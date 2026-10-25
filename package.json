@@ -1,6 +1,6 @@
 {
   "name": "sebze-oyunu",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Toprak Kati — bilgisayara karşı + LAN + Android",
   "main": "server.js",
   "scripts": {

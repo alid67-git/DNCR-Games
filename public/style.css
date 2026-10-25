@@ -286,25 +286,9 @@ body {
   }
 }
 
-.fx-flyer {
-  pointer-events: none;
-}
+.fx-flyer,
 .fx-victim {
-  animation: victimPop 0.45s ease forwards;
-}
-@keyframes victimPop {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  55% {
-    opacity: 1;
-    transform: scale(1.35);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.2);
-  }
+  pointer-events: none;
 }
 
 .lobby-form {

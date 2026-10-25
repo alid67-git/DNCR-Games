@@ -283,30 +283,37 @@
 
     const from = POSITIONS[move.from];
     const to = POSITIONS[move.to];
+    if (!from || !to) {
+      animating = false;
+      return;
+    }
+
     const hide = new Set([move.from]);
     if (move.capture && move.over) hide.add(move.over);
 
-    // Show board without moving piece (and without victim if capture)
+    // Tahta: hareket eden (ve yenilen) taş gizlensin
     renderPieces(prevBoard, null, hide);
 
+    let vic = null;
+    let vp = null;
     if (move.capture && move.over) {
-      const vp = POSITIONS[move.over];
+      vp = POSITIONS[move.over];
       const victim = opponent(attacker);
-      const vic = makePieceGroup(victim, vp.x, vp.y, false);
+      vic = makePieceGroup(victim, vp.x, vp.y, false);
       vic.setAttribute("class", `fx-victim ${victim}-piece`);
-      vic.style.transformOrigin = `${vp.x}px ${vp.y}px`;
       fx.appendChild(vic);
       showEatBanner(attacker);
     }
 
+    // Uçan taş: sadece group transform (cx/cy'ye tekrar yazma — çift kaymayı önler)
     const flyer = makePieceGroup(attacker, from.x, from.y, false);
     flyer.setAttribute("class", `fx-flyer ${attacker}-piece`);
+    flyer.setAttribute("transform", "translate(0 0)");
     fx.appendChild(flyer);
 
-    const skin = flyer.querySelector(".skin");
-    const gloss = flyer.querySelectorAll("circle");
-    const duration = move.capture ? 520 : 320;
+    const duration = move.capture ? 520 : 300;
     const start = performance.now();
+    let victimPopStarted = false;
 
     await new Promise((resolve) => {
       function frame(now) {
@@ -314,24 +321,24 @@
         const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
         const x = from.x + (to.x - from.x) * ease;
         const y = from.y + (to.y - from.y) * ease;
-        const lift = move.capture ? Math.sin(Math.PI * ease) * 6 : Math.sin(Math.PI * ease) * 2;
-        skin.setAttribute("cx", x);
-        skin.setAttribute("cy", y - lift);
-        gloss.forEach((c, i) => {
-          if (i === 0 && c !== skin) {
-            // stem for tomato is first extra
-          }
-        });
-        flyer.querySelectorAll("circle").forEach((c) => {
-          const isSkin = c.classList.contains("skin");
-          if (isSkin) return;
-          // reposition relative offsets roughly
-        });
-        // simpler: move whole group via transform
+        const lift = (move.capture ? 5 : 1.8) * Math.sin(Math.PI * ease);
         flyer.setAttribute(
           "transform",
           `translate(${x - from.x} ${y - from.y - lift})`
         );
+
+        // Ortaya gelince yenilen taşı küçült
+        if (vic && vp && t >= 0.42) {
+          if (!victimPopStarted) victimPopStarted = true;
+          const vt = Math.min(1, (t - 0.42) / 0.55);
+          const s = Math.max(0.05, 1.15 * (1 - vt));
+          vic.setAttribute(
+            "transform",
+            `translate(${vp.x} ${vp.y}) scale(${s}) translate(${-vp.x} ${-vp.y})`
+          );
+          vic.setAttribute("opacity", String(1 - vt));
+        }
+
         if (t < 1) requestAnimationFrame(frame);
         else resolve();
       }
