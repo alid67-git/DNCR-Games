@@ -1,0 +1,30 @@
+{
+  "name": "sebze-oyunu",
+  "version": "1.1.0",
+  "description": "Toprak Kati — bilgisayara karşı + LAN + Android",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node game/board.test.js && node game/ai.test.js",
+    "android:sync": "npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:apk": "cd android && ./gradlew assembleDebug"
+  },
+  "keywords": [
+    "lan",
+    "multiplayer",
+    "board-game",
+    "socket.io",
+    "android",
+    "capacitor"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  }
+}

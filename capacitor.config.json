@@ -1,0 +1,12 @@
+{
+  "appId": "com.toprakkati.app",
+  "appName": "Toprak Kati",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

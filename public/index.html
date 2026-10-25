@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Toprak Kati</title>
+  <meta name="theme-color" content="#2a1c0e" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="soil" aria-hidden="true"></div>
+
+  <main id="app">
+    <!-- Lobis -->
+    <section id="screen-lobby" class="screen active">
+      <header class="brand">
+        <p class="brand-mark">Toprak Kati</p>
+        <h1>Domates &amp; Acur</h1>
+        <p class="lede">Bilgisayara karşı tek başına, veya aynı Wi‑Fi’de iki kişi.</p>
+      </header>
+
+      <form id="lobby-form" class="lobby-form">
+        <label>
+          Adın
+          <input id="player-name" type="text" maxlength="20" placeholder="Örn. Ali" autocomplete="nickname" />
+        </label>
+
+        <div class="lobby-actions">
+          <button type="button" id="btn-solo" class="btn btn-primary">Bilgisayara karşı</button>
+          <p class="lobby-sep">veya arkadaşınla (aynı Wi‑Fi)</p>
+          <label class="server-label native-only hidden" id="native-hint">
+            PC sunucu adresi
+            <input id="server-url" type="url" inputmode="url" placeholder="http://192.168.1.10:3847" autocomplete="url" />
+          </label>
+          <button type="button" id="btn-create" class="btn btn-secondary">Oda kur</button>
+          <div class="join-row">
+            <input id="join-code" type="text" maxlength="6" placeholder="Oda kodu" autocomplete="off" spellcheck="false" />
+            <button type="button" id="btn-join" class="btn btn-ghost">Katıl</button>
+          </div>
+        </div>
+      </form>
+
+      <aside class="how">
+        <h2>Nasıl oynanır?</h2>
+        <ol>
+          <li>Taşını çizgi boyunca komşu boş noktaya kaydır.</li>
+          <li>Rakibin üzerinden düz çizgide boş noktaya zıplayarak ye.</li>
+          <li>Yakalama zorunlu; zincir varsa aynı taşla devam et.</li>
+          <li>Rakibin tüm taşlarını ye veya hareket ettirme.</li>
+        </ol>
+      </aside>
+    </section>
+
+    <!-- Bekleme / hazır -->
+    <section id="screen-room" class="screen">
+      <header class="room-head">
+        <p class="brand-mark sm">Toprak Kati</p>
+        <h1>Oda <span id="room-code-display">----</span></h1>
+        <p id="share-hint" class="lede"></p>
+      </header>
+
+      <div class="roster">
+        <div class="seat tomato" id="seat-tomato">
+          <span class="seat-piece" aria-hidden="true"></span>
+          <div>
+            <strong id="name-tomato">—</strong>
+            <span id="ready-tomato" class="pill">bekliyor</span>
+          </div>
+        </div>
+        <div class="seat gourd" id="seat-gourd">
+          <span class="seat-piece" aria-hidden="true"></span>
+          <div>
+            <strong id="name-gourd">Rakip bekleniyor…</strong>
+            <span id="ready-gourd" class="pill">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="room-actions">
+        <button type="button" id="btn-ready" class="btn btn-primary" disabled>Hazırım</button>
+        <button type="button" id="btn-copy-link" class="btn btn-ghost">Bağlantıyı kopyala</button>
+      </div>
+    </section>
+
+    <!-- Oyun -->
+    <section id="screen-game" class="screen">
+      <header class="game-bar">
+        <p class="brand-mark sm">Toprak Kati</p>
+        <p id="turn-label" class="turn-label">Sıra: Domates</p>
+        <p id="you-label" class="you-label"></p>
+      </header>
+
+      <div class="board-wrap">
+        <svg id="board" viewBox="0 0 100 100" role="img" aria-label="Oyun tahtası">
+          <defs>
+            <radialGradient id="dirtGrad" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stop-color="#c4a574" />
+              <stop offset="55%" stop-color="#9a7b4f" />
+              <stop offset="100%" stop-color="#6e5333" />
+            </radialGradient>
+            <filter id="pieceShadow" x="-40%" y="-40%" width="180%" height="180%">
+              <feDropShadow dx="0.4" dy="0.8" stdDeviation="0.7" flood-opacity="0.35" />
+            </filter>
+          </defs>
+          <ellipse cx="50" cy="50" rx="46" ry="46" fill="url(#dirtGrad)" class="board-soil" />
+          <g id="board-lines" fill="none" stroke="#3d2a16" stroke-width="1.1" stroke-linecap="round"></g>
+          <!-- sol / sağ yay vurgusu -->
+          <path id="left-arc" d="" fill="none" stroke="#3d2a16" stroke-width="1.1" />
+          <path id="right-arc" d="" fill="none" stroke="#3d2a16" stroke-width="1.1" />
+          <g id="board-nodes"></g>
+          <g id="board-pieces" filter="url(#pieceShadow)"></g>
+          <g id="board-hints"></g>
+        </svg>
+      </div>
+
+      <p id="status-msg" class="status-msg" aria-live="polite"></p>
+
+      <div id="end-panel" class="end-panel hidden">
+        <p id="end-text"></p>
+        <button type="button" id="btn-rematch" class="btn btn-primary">Yeniden oyna</button>
+        <button type="button" id="btn-lobby" class="btn btn-ghost">Lobye dön</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <script src="engine.js"></script>
+  <script>
+    (function () {
+      var native =
+        location.protocol === "capacitor:" ||
+        location.protocol === "file:";
+      if (native) return;
+      var s = document.createElement("script");
+      s.src = "/socket.io/socket.io.js";
+      s.onload = function () {
+        window.__socketReady = true;
+      };
+      document.body.appendChild(s);
+    })();
+  </script>
+  <script src="game-client.js" defer></script>
+</body>
+</html>
