@@ -1,4 +1,4 @@
-const { createGameState, tryMove, PLAYERS } = require("./board");
+const { createGameState, tryMove, PLAYERS, opponent } = require("./board");
 
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const AI_ID = "__AI__";
@@ -9,6 +9,10 @@ function makeCode(len = 4) {
     s += CODE_CHARS[(Math.random() * CODE_CHARS.length) | 0];
   }
   return s;
+}
+
+function nextStarter(prev) {
+  return opponent(prev || PLAYERS.tomato);
 }
 
 class RoomManager {
@@ -31,16 +35,16 @@ class RoomManager {
       names: { [hostSocketId]: hostName || "Oyuncu 1" },
       roles: { [hostSocketId]: PLAYERS.tomato },
       ready: { [hostSocketId]: false },
-      status: "waiting", // waiting | playing | finished
-      game: createGameState(),
+      status: "waiting",
+      nextStarter: PLAYERS.tomato,
+      game: createGameState(PLAYERS.tomato),
       createdAt: Date.now(),
     };
     this.rooms.set(code, room);
     return room;
   }
 
-  /** Tek oyuncu: insan domates, AI acur — hemen başlar */
-  createSolo(hostSocketId, hostName) {
+  createSolo(hostSocketId, hostName, starter) {
     const room = this.create(hostSocketId, hostName || "Oyuncu");
     room.vsAi = true;
     room.guestId = AI_ID;
@@ -49,7 +53,12 @@ class RoomManager {
     room.ready[hostSocketId] = true;
     room.ready[AI_ID] = true;
     room.status = "playing";
-    room.game = createGameState();
+    const start =
+      starter === PLAYERS.gourd || starter === PLAYERS.tomato
+        ? starter
+        : PLAYERS.tomato;
+    room.nextStarter = nextStarter(start);
+    room.game = createGameState(start);
     return room;
   }
 
@@ -87,7 +96,9 @@ class RoomManager {
       room.ready[room.guestId]
     ) {
       room.status = "playing";
-      room.game = createGameState();
+      const start = room.nextStarter || PLAYERS.tomato;
+      room.game = createGameState(start);
+      room.nextStarter = nextStarter(start);
     }
     return { ok: true, room };
   }
@@ -105,7 +116,6 @@ class RoomManager {
     return { ok: true, room };
   }
 
-  /** AI hamlesi (socketId yok) */
   moveAi(code, from, to) {
     const room = this.get(code);
     if (!room || !room.vsAi) return { ok: false, error: "AI odası değil." };
@@ -122,8 +132,11 @@ class RoomManager {
     if (!room) return { ok: false, error: "Oda yok." };
     if (!room.roles[socketId]) return { ok: false, error: "Oyuncu değilsiniz." };
 
+    const start = room.nextStarter || PLAYERS.tomato;
+    room.nextStarter = nextStarter(start);
+
     if (room.vsAi) {
-      room.game = createGameState();
+      room.game = createGameState(start);
       room.status = "playing";
       room.ready[room.hostId] = true;
       room.ready[AI_ID] = true;
@@ -134,7 +147,7 @@ class RoomManager {
     if (room.guestId) room.ready[room.guestId] = false;
     room.ready[socketId] = true;
     room.status = "waiting";
-    room.game = createGameState();
+    room.game = createGameState(start);
     if (
       room.hostId &&
       room.guestId &&
@@ -158,7 +171,7 @@ class RoomManager {
         delete room.roles[socketId];
         delete room.ready[socketId];
         room.status = "waiting";
-        room.game = createGameState();
+        room.game = createGameState(room.nextStarter || PLAYERS.tomato);
         affected.push({ code, closed: false, room });
       }
     }

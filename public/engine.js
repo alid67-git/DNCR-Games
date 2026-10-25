@@ -186,14 +186,20 @@
     return null;
   }
 
-  function createGameState() {
+  function createGameState(starter) {
+    const start =
+      starter === PLAYERS.gourd || starter === PLAYERS.tomato
+        ? starter
+        : PLAYERS.tomato;
     return {
       board: initialBoard(),
-      turn: PLAYERS.tomato,
+      turn: start,
+      starter: start,
       chainFrom: null,
       winner: null,
       lastMove: null,
       moveCount: 0,
+      capturedBy: { tomato: 0, gourd: 0 },
     };
   }
 
@@ -210,7 +216,12 @@
     const board = applyMove(state.board, move);
     let chainFrom = null;
     let turn = player;
+    const capturedBy = {
+      tomato: (state.capturedBy && state.capturedBy.tomato) || 0,
+      gourd: (state.capturedBy && state.capturedBy.gourd) || 0,
+    };
     if (move.capture) {
+      capturedBy[player] = (capturedBy[player] || 0) + 1;
       const more = getCapturesFrom(board, move.to, player);
       if (more.length > 0) chainFrom = move.to;
       else turn = opponent(player);
@@ -224,6 +235,7 @@
       chainFrom,
       lastMove: move,
       moveCount: state.moveCount + 1,
+      capturedBy,
       winner: null,
     };
     next.winner = checkWinner(board, next.turn);

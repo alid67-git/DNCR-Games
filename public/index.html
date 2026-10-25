@@ -20,7 +20,20 @@
         <p class="brand-mark">Toprak Kati</p>
         <h1>Domates &amp; Acur</h1>
         <p class="lede">Bilgisayara karşı tek başına, veya aynı Wi‑Fi’de iki kişi.</p>
+        <p class="ver-chip">v1.2 · yükseltme</p>
       </header>
+
+      <aside class="upgrade-card" aria-label="Yazılım yükseltmesi">
+        <div class="upgrade-head">
+          <span class="upgrade-badge">Yeni</span>
+          <h2>Bu sürümde</h2>
+        </div>
+        <ul class="upgrade-list">
+          <li><strong>Sıra dönüşü</strong> — her maçta başlayan taraf değişir</li>
+          <li><strong>Yeme animasyonu</strong> — kim kimi yediği görünür</li>
+          <li><strong>Skor tepsisi</strong> — yenilen taşlar birikir</li>
+        </ul>
+      </aside>
 
       <form id="lobby-form" class="lobby-form">
         <label>
@@ -91,9 +104,22 @@
         <p class="brand-mark sm">Toprak Kati</p>
         <p id="turn-label" class="turn-label">Sıra: Domates</p>
         <p id="you-label" class="you-label"></p>
+        <p id="starter-label" class="starter-label"></p>
       </header>
 
+      <div class="score-trays" aria-live="polite">
+        <div class="tray tomato-tray">
+          <span class="tray-title">Domates yedi</span>
+          <div id="tray-tomato" class="tray-dots"></div>
+        </div>
+        <div class="tray gourd-tray">
+          <span class="tray-title">Acur yedi</span>
+          <div id="tray-gourd" class="tray-dots"></div>
+        </div>
+      </div>
+
       <div class="board-wrap">
+        <div id="eat-banner" class="eat-banner hidden" aria-live="assertive"></div>
         <svg id="board" viewBox="0 0 100 100" role="img" aria-label="Oyun tahtası">
           <defs>
             <radialGradient id="dirtGrad" cx="50%" cy="40%" r="70%">
@@ -107,12 +133,12 @@
           </defs>
           <ellipse cx="50" cy="50" rx="46" ry="46" fill="url(#dirtGrad)" class="board-soil" />
           <g id="board-lines" fill="none" stroke="#3d2a16" stroke-width="1.1" stroke-linecap="round"></g>
-          <!-- sol / sağ yay vurgusu -->
           <path id="left-arc" d="" fill="none" stroke="#3d2a16" stroke-width="1.1" />
           <path id="right-arc" d="" fill="none" stroke="#3d2a16" stroke-width="1.1" />
           <g id="board-nodes"></g>
           <g id="board-pieces" filter="url(#pieceShadow)"></g>
           <g id="board-hints"></g>
+          <g id="board-fx"></g>
         </svg>
       </div>
 

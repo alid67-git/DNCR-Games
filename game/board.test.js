@@ -65,8 +65,28 @@ function testPieceCounts() {
   assert.strictEqual(b.C, null);
 }
 
+function testAlternateStarter() {
+  const gStart = createGameState(PLAYERS.gourd);
+  assert.strictEqual(gStart.turn, PLAYERS.gourd);
+  assert.strictEqual(gStart.starter, PLAYERS.gourd);
+  const bad = tryMove(gStart, PLAYERS.tomato, "LI", "C");
+  assert.ok(!bad.ok);
+  const ok = tryMove(gStart, PLAYERS.gourd, "RI", "C");
+  assert.ok(ok.ok, ok.error);
+}
+
+function testCaptureCount() {
+  const state = createGameState();
+  const r1 = tryMove(state, PLAYERS.tomato, "LI", "C");
+  const r2 = tryMove(r1.state, PLAYERS.gourd, "RI", "LI");
+  assert.strictEqual(r2.state.capturedBy.gourd, 1);
+  assert.strictEqual(r2.state.capturedBy.tomato, 0);
+}
+
 testPieceCounts();
 testInitialForcedCapturePath();
 testRejectWrongTurn();
 testRejectIllegal();
+testAlternateStarter();
+testCaptureCount();
 console.log("board.test.js — tüm testler geçti");

@@ -117,13 +117,16 @@ io.on("connection", (socket) => {
     socket.emit("room:created", rooms.publicState(room, socket.id));
   });
 
-  socket.on("solo:start", ({ name } = {}) => {
-    // Eski odayı temizle
+  socket.on("solo:start", ({ name, starter } = {}) => {
     rooms.leave(socket.id);
-    const room = rooms.createSolo(socket.id, (name || "").trim() || "Oyuncu");
+    const room = rooms.createSolo(
+      socket.id,
+      (name || "").trim() || "Oyuncu",
+      starter
+    );
     socket.join(room.code);
     socket.emit("room:state", rooms.publicState(room, socket.id));
-    // Domates (insan) başlar — AI beklemede
+    maybeScheduleAi(room);
   });
 
   socket.on("room:join", ({ code, name } = {}) => {

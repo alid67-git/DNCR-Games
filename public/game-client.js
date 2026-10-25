@@ -5,8 +5,18 @@
     return;
   }
 
-  const { POSITIONS, BOARD_EDGES: EDGES, PLAYERS, createGameState, tryMove, getAllLegalMoves, chooseMove } = E;
+  const {
+    POSITIONS,
+    BOARD_EDGES: EDGES,
+    PLAYERS,
+    createGameState,
+    tryMove,
+    getAllLegalMoves,
+    chooseMove,
+    opponent,
+  } = E;
   const LABELS = { tomato: "Domates", gourd: "Acur" };
+  const STARTER_KEY = "toprak_kati_next_starter";
 
   const $ = (id) => document.getElementById(id);
   const screens = {
@@ -32,6 +42,8 @@
   let port = 3847;
   let localMode = false;
   let aiTimer = null;
+  let animating = false;
+  let lastSeenMoveCount = -1;
 
   function showScreen(name) {
     Object.values(screens).forEach((el) => el.classList.remove("active"));
@@ -57,6 +69,24 @@
     if (trimmed) return trimmed.replace(/\/$/, "");
     if (isNative) return "";
     return location.origin;
+  }
+
+  function readNextStarter() {
+    try {
+      const v = localStorage.getItem(STARTER_KEY);
+      if (v === PLAYERS.gourd || v === PLAYERS.tomato) return v;
+    } catch (_) {}
+    return PLAYERS.tomato;
+  }
+
+  function writeNextStarter(starter) {
+    try {
+      localStorage.setItem(STARTER_KEY, opponent(starter));
+    } catch (_) {}
+  }
+
+  function sleep(ms) {
+    return new Promise((r) => setTimeout(r, ms));
   }
 
   // —— Board draw ——
@@ -125,42 +155,51 @@
     }
   }
 
-  function renderPieces(board, lastMove) {
+  function makePieceGroup(owner, x, y, selectedNode) {
+    const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    group.setAttribute(
+      "class",
+      `piece ${owner}-piece${selectedNode ? " selected" : ""}`
+    );
+
+    const skin = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    skin.setAttribute("class", "skin");
+    skin.setAttribute("cx", x);
+    skin.setAttribute("cy", y);
+    skin.setAttribute("r", 4.2);
+    skin.setAttribute("fill", owner === "tomato" ? "url(#tomatoFill)" : "url(#gourdFill)");
+
+    const gloss = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    gloss.setAttribute("cx", x - 1.2);
+    gloss.setAttribute("cy", y - 1.4);
+    gloss.setAttribute("r", 1.2);
+    gloss.setAttribute("fill", "rgba(255,255,255,0.35)");
+    gloss.setAttribute("pointer-events", "none");
+
+    if (owner === "tomato") {
+      const stem = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      stem.setAttribute("cx", x);
+      stem.setAttribute("cy", y - 3.6);
+      stem.setAttribute("r", 0.9);
+      stem.setAttribute("fill", "#2e7d32");
+      stem.setAttribute("pointer-events", "none");
+      group.appendChild(stem);
+    }
+
+    group.appendChild(skin);
+    group.appendChild(gloss);
+    return group;
+  }
+
+  function renderPieces(board, lastMove, hideNodes) {
     const g = $("board-pieces");
     g.innerHTML = "";
+    const hide = hideNodes || new Set();
     for (const [id, owner] of Object.entries(board || {})) {
-      if (!owner) continue;
+      if (!owner || hide.has(id)) continue;
       const p = POSITIONS[id];
-      const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      group.setAttribute("class", `piece ${owner}-piece${selected === id ? " selected" : ""}`);
+      const group = makePieceGroup(owner, p.x, p.y, selected === id);
       group.dataset.node = id;
-
-      const skin = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      skin.setAttribute("class", "skin");
-      skin.setAttribute("cx", p.x);
-      skin.setAttribute("cy", p.y);
-      skin.setAttribute("r", 4.2);
-      skin.setAttribute("fill", owner === "tomato" ? "url(#tomatoFill)" : "url(#gourdFill)");
-
-      const gloss = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      gloss.setAttribute("cx", p.x - 1.2);
-      gloss.setAttribute("cy", p.y - 1.4);
-      gloss.setAttribute("r", 1.2);
-      gloss.setAttribute("fill", "rgba(255,255,255,0.35)");
-      gloss.setAttribute("pointer-events", "none");
-
-      if (owner === "tomato") {
-        const stem = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        stem.setAttribute("cx", p.x);
-        stem.setAttribute("cy", p.y - 3.6);
-        stem.setAttribute("r", 0.9);
-        stem.setAttribute("fill", "#2e7d32");
-        stem.setAttribute("pointer-events", "none");
-        group.appendChild(stem);
-      }
-
-      group.appendChild(skin);
-      group.appendChild(gloss);
       group.addEventListener("click", (e) => {
         e.stopPropagation();
         onNodeClick(id);
@@ -203,6 +242,106 @@
     return getAllLegalMoves(board, player).some((m) => m.capture);
   }
 
+  function renderTrays(capturedBy) {
+    const t = (capturedBy && capturedBy.tomato) || 0;
+    const g = (capturedBy && capturedBy.gourd) || 0;
+    const tEl = $("tray-tomato");
+    const gEl = $("tray-gourd");
+    if (!tEl || !gEl) return;
+    tEl.innerHTML = "";
+    gEl.innerHTML = "";
+    for (let i = 0; i < t; i++) {
+      const d = document.createElement("span");
+      d.className = "tray-dot";
+      // gourd pieces eaten by tomato → green dots in tomato tray
+      d.style.background = "radial-gradient(circle at 35% 30%, #a5d6a7, #2e7d32)";
+      tEl.appendChild(d);
+    }
+    for (let i = 0; i < g; i++) {
+      const d = document.createElement("span");
+      d.className = "tray-dot";
+      d.style.background = "radial-gradient(circle at 35% 30%, #ff8a80, #c62828)";
+      gEl.appendChild(d);
+    }
+  }
+
+  function showEatBanner(attacker) {
+    const el = $("eat-banner");
+    if (!el) return;
+    const victim = opponent(attacker);
+    el.textContent = `${LABELS[attacker]} → ${LABELS[victim]} yedi!`;
+    el.className = `eat-banner ${attacker}-eat`;
+    clearTimeout(showEatBanner._t);
+    showEatBanner._t = setTimeout(() => el.classList.add("hidden"), 900);
+  }
+
+  async function animateMove(prevBoard, move, attacker) {
+    const fx = $("board-fx");
+    if (!fx || !move) return;
+    animating = true;
+    fx.innerHTML = "";
+
+    const from = POSITIONS[move.from];
+    const to = POSITIONS[move.to];
+    const hide = new Set([move.from]);
+    if (move.capture && move.over) hide.add(move.over);
+
+    // Show board without moving piece (and without victim if capture)
+    renderPieces(prevBoard, null, hide);
+
+    if (move.capture && move.over) {
+      const vp = POSITIONS[move.over];
+      const victim = opponent(attacker);
+      const vic = makePieceGroup(victim, vp.x, vp.y, false);
+      vic.setAttribute("class", `fx-victim ${victim}-piece`);
+      vic.style.transformOrigin = `${vp.x}px ${vp.y}px`;
+      fx.appendChild(vic);
+      showEatBanner(attacker);
+    }
+
+    const flyer = makePieceGroup(attacker, from.x, from.y, false);
+    flyer.setAttribute("class", `fx-flyer ${attacker}-piece`);
+    fx.appendChild(flyer);
+
+    const skin = flyer.querySelector(".skin");
+    const gloss = flyer.querySelectorAll("circle");
+    const duration = move.capture ? 520 : 320;
+    const start = performance.now();
+
+    await new Promise((resolve) => {
+      function frame(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const x = from.x + (to.x - from.x) * ease;
+        const y = from.y + (to.y - from.y) * ease;
+        const lift = move.capture ? Math.sin(Math.PI * ease) * 6 : Math.sin(Math.PI * ease) * 2;
+        skin.setAttribute("cx", x);
+        skin.setAttribute("cy", y - lift);
+        gloss.forEach((c, i) => {
+          if (i === 0 && c !== skin) {
+            // stem for tomato is first extra
+          }
+        });
+        flyer.querySelectorAll("circle").forEach((c) => {
+          const isSkin = c.classList.contains("skin");
+          if (isSkin) return;
+          // reposition relative offsets roughly
+        });
+        // simpler: move whole group via transform
+        flyer.setAttribute(
+          "transform",
+          `translate(${x - from.x} ${y - from.y - lift})`
+        );
+        if (t < 1) requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
+    });
+
+    fx.innerHTML = "";
+    animating = false;
+  }
+
   // —— Local solo ——
   function makeLocalState(game) {
     return {
@@ -222,41 +361,64 @@
     clearTimeout(aiTimer);
     localMode = true;
     selected = null;
+    lastSeenMoveCount = -1;
     if (socket) {
       try {
         socket.emit("room:leave");
       } catch (_) {}
     }
-    applyState(makeLocalState(createGameState()));
+    const starter = readNextStarter();
+    writeNextStarter(starter);
+    const game = createGameState(starter);
+    applyState(makeLocalState(game));
+    if (game.turn === PLAYERS.gourd) {
+      toast("Bu elde bilgisayar başlıyor.");
+      scheduleLocalAi(700);
+    } else {
+      toast("Bu elde sen başlıyorsun.");
+    }
   }
 
-  function scheduleLocalAi() {
+  function scheduleLocalAi(delay = 520) {
     clearTimeout(aiTimer);
     if (!state || !state.local || state.game.winner) return;
     if (state.game.turn !== PLAYERS.gourd) return;
-    aiTimer = setTimeout(() => {
-      if (!state || !state.local) return;
+    aiTimer = setTimeout(async () => {
+      if (!state || !state.local || animating) return;
       const pick = chooseMove(state.game, PLAYERS.gourd, 3);
       if (!pick) return;
-      const r = tryMove(state.game, PLAYERS.gourd, pick.from, pick.to);
-      if (!r.ok) return;
-      applyState(makeLocalState(r.state));
-      if (r.state.turn === PLAYERS.gourd && !r.state.winner) scheduleLocalAi();
-    }, 520);
+      await playLocalMove(pick.from, pick.to, PLAYERS.gourd);
+      if (state && state.game.turn === PLAYERS.gourd && !state.game.winner) {
+        scheduleLocalAi(380);
+      }
+    }, delay);
   }
 
-  function playLocalMove(from, to) {
-    const r = tryMove(state.game, state.you, from, to);
+  async function playLocalMove(from, to, asPlayer) {
+    if (animating) return;
+    const player = asPlayer || state.you;
+    const prevBoard = { ...state.game.board };
+    const r = tryMove(state.game, player, from, to);
     if (!r.ok) {
       toast(r.error);
       return;
     }
-    applyState(makeLocalState(r.state));
-    scheduleLocalAi();
+    const move = r.state.lastMove;
+    await animateMove(prevBoard, move, player);
+    lastSeenMoveCount = r.state.moveCount;
+    await applyState(makeLocalState(r.state), { skipAnim: true });
+    if (
+      state &&
+      state.local &&
+      !state.game.winner &&
+      state.game.turn === PLAYERS.gourd
+    ) {
+      scheduleLocalAi(move && move.capture ? 480 : 420);
+    }
   }
 
   function onNodeClick(nodeId) {
-    if (!state || state.status !== "playing") return;
+    if (!state || state.status !== "playing" || animating) return;
     const game = state.game;
     if (!state.you || state.you !== game.turn) {
       toast(state.vsAi ? "Bilgisayar oynuyor." : "Sıra rakipte.");
@@ -317,10 +479,31 @@
     showHints(targets, caps);
   }
 
-  function applyState(s) {
-    state = s;
+  async function applyState(s, opts) {
     if (!s) return;
+    const skipAnim = opts && opts.skipAnim;
+    const prev = state;
     localMode = !!s.local;
+
+    // Network / remote: animate when moveCount advances
+    if (
+      !skipAnim &&
+      prev &&
+      prev.game &&
+      s.game &&
+      s.game.lastMove &&
+      s.game.moveCount > lastSeenMoveCount &&
+      s.game.moveCount === (prev.game.moveCount || 0) + 1
+    ) {
+      const who =
+        prev.game.board[s.game.lastMove.from] || prev.game.turn || PLAYERS.tomato;
+      await animateMove(prev.game.board, s.game.lastMove, who);
+      lastSeenMoveCount = s.game.moveCount;
+    } else if (s.game) {
+      lastSeenMoveCount = s.game.moveCount;
+    }
+
+    state = s;
 
     if (s.vsAi || s.status === "playing" || s.status === "finished") {
       showScreen("game");
@@ -363,6 +546,7 @@
 
     renderPieces(g.board, g.lastMove);
     updateHints();
+    renderTrays(g.capturedBy);
 
     const turnName = LABELS[g.turn];
     if (g.winner) {
@@ -379,6 +563,12 @@
       : s.you
         ? `Sen: ${LABELS[s.you]} · Oda ${s.code}`
         : `Oda ${s.code}`;
+
+    const starterEl = $("starter-label");
+    if (starterEl) {
+      const st = g.starter || PLAYERS.tomato;
+      starterEl.textContent = `Bu el başlayan: ${LABELS[st]}`;
+    }
 
     if (g.chainFrom && s.you === g.turn) {
       $("status-msg").textContent = "Aynı taşla yakalamaya devam et.";
@@ -430,7 +620,7 @@
       return;
     }
     const src = (base || "") + "/socket.io/socket.io.js";
-    const existing = document.querySelector('script[data-socket-io]');
+    const existing = document.querySelector("script[data-socket-io]");
     if (existing) {
       existing.addEventListener("load", () => done());
       return;
@@ -479,7 +669,6 @@
     })();
   }
 
-  // —— Events ——
   $("btn-solo").addEventListener("click", () => startLocalSolo());
 
   $("btn-create").addEventListener("click", () => {
@@ -520,7 +709,7 @@
   $("btn-rematch").addEventListener("click", () => {
     if (!state) return;
     selected = null;
-    if (state.local || state.vsAi && localMode) {
+    if (state.local || (state.vsAi && localMode)) {
       startLocalSolo();
       return;
     }
@@ -552,7 +741,6 @@
   }
 
   applyNativeUi();
-  // Capacitor köprüsü bazen biraz gecikir
   setTimeout(applyNativeUi, 300);
 
   initBoardSvg();
