@@ -239,11 +239,6 @@
   function clearAiFx() {
     const fx = $("fx-layer");
     if (fx) fx.innerHTML = "";
-    const wrap = document.querySelector(".board-wrap");
-    if (wrap) {
-      wrap.classList.remove("ai-spotlight");
-      wrap.classList.remove("ai-striking");
-    }
     const banner = $("ai-move-banner");
     if (banner) {
       banner.classList.add("hidden");
@@ -251,109 +246,49 @@
     }
   }
 
+  /** Sadece hedef kenarı sade renk değişimiyle göster (banner/karartma yok). */
   function showAiFocusFx(edgeId) {
     const edge = session.graph.edges.get(edgeId);
     const fx = $("fx-layer");
-    const wrap = document.querySelector(".board-wrap");
-    const banner = $("ai-move-banner");
     if (!edge || !fx || !layout) return false;
     clearAiFx();
-    if (wrap) wrap.classList.add("ai-spotlight");
-    if (banner) {
-      banner.textContent = t("aiWatchHere");
-      banner.classList.remove("hidden");
-    }
 
     const a = layout.coords.get(edge.dotA.join(","));
     const b = layout.coords.get(edge.dotB.join(","));
     if (!a || !b) return false;
 
-    const dim = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    dim.setAttribute("x", 0);
-    dim.setAttribute("y", 0);
-    dim.setAttribute("width", 100);
-    dim.setAttribute("height", 100);
-    dim.setAttribute("class", "fx-dim");
-    fx.appendChild(dim);
-
-    // Geniş sarı halo → orta glow → parlak çekirdek (üç katman)
-    const halo = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    halo.setAttribute("x1", a.x);
-    halo.setAttribute("y1", a.y);
-    halo.setAttribute("x2", b.x);
-    halo.setAttribute("y2", b.y);
-    halo.setAttribute("class", "fx-ai-halo");
-    fx.appendChild(halo);
-
-    const glow = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    glow.setAttribute("x1", a.x);
-    glow.setAttribute("y1", a.y);
-    glow.setAttribute("x2", b.x);
-    glow.setAttribute("y2", b.y);
-    glow.setAttribute("class", "fx-ai-glow");
-    fx.appendChild(glow);
-
-    const core = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    core.setAttribute("x1", a.x);
-    core.setAttribute("y1", a.y);
-    core.setAttribute("x2", b.x);
-    core.setAttribute("y2", b.y);
-    core.setAttribute("class", "fx-ai-core");
-    fx.appendChild(core);
-
-    for (const p of [a, b]) {
-      const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      ring.setAttribute("cx", p.x);
-      ring.setAttribute("cy", p.y);
-      ring.setAttribute("r", 5.5);
-      ring.setAttribute("class", "fx-ai-ring");
-      fx.appendChild(ring);
-
-      const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      c.setAttribute("cx", p.x);
-      c.setAttribute("cy", p.y);
-      c.setAttribute("r", 4);
-      c.setAttribute("class", "fx-ai-dot");
-      fx.appendChild(c);
-    }
+    const preview = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    preview.setAttribute("x1", a.x);
+    preview.setAttribute("y1", a.y);
+    preview.setAttribute("x2", b.x);
+    preview.setAttribute("y2", b.y);
+    preview.setAttribute("class", "fx-ai-preview");
+    fx.appendChild(preview);
     return true;
   }
 
-  /** AI hamlesi: kısa sarı vurgu → çiz → kutu dolduysa hızlı parlat. */
+  /** AI hamlesi: sade önizleme → biraz yavaş mavi çizim. */
   async function highlightAndPlayAi(edgeId) {
-    const wrap = document.querySelector(".board-wrap");
     showAiFocusFx(edgeId);
     updateHud();
-    await sleep(420);
-
-    if (wrap) wrap.classList.add("ai-striking");
-    await sleep(160);
+    await sleep(700);
 
     const r = applyMove(session.boardId, session.state, edgeId, session.state.turn);
     if (!r.ok) {
-      if (wrap) wrap.classList.remove("ai-striking");
       clearAiFx();
       return false;
     }
     session.state = r.state;
-    if (wrap) wrap.classList.remove("ai-striking");
     clearAiFx();
     renderAll();
 
-    const completed = (session.state.lastMove && session.state.lastMove.boxesCompleted) || [];
     const drawn = document.querySelector(`#edge-layer line[data-edge="${edgeId}"]`);
     if (drawn) {
-      drawn.classList.add(completed.length ? "edge-ai-reveal edge-ai-box" : "edge-ai-reveal");
-      completed.forEach((bi) => {
-        const el = document.querySelector(`#box-layer [data-box="${bi}"]`);
-        if (el) el.classList.add("box-ai-flash");
-      });
-      // Kutu doldururken de hızlı — sadece kısa vurgu
-      await sleep(completed.length ? 520 : 380);
-      drawn.classList.remove("edge-ai-reveal", "edge-ai-box");
-      document.querySelectorAll(".box-ai-flash").forEach((el) => el.classList.remove("box-ai-flash"));
+      drawn.classList.add("edge-ai-reveal");
+      await sleep(850);
+      drawn.classList.remove("edge-ai-reveal");
     } else {
-      await sleep(220);
+      await sleep(300);
     }
     return true;
   }

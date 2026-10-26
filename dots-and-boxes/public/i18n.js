@@ -16,8 +16,8 @@ window.DotsI18n = (function () {
       play2pHint: "Yan yana oturun — telefonu / iPad’i yatay tutun",
       couchHint: "Yan yana oturun · cihazı yatay tutun · sol kırmızı · sağ mavi",
       sideTurn: "Sıra sende",
-      aiMoveHint: "Bilgisayar oynuyor — sarı çizgiyi izle",
-      aiWatchHere: "Bilgisayar buraya çiziyor…",
+      aiMoveHint: "Bilgisayar oynuyor…",
+      aiWatchHere: "Bilgisayar oynuyor…",
 
       soloSetupTitle: "Bilgisayara karşı",
       chooseDifficulty: "Zorluk seç",
@@ -117,8 +117,8 @@ window.DotsI18n = (function () {
       play2pHint: "Sit side by side — hold the phone / iPad landscape",
       couchHint: "Sit side by side · landscape · left red · right blue",
       sideTurn: "Your turn",
-      aiMoveHint: "Computer is moving — watch the yellow line",
-      aiWatchHere: "Computer is drawing here…",
+      aiMoveHint: "Computer is moving…",
+      aiWatchHere: "Computer is moving…",
 
       soloSetupTitle: "Vs computer",
       chooseDifficulty: "Choose difficulty",

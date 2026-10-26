@@ -1,8 +1,17 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.0.8",
-  build: 9,
+  version: "1.0.9",
+  build: 10,
   changelog: [
+    {
+      version: "1.0.9",
+      build: 10,
+      date: "2026-10-26",
+      items: {
+        tr: ["Bilgisayar hamlesi sade: renk değişimi + biraz yavaş çizim"],
+        en: ["Computer moves: simple color change + slightly slower draw"],
+      },
+    },
     {
       version: "1.0.8",
       build: 9,
