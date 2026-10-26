@@ -8,7 +8,8 @@
     "test": "node game/board.test.js && node game/ai.test.js",
     "android:sync": "npx cap sync android",
     "android:open": "npx cap open android",
-    "android:apk": "cd android && ./gradlew assembleDebug"
+    "android:apk": "cd android && ./gradlew assembleRelease",
+    "android:apk:debug": "cd android && ./gradlew assembleDebug"
   },
   "keywords": [
     "lan",
@@ -22,6 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "@capacitor/android": "^8.5.3",
+    "@capacitor/browser": "^8.0.5",
     "@capacitor/cli": "^8.5.3",
     "@capacitor/core": "^8.5.3",
     "express": "^5.1.0",

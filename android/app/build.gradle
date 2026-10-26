@@ -7,8 +7,8 @@ android {
         applicationId "com.toprakkati.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 16
-        versionName "1.3.2"
+        versionCode 17
+        versionName "1.4.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +16,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        // Dedicated keystore so every release build (local or CI) shares one
+        // signing identity. This lets the in-app updater install a new APK
+        // over an existing install without an uninstall step. It is NOT a
+        // Play Store / production secret — see ANDROID.md for the trade-off.
+        release {
+            storeFile file('../kati-release.keystore')
+            storePassword 'katiarena123'
+            keyAlias 'katiarena'
+            keyPassword 'katiarena123'
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
