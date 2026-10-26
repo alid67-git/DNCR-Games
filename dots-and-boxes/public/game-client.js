@@ -651,6 +651,17 @@
   $("btn-rematch").addEventListener("click", rematch);
   $("btn-change-board").addEventListener("click", changeBoard);
   $("btn-game-home").addEventListener("click", goHome);
+  $("btn-game-back").addEventListener("click", () => {
+    clearTimeout(aiTimer);
+    if (!session) {
+      goHome();
+      return;
+    }
+    changeBoard();
+  });
+  $("btn-game-restart").addEventListener("click", () => {
+    if (session) rematch();
+  });
 
   // Boot
   applyI18n();

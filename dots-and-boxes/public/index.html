@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>Noktalar ve Kutular</title>
-  <meta name="theme-color" content="#120f2b" />
+  <meta name="theme-color" content="#0a1f22" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Noktalar" />
   <meta name="description" content="Noktalar ve Kutular — tek kişilik (4 zorluk) ve iki kişilik, 10 farklı oyun alanı." />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
@@ -154,6 +157,12 @@
 
     <!-- GAME -->
     <section id="screen-game" class="screen">
+      <header class="game-top">
+        <button type="button" class="btn-icon" id="btn-game-back" aria-label="Geri">←</button>
+        <p class="game-title" data-i18n="appName">Noktalar ve Kutular</p>
+        <button type="button" class="btn-icon" id="btn-game-restart" aria-label="Yeniden" title="Yeniden">↻</button>
+      </header>
+
       <div class="score-row">
         <div class="score-chip chip-b" id="chip-b">
           <span class="chip-dot dot-b"></span>
