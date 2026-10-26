@@ -1,10 +1,23 @@
 window.KatiConfig = {
   appName: "Kati Arena",
-  version: "1.3.1",
-  build: 15,
+  version: "1.3.2",
+  build: 16,
   /** tomato = red, gourd = green (engine keys) */
   teams: { tomato: "red", gourd: "green" },
   changelog: [
+    {
+      version: "1.3.2",
+      build: 16,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "Yeni Kati Arena logosu (ana menü + Android ikon)",
+        ],
+        en: [
+          "New Kati Arena logo (home screen + Android icon)",
+        ],
+      },
+    },
     {
       version: "1.3.1",
       build: 15,
