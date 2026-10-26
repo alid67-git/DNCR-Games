@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Noktalar ve Kutular</string>
+    <string name="title_activity_main">Noktalar ve Kutular</string>
+    <string name="package_name">com.noktalarvekutular.app</string>
+    <string name="custom_url_scheme">com.noktalarvekutular.app</string>
+</resources>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Noktalar ve Kutular">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a5558"/>
+      <stop offset="55%" stop-color="#0f2f32"/>
+      <stop offset="100%" stop-color="#061416"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <!-- faint grid -->
+  <g fill="none" stroke="#7ec8c4" stroke-width="1.4" opacity="0.28" stroke-linecap="round">
+    <path d="M34 34h60M34 64h60M34 94h60M34 34v60M64 34v60M94 34v60"/>
+  </g>
+  <!-- claimed edges -->
+  <g fill="none" stroke-linecap="round" stroke-width="5" filter="url(#glow)">
+    <path stroke="#e53935" d="M34 34h30M64 34v30M34 64h30M34 34v30"/>
+    <path stroke="#1e88e5" d="M64 64h30M94 64v30M64 94h30M94 34v30"/>
+  </g>
+  <!-- filled boxes -->
+  <rect x="36" y="36" width="26" height="26" rx="4" fill="#e53935" opacity="0.85"/>
+  <rect x="66" y="66" width="26" height="26" rx="4" fill="#1e88e5" opacity="0.85"/>
+  <!-- dots -->
+  <g fill="#f4fffd" filter="url(#glow)">
+    <circle cx="34" cy="34" r="4.2"/>
+    <circle cx="64" cy="34" r="4.2"/>
+    <circle cx="94" cy="34" r="4.2"/>
+    <circle cx="34" cy="64" r="4.2"/>
+    <circle cx="64" cy="64" r="4.2"/>
+    <circle cx="94" cy="64" r="4.2"/>
+    <circle cx="34" cy="94" r="4.2"/>
+    <circle cx="64" cy="94" r="4.2"/>
+    <circle cx="94" cy="94" r="4.2"/>
+  </g>
+</svg>

@@ -38,3 +38,15 @@ npm test
 ```
 
 Bu repo, CudyTurkiye içindeki `sebze-oyunu/` klasöründen ayrılmıştır.
+
+## İkinci oyun: Noktalar ve Kutular
+
+Klasik Dots and Boxes — tek/iki kişilik, 4 zorluk, 10 tahta, Android + Safari:
+
+```bash
+cd dots-and-boxes
+npm install
+npm start
+```
+
+Ayrıntı: [dots-and-boxes/README.md](./dots-and-boxes/README.md)

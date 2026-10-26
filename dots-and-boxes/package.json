@@ -1,0 +1,28 @@
+{
+  "name": "noktalar-ve-kutular",
+  "version": "1.0.0",
+  "description": "Noktalar ve Kutular — solo (4 difficulty) + local 2P, 10 boards, Android APK + Safari",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node game/boards.test.js && node game/engine.test.js && node game/ai.test.js",
+    "android:sync": "npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:apk": "cd android && ./gradlew assembleDebug"
+  },
+  "keywords": [
+    "dots-and-boxes",
+    "board-game",
+    "android",
+    "capacitor",
+    "pwa"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "express": "^5.1.0"
+  }
+}
