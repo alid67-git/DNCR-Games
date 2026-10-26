@@ -36,6 +36,11 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # The action's default "tools platform-tools" tries to install the
+          # long-discontinued monolithic "tools" package, which 404s. Gradle
+          # resolves the rest (platform, build-tools) itself during the build.
+          packages: platform-tools
 
       - name: Sync Capacitor Android project
         run: npx cap sync android
