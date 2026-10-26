@@ -17,7 +17,14 @@ npm start
 
 Tarayıcı: `http://localhost:3857`
 
-iPhone Safari: aynı Wi‑Fi’de bilgisayarın LAN adresini aç (sunucu başlarken yazdırılır).
+### iPhone Safari
+
+1. `npm start` sonrası terminaldeki **Safari:** satırındaki adresi kopyala  
+   (örn. `http://192.168.1.42:3857`)
+2. iPhone’da **Safari** ile aç (aynı Wi‑Fi)
+3. İsteğe bağlı: **Paylaş → Ana Ekrana Ekle** (tam ekran)
+
+Ayrıntı: [SAFARI.md](./SAFARI.md)
 
 Ana menü: **Oyna · Ayarlar · Yardım · Güncellemeler**
 

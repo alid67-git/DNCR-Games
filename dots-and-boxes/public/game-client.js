@@ -254,12 +254,104 @@
     );
   }
 
+  /** Ekran (client) koordinatını SVG viewBox birimine çevirir — Safari dahil. */
+  function clientToSvgPoint(svg, clientX, clientY) {
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) {
+      const rect = svg.getBoundingClientRect();
+      return {
+        x: ((clientX - rect.left) / rect.width) * 100,
+        y: ((clientY - rect.top) / rect.height) * 100,
+      };
+    }
+    return pt.matrixTransform(ctm.inverse());
+  }
+
+  /** Noktadan doğru parçasına (a→b) en kısa mesafe. */
+  function distToSegment(px, py, ax, ay, bx, by) {
+    const dx = bx - ax;
+    const dy = by - ay;
+    const len2 = dx * dx + dy * dy;
+    if (len2 < 1e-8) return Math.hypot(px - ax, py - ay);
+    let t = ((px - ax) * dx + (py - ay) * dy) / len2;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+  }
+
+  /**
+   * Dokunulan noktaya en yakın çizilmemiş kenarı bulur.
+   * Safari’de ince SVG <line> hit-test güvenilmez olduğu için tercih edilen yol budur.
+   */
+  function nearestUndrawnEdge(svgX, svgY) {
+    if (!session || !layout) return null;
+    const threshold = Math.max(4.5, (layout.cell || 10) * 0.42);
+    let best = null;
+    let bestDist = threshold;
+    for (const edge of session.graph.edges.values()) {
+      if (session.state.edgeDrawnBy[edge.id]) continue;
+      const a = layout.coords.get(edge.dotA.join(","));
+      const b = layout.coords.get(edge.dotB.join(","));
+      if (!a || !b) continue;
+      const d = distToSegment(svgX, svgY, a.x, a.y, b.x, b.y);
+      if (d < bestDist) {
+        bestDist = d;
+        best = edge.id;
+      }
+    }
+    return best;
+  }
+
+  let lastPointerEdgeAt = 0;
+
+  function onBoardPointer(ev) {
+    if (!session || session.state.winner || session.aiThinking) return;
+    // Çoklu dokunuş / sağ tık yok say
+    if (ev.pointerType === "mouse" && ev.button !== 0) return;
+    const svg = $("board");
+    if (!svg) return;
+    const p = clientToSvgPoint(svg, ev.clientX, ev.clientY);
+    const edgeId = nearestUndrawnEdge(p.x, p.y);
+    if (!edgeId) return;
+    ev.preventDefault();
+    lastPointerEdgeAt = Date.now();
+    onEdgeClick(edgeId);
+  }
+
+  function bindBoardPointerOnce() {
+    const svg = $("board");
+    if (!svg || svg.dataset.pointerBound === "1") return;
+    svg.dataset.pointerBound = "1";
+    // pointerdown: Safari + Chrome + Capacitor tek yol
+    svg.addEventListener("pointerdown", onBoardPointer, { passive: false });
+    // Eski iOS yedek
+    svg.addEventListener(
+      "touchstart",
+      (ev) => {
+        if (!ev.touches || !ev.touches[0]) return;
+        const t = ev.touches[0];
+        const fake = {
+          clientX: t.clientX,
+          clientY: t.clientY,
+          pointerType: "touch",
+          button: 0,
+          preventDefault: () => ev.preventDefault(),
+        };
+        onBoardPointer(fake);
+      },
+      { passive: false }
+    );
+  }
+
   function buildBoardSvg(graph) {
     clearBoardSvg();
     layout = computeLayout(graph);
     const edgeLayer = $("edge-layer");
     const hitLayer = $("edge-hit-layer");
     const dotLayer = $("dot-layer");
+    bindBoardPointerOnce();
 
     for (const edge of graph.edges.values()) {
       const a = layout.coords.get(edge.dotA.join(","));
@@ -282,9 +374,17 @@
       hit.setAttribute("y2", b.y);
       hit.setAttribute("class", "edge-hit");
       hit.dataset.edge = edge.id;
-      hit.addEventListener("click", () => onEdgeClick(edge.id));
+      // Masaüstü hover önizleme; dokunma ana yol board pointer
       hit.addEventListener("pointerenter", () => previewEdge(edge.id, true));
       hit.addEventListener("pointerleave", () => previewEdge(edge.id, false));
+      hit.addEventListener("click", (e) => {
+        // pointerdown zaten işlediyse çift hamle olmasın
+        if (Date.now() - lastPointerEdgeAt < 450) {
+          e.preventDefault();
+          return;
+        }
+        onEdgeClick(edge.id);
+      });
       hitLayer.appendChild(hit);
     }
 
@@ -295,6 +395,7 @@
       circle.setAttribute("cy", p.y);
       circle.setAttribute("r", Math.max(1.1, layout.cell * 0.09));
       circle.setAttribute("class", "board-dot");
+      circle.setAttribute("pointer-events", "none");
       dotLayer.appendChild(circle);
     }
   }
@@ -663,7 +764,35 @@
     if (session) rematch();
   });
 
+  function isIosSafari() {
+    const ua = navigator.userAgent || "";
+    const iOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const webkit = /WebKit/.test(ua);
+    const notOther = !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+    return iOS && webkit && notOther;
+  }
+
+  function isStandalone() {
+    try {
+      if (window.navigator.standalone) return true;
+      if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+    } catch (_) {}
+    return false;
+  }
+
+  function showSafariTipIfNeeded() {
+    const tip = $("safari-tip");
+    if (!tip) return;
+    if (isIosSafari() && !isStandalone()) {
+      tip.classList.remove("hidden");
+      tip.textContent = t("safariTip");
+    } else {
+      tip.classList.add("hidden");
+    }
+  }
+
   // Boot
   applyI18n();
   fillSettingsForm();
+  showSafariTipIfNeeded();
 })();

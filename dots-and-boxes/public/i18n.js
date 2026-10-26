@@ -59,6 +59,11 @@ window.DotsI18n = (function () {
         "Kolay: yapay zeka sık hata yapar. Orta: dengeli ve hatasız oynar. Zor: kutuları akıllıca bırakıp kontrolü elinde tutar (double-cross). Çok Zor: aynı zamanda olası hamleleri simüle ederek en iyisini seçer.",
       helpTwoPTitle: "İki kişilik",
       helpTwoP: "Aynı cihazda sırayla oynanır — telefon elden ele geçer.",
+      helpSafariTitle: "iPhone Safari",
+      helpSafari1: "Bilgisayarda npm start çalıştır; terminaldeki LAN adresini (http://192.168.x.x:3857) kopyala.",
+      helpSafari2: "iPhone Safari’de bu adresi aç — aynı Wi‑Fi şart.",
+      helpSafari3: "Paylaş → Ana Ekrana Ekle ile tam ekran uygulama gibi kullan.",
+      safariTip: "Safari ipucu: Paylaş → Ana Ekrana Ekle",
 
       updatesTitle: "Güncellemeler",
       updatesCurrent: "Yüklü sürüm",
@@ -144,6 +149,11 @@ window.DotsI18n = (function () {
         "Easy: the computer makes frequent mistakes. Medium: balanced, mistake-free play. Hard: sacrifices boxes smartly to keep control (double-cross). Very Hard: also simulates likely outcomes to pick the best move.",
       helpTwoPTitle: "Two players",
       helpTwoP: "Play on the same device, taking turns — pass the phone around.",
+      helpSafariTitle: "iPhone Safari",
+      helpSafari1: "Run npm start on a computer; copy the LAN URL (http://192.168.x.x:3857).",
+      helpSafari2: "Open that URL in iPhone Safari — same Wi‑Fi required.",
+      helpSafari3: "Share → Add to Home Screen for a full-screen app-like experience.",
+      safariTip: "Safari tip: Share → Add to Home Screen",
 
       updatesTitle: "Updates",
       updatesCurrent: "Installed version",

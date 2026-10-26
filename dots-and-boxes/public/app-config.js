@@ -1,8 +1,27 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.0.0",
-  build: 1,
+  version: "1.0.1",
+  build: 2,
   changelog: [
+    {
+      version: "1.0.1",
+      build: 2,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "iPhone Safari dokunma: geniş kenar yakalama + pointer/touch",
+          "Ana Ekrana Ekle (PWA manifest + apple-touch meta)",
+          "Safari kaydırma/zoom kilidi ve güvenli alan desteği",
+          "Yardım’a Safari kurulum adımları eklendi",
+        ],
+        en: [
+          "iPhone Safari touch: wide edge picking + pointer/touch",
+          "Add to Home Screen (PWA manifest + apple-touch meta)",
+          "Safari scroll/zoom lock and safe-area support",
+          "Safari setup steps added to Help",
+        ],
+      },
+    },
     {
       version: "1.0.0",
       build: 1,
