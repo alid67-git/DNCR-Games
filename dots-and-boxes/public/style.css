@@ -1246,7 +1246,7 @@ html[lang="en"] .chip-score::before {
 }
 
 @media (max-width: 420px) {
-  #app {
+  body:not(.in-game) #app {
     padding-left: 0.85rem;
     padding-right: 0.85rem;
   }
