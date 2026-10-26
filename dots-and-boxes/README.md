@@ -18,12 +18,11 @@ npm start
 
 Tarayıcı: `http://localhost:3857`
 
-### iPhone Safari
+### iPhone Safari (bilgisayar yok)
 
-1. `npm start` sonrası terminaldeki **Safari:** satırındaki adresi kopyala  
-   (örn. `http://192.168.1.42:3857`)
-2. iPhone’da **Safari** ile aç (aynı Wi‑Fi)
-3. İsteğe bağlı: **Paylaş → Ana Ekrana Ekle** (tam ekran)
+1. Safari’de aç: **https://alid67-git.github.io/KatiArena/noktalar/**
+2. **Paylaş → Ana Ekrana Ekle**
+3. Sonraki açılışlarda internet gerekmez
 
 Ayrıntı: [SAFARI.md](./SAFARI.md)
 

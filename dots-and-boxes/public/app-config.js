@@ -1,8 +1,23 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.0.2",
-  build: 3,
+  version: "1.0.3",
+  build: 4,
   changelog: [
+    {
+      version: "1.0.3",
+      build: 4,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "iPhone’da bilgisayarsız oyna: GitHub Pages + Ana Ekrana Ekle",
+          "Service worker — ilk indirmeden sonra çevrimdışı",
+        ],
+        en: [
+          "Play on iPhone without a computer: GitHub Pages + Add to Home Screen",
+          "Service worker — offline after first download",
+        ],
+      },
+    },
     {
       version: "1.0.2",
       build: 3,

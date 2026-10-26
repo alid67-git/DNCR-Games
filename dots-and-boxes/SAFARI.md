@@ -1,34 +1,23 @@
-# iPhone Safari’de oyna
+# iPhone’da oyna (bilgisayar gerekmez)
 
-Uygulama ekstra kurulum gerektirmez — Safari’de açılan web oyunudur.
+## 1) Safari’de aç
 
-**İnternet şart değil.** Oyun ve yapay zeka cihazda çalışır; bilgisayardaki yerel sunucuya aynı Wi‑Fi ile bağlanman yeterli (dış ağ / mobil veri gerekmez).
+Adres:
 
-## Aynı Wi‑Fi (en kolay)
+**https://alid67-git.github.io/KatiArena/noktalar/**
 
-1. Bilgisayarda:
-   ```bash
-   cd dots-and-boxes
-   npm install
-   npm start
-   ```
-2. Terminalde çıkan **LAN** adresini kopyala (örn. `http://192.168.1.42:3857`).
-3. iPhone’da **Safari** → adres çubuğuna yapıştır → Git.
-4. (İsteğe bağlı) **Paylaş → Ana Ekrana Ekle** — tam ekran uygulama gibi açılır.
+## 2) Ana Ekrana Ekle (önerilir)
 
-> Not: iPhone ile bilgisayar **aynı Wi‑Fi**’de olmalı. Misafir ağı / AP izolasyonu LAN’ı kesebilir.
+1. Safari → **Paylaş (□↑)**
+2. **Ana Ekrana Ekle** → Ekle
+3. Bundan sonra ana ekrandaki ikondan aç — uygulama gibi, tam ekran
 
-## Ana Ekrana Ekle (önerilir)
+## 3) Çevrimdışı
 
-Safari → **Paylaş (□↑)** → **Ana Ekrana Ekle** → Ekle.
+İlk açılışta bir kez internet gerekir (indirme). Sonra **Ana Ekrana Ekle** ile açınca internet olmadan da oynanır (service worker önbelleği).
 
-Sonra ana ekrandaki ikondan aç; üstteki Safari çubuğu gizlenir.
+---
 
-## Sorun giderme
+### Eski yol (bilgisayar + aynı Wi‑Fi)
 
-| Sorun | Çözüm |
-|-------|--------|
-| Sayfa açılmıyor | Aynı Wi‑Fi? Adres `http://` ile mi? Firewall port 3857’yi engelliyor mu? |
-| Çizgiye dokununca olmuyor | Tahtayı biraz yaklaştır / kenarın ortasına dokun; güncel sürüm dokunmayı geniş tutar |
-| Yazılar küçük / zoom | Ana Ekrana Ekle ile açmayı dene |
-| Fontlar yüklenmiyor | İnternet kesikse sistem fontuna düşer; oyun yine çalışır |
+Hâlâ mümkün: bilgisayarda `npm start` → LAN adresini Safari’de aç. Ayrıntı için README.

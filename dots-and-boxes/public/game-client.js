@@ -791,8 +791,18 @@
     }
   }
 
+  function registerServiceWorker() {
+    if (!("serviceWorker" in navigator)) return;
+    // file:// ve capacitor’da SW gerekmez / desteklenmez
+    if (location.protocol === "file:") return;
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
+
   // Boot
   applyI18n();
   fillSettingsForm();
   showSafariTipIfNeeded();
+  registerServiceWorker();
 })();

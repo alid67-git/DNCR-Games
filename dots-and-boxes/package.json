@@ -1,6 +1,6 @@
 {
   "name": "noktalar-ve-kutular",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Noktalar ve Kutular — solo (4 difficulty) + local 2P, 10 boards, Android APK + Safari",
   "main": "server.js",
   "scripts": {
