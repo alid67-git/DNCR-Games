@@ -10,7 +10,6 @@ Kırmızı takım vs Yeşil takım. Klasik Kati tahtası.
 ## Çalıştır
 
 ```bash
-cd sebze-oyunu
 npm install
 npm start
 ```
@@ -37,3 +36,5 @@ Detay: [ANDROID.md](./ANDROID.md)
 ```bash
 npm test
 ```
+
+Bu repo, CudyTurkiye içindeki `sebze-oyunu/` klasöründen ayrılmıştır.
