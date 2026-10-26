@@ -1162,8 +1162,9 @@ html[lang="en"] .chip-score::before {
 .end-panel {
   position: absolute;
   left: 50%;
-  bottom: max(1rem, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
+  top: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
   z-index: 20;
   width: min(92vw, 420px);
   padding: 1.1rem;
@@ -1172,7 +1173,17 @@ html[lang="en"] .chip-score::before {
   border-radius: var(--radius);
   border: 1px solid rgba(144, 200, 200, 0.28);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
-  animation: rise 0.35s ease both;
+  animation: endPanelIn 0.35s ease both;
+}
+@keyframes endPanelIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 #screen-game {
   position: relative;

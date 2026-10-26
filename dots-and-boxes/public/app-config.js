@@ -1,8 +1,17 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.0.5",
-  build: 6,
+  version: "1.0.6",
+  build: 7,
   changelog: [
+    {
+      version: "1.0.6",
+      build: 7,
+      date: "2026-10-26",
+      items: {
+        tr: ["Oyun sonu menüsü ekranın ortasında açılır"],
+        en: ["End-of-game menu opens centered on screen"],
+      },
+    },
     {
       version: "1.0.5",
       build: 6,
