@@ -1,6 +1,6 @@
 {
   "name": "kati-arena",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Kati Arena — Red vs Green: solo, online cross-country, Android",
   "main": "server.js",
   "scripts": {

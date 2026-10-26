@@ -1,10 +1,29 @@
 window.KatiConfig = {
   appName: "Kati Arena",
-  version: "1.4.0",
-  build: 17,
+  version: "1.5.0",
+  build: 18,
   /** tomato = red, gourd = green (engine keys) */
   teams: { tomato: "red", gourd: "green" },
+  /** Public web URL used in invite links (works from APK too). */
+  shareBaseUrl: "https://alid67-git.github.io/KatiArena/",
   changelog: [
+    {
+      version: "1.5.0",
+      build: 18,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "Ülkeler arası oyun: sunucu kurmaya gerek yok (doğrudan cihazlar arası)",
+          "Oda kur → davet linkini gönder → rakip katılır",
+          "iPhone Safari ve Android aynı şekilde oynar",
+        ],
+        en: [
+          "Cross-country play with no server setup (direct device-to-device)",
+          "Create a room → send the invite link → opponent joins",
+          "Works the same on iPhone Safari and Android",
+        ],
+      },
+    },
     {
       version: "1.4.0",
       build: 17,

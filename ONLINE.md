@@ -1,29 +1,29 @@
 # Kati Arena — ülkeler arası (online)
 
-Telefon (TR) ile başka ülkedeki bilgisayar aynı **herkese açık sunucuya** bağlanır.
+**Sunucu kurmana gerek yok.** Oyun cihazlar arasında doğrudan bağlanır (WebRTC).  
+iPhone Safari, Android APK ve bilgisayar tarayıcısı aynı şekilde oynar.
 
-## 1) Sunucuyu yayınla
+Canlı link: **https://alid67-git.github.io/KatiArena/**
 
-Bir VPS / Render / Railway / Fly.io üzerinde:
+## Nasıl oynanır
+
+1. Bir kişi **Oyna → Çevrimiçi oyna → Oda kur**
+2. **Davet linkini kopyala** → WhatsApp / e-posta / SMS
+3. Diğer kişi linki açar (veya oda kodunu yazar) → **Katıl**
+4. İkisi de **Hazırım** der → oyun başlar
+
+Aynı Wi‑Fi şart değil. Aynı ülkede olmanız da şart değil.
+
+## Gelişmiş (isteğe bağlı)
+
+Kendi Node/socket.io sunucunu kullanmak istersen Ayarlar → **Gelişmiş: kendi sunucun** alanına URL yaz.  
+Boş bırakıldığında varsayılan sunucusuz (P2P) yol kullanılır.
+
+Eski yol (kendi sunucu):
 
 ```bash
 npm install
 PORT=3847 npm start
 ```
 
-HTTPS URL alın (örn. `https://kati-arena.onrender.com`).
-
-Yerel test için [ngrok](https://ngrok.com): `ngrok http 3847`
-
-## 2) İki oyuncu
-
-1. **Ayarlar** → Çevrimiçi sunucu adresine URL’yi yaz → Kaydet  
-2. **Oyna → Çevrimiçi oyna → Oda kur**  
-3. **Davet linkini kopyala** → WhatsApp / e-posta  
-4. Diğer kişi linki açar (veya kodu yazar) → **Katıl** → ikisi de **Hazırım**
-
-Aynı Wi‑Fi gerekmez. Önemli olan ikisinin de **aynı sunucu URL’sine** bağlanmasıdır.
-
-## 3) Android
-
-Uygulamada Ayarlar’daki sunucu alanı zorunlu (localhost yok).
+HTTPS için VPS / Render / Railway / Fly.io veya yerel test için `ngrok http 3847`.

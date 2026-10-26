@@ -1,8 +1,7 @@
 name: Deploy GitHub Pages
 
 # Publishes public/ as a static site so Safari / iPhone can open the game
-# at https://alid67-git.github.io/KatiArena/ (solo works fully client-side;
-# online multiplayer still needs a Node server URL in Settings).
+# at https://alid67-git.github.io/KatiArena/ (solo + P2P online; no Node server).
 on:
   push:
     branches:

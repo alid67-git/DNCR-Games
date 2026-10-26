@@ -63,16 +63,12 @@
       <header class="brand sm-head">
         <p class="brand-mark sm" data-i18n="appName">Kati Arena</p>
         <h1 data-i18n="onlineTitle">Çevrimiçi</h1>
-        <p class="lede" data-i18n="onlineLead">Aynı sunucuya bağlanın — Wi‑Fi şart değil.</p>
+        <p class="lede" data-i18n="onlineLead">Sunucu gerekmez — davet linkiyle dünyanın her yerinden oyna.</p>
       </header>
       <form id="online-form" class="lobby-form" onsubmit="return false;">
         <label>
           <span data-i18n="yourName">Adın</span>
           <input id="player-name" type="text" maxlength="20" data-i18n-ph="namePh" placeholder="Örn. Ali" autocomplete="nickname" />
-        </label>
-        <label>
-          <span data-i18n="serverUrl">Çevrimiçi sunucu adresi</span>
-          <input id="online-server-url" type="url" inputmode="url" data-i18n-ph="serverPh" placeholder="https://..." autocomplete="url" />
         </label>
         <div class="lobby-actions">
           <button type="button" id="btn-create" class="btn btn-primary" data-i18n="createRoom">Oda kur</button>
@@ -107,11 +103,14 @@
           <label class="radio-row"><input type="radio" name="aiDiff" value="hard" /> <span data-i18n="aiHard">Zor — güçlü, az çeşitlilik</span></label>
         </fieldset>
         <p class="field-hint" data-i18n="aiHint"></p>
-        <label>
-          <span data-i18n="serverUrl">Çevrimiçi sunucu adresi</span>
-          <input id="settings-server" type="url" inputmode="url" data-i18n-ph="serverPh" placeholder="https://..." />
-        </label>
-        <p class="field-hint" data-i18n="serverHint"></p>
+        <details class="advanced-block">
+          <summary data-i18n="advancedServer">Gelişmiş: kendi sunucun (isteğe bağlı)</summary>
+          <label>
+            <span data-i18n="serverUrl">Eski socket sunucu adresi</span>
+            <input id="settings-server" type="url" inputmode="url" data-i18n-ph="serverPh" placeholder="https://..." />
+          </label>
+          <p class="field-hint" data-i18n="serverHint"></p>
+        </details>
         <label class="check-row">
           <input type="checkbox" id="settings-notif" />
           <span data-i18n="notifications">Bildirimler</span>
@@ -272,6 +271,7 @@
   <script src="i18n.js"></script>
   <script src="engine.js"></script>
   <script src="update-check.js"></script>
+  <script src="p2p-online.js"></script>
   <script src="game-client.js" defer></script>
 </body>
 </html>

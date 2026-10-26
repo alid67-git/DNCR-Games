@@ -3,7 +3,7 @@
 Kırmızı takım vs Yeşil takım. Klasik Kati tahtası.
 
 - **Bilgisayara karşı** (çevrimdışı)
-- **Çevrimiçi** — telefon ↔ başka ülkedeki PC (aynı public sunucu)
+- **Çevrimiçi** — ülkeler arası, **sunucu kurmaya gerek yok** (davet linki)
 - **TR / EN**, ayarlar, yardım, sürüm takibi
 - **Android** (Capacitor)
 
@@ -11,7 +11,7 @@ Kırmızı takım vs Yeşil takım. Klasik Kati tahtası.
 
 **https://alid67-git.github.io/KatiArena/**
 
-Bilgisayara karşı (solo) tarayıcıda çalışır. Ana Ekrana Ekle ile uygulama gibi açabilirsin.
+Solo ve çevrimiçi (davet linkiyle) tarayıcıda çalışır. Ana Ekrana Ekle ile uygulama gibi açabilirsin.
 
 ## Çalıştır (yerel)
 

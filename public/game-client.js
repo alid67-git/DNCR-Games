@@ -46,6 +46,7 @@
 
   let settings = loadSettings();
   let socket = null;
+  let p2pSession = null;
   let state = null;
   let selected = null;
   let lanIps = [];
@@ -55,6 +56,10 @@
   let animating = false;
   let lastSeenMoveCount = -1;
   let prevGuestJoined = false;
+
+  function useLegacySocket() {
+    return !!(settings.serverUrl && String(settings.serverUrl).trim());
+  }
 
   function loadSettings() {
     const defaults = {
@@ -114,22 +119,103 @@
   }
 
   function serverBase() {
-    const onlineEl = $("online-server-url");
-    const fromOnline = onlineEl && onlineEl.value.trim();
-    const raw = (fromOnline || settings.serverUrl || "").trim().replace(/\/$/, "");
+    const raw = (settings.serverUrl || "").trim().replace(/\/$/, "");
     if (raw) return raw;
     if (isNative) return "";
     return location.origin;
   }
 
   function inviteUrl(code) {
-    const base = serverBase() || location.origin;
+    // Always share the public web URL so APK hosts can invite Safari users.
+    const configured = (CFG.shareBaseUrl || "").trim().replace(/\/$/, "");
+    let base = configured;
+    if (!base && (location.protocol === "http:" || location.protocol === "https:")) {
+      base = location.href.split("?")[0].split("#")[0].replace(/\/index\.html$/i, "");
+      base = base.replace(/\/$/, "");
+    }
+    if (!base) base = "https://alid67-git.github.io/KatiArena";
     try {
-      const u = new URL(base);
+      const u = new URL(base.endsWith("/") ? base : base + "/");
       u.searchParams.set("join", code);
       return u.toString();
     } catch (_) {
       return `${base}?join=${encodeURIComponent(code)}`;
+    }
+  }
+
+  function mapP2pError(err) {
+    const msg = (err && err.message) || String(err || "");
+    if (msg === "timeout" || msg === "join_fail") return t("p2pTimeout");
+    if (msg === "room_full") return t("roomFull");
+    if (msg === "need_code") return t("needCode");
+    return t("p2pFail");
+  }
+
+  function endP2p() {
+    if (p2pSession) {
+      try {
+        p2pSession.leave();
+      } catch (_) {
+        try {
+          p2pSession.destroy();
+        } catch (_) {}
+      }
+      p2pSession = null;
+    }
+  }
+
+  function startP2pHandlers() {
+    return {
+      onState: (st) => {
+        localMode = false;
+        applyState(st);
+      },
+      onError: (msg) => {
+        if (msg === "room_full") toast(t("roomFull"));
+        else if (msg && typeof msg === "string" && msg.length < 80 && !/^[a-z_]+$/.test(msg))
+          toast(msg);
+        else toast(mapP2pError(msg));
+      },
+      onClosed: () => {
+        toast(t("toHome"));
+        p2pSession = null;
+        state = null;
+        showScreen("home");
+      },
+    };
+  }
+
+  async function p2pCreateRoom() {
+    if (!window.KatiP2P) {
+      toast(t("p2pFail"));
+      return;
+    }
+    endP2p();
+    toast(t("connecting"));
+    const session = window.KatiP2P.createSession(startP2pHandlers());
+    p2pSession = session;
+    try {
+      await session.host(playerName());
+    } catch (err) {
+      endP2p();
+      toast(mapP2pError(err));
+    }
+  }
+
+  async function p2pJoinRoom(code) {
+    if (!window.KatiP2P) {
+      toast(t("p2pFail"));
+      return;
+    }
+    endP2p();
+    toast(t("connecting"));
+    const session = window.KatiP2P.createSession(startP2pHandlers());
+    p2pSession = session;
+    try {
+      await session.join(code, playerName());
+    } catch (err) {
+      endP2p();
+      toast(mapP2pError(err));
     }
   }
 
@@ -518,6 +604,7 @@
     localMode = true;
     selected = null;
     lastSeenMoveCount = -1;
+    endP2p();
     if (socket) {
       try {
         socket.emit("room:leave");
@@ -583,7 +670,8 @@
         selected = null;
         clearHints();
         if (state.local) playLocalMove(move.from, move.to);
-        else socket.emit("game:move", { code: state.code, from: move.from, to: move.to });
+        else if (p2pSession) p2pSession.move(move.from, move.to);
+        else if (socket) socket.emit("game:move", { code: state.code, from: move.from, to: move.to });
         return;
       }
       if (board[nodeId] === state.you && (!game.chainFrom || game.chainFrom === nodeId)) {
@@ -824,7 +912,6 @@
       r.checked = r.value === diff;
     });
     if ($("player-name") && settings.name) $("player-name").value = settings.name;
-    if ($("online-server-url")) $("online-server-url").value = settings.serverUrl || "";
   }
 
   function goHome() {
@@ -832,6 +919,7 @@
     selected = null;
     state = null;
     localMode = false;
+    endP2p();
     showScreen("home");
   }
 
@@ -904,10 +992,12 @@
   });
 
   $("btn-create").addEventListener("click", () => {
-    const url = ($("online-server-url").value || "").trim().replace(/\/$/, "");
-    if (url) saveSettings({ serverUrl: url, name: playerName() });
-    else saveSettings({ name: playerName() });
-    ensureSocket((s) => s.emit("room:create", { name: playerName() }));
+    saveSettings({ name: playerName() });
+    if (useLegacySocket()) {
+      ensureSocket((s) => s.emit("room:create", { name: playerName() }));
+    } else {
+      p2pCreateRoom();
+    }
   });
 
   $("btn-join").addEventListener("click", () => {
@@ -916,10 +1006,12 @@
       toast(t("needCode"));
       return;
     }
-    const url = ($("online-server-url").value || "").trim().replace(/\/$/, "");
-    if (url) saveSettings({ serverUrl: url, name: playerName() });
-    else saveSettings({ name: playerName() });
-    ensureSocket((s) => s.emit("room:join", { code, name: playerName() }));
+    saveSettings({ name: playerName() });
+    if (useLegacySocket()) {
+      ensureSocket((s) => s.emit("room:join", { code, name: playerName() }));
+    } else {
+      p2pJoinRoom(code);
+    }
   });
 
   $("join-code").addEventListener("keydown", (e) => {
@@ -929,7 +1021,8 @@
   $("btn-ready").addEventListener("click", () => {
     if (!state || state.local) return;
     const iAmReady = state.you === "tomato" ? state.ready.tomato : state.ready.gourd;
-    socket.emit("room:ready", { code: state.code, ready: !iAmReady });
+    if (p2pSession) p2pSession.setReady(!iAmReady);
+    else if (socket) socket.emit("room:ready", { code: state.code, ready: !iAmReady });
   });
 
   $("btn-copy-link").addEventListener("click", async () => {
@@ -955,7 +1048,8 @@
       startLocalSolo();
       return;
     }
-    socket.emit("game:rematch", { code: state.code });
+    if (p2pSession) p2pSession.rematch();
+    else if (socket) socket.emit("game:rematch", { code: state.code });
   });
 
   $("btn-lobby").addEventListener("click", () => {
@@ -976,8 +1070,7 @@
       fillSettingsForm();
       showScreen("online");
       if ($("join-code")) $("join-code").value = code;
-      // mild delay for socket.io on same origin
-      setTimeout(() => $("btn-join").click(), 400);
+      setTimeout(() => $("btn-join").click(), 700);
     } catch (_) {}
   }
 
