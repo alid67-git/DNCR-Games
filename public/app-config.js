@@ -1,10 +1,25 @@
 window.KatiConfig = {
   appName: "Kati Arena",
-  version: "1.3.0",
-  build: 14,
+  version: "1.3.1",
+  build: 15,
   /** tomato = red, gourd = green (engine keys) */
   teams: { tomato: "red", gourd: "green" },
   changelog: [
+    {
+      version: "1.3.1",
+      build: 15,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "Bilgisayar zorluğu: Kolay / Normal / Zor (Ayarlar)",
+          "Aynı partiyi ezberleyen AI düzeltildi — yakın hamle çeşitliliği",
+        ],
+        en: [
+          "Computer difficulty: Easy / Normal / Hard (Settings)",
+          "Fixed scripted AI — variety among near-best moves",
+        ],
+      },
+    },
     {
       version: "1.3.0",
       build: 14,

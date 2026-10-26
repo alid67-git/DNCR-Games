@@ -358,31 +358,158 @@
     return best.path ? best : { score: wantMax ? -500 : 500, path: [] };
   }
 
-  function chooseMove(state, aiPlayer, depth) {
+  /**
+   * Zorluk: easy / normal / hard
+   * Aynı konumda hep aynı hamleyi seçmeyi kırar — en iyi skora yakın
+   * hamleler arasından rastgele seçer.
+   */
+  const DIFFICULTY = {
+    easy: { depth: 1, variety: 10, blunderChance: 0.28 },
+    normal: { depth: 2, variety: 3, blunderChance: 0.08 },
+    hard: { depth: 3, variety: 1.2, blunderChance: 0 },
+  };
+
+  function resolveAiOptions(depthOrOpts, maybeOpts) {
+    let difficulty = "normal";
+    let depth;
+    let variety;
+    let blunderChance;
+    if (typeof depthOrOpts === "object" && depthOrOpts) {
+      difficulty = depthOrOpts.difficulty || "normal";
+      const preset = DIFFICULTY[difficulty] || DIFFICULTY.normal;
+      depth = depthOrOpts.depth != null ? depthOrOpts.depth : preset.depth;
+      variety = depthOrOpts.variety != null ? depthOrOpts.variety : preset.variety;
+      blunderChance =
+        depthOrOpts.blunderChance != null
+          ? depthOrOpts.blunderChance
+          : preset.blunderChance;
+    } else {
+      if (maybeOpts && typeof maybeOpts === "object") {
+        difficulty = maybeOpts.difficulty || "normal";
+        const preset = DIFFICULTY[difficulty] || DIFFICULTY.normal;
+        depth = depthOrOpts !== undefined ? depthOrOpts : preset.depth;
+        variety = maybeOpts.variety != null ? maybeOpts.variety : preset.variety;
+        blunderChance =
+          maybeOpts.blunderChance != null
+            ? maybeOpts.blunderChance
+            : preset.blunderChance;
+      } else if (depthOrOpts !== undefined) {
+        // Eski API: chooseMove(state, player, depth) — hard + küçük çeşitlilik
+        depth = depthOrOpts;
+        variety = 1.2;
+        blunderChance = 0;
+        difficulty = "hard";
+      } else {
+        const preset = DIFFICULTY.normal;
+        depth = preset.depth;
+        variety = preset.variety;
+        blunderChance = preset.blunderChance;
+      }
+    }
+    return { difficulty, depth, variety, blunderChance };
+  }
+
+  function pickFromScored(scored, variety, blunderChance) {
+    if (!scored.length) return null;
+    scored.sort((a, b) => b.score - a.score);
+    const best = scored[0].score;
+    let pool = scored.filter((s) => s.score >= best - variety);
+    if (
+      blunderChance > 0 &&
+      Math.random() < blunderChance &&
+      scored.length > 1
+    ) {
+      // Bilinçli hata: en iyi dışındaki orta dilim
+      const weaker = scored.slice(1, Math.min(scored.length, 4));
+      if (weaker.length) pool = weaker;
+    }
+    if (!pool.length) pool = [scored[0]];
+    const pick = pool[(Math.random() * pool.length) | 0];
+    return { from: pick.move.from, to: pick.move.to };
+  }
+
+  /** Hamleyi uygula; zincir varsa greedy (küçük çeşitlilikle) tamamla. */
+  function applyMoveResolveChain(state, player, move, rootPlayer) {
+    const result = tryMove(state, player, move.from, move.to);
+    if (!result.ok) return null;
+    let childState = result.state;
+    while (
+      !childState.winner &&
+      childState.chainFrom &&
+      childState.turn === player
+    ) {
+      const cont = getAllLegalMoves(
+        childState.board,
+        player,
+        childState.chainFrom
+      );
+      if (!cont.length) break;
+      const contScored = [];
+      for (const c of cont) {
+        const r = tryMove(childState, player, c.from, c.to);
+        if (!r.ok) continue;
+        contScored.push({
+          move: c,
+          score: evaluate(r.state.board, rootPlayer),
+          state: r.state,
+        });
+      }
+      if (!contScored.length) break;
+      contScored.sort((a, b) => b.score - a.score);
+      const bestC = contScored[0].score;
+      const near = contScored.filter((s) => s.score >= bestC - 1.5);
+      const chosen = near[(Math.random() * near.length) | 0];
+      childState = chosen.state;
+    }
+    return childState;
+  }
+
+  function chooseMove(state, aiPlayer, depthOrOpts, maybeOpts) {
     if (aiPlayer === undefined) aiPlayer = PLAYERS.gourd;
-    if (depth === undefined) depth = 3;
+    const opts = resolveAiOptions(depthOrOpts, maybeOpts);
     if (state.winner || state.turn !== aiPlayer) return null;
     const moves = getAllLegalMoves(state.board, aiPlayer, state.chainFrom);
     if (!moves.length) return null;
 
     if (state.chainFrom) {
-      let best = null;
-      let bestScore = -Infinity;
+      const scored = [];
       for (const m of moves) {
         const r = tryMove(state, aiPlayer, m.from, m.to);
         if (!r.ok) continue;
-        const sc = evaluate(r.state.board, aiPlayer);
-        if (sc > bestScore) {
-          bestScore = sc;
-          best = m;
-        }
+        scored.push({
+          move: m,
+          score: evaluate(r.state.board, aiPlayer),
+        });
       }
-      return best ? { from: best.from, to: best.to } : null;
+      return pickFromScored(scored, Math.max(opts.variety, 1), opts.blunderChance);
     }
 
-    const result = minimax(state, depth, true, aiPlayer, -Infinity, Infinity);
-    const first = result.path && result.path[0];
-    if (first) return first;
+    const scored = [];
+    for (const m of moves) {
+      const childState = applyMoveResolveChain(state, aiPlayer, m, aiPlayer);
+      if (!childState) continue;
+      let score;
+      if (childState.winner) {
+        score =
+          childState.winner === aiPlayer
+            ? 900 + opts.depth
+            : -900 - opts.depth;
+      } else {
+        const child = minimax(
+          childState,
+          Math.max(0, opts.depth - 1),
+          true,
+          aiPlayer,
+          -Infinity,
+          Infinity
+        );
+        score = child.score;
+      }
+      scored.push({ move: m, score });
+    }
+
+    const picked = pickFromScored(scored, opts.variety, opts.blunderChance);
+    if (picked) return picked;
     const m = moves[(Math.random() * moves.length) | 0];
     return { from: m.from, to: m.to };
   }
@@ -394,6 +521,7 @@
     JUMP_LINES,
     BOARD_EDGES,
     PLAYERS,
+    DIFFICULTY,
     initialBoard,
     opponent,
     countPieces,

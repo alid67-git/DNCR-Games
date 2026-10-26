@@ -62,6 +62,7 @@
       name: "",
       serverUrl: "",
       notifications: true,
+      aiDifficulty: "normal",
     };
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
@@ -473,7 +474,9 @@
     if (state.game.turn !== PLAYERS.gourd) return;
     aiTimer = setTimeout(async () => {
       if (!state || !state.local || animating) return;
-      const pick = chooseMove(state.game, PLAYERS.gourd, 3);
+      const pick = chooseMove(state.game, PLAYERS.gourd, {
+        difficulty: settings.aiDifficulty || "normal",
+      });
       if (!pick) return;
       await playLocalMove(pick.from, pick.to, PLAYERS.gourd);
       if (state && state.game.turn === PLAYERS.gourd && !state.game.winner) {
@@ -749,6 +752,10 @@
     document.querySelectorAll('input[name="lang"]').forEach((r) => {
       r.checked = r.value === lang();
     });
+    const diff = settings.aiDifficulty || "normal";
+    document.querySelectorAll('input[name="aiDiff"]').forEach((r) => {
+      r.checked = r.value === diff;
+    });
     if ($("player-name") && settings.name) $("player-name").value = settings.name;
     if ($("online-server-url")) $("online-server-url").value = settings.serverUrl || "";
   }
@@ -791,11 +798,17 @@
   $("btn-settings-save").addEventListener("click", async () => {
     const selectedLang =
       (document.querySelector('input[name="lang"]:checked') || {}).value || "tr";
+    const selectedDiff =
+      (document.querySelector('input[name="aiDiff"]:checked') || {}).value ||
+      "normal";
     saveSettings({
       lang: selectedLang,
       name: ($("settings-name").value || "").trim(),
       serverUrl: ($("settings-server").value || "").trim().replace(/\/$/, ""),
       notifications: !!$("settings-notif").checked,
+      aiDifficulty: ["easy", "normal", "hard"].includes(selectedDiff)
+        ? selectedDiff
+        : "normal",
     });
     if (settings.notifications) await ensureNotifPermission();
     applyI18n();

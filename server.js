@@ -86,7 +86,7 @@ function runAiTurn(code) {
   if (room.game.winner) return;
   if (room.game.turn !== PLAYERS.gourd) return;
 
-  const pick = chooseMove(room.game, PLAYERS.gourd, 3);
+  const pick = chooseMove(room.game, PLAYERS.gourd, { difficulty: "normal" });
   if (!pick) return;
 
   const result = rooms.moveAi(code, pick.from, pick.to);

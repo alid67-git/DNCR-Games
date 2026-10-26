@@ -30,6 +30,12 @@ window.KatiI18n = (function () {
       language: "Dil",
       langTr: "Türkçe",
       langEn: "English",
+      aiDifficulty: "Bilgisayar zorluğu",
+      aiEasy: "Kolay — daha çeşitli, hata yapar",
+      aiNormal: "Normal — dengeli",
+      aiHard: "Zor — güçlü, az çeşitlilik",
+      aiHint:
+        "Eski sürüm aynı partiyi tekrarlıyordu. Artık yakın hamleler arasından seçer; zorluk Ayarlar’dan değişir.",
       serverUrl: "Çevrimiçi sunucu adresi",
       serverHint:
         "Ülkeler arası oyun için herkese açık sunucu URL’si (örn. https://kati.ornek.com). Boş bırakırsan bu cihazın sunucusu kullanılır.",
@@ -52,6 +58,9 @@ window.KatiI18n = (function () {
       helpOnline4: "Arkadaş linki açıp katılır; ikiniz de Hazırım deyin.",
       helpTeamsTitle: "Takımlar",
       helpTeams: "Kırmızı takım solda, yeşil takım sağda. Her elde başlayan taraf değişir.",
+      helpAiTitle: "Bilgisayara karşı",
+      helpAi:
+        "Ayarlar → Bilgisayar zorluğu: Kolay (çeşitli, hata yapar), Normal, Zor. Aynı açılışı ezberlemesin diye yakın hamleler arasından seçer.",
       updatesTitle: "Güncellemeler",
       updatesCurrent: "Yüklü sürüm",
       updatesNew: "Yeni",
@@ -124,6 +133,12 @@ window.KatiI18n = (function () {
       language: "Language",
       langTr: "Türkçe",
       langEn: "English",
+      aiDifficulty: "Computer difficulty",
+      aiEasy: "Easy — more variety, makes mistakes",
+      aiNormal: "Normal — balanced",
+      aiHard: "Hard — strong, less variety",
+      aiHint:
+        "Older builds replayed the same lines. Now it picks among near-best moves; change difficulty here.",
       serverUrl: "Online server URL",
       serverHint:
         "For cross-country play, set a public server URL (e.g. https://kati.example.com). Leave empty to use this site’s server.",
@@ -146,6 +161,9 @@ window.KatiI18n = (function () {
       helpOnline4: "They open the link and join; both tap Ready.",
       helpTeamsTitle: "Teams",
       helpTeams: "Red team starts on the left, green on the right. Who opens alternates each match.",
+      helpAiTitle: "Vs computer",
+      helpAi:
+        "Settings → Computer difficulty: Easy (varied, mistakes), Normal, Hard. It picks among near-best moves so games don’t repeat the same script.",
       updatesTitle: "Updates",
       updatesCurrent: "Installed version",
       updatesNew: "New",

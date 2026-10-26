@@ -21,7 +21,7 @@
         <header class="brand home-brand">
           <p class="brand-mark" data-i18n="appName">Kati Arena</p>
           <p class="lede" data-i18n="tagline">Kırmızı takım · Yeşil takım</p>
-          <p class="ver-chip" id="home-version">v1.3.0</p>
+          <p class="ver-chip" id="home-version">v1.3.1</p>
         </header>
         <nav class="home-menu" aria-label="Main">
           <button type="button" class="btn btn-primary btn-menu" id="btn-home-play" data-i18n="homePlay">Oyna</button>
@@ -96,6 +96,13 @@
           <label class="radio-row"><input type="radio" name="lang" value="tr" /> <span data-i18n="langTr">Türkçe</span></label>
           <label class="radio-row"><input type="radio" name="lang" value="en" /> <span data-i18n="langEn">English</span></label>
         </fieldset>
+        <fieldset class="lang-field">
+          <legend data-i18n="aiDifficulty">Bilgisayar zorluğu</legend>
+          <label class="radio-row"><input type="radio" name="aiDiff" value="easy" /> <span data-i18n="aiEasy">Kolay — daha çeşitli, hata yapar</span></label>
+          <label class="radio-row"><input type="radio" name="aiDiff" value="normal" /> <span data-i18n="aiNormal">Normal — dengeli</span></label>
+          <label class="radio-row"><input type="radio" name="aiDiff" value="hard" /> <span data-i18n="aiHard">Zor — güçlü, az çeşitlilik</span></label>
+        </fieldset>
+        <p class="field-hint" data-i18n="aiHint"></p>
         <label>
           <span data-i18n="serverUrl">Çevrimiçi sunucu adresi</span>
           <input id="settings-server" type="url" inputmode="url" data-i18n-ph="serverPh" placeholder="https://..." />
@@ -126,6 +133,8 @@
         </ol>
         <h2 data-i18n="helpTeamsTitle">Takımlar</h2>
         <p data-i18n="helpTeams"></p>
+        <h2 data-i18n="helpAiTitle">Bilgisayara karşı</h2>
+        <p data-i18n="helpAi"></p>
         <h2 data-i18n="helpOnlineTitle">Ülkeler arası</h2>
         <ol>
           <li data-i18n="helpOnline1"></li>
@@ -141,7 +150,7 @@
       <button type="button" class="btn-back" id="btn-updates-back" data-i18n="back">Geri</button>
       <header class="brand sm-head">
         <h1 data-i18n="updatesTitle">Güncellemeler</h1>
-        <p class="lede"><span data-i18n="updatesCurrent">Yüklü sürüm</span>: <strong id="updates-current">1.3.0</strong></p>
+        <p class="lede"><span data-i18n="updatesCurrent">Yüklü sürüm</span>: <strong id="updates-current">1.3.1</strong></p>
       </header>
       <div id="changelog-list" class="changelog"></div>
       <button type="button" id="btn-updates-seen" class="btn btn-primary" data-i18n="updatesSeen">Gördüm</button>
