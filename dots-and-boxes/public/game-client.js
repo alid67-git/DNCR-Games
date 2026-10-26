@@ -87,6 +87,85 @@
   function showScreen(name) {
     Object.values(screens).forEach((el) => el && el.classList.remove("active"));
     if (screens[name]) screens[name].classList.add("active");
+    document.body.classList.toggle("in-game", name === "game");
+    if (name !== "game") {
+      document.body.classList.remove("game-solo", "game-twop", "landscape-game");
+      const hint = $("couch-hint");
+      if (hint) hint.classList.add("hidden");
+    }
+  }
+
+  function applyGameLayout(mode) {
+    document.body.classList.toggle("game-solo", mode === "solo");
+    document.body.classList.toggle("game-twop", mode === "twop");
+    syncLandscapeClass();
+    const hint = $("couch-hint");
+    if (hint) {
+      if (mode === "twop") {
+        hint.classList.remove("hidden");
+        hint.textContent = t("couchHint");
+      } else {
+        hint.classList.add("hidden");
+      }
+    }
+    tryLockLandscape(mode === "twop");
+  }
+
+  function syncLandscapeClass() {
+    const landscape =
+      window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+    document.body.classList.toggle("landscape-game", !!landscape);
+  }
+
+  function tryLockLandscape(want) {
+    const orient = screen.orientation;
+    if (!orient || typeof orient.lock !== "function") return;
+    if (want) {
+      orient.lock("landscape").catch(() => {});
+    } else if (typeof orient.unlock === "function") {
+      try {
+        orient.unlock();
+      } catch (_) {}
+    }
+  }
+
+  window.addEventListener("orientationchange", () => {
+    setTimeout(syncLandscapeClass, 120);
+  });
+  if (window.matchMedia) {
+    const mq = window.matchMedia("(orientation: landscape)");
+    if (typeof mq.addEventListener === "function") mq.addEventListener("change", syncLandscapeClass);
+    else if (typeof mq.addListener === "function") mq.addListener(syncLandscapeClass);
+  }
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /** AI hamlesinden önce kenarı sarıyla vurgula, sonra yavaş çiz. */
+  async function highlightAndPlayAi(edgeId) {
+    const line = document.querySelector(`#edge-layer line[data-edge="${edgeId}"]`);
+    if (line) {
+      line.classList.remove("edge-idle", "edge-a", "edge-b", "edge-preview");
+      line.classList.add("edge-ai-focus");
+      await sleep(780);
+      line.classList.remove("edge-ai-focus");
+    } else {
+      await sleep(400);
+    }
+    const r = applyMove(session.boardId, session.state, edgeId, session.state.turn);
+    if (!r.ok) return false;
+    session.state = r.state;
+    renderAll();
+    const drawn = document.querySelector(`#edge-layer line[data-edge="${edgeId}"]`);
+    if (drawn) {
+      drawn.classList.add("edge-ai-reveal");
+      await sleep(900);
+      drawn.classList.remove("edge-ai-reveal");
+    } else {
+      await sleep(500);
+    }
+    return true;
   }
 
   function toast(msg) {
@@ -462,13 +541,11 @@
     statusB.textContent = "";
     if (!state.winner) {
       if (state.turn === PLAYERS.A) {
-        statusA.textContent =
-          mode === "solo" && humanPlayer === PLAYERS.A ? t("yourTurn") : t("yourTurn");
+        statusA.textContent = mode === "twop" ? t("sideTurn") : t("yourTurn");
+      } else if (mode === "solo") {
+        statusB.textContent = session.aiThinking ? t("computerThinking") : t("opponentTurn");
       } else {
-        if (mode === "solo") statusB.textContent = session.aiThinking
-          ? t("computerThinking")
-          : t("opponentTurn");
-        else statusB.textContent = t("yourTurn");
+        statusB.textContent = t("sideTurn");
       }
     }
 
@@ -477,7 +554,7 @@
 
     const msg = $("status-msg");
     if (state.winner) msg.textContent = "";
-    else if (session.aiThinking) msg.textContent = t("computerThinking");
+    else if (session.aiThinking) msg.textContent = t("aiMoveHint");
     else if (
       state.lastMove &&
       state.lastMove.boxesCompleted.length > 0 &&
@@ -485,7 +562,12 @@
     ) {
       msg.textContent = t("extraTurn");
     } else if (mode === "solo" && state.turn !== humanPlayer) {
-      msg.textContent = t("computerThinking");
+      msg.textContent = t("aiMoveHint");
+    } else if (mode === "twop") {
+      msg.textContent =
+        state.turn === PLAYERS.A
+          ? `${names.A} — ${t("sideTurn")}`
+          : `${names.B} — ${t("sideTurn")}`;
     } else {
       msg.textContent = t("yourTurn");
     }
@@ -545,9 +627,8 @@
 
     buildBoardSvg(graph);
     showScreen("game");
+    applyGameLayout(mode);
     renderAll();
-
-    // Solo: eğer AI başlıyorsa (şimdilik A=insan başlar) — gerekmez.
     maybeScheduleAi();
   }
 
@@ -582,11 +663,18 @@
     session.aiThinking = true;
     updateHud();
     clearTimeout(aiTimer);
-    const delay = 380 + Math.random() * 420;
-    aiTimer = setTimeout(runAiTurn, delay);
+    const delay = 550 + Math.random() * 350;
+    aiTimer = setTimeout(() => {
+      runAiTurn().catch(() => {
+        if (session) {
+          session.aiThinking = false;
+          updateHud();
+        }
+      });
+    }, delay);
   }
 
-  function runAiTurn() {
+  async function runAiTurn() {
     if (!session || session.mode !== "solo") return;
     if (session.state.winner) {
       session.aiThinking = false;
@@ -607,19 +695,27 @@
       updateHud();
       return;
     }
-    const r = applyMove(session.boardId, session.state, move.edgeId, session.state.turn);
-    if (!r.ok) {
-      session.aiThinking = false;
-      updateHud();
+
+    const ok = await highlightAndPlayAi(move.edgeId);
+    if (!ok || !session) {
+      if (session) {
+        session.aiThinking = false;
+        updateHud();
+      }
       return;
     }
-    session.state = r.state;
-    renderAll();
 
-    // Ekstra tur: AI yine oynuyor
+    // Ekstra tur: AI yine oynuyor — kısa nefes arası
     if (!session.state.winner && session.state.turn !== session.humanPlayer) {
-      const nextDelay = 280 + Math.random() * 320;
-      aiTimer = setTimeout(runAiTurn, nextDelay);
+      await sleep(420);
+      aiTimer = setTimeout(() => {
+        runAiTurn().catch(() => {
+          if (session) {
+            session.aiThinking = false;
+            updateHud();
+          }
+        });
+      }, 80);
     } else {
       session.aiThinking = false;
       updateHud();
@@ -660,6 +756,7 @@
   function goHome() {
     clearTimeout(aiTimer);
     session = null;
+    tryLockLandscape(false);
     showScreen("home");
   }
 

@@ -172,38 +172,41 @@
         <button type="button" class="btn-icon" id="btn-game-restart" aria-label="Yeniden" title="Yeniden">↻</button>
       </header>
 
-      <div class="score-row">
-        <div class="score-chip chip-b" id="chip-b">
-          <span class="chip-dot dot-b"></span>
-          <div class="chip-info">
-            <strong id="name-b">—</strong>
-            <span id="status-b" class="chip-status"></span>
-          </div>
-          <span class="chip-score" id="score-b">0</span>
-        </div>
-        <div class="score-chip chip-a" id="chip-a">
+      <p id="couch-hint" class="couch-hint hidden" data-i18n="couchHint"></p>
+
+      <div class="game-stage">
+        <aside class="seat seat-a" id="chip-a">
           <span class="chip-dot dot-a"></span>
           <div class="chip-info">
             <strong id="name-a">—</strong>
             <span id="status-a" class="chip-status"></span>
           </div>
           <span class="chip-score" id="score-a">0</span>
+        </aside>
+
+        <div class="board-column">
+          <p id="boxes-left" class="boxes-left"></p>
+          <div class="board-wrap">
+            <svg id="board" viewBox="0 0 100 100" role="img" aria-label="Oyun alanı">
+              <g id="box-layer"></g>
+              <g id="edge-layer"></g>
+              <g id="edge-hit-layer"></g>
+              <g id="dot-layer"></g>
+              <g id="fx-layer"></g>
+            </svg>
+          </div>
+          <p id="status-msg" class="status-msg" aria-live="polite"></p>
         </div>
+
+        <aside class="seat seat-b" id="chip-b">
+          <span class="chip-dot dot-b"></span>
+          <div class="chip-info">
+            <strong id="name-b">—</strong>
+            <span id="status-b" class="chip-status"></span>
+          </div>
+          <span class="chip-score" id="score-b">0</span>
+        </aside>
       </div>
-
-      <p id="boxes-left" class="boxes-left"></p>
-
-      <div class="board-wrap">
-        <svg id="board" viewBox="0 0 100 100" role="img" aria-label="Oyun alanı">
-          <g id="box-layer"></g>
-          <g id="edge-layer"></g>
-          <g id="edge-hit-layer"></g>
-          <g id="dot-layer"></g>
-          <g id="fx-layer"></g>
-        </svg>
-      </div>
-
-      <p id="status-msg" class="status-msg" aria-live="polite"></p>
 
       <div id="end-panel" class="end-panel hidden">
         <p id="end-text"></p>

@@ -1,8 +1,25 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.0.3",
-  build: 4,
+  version: "1.0.4",
+  build: 5,
   changelog: [
+    {
+      version: "1.0.4",
+      build: 5,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "Tahta büyütüldü — ekranı doldurur",
+          "Bilgisayar hamlesi sarı vurgu + yavaş çizim",
+          "İki kişilik yan yana: sol kırmızı / sağ mavi (yatay)",
+        ],
+        en: [
+          "Larger board — fills the screen",
+          "Computer moves: yellow highlight + slow draw",
+          "Two-player side-by-side: left red / right blue (landscape)",
+        ],
+      },
+    },
     {
       version: "1.0.3",
       build: 4,

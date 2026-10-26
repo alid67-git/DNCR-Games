@@ -13,7 +13,10 @@ window.DotsI18n = (function () {
       playSolo: "Tek kişilik",
       playSoloHint: "Yapay zekaya karşı — zorluk seç",
       play2p: "İki kişilik",
-      play2pHint: "Aynı cihazda, sırayla oynayın",
+      play2pHint: "Yan yana oturun — telefonu / iPad’i yatay tutun",
+      couchHint: "Yan yana oturun · cihazı yatay tutun · sol kırmızı · sağ mavi",
+      sideTurn: "Sıra sende",
+      aiMoveHint: "Bilgisayar oynuyor — sarı çizgiyi izle",
 
       soloSetupTitle: "Bilgisayara karşı",
       chooseDifficulty: "Zorluk seç",
@@ -57,8 +60,9 @@ window.DotsI18n = (function () {
       helpDifficultyTitle: "Zorluk seviyeleri",
       helpDifficulty:
         "Kolay: yapay zeka sık hata yapar. Orta: dengeli ve hatasız oynar. Zor: kutuları akıllıca bırakıp kontrolü elinde tutar (double-cross). Çok Zor: aynı zamanda olası hamleleri simüle ederek en iyisini seçer.",
-      helpTwoPTitle: "İki kişilik",
-      helpTwoP: "Aynı cihazda sırayla oynanır — telefon elden ele geçer.",
+      helpTwoPTitle: "İki kişilik (yan yana)",
+      helpTwoP:
+        "İki kişi aynı telefon veya iPad’de yan yana oturur. Cihazı yatay tutun: sol kırmızı, sağ mavi. Sıra altın çerçeveyle gösterilir.",
       helpSafariTitle: "iPhone Safari",
       helpSafari1: "Safari’de https://alid67-git.github.io/KatiArena/noktalar/ adresini aç (bilgisayar gerekmez).",
       helpSafari2: "Paylaş → Ana Ekrana Ekle — ikondan uygulama gibi açılır.",
@@ -103,7 +107,10 @@ window.DotsI18n = (function () {
       playSolo: "Single player",
       playSoloHint: "Vs computer — pick a difficulty",
       play2p: "Two players",
-      play2pHint: "Same device, take turns",
+      play2pHint: "Sit side by side — hold the phone / iPad landscape",
+      couchHint: "Sit side by side · landscape · left red · right blue",
+      sideTurn: "Your turn",
+      aiMoveHint: "Computer is moving — watch the yellow line",
 
       soloSetupTitle: "Vs computer",
       chooseDifficulty: "Choose difficulty",
@@ -147,8 +154,9 @@ window.DotsI18n = (function () {
       helpDifficultyTitle: "Difficulty levels",
       helpDifficulty:
         "Easy: the computer makes frequent mistakes. Medium: balanced, mistake-free play. Hard: sacrifices boxes smartly to keep control (double-cross). Very Hard: also simulates likely outcomes to pick the best move.",
-      helpTwoPTitle: "Two players",
-      helpTwoP: "Play on the same device, taking turns — pass the phone around.",
+      helpTwoPTitle: "Two players (side by side)",
+      helpTwoP:
+        "Two people sit side by side on one phone or iPad. Hold it landscape: left is red, right is blue. The gold frame shows whose turn it is.",
       helpSafariTitle: "iPhone Safari",
       helpSafari1: "Open https://alid67-git.github.io/KatiArena/noktalar/ in Safari (no computer needed).",
       helpSafari2: "Share → Add to Home Screen — launch like an app from your icon.",
