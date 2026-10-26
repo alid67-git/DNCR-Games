@@ -765,7 +765,7 @@
     s.on("error:msg", (msg) => toast(msg));
   }
 
-  function loadIoScript(base, done) {
+  function loadIoScript(base, done, { silent = false } = {}) {
     if (typeof io === "function") {
       done();
       return;
@@ -774,14 +774,18 @@
     const existing = document.querySelector("script[data-socket-io]");
     if (existing) {
       existing.addEventListener("load", () => done());
-      existing.addEventListener("error", () => toast(t("connectFail")));
+      existing.addEventListener("error", () => {
+        if (!silent) toast(t("connectFail"));
+      });
       return;
     }
     const el = document.createElement("script");
     el.src = src;
     el.dataset.socketIo = "1";
     el.onload = () => done();
-    el.onerror = () => toast(t("connectFail"));
+    el.onerror = () => {
+      if (!silent) toast(t("connectFail"));
+    };
     document.body.appendChild(el);
   }
 
@@ -982,9 +986,9 @@
   fillSettingsForm();
   initBoardSvg();
   if (settings.notifications) ensureNotifPermission();
-  // Same-origin socket preload for web
-  if (!isNative && location.protocol !== "file:") {
-    loadIoScript("", () => {});
+  // Same-origin socket preload for web (silent: static hosts like GitHub Pages have no /socket.io)
+  if (!isNative && location.protocol !== "file:" && location.protocol !== "capacitor:") {
+    loadIoScript("", () => {}, { silent: true });
   }
   handleInviteQuery();
   // Check for a newer release shortly after the app first opens.
