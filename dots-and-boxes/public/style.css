@@ -542,13 +542,40 @@ body.in-game #app {
   gap: 0.35rem;
   flex-shrink: 0;
 }
+.game-top-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.05rem;
+  min-width: 0;
+}
 .game-title {
   margin: 0;
   text-align: center;
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.88rem;
+  font-weight: 600;
+  font-size: 0.68rem;
+  color: #8ebbb8;
+  letter-spacing: 0.02em;
+}
+.game-timer {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  line-height: 1.1;
   color: #f2fffd;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 12px rgba(120, 220, 210, 0.35);
+}
+.game-timer.timer-low {
+  color: #ffe082;
+}
+.game-timer.timer-done {
+  color: #ef9a9a;
 }
 .btn-icon {
   appearance: none;
@@ -562,8 +589,51 @@ body.in-game #app {
   cursor: pointer;
   line-height: 1;
 }
+.btn-icon.btn-end-game {
+  color: #ef9a9a;
+  border-color: rgba(239, 154, 154, 0.4);
+}
 .btn-icon:active {
   transform: scale(0.95);
+}
+
+.confirm-leave {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(2, 8, 10, 0.72);
+}
+.confirm-leave.hidden {
+  display: none !important;
+}
+.confirm-leave-card {
+  width: min(92vw, 360px);
+  padding: 1.15rem;
+  text-align: center;
+  background: rgba(6, 22, 24, 0.98);
+  border-radius: var(--radius);
+  border: 1px solid rgba(144, 200, 200, 0.28);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+.confirm-leave-card p {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: #f2fffd;
+}
+.confirm-leave-hint {
+  font-family: var(--font-body) !important;
+  font-size: 0.88rem !important;
+  color: var(--muted) !important;
+  margin-bottom: 0.85rem !important;
+}
+.confirm-leave-card .btn {
+  width: 100%;
+  margin-top: 0.45rem;
 }
 
 .couch-hint {
@@ -604,7 +674,10 @@ body.game-twop .btn-icon {
   height: 36px;
 }
 body.game-twop .game-title {
-  font-size: 0.78rem;
+  font-size: 0.62rem;
+}
+body.game-twop .game-timer {
+  font-size: 1.15rem;
 }
 body.game-twop .couch-hint {
   font-size: 0.68rem;
@@ -646,7 +719,10 @@ body.game-solo:not(.landscape-game) .chip-score {
   font-size: 1.05rem;
 }
 body.game-solo:not(.landscape-game) .game-title {
-  font-size: 0.8rem;
+  font-size: 0.64rem;
+}
+body.game-solo:not(.landscape-game) .game-timer {
+  font-size: 1.4rem;
 }
 body.game-solo:not(.landscape-game) .couch-hint {
   display: none;
@@ -845,9 +921,12 @@ html[lang="en"] .chip-score::before {
   animation: drawEdge 0.35s ease both;
 }
 .edge-b.edge-ai-reveal {
-  animation: aiReveal 2.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
-  stroke-width: 5;
-  filter: drop-shadow(0 0 12px rgba(100, 181, 246, 1));
+  animation: aiReveal 0.42s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  stroke-width: 4;
+  filter: drop-shadow(0 0 10px rgba(100, 181, 246, 1));
+}
+.edge-b.edge-ai-reveal.edge-ai-box {
+  animation: aiRevealBox 0.52s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 @keyframes drawEdge {
   from {
@@ -864,23 +943,39 @@ html[lang="en"] .chip-score::before {
 @keyframes aiReveal {
   0% {
     stroke: #fff59d;
-    stroke-width: 9;
-    stroke-dasharray: 80;
-    stroke-dashoffset: 80;
-    filter: drop-shadow(0 0 22px rgba(255, 245, 157, 1));
+    stroke-width: 6.5;
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    filter: drop-shadow(0 0 14px rgba(255, 245, 157, 1));
     opacity: 1;
   }
-  35% {
-    stroke: #ffe082;
-    stroke-width: 7.5;
-    stroke-dashoffset: 28;
-    filter: drop-shadow(0 0 20px rgba(255, 224, 130, 1));
-  }
-  70% {
+  55% {
     stroke: #90caf9;
+    stroke-width: 4.2;
+    stroke-dashoffset: 0;
+    filter: drop-shadow(0 0 12px rgba(100, 181, 246, 1));
+  }
+  100% {
+    stroke: var(--ai);
+    stroke-width: 2.6;
+    stroke-dashoffset: 0;
+    filter: drop-shadow(0 0 2.5px rgba(30, 136, 229, 0.7));
+  }
+}
+@keyframes aiRevealBox {
+  0% {
+    stroke: #fff59d;
+    stroke-width: 7.5;
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    filter: drop-shadow(0 0 18px rgba(255, 245, 157, 1));
+    opacity: 1;
+  }
+  45% {
+    stroke: #ffe082;
     stroke-width: 5.5;
     stroke-dashoffset: 0;
-    filter: drop-shadow(0 0 22px rgba(100, 181, 246, 1));
+    filter: drop-shadow(0 0 16px rgba(255, 224, 130, 1));
   }
   100% {
     stroke: var(--ai);
@@ -1121,16 +1216,13 @@ html[lang="en"] .chip-score::before {
   animation: boxPop 0.35s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
 .box-ai-flash {
-  animation: boxAiFlash 2.8s ease both !important;
+  animation: boxAiFlash 0.52s ease both !important;
 }
 @keyframes boxAiFlash {
   0% {
     fill: rgba(255, 224, 130, 0.98);
   }
-  35% {
-    fill: rgba(255, 245, 157, 0.95);
-  }
-  65% {
+  45% {
     fill: rgba(144, 202, 249, 0.95);
   }
   100% {

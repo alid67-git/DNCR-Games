@@ -167,10 +167,22 @@
     <!-- GAME -->
     <section id="screen-game" class="screen">
       <header class="game-top">
-        <button type="button" class="btn-icon" id="btn-game-back" aria-label="Geri">←</button>
-        <p class="game-title" data-i18n="appName">Noktalar ve Kutular</p>
-        <button type="button" class="btn-icon" id="btn-game-restart" aria-label="Yeniden" title="Yeniden">↻</button>
+        <button type="button" class="btn-icon" id="btn-game-back" aria-label="Geri" title="Geri">←</button>
+        <div class="game-top-center">
+          <p class="game-title" data-i18n="appName">Noktalar ve Kutular</p>
+          <div id="game-timer" class="game-timer" aria-live="off">1:00:00</div>
+        </div>
+        <button type="button" class="btn-icon btn-end-game" id="btn-game-end" aria-label="Oyunu sonlandır" title="Oyunu sonlandır">✕</button>
       </header>
+
+      <div id="confirm-leave" class="confirm-leave hidden" role="dialog" aria-modal="true">
+        <div class="confirm-leave-card">
+          <p id="confirm-leave-text" data-i18n="confirmLeave">Oyunu sonlandırmak istediğine emin misin?</p>
+          <p class="confirm-leave-hint" data-i18n="confirmLeaveHint">İlerleme kaybolur.</p>
+          <button type="button" id="btn-confirm-leave-yes" class="btn btn-primary" data-i18n="confirmLeaveYes">Evet, çık</button>
+          <button type="button" id="btn-confirm-leave-no" class="btn btn-ghost" data-i18n="confirmLeaveNo">Vazgeç</button>
+        </div>
+      </div>
 
       <p id="couch-hint" class="couch-hint hidden" data-i18n="couchHint"></p>
 

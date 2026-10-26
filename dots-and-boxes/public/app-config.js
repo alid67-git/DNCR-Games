@@ -1,8 +1,25 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.0.6",
-  build: 7,
+  version: "1.0.7",
+  build: 8,
   changelog: [
+    {
+      version: "1.0.7",
+      build: 8,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "Kutu kazanınca ekstra tur hatası düzeltildi (çift dokunuş)",
+          "Bilgisayar vurgusu hızlı; kutu doldururken sarı parlama",
+          "Üstte 1 saatlik süre; oyunu sonlandır + onay",
+        ],
+        en: [
+          "Fixed extra-turn bug after claiming a box (double-tap)",
+          "Fast computer highlight; yellow flash when filling a box",
+          "1-hour timer on top; end game with confirmation",
+        ],
+      },
+    },
     {
       version: "1.0.6",
       build: 7,

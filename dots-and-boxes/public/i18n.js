@@ -94,6 +94,12 @@ window.DotsI18n = (function () {
       move: "Hamle",
       edgeTaken: "Bu çizgi zaten çizili.",
       notYourTurn: "Sıra sende değil.",
+      endGame: "Oyunu sonlandır",
+      confirmLeave: "Oyunu sonlandırmak istediğine emin misin?",
+      confirmLeaveHint: "İlerleme kaybolur.",
+      confirmLeaveYes: "Evet, çık",
+      confirmLeaveNo: "Vazgeç",
+      timeUp: "Süre doldu!",
     },
     en: {
       appName: "Dots and Boxes",
@@ -189,6 +195,12 @@ window.DotsI18n = (function () {
       move: "Move",
       edgeTaken: "That line is already drawn.",
       notYourTurn: "Not your turn.",
+      endGame: "End game",
+      confirmLeave: "Are you sure you want to end the game?",
+      confirmLeaveHint: "Progress will be lost.",
+      confirmLeaveYes: "Yes, leave",
+      confirmLeaveNo: "Cancel",
+      timeUp: "Time's up!",
     },
   };
 

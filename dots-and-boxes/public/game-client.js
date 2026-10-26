@@ -53,6 +53,11 @@
   let session = null;
   let aiTimer = null;
   let layout = null; // {pad, cell, coords: Map "r,c" -> {x,y}}
+  let inputLockUntil = 0; // çift dokunuş / pointer+touch çift hamle kilidi
+  let leaveAction = null; // "home" | "setup" | null
+  const GAME_DURATION_MS = 60 * 60 * 1000; // 1 saat
+  let timerStartedAt = 0;
+  let timerRaf = 0;
 
   function loadSettings() {
     const defaults = { lang: "tr", aiDifficulty: "medium", p1: "", p2: "" };
@@ -92,7 +97,99 @@
       document.body.classList.remove("game-solo", "game-twop", "landscape-game");
       const hint = $("couch-hint");
       if (hint) hint.classList.add("hidden");
+      stopGameTimer();
+      hideConfirmLeave();
     }
+  }
+
+  function formatTimer(msLeft) {
+    const ms = Math.max(0, msLeft);
+    const totalSec = Math.ceil(ms / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${h}:${pad(m)}:${pad(s)}`;
+  }
+
+  function updateTimerDisplay() {
+    const el = $("game-timer");
+    if (!el || !session || !timerStartedAt) return;
+    const left = GAME_DURATION_MS - (Date.now() - timerStartedAt);
+    el.textContent = formatTimer(left);
+    el.classList.toggle("timer-low", left <= 5 * 60 * 1000 && left > 0);
+    el.classList.toggle("timer-done", left <= 0);
+    if (left <= 0 && session && !session.state.winner) {
+      endByTimeout();
+    }
+  }
+
+  function tickTimer() {
+    updateTimerDisplay();
+    if (!session || session.state.winner) {
+      timerRaf = 0;
+      return;
+    }
+    timerRaf = window.setTimeout(tickTimer, 250);
+  }
+
+  function startGameTimer() {
+    stopGameTimer();
+    timerStartedAt = Date.now();
+    updateTimerDisplay();
+    tickTimer();
+  }
+
+  function stopGameTimer() {
+    if (timerRaf) {
+      clearTimeout(timerRaf);
+      timerRaf = 0;
+    }
+  }
+
+  function endByTimeout() {
+    if (!session || session.state.winner) return;
+    clearTimeout(aiTimer);
+    session.aiThinking = false;
+    clearAiFx();
+    const next = Engine.cloneState(session.state);
+    const a = next.scores.A;
+    const b = next.scores.B;
+    next.winner = a === b ? "draw" : a > b ? PLAYERS.A : PLAYERS.B;
+    session.state = next;
+    stopGameTimer();
+    const el = $("game-timer");
+    if (el) {
+      el.textContent = "0:00:00";
+      el.classList.add("timer-done");
+    }
+    renderAll();
+    toast(t("timeUp"));
+  }
+
+  function showConfirmLeave(action) {
+    leaveAction = action;
+    const box = $("confirm-leave");
+    if (!box) return;
+    const text = $("confirm-leave-text");
+    if (text) text.textContent = t("confirmLeave");
+    box.classList.remove("hidden");
+  }
+
+  function hideConfirmLeave() {
+    leaveAction = null;
+    const box = $("confirm-leave");
+    if (box) box.classList.add("hidden");
+  }
+
+  function confirmLeaveYes() {
+    const action = leaveAction;
+    hideConfirmLeave();
+    clearTimeout(aiTimer);
+    clearAiFx();
+    stopGameTimer();
+    if (action === "setup") changeBoard();
+    else goHome();
   }
 
   function applyGameLayout(mode) {
@@ -225,17 +322,15 @@
     return true;
   }
 
-  /** AI hamlesi: uzun karartma + kalın sarı vurgu → kısa vuruş → yavaş mavi çiz. */
+  /** AI hamlesi: kısa sarı vurgu → çiz → kutu dolduysa hızlı parlat. */
   async function highlightAndPlayAi(edgeId) {
     const wrap = document.querySelector(".board-wrap");
     showAiFocusFx(edgeId);
     updateHud();
-    // Odak: oyuncu nereye çizildiğini net görsün
-    await sleep(2800);
+    await sleep(420);
 
-    // Vuruş anı: sarı çizgi bir kez daha şişsin
     if (wrap) wrap.classList.add("ai-striking");
-    await sleep(550);
+    await sleep(160);
 
     const r = applyMove(session.boardId, session.state, edgeId, session.state.turn);
     if (!r.ok) {
@@ -248,19 +343,20 @@
     clearAiFx();
     renderAll();
 
+    const completed = (session.state.lastMove && session.state.lastMove.boxesCompleted) || [];
     const drawn = document.querySelector(`#edge-layer line[data-edge="${edgeId}"]`);
     if (drawn) {
-      drawn.classList.add("edge-ai-reveal");
-      const completed = (session.state.lastMove && session.state.lastMove.boxesCompleted) || [];
+      drawn.classList.add(completed.length ? "edge-ai-reveal edge-ai-box" : "edge-ai-reveal");
       completed.forEach((bi) => {
         const el = document.querySelector(`#box-layer [data-box="${bi}"]`);
         if (el) el.classList.add("box-ai-flash");
       });
-      await sleep(2800);
-      drawn.classList.remove("edge-ai-reveal");
+      // Kutu doldururken de hızlı — sadece kısa vurgu
+      await sleep(completed.length ? 520 : 380);
+      drawn.classList.remove("edge-ai-reveal", "edge-ai-box");
       document.querySelectorAll(".box-ai-flash").forEach((el) => el.classList.remove("box-ai-flash"));
     } else {
-      await sleep(900);
+      await sleep(220);
     }
     return true;
   }
@@ -484,6 +580,7 @@
 
   function onBoardPointer(ev) {
     if (!session || session.state.winner || session.aiThinking) return;
+    if (Date.now() < inputLockUntil) return;
     // Çoklu dokunuş / sağ tık yok say
     if (ev.pointerType === "mouse" && ev.button !== 0) return;
     const svg = $("board");
@@ -500,25 +597,27 @@
     const svg = $("board");
     if (!svg || svg.dataset.pointerBound === "1") return;
     svg.dataset.pointerBound = "1";
-    // pointerdown: Safari + Chrome + Capacitor tek yol
-    svg.addEventListener("pointerdown", onBoardPointer, { passive: false });
-    // Eski iOS yedek
-    svg.addEventListener(
-      "touchstart",
-      (ev) => {
-        if (!ev.touches || !ev.touches[0]) return;
-        const t = ev.touches[0];
-        const fake = {
-          clientX: t.clientX,
-          clientY: t.clientY,
-          pointerType: "touch",
-          button: 0,
-          preventDefault: () => ev.preventDefault(),
-        };
-        onBoardPointer(fake);
-      },
-      { passive: false }
-    );
+    // Tek yol: pointerdown. touchstart+pointerdown çift hamle ekstra turu çalıyordu.
+    if (window.PointerEvent) {
+      svg.addEventListener("pointerdown", onBoardPointer, { passive: false });
+    } else {
+      svg.addEventListener(
+        "touchstart",
+        (ev) => {
+          if (!ev.touches || !ev.touches[0]) return;
+          const t = ev.touches[0];
+          onBoardPointer({
+            clientX: t.clientX,
+            clientY: t.clientY,
+            pointerType: "touch",
+            button: 0,
+            preventDefault: () => ev.preventDefault(),
+          });
+        },
+        { passive: false }
+      );
+      svg.addEventListener("mousedown", (ev) => onBoardPointer(ev), { passive: false });
+    }
   }
 
   function buildBoardSvg(graph) {
@@ -554,8 +653,8 @@
       hit.addEventListener("pointerenter", () => previewEdge(edge.id, true));
       hit.addEventListener("pointerleave", () => previewEdge(edge.id, false));
       hit.addEventListener("click", (e) => {
-        // pointerdown zaten işlediyse çift hamle olmasın
-        if (Date.now() - lastPointerEdgeAt < 450) {
+        // pointerdown zaten işlediyse / kilit varken çift hamle olmasın
+        if (Date.now() - lastPointerEdgeAt < 450 || Date.now() < inputLockUntil) {
           e.preventDefault();
           return;
         }
@@ -671,6 +770,7 @@
 
     const end = $("end-panel");
     if (state.winner) {
+      stopGameTimer();
       end.classList.remove("hidden");
       let text;
       if (state.winner === "draw") text = t("draw");
@@ -725,6 +825,7 @@
     buildBoardSvg(graph);
     showScreen("game");
     applyGameLayout(mode);
+    startGameTimer();
     renderAll();
     maybeScheduleAi();
   }
@@ -732,6 +833,7 @@
   function onEdgeClick(edgeId) {
     if (!session || session.state.winner) return;
     if (session.aiThinking) return;
+    if (Date.now() < inputLockUntil) return;
     const { state, mode, humanPlayer } = session;
     if (mode === "solo" && state.turn !== humanPlayer) {
       toast(t("notYourTurn"));
@@ -748,6 +850,8 @@
       toast(r.error === "Bu çizgi zaten çizili." ? t("edgeTaken") : r.error);
       return;
     }
+    // Kutu kazanınca ikinci dokunuşun yanlışlıkla başka kenarı çizmesini engelle
+    inputLockUntil = Date.now() + 380;
     session.state = r.state;
     renderAll();
     maybeScheduleAi();
@@ -755,12 +859,21 @@
 
   function maybeScheduleAi() {
     if (!session || session.mode !== "solo") return;
-    if (session.state.winner) return;
-    if (session.state.turn === session.humanPlayer) return;
+    if (session.state.winner) {
+      clearTimeout(aiTimer);
+      session.aiThinking = false;
+      return;
+    }
+    // Ekstra tur insanda: bekleyen AI zamanlayıcısını iptal et
+    if (session.state.turn === session.humanPlayer) {
+      clearTimeout(aiTimer);
+      session.aiThinking = false;
+      return;
+    }
     session.aiThinking = true;
     updateHud();
     clearTimeout(aiTimer);
-    const delay = 700 + Math.random() * 400;
+    const delay = 380 + Math.random() * 220;
     aiTimer = setTimeout(() => {
       runAiTurn().catch(() => {
         if (session) {
@@ -803,9 +916,9 @@
       return;
     }
 
-    // Ekstra tur: AI yine oynuyor — nefes arası (vurgu kaçmasın)
+    // Ekstra tur: AI yine oynuyor — kısa ara
     if (!session.state.winner && session.state.turn !== session.humanPlayer) {
-      await sleep(650);
+      await sleep(220);
       aiTimer = setTimeout(() => {
         runAiTurn().catch(() => {
           if (session) {
@@ -814,7 +927,7 @@
             updateHud();
           }
         });
-      }, 80);
+      }, 40);
     } else {
       session.aiThinking = false;
       clearAiFx();
@@ -950,16 +1063,29 @@
   $("btn-change-board").addEventListener("click", changeBoard);
   $("btn-game-home").addEventListener("click", goHome);
   $("btn-game-back").addEventListener("click", () => {
-    clearTimeout(aiTimer);
     if (!session) {
       goHome();
       return;
     }
-    changeBoard();
+    if (session.state.winner) {
+      changeBoard();
+      return;
+    }
+    showConfirmLeave("setup");
   });
-  $("btn-game-restart").addEventListener("click", () => {
-    if (session) rematch();
+  $("btn-game-end").addEventListener("click", () => {
+    if (!session) {
+      goHome();
+      return;
+    }
+    if (session.state.winner) {
+      goHome();
+      return;
+    }
+    showConfirmLeave("home");
   });
+  $("btn-confirm-leave-yes").addEventListener("click", confirmLeaveYes);
+  $("btn-confirm-leave-no").addEventListener("click", hideConfirmLeave);
 
   function isIosSafari() {
     const ua = navigator.userAgent || "";
