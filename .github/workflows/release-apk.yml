@@ -1,0 +1,87 @@
+name: Release APK
+
+# Push a tag like "v1.3.3" (matching package.json / app-config.js / android
+# versionName) to build a signed APK and publish it as a GitHub Release.
+# The in-app update checker (public/update-check.js) reads the latest
+# release from the GitHub API, so this is what makes "check for updates /
+# update now" work inside the app.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+
+      - name: Build signed release APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Locate APK
+        id: apk
+        run: |
+          APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n1)
+          echo "path=$APK_PATH" >> "$GITHUB_OUTPUT"
+          echo "name=kati-arena-${GITHUB_REF_NAME}.apk" >> "$GITHUB_OUTPUT"
+
+      - name: Rename APK
+        run: cp "${{ steps.apk.outputs.path }}" "${{ steps.apk.outputs.name }}"
+
+      - name: Build release notes from changelog
+        id: notes
+        run: |
+          node -e '
+            const vm = require("vm");
+            const fs = require("fs");
+            const tag = process.env.GITHUB_REF_NAME.replace(/^v/, "");
+            const code = fs.readFileSync("public/app-config.js", "utf8");
+            const sandbox = { window: {} };
+            vm.createContext(sandbox);
+            vm.runInContext(code, sandbox);
+            const cfg = sandbox.window.KatiConfig;
+            const entry = (cfg.changelog || []).find((e) => e.version === tag);
+            let body = `Kati Arena v${tag}`;
+            if (entry) {
+              const tr = (entry.items && entry.items.tr) || [];
+              const en = (entry.items && entry.items.en) || [];
+              body =
+                `## v${tag}\n\n` +
+                `**TR**\n` + tr.map((i) => `- ${i}`).join("\n") +
+                `\n\n**EN**\n` + en.map((i) => `- ${i}`).join("\n");
+            }
+            fs.writeFileSync("RELEASE_NOTES.md", body);
+          '
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Kati Arena ${{ github.ref_name }}"
+          body_path: RELEASE_NOTES.md
+          files: ${{ steps.apk.outputs.name }}
