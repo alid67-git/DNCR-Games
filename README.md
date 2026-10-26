@@ -7,7 +7,13 @@ Kırmızı takım vs Yeşil takım. Klasik Kati tahtası.
 - **TR / EN**, ayarlar, yardım, sürüm takibi
 - **Android** (Capacitor)
 
-## Çalıştır
+## iPhone / Safari (canlı)
+
+**https://alid67-git.github.io/KatiArena/**
+
+Bilgisayara karşı (solo) tarayıcıda çalışır. Ana Ekrana Ekle ile uygulama gibi açabilirsin.
+
+## Çalıştır (yerel)
 
 ```bash
 npm install
