@@ -1,8 +1,10 @@
-# Toprak Kati — Android
+# Kati Arena — Android
 
-Evet: APK’yı telefona kurunca **internetsiz / sunucusuz** bilgisayara karşı oynarsın.
+APK’yı telefona kurunca **bilgisayara karşı** çevrimdışı oynarsın.
 
-İki kişi için hâlâ aynı Wi‑Fi’de bir PC’de `npm start` gerekir; uygulamada **PC sunucu adresi** alanına `http://192.168.x.x:3847` yazılır.
+**Ülkeler arası / çevrimiçi:** Ayarlar’da herkese açık sunucu URL’sini yaz (bkz. [ONLINE.md](./ONLINE.md)). Aynı Wi‑Fi şart değil.
+
+LAN (eski yol): aynı Wi‑Fi’de PC’de `npm start`, uygulamada sunucu alanına `http://192.168.x.x:3847`.
 
 ## APK üretmek (Android Studio — önerilen)
 

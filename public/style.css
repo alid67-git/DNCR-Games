@@ -59,6 +59,166 @@ body {
   padding: 1.5rem 1.25rem 3rem;
 }
 
+.home-center {
+  min-height: min(78dvh, 640px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1.75rem;
+  animation: rise 0.55s ease both;
+}
+.home-brand .lede {
+  margin-left: auto;
+  margin-right: auto;
+}
+.home-menu {
+  width: min(100%, 320px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.btn-menu {
+  width: 100%;
+  position: relative;
+}
+.updates-dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-left: 0.35rem;
+  border-radius: 50%;
+  background: var(--tomato-glow);
+  box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.25);
+  vertical-align: middle;
+  animation: pulseDot 1.2s ease-in-out infinite;
+}
+@keyframes pulseDot {
+  50% {
+    transform: scale(1.15);
+    opacity: 0.75;
+  }
+}
+
+.btn-back {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--sand);
+  font: inherit;
+  font-weight: 600;
+  padding: 0.35rem 0;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+}
+.sm-head h1 {
+  margin: 0.2rem 0 0;
+  font-size: 1.35rem;
+  font-family: var(--font-display);
+  color: var(--sand-light);
+}
+
+.mode-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+.mode-card {
+  appearance: none;
+  text-align: left;
+  cursor: pointer;
+  padding: 1.1rem 1.15rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(212, 180, 131, 0.22);
+  background: var(--panel);
+  color: inherit;
+  font: inherit;
+  transition: transform 0.15s ease, border-color 0.15s;
+}
+.mode-card:active {
+  transform: scale(0.98);
+}
+.mode-card strong {
+  display: block;
+  font-size: 1.05rem;
+  margin-bottom: 0.25rem;
+  color: var(--sand-light);
+}
+.mode-card span {
+  font-size: 0.88rem;
+  color: rgba(243, 230, 200, 0.62);
+}
+
+.lang-field {
+  border: 1px solid rgba(212, 180, 131, 0.22);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  margin: 0.75rem 0;
+}
+.lang-field legend {
+  padding: 0 0.35rem;
+  color: var(--sand);
+  font-size: 0.85rem;
+}
+.radio-row,
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.35rem 0;
+  font-size: 0.95rem;
+}
+.field-hint {
+  margin: 0.35rem 0 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: rgba(243, 230, 200, 0.55);
+}
+
+.help-block {
+  margin-top: 1rem;
+  padding: 1.1rem 1.15rem;
+  border-radius: var(--radius);
+  background: var(--panel);
+  border: 1px solid rgba(212, 180, 131, 0.15);
+}
+.help-block h2 {
+  margin: 1rem 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--sand);
+}
+.help-block h2:first-child {
+  margin-top: 0;
+}
+.help-block ol,
+.help-block p {
+  margin: 0;
+  color: rgba(243, 230, 200, 0.72);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.help-block ol {
+  padding-left: 1.15rem;
+}
+.help-block li + li {
+  margin-top: 0.3rem;
+}
+
+.changelog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+.changelog-card h2 {
+  font-size: 0.95rem !important;
+  font-family: var(--font-body) !important;
+  font-weight: 500 !important;
+}
+
 .screen {
   display: none;
   animation: rise 0.55s ease both;

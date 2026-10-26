@@ -1,6 +1,6 @@
 {
   "appId": "com.toprakkati.app",
-  "appName": "Toprak Kati",
+  "appName": "Kati Arena",
   "webDir": "public",
   "server": {
     "androidScheme": "https",

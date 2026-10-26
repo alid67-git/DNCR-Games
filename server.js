@@ -25,11 +25,23 @@ const aiTimers = new Map();
 
 app.use(express.static(path.join(__dirname, "public")));
 
+const APP_VERSION = require("./package.json").version;
+
 app.get("/api/meta", (_req, res) => {
   res.json({
     port: PORT,
     lanIps: getLanIps(),
+    version: APP_VERSION,
+    app: "Kati Arena",
     board: { nodes: NODES, positions: POSITIONS, edges: BOARD_EDGES, players: PLAYERS },
+  });
+});
+
+app.get("/api/version", (_req, res) => {
+  res.json({
+    name: "Kati Arena",
+    version: APP_VERSION,
+    teams: { tomato: "red", gourd: "green" },
   });
 });
 
@@ -197,11 +209,11 @@ io.on("connection", (socket) => {
 server.listen(PORT, "0.0.0.0", () => {
   const ips = getLanIps();
   console.log("");
-  console.log("  🍅  Toprak Kati — LAN + bilgisayara karşı");
-  console.log(`  Yerel:   http://localhost:${PORT}`);
+  console.log("  Kati Arena — solo + online (Red vs Green)");
+  console.log(`  Local:   http://localhost:${PORT}`);
   for (const ip of ips) {
-    console.log(`  Ağ:      http://${ip}:${PORT}`);
+    console.log(`  LAN:     http://${ip}:${PORT}`);
   }
-  console.log("  Aynı Wi‑Fi'deki arkadaş veya «Bilgisayara karşı».");
+  console.log("  Publish this URL for cross-country play.");
   console.log("");
 });

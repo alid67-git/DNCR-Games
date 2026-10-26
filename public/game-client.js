@@ -1,7 +1,9 @@
 (() => {
   const E = window.ToprakEngine;
-  if (!E) {
-    console.error("engine.js yüklenmedi");
+  const CFG = window.KatiConfig;
+  const I18N = window.KatiI18n;
+  if (!E || !CFG || !I18N) {
+    console.error("Kati Arena: missing modules");
     return;
   }
 
@@ -15,12 +17,19 @@
     chooseMove,
     opponent,
   } = E;
-  const LABELS = { tomato: "Domates", gourd: "Acur" };
-  const STARTER_KEY = "toprak_kati_next_starter";
+
+  const SETTINGS_KEY = "kati_arena_settings";
+  const STARTER_KEY = "kati_arena_next_starter";
+  const SEEN_VER_KEY = "kati_arena_seen_version";
 
   const $ = (id) => document.getElementById(id);
   const screens = {
-    lobby: $("screen-lobby"),
+    home: $("screen-home"),
+    play: $("screen-play"),
+    online: $("screen-online"),
+    settings: $("screen-settings"),
+    help: $("screen-help"),
+    updates: $("screen-updates"),
     room: $("screen-room"),
     game: $("screen-game"),
   };
@@ -35,6 +44,7 @@
   }
   let isNative = detectNative();
 
+  let settings = loadSettings();
   let socket = null;
   let state = null;
   let selected = null;
@@ -44,10 +54,46 @@
   let aiTimer = null;
   let animating = false;
   let lastSeenMoveCount = -1;
+  let prevGuestJoined = false;
+
+  function loadSettings() {
+    const defaults = {
+      lang: "tr",
+      name: "",
+      serverUrl: "",
+      notifications: true,
+    };
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if (!raw) return defaults;
+      return { ...defaults, ...JSON.parse(raw) };
+    } catch (_) {
+      return defaults;
+    }
+  }
+
+  function saveSettings(next) {
+    settings = { ...settings, ...next };
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch (_) {}
+  }
+
+  function lang() {
+    return settings.lang === "en" ? "en" : "tr";
+  }
+
+  function t(key) {
+    return I18N.t(lang(), key);
+  }
+
+  function teamLabel(player) {
+    return player === PLAYERS.tomato ? t("red") : t("green");
+  }
 
   function showScreen(name) {
-    Object.values(screens).forEach((el) => el.classList.remove("active"));
-    screens[name].classList.add("active");
+    Object.values(screens).forEach((el) => el && el.classList.remove("active"));
+    if (screens[name]) screens[name].classList.add("active");
   }
 
   function toast(msg) {
@@ -59,57 +105,112 @@
   }
 
   function playerName() {
-    return ($("player-name").value || "").trim() || "Oyuncu";
+    const n =
+      ($("player-name") && $("player-name").value) ||
+      settings.name ||
+      "";
+    return n.trim() || (lang() === "en" ? "Player" : "Oyuncu");
   }
 
   function serverBase() {
-    const el = $("server-url");
-    const raw = (el && el.value) || "";
-    const trimmed = raw.trim();
-    if (trimmed) return trimmed.replace(/\/$/, "");
+    const onlineEl = $("online-server-url");
+    const fromOnline = onlineEl && onlineEl.value.trim();
+    const raw = (fromOnline || settings.serverUrl || "").trim().replace(/\/$/, "");
+    if (raw) return raw;
     if (isNative) return "";
     return location.origin;
   }
 
-  function readNextStarter() {
+  function inviteUrl(code) {
+    const base = serverBase() || location.origin;
     try {
-      const v = localStorage.getItem(STARTER_KEY);
-      if (v === PLAYERS.gourd || v === PLAYERS.tomato) return v;
-    } catch (_) {}
-    return PLAYERS.tomato;
+      const u = new URL(base);
+      u.searchParams.set("join", code);
+      return u.toString();
+    } catch (_) {
+      return `${base}?join=${encodeURIComponent(code)}`;
+    }
   }
 
-  function writeNextStarter(starter) {
+  // —— i18n DOM ——
+  function applyI18n() {
+    document.documentElement.lang = lang();
+    document.title = t("appName");
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      if (key) el.textContent = t(key);
+    });
+    document.querySelectorAll("[data-i18n-ph]").forEach((el) => {
+      const key = el.getAttribute("data-i18n-ph");
+      if (key) el.setAttribute("placeholder", t(key));
+    });
+    const ver = `v${CFG.version} · build ${CFG.build}`;
+    if ($("home-version")) $("home-version").textContent = ver;
+    if ($("updates-current")) $("updates-current").textContent = `${CFG.version} (${CFG.build})`;
+    renderChangelog();
+    updateUpdatesDot();
+  }
+
+  function renderChangelog() {
+    const list = $("changelog-list");
+    if (!list) return;
+    list.innerHTML = "";
+    const L = lang();
+    CFG.changelog.forEach((entry) => {
+      const card = document.createElement("article");
+      card.className = "upgrade-card changelog-card";
+      const items = (entry.items && entry.items[L]) || entry.items.tr || [];
+      card.innerHTML = `
+        <div class="upgrade-head">
+          <span class="upgrade-badge">v${entry.version}</span>
+          <h2>build ${entry.build}${entry.date ? " · " + entry.date : ""}</h2>
+        </div>
+        <ul class="upgrade-list">${items.map((i) => `<li>${i}</li>`).join("")}</ul>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function updateUpdatesDot() {
+    let seen = "";
     try {
-      localStorage.setItem(STARTER_KEY, opponent(starter));
+      seen = localStorage.getItem(SEEN_VER_KEY) || "";
+    } catch (_) {}
+    const dot = $("updates-dot");
+    if (!dot) return;
+    if (seen !== CFG.version) dot.classList.remove("hidden");
+    else dot.classList.add("hidden");
+  }
+
+  // —— Notifications ——
+  async function ensureNotifPermission() {
+    if (!settings.notifications) return false;
+    if (!("Notification" in window)) return false;
+    if (Notification.permission === "granted") return true;
+    if (Notification.permission === "denied") return false;
+    try {
+      const p = await Notification.requestPermission();
+      return p === "granted";
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function notify(title, body) {
+    if (!settings.notifications) return;
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    try {
+      new Notification(title || t("appName"), {
+        body: body || "",
+        silent: false,
+      });
     } catch (_) {}
   }
 
-  function sleep(ms) {
-    return new Promise((r) => setTimeout(r, ms));
-  }
-
-  // —— Board draw ——
+  // —— Board ——
   function initBoardSvg() {
     const lines = $("board-lines");
-    const nodes = $("board-nodes");
-    const defs = document.querySelector("#board defs");
-
-    defs.insertAdjacentHTML(
-      "beforeend",
-      `
-      <radialGradient id="tomatoFill" cx="35%" cy="30%" r="70%">
-        <stop offset="0%" stop-color="#ff8a80"/>
-        <stop offset="55%" stop-color="#c62828"/>
-        <stop offset="100%" stop-color="#7f0000"/>
-      </radialGradient>
-      <radialGradient id="gourdFill" cx="35%" cy="30%" r="70%">
-        <stop offset="0%" stop-color="#c8e6c9"/>
-        <stop offset="45%" stop-color="#43a047"/>
-        <stop offset="100%" stop-color="#1b5e20"/>
-      </radialGradient>
-    `
-    );
+    if (!lines || lines.childElementCount) return;
 
     for (const [a, b] of EDGES) {
       const pa = POSITIONS[a];
@@ -135,6 +236,7 @@
        Q ${POSITIONS.FR.x + 6} ${POSITIONS.BC.y}, ${POSITIONS.BC.x} ${POSITIONS.BC.y}`
     );
 
+    const nodes = $("board-nodes");
     for (const [id, p] of Object.entries(POSITIONS)) {
       const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       ring.setAttribute("cx", p.x);
@@ -161,31 +263,18 @@
       "class",
       `piece ${owner}-piece${selectedNode ? " selected" : ""}`
     );
-
     const skin = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     skin.setAttribute("class", "skin");
     skin.setAttribute("cx", x);
     skin.setAttribute("cy", y);
     skin.setAttribute("r", 4.2);
     skin.setAttribute("fill", owner === "tomato" ? "url(#tomatoFill)" : "url(#gourdFill)");
-
     const gloss = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     gloss.setAttribute("cx", x - 1.2);
     gloss.setAttribute("cy", y - 1.4);
     gloss.setAttribute("r", 1.2);
     gloss.setAttribute("fill", "rgba(255,255,255,0.35)");
     gloss.setAttribute("pointer-events", "none");
-
-    if (owner === "tomato") {
-      const stem = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      stem.setAttribute("cx", x);
-      stem.setAttribute("cy", y - 3.6);
-      stem.setAttribute("r", 0.9);
-      stem.setAttribute("fill", "#2e7d32");
-      stem.setAttribute("pointer-events", "none");
-      group.appendChild(stem);
-    }
-
     group.appendChild(skin);
     group.appendChild(gloss);
     return group;
@@ -206,7 +295,6 @@
       });
       g.appendChild(group);
     }
-
     document.querySelectorAll(".node-ring").forEach((el) => {
       el.classList.remove("last-move-from", "last-move-to");
       if (lastMove) {
@@ -243,21 +331,20 @@
   }
 
   function renderTrays(capturedBy) {
-    const t = (capturedBy && capturedBy.tomato) || 0;
-    const g = (capturedBy && capturedBy.gourd) || 0;
+    const tCount = (capturedBy && capturedBy.tomato) || 0;
+    const gCount = (capturedBy && capturedBy.gourd) || 0;
     const tEl = $("tray-tomato");
     const gEl = $("tray-gourd");
     if (!tEl || !gEl) return;
     tEl.innerHTML = "";
     gEl.innerHTML = "";
-    for (let i = 0; i < t; i++) {
+    for (let i = 0; i < tCount; i++) {
       const d = document.createElement("span");
       d.className = "tray-dot";
-      // gourd pieces eaten by tomato → green dots in tomato tray
       d.style.background = "radial-gradient(circle at 35% 30%, #a5d6a7, #2e7d32)";
       tEl.appendChild(d);
     }
-    for (let i = 0; i < g; i++) {
+    for (let i = 0; i < gCount; i++) {
       const d = document.createElement("span");
       d.className = "tray-dot";
       d.style.background = "radial-gradient(circle at 35% 30%, #ff8a80, #c62828)";
@@ -269,7 +356,7 @@
     const el = $("eat-banner");
     if (!el) return;
     const victim = opponent(attacker);
-    el.textContent = `${LABELS[attacker]} → ${LABELS[victim]} yedi!`;
+    el.textContent = `${teamLabel(attacker)} → ${teamLabel(victim)} ${t("ate")}`;
     el.className = `eat-banner ${attacker}-eat`;
     clearTimeout(showEatBanner._t);
     showEatBanner._t = setTimeout(() => el.classList.add("hidden"), 900);
@@ -280,18 +367,14 @@
     if (!fx || !move) return;
     animating = true;
     fx.innerHTML = "";
-
     const from = POSITIONS[move.from];
     const to = POSITIONS[move.to];
     if (!from || !to) {
       animating = false;
       return;
     }
-
     const hide = new Set([move.from]);
     if (move.capture && move.over) hide.add(move.over);
-
-    // Tahta: hareket eden (ve yenilen) taş gizlensin
     renderPieces(prevBoard, null, hide);
 
     let vic = null;
@@ -305,7 +388,6 @@
       showEatBanner(attacker);
     }
 
-    // Uçan taş: sadece group transform (cx/cy'ye tekrar yazma — çift kaymayı önler)
     const flyer = makePieceGroup(attacker, from.x, from.y, false);
     flyer.setAttribute("class", `fx-flyer ${attacker}-piece`);
     flyer.setAttribute("transform", "translate(0 0)");
@@ -313,24 +395,16 @@
 
     const duration = move.capture ? 520 : 300;
     const start = performance.now();
-    let victimPopStarted = false;
-
     await new Promise((resolve) => {
       function frame(now) {
-        const t = Math.min(1, (now - start) / duration);
-        const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const tt = Math.min(1, (now - start) / duration);
+        const ease = tt < 0.5 ? 2 * tt * tt : 1 - Math.pow(-2 * tt + 2, 2) / 2;
         const x = from.x + (to.x - from.x) * ease;
         const y = from.y + (to.y - from.y) * ease;
         const lift = (move.capture ? 5 : 1.8) * Math.sin(Math.PI * ease);
-        flyer.setAttribute(
-          "transform",
-          `translate(${x - from.x} ${y - from.y - lift})`
-        );
-
-        // Ortaya gelince yenilen taşı küçült
-        if (vic && vp && t >= 0.42) {
-          if (!victimPopStarted) victimPopStarted = true;
-          const vt = Math.min(1, (t - 0.42) / 0.55);
+        flyer.setAttribute("transform", `translate(${x - from.x} ${y - from.y - lift})`);
+        if (vic && vp && tt >= 0.42) {
+          const vt = Math.min(1, (tt - 0.42) / 0.55);
           const s = Math.max(0.05, 1.15 * (1 - vt));
           vic.setAttribute(
             "transform",
@@ -338,18 +412,29 @@
           );
           vic.setAttribute("opacity", String(1 - vt));
         }
-
-        if (t < 1) requestAnimationFrame(frame);
+        if (tt < 1) requestAnimationFrame(frame);
         else resolve();
       }
       requestAnimationFrame(frame);
     });
-
     fx.innerHTML = "";
     animating = false;
   }
 
-  // —— Local solo ——
+  function readNextStarter() {
+    try {
+      const v = localStorage.getItem(STARTER_KEY);
+      if (v === PLAYERS.gourd || v === PLAYERS.tomato) return v;
+    } catch (_) {}
+    return PLAYERS.tomato;
+  }
+
+  function writeNextStarter(starter) {
+    try {
+      localStorage.setItem(STARTER_KEY, opponent(starter));
+    } catch (_) {}
+  }
+
   function makeLocalState(game) {
     return {
       code: "SOLO",
@@ -357,7 +442,7 @@
       vsAi: true,
       local: true,
       you: PLAYERS.tomato,
-      names: { tomato: playerName(), gourd: "Bilgisayar" },
+      names: { tomato: playerName(), gourd: lang() === "en" ? "Computer" : "Bilgisayar" },
       ready: { tomato: true, gourd: true },
       guestJoined: true,
       game,
@@ -377,13 +462,9 @@
     const starter = readNextStarter();
     writeNextStarter(starter);
     const game = createGameState(starter);
-    applyState(makeLocalState(game));
-    if (game.turn === PLAYERS.gourd) {
-      toast("Bu elde bilgisayar başlıyor.");
-      scheduleLocalAi(700);
-    } else {
-      toast("Bu elde sen başlıyorsun.");
-    }
+    applyState(makeLocalState(game), { skipAnim: true });
+    toast(starter === PLAYERS.gourd ? t("cpuStarts") : t("youStart"));
+    if (game.turn === PLAYERS.gourd) scheduleLocalAi(700);
   }
 
   function scheduleLocalAi(delay = 520) {
@@ -414,12 +495,7 @@
     await animateMove(prevBoard, move, player);
     lastSeenMoveCount = r.state.moveCount;
     await applyState(makeLocalState(r.state), { skipAnim: true });
-    if (
-      state &&
-      state.local &&
-      !state.game.winner &&
-      state.game.turn === PLAYERS.gourd
-    ) {
+    if (state && state.local && !state.game.winner && state.game.turn === PLAYERS.gourd) {
       scheduleLocalAi(move && move.capture ? 480 : 420);
     }
   }
@@ -428,11 +504,10 @@
     if (!state || state.status !== "playing" || animating) return;
     const game = state.game;
     if (!state.you || state.you !== game.turn) {
-      toast(state.vsAi ? "Bilgisayar oynuyor." : "Sıra rakipte.");
+      toast(state.vsAi ? t("cpuPlaying") : t("oppTurn"));
       return;
     }
     if (game.winner) return;
-
     const board = game.board;
     const moves = legalMoves(board, state.you, game.chainFrom);
 
@@ -459,12 +534,12 @@
 
     if (board[nodeId] === state.you) {
       if (game.chainFrom && game.chainFrom !== nodeId) {
-        toast("Zincire aynı taşla devam et.");
+        toast(t("statusChain"));
         return;
       }
       const myMoves = moves.filter((m) => m.from === nodeId);
       if (!myMoves.length) {
-        toast(anyCapture(board, state.you) ? "Yakalama zorunlu — başka taş seç." : "Bu taşın hamlesi yok.");
+        toast(anyCapture(board, state.you) ? t("statusMustCapture") : t("statusPick"));
         return;
       }
       selected = nodeId;
@@ -481,9 +556,10 @@
     const moves = legalMoves(state.game.board, state.you, state.game.chainFrom).filter(
       (m) => m.from === selected
     );
-    const targets = moves.map((m) => m.to);
-    const caps = new Set(moves.filter((m) => m.capture).map((m) => m.to));
-    showHints(targets, caps);
+    showHints(
+      moves.map((m) => m.to),
+      new Set(moves.filter((m) => m.capture).map((m) => m.to))
+    );
   }
 
   async function applyState(s, opts) {
@@ -492,7 +568,6 @@
     const prev = state;
     localMode = !!s.local;
 
-    // Network / remote: animate when moveCount advances
     if (
       !skipAnim &&
       prev &&
@@ -502,15 +577,31 @@
       s.game.moveCount > lastSeenMoveCount &&
       s.game.moveCount === (prev.game.moveCount || 0) + 1
     ) {
-      const who =
-        prev.game.board[s.game.lastMove.from] || prev.game.turn || PLAYERS.tomato;
+      const who = prev.game.board[s.game.lastMove.from] || prev.game.turn || PLAYERS.tomato;
       await animateMove(prev.game.board, s.game.lastMove, who);
       lastSeenMoveCount = s.game.moveCount;
     } else if (s.game) {
       lastSeenMoveCount = s.game.moveCount;
     }
 
+    // notifications
+    if (prev && !prev.guestJoined && s.guestJoined && !s.local) {
+      notify(t("appName"), t("notifJoined"));
+    }
+    if (
+      prev &&
+      s.game &&
+      prev.game &&
+      s.you === s.game.turn &&
+      prev.you !== prev.game.turn &&
+      !s.game.winner &&
+      s.status === "playing"
+    ) {
+      notify(t("appName"), t("notifYourTurn"));
+    }
+
     state = s;
+    prevGuestJoined = !!s.guestJoined;
 
     if (s.vsAi || s.status === "playing" || s.status === "finished") {
       showScreen("game");
@@ -523,83 +614,70 @@
 
   function renderRoom(s) {
     $("room-code-display").textContent = s.code;
-    $("name-tomato").textContent = s.names.tomato || "Domates";
-    $("name-gourd").textContent = s.names.gourd || "Rakip bekleniyor…";
-    $("ready-tomato").textContent = s.ready.tomato ? "hazır" : "bekliyor";
+    $("name-tomato").textContent = s.names.tomato || t("red");
+    $("name-gourd").textContent = s.names.gourd || t("waitingGuest");
+    $("ready-tomato").textContent = s.ready.tomato ? t("readyOn") : t("waiting");
     $("ready-tomato").classList.toggle("on", s.ready.tomato);
     $("ready-gourd").textContent = s.guestJoined
       ? s.ready.gourd
-        ? "hazır"
-        : "bekliyor"
+        ? t("readyOn")
+        : t("waiting")
       : "—";
     $("ready-gourd").classList.toggle("on", !!s.ready.gourd);
-
     const btn = $("btn-ready");
     btn.disabled = !s.guestJoined;
     const iAmReady = s.you === "tomato" ? s.ready.tomato : s.ready.gourd;
-    btn.textContent = iAmReady ? "Hazır ✓" : "Hazırım";
-
-    const base = serverBase() || `${location.protocol}//${lanIps[0] || location.hostname}:${port}`;
+    btn.textContent = iAmReady ? t("readyOn") : t("ready");
     $("share-hint").textContent =
       s.you === "tomato"
-        ? `Arkadaşın ${base} adresini açıp kodu yazısın: ${s.code}`
-        : `Odaya katıldın. İkiniz de «Hazırım» deyin.`;
+        ? `${t("shareHintHost")} ${s.code}`
+        : t("shareHintGuest");
   }
 
   function renderGame(s) {
     const g = s.game;
     selected = g.chainFrom && s.you === g.turn ? g.chainFrom : selected;
     if (selected && g.board[selected] !== s.you) selected = null;
-
     renderPieces(g.board, g.lastMove);
     updateHints();
     renderTrays(g.capturedBy);
 
-    const turnName = LABELS[g.turn];
-    if (g.winner) {
-      $("turn-label").textContent = "Oyun bitti";
-    } else if (g.chainFrom && s.you === g.turn) {
-      $("turn-label").textContent = "Yakalama zinciri — devam et!";
-    } else {
+    const turnName = teamLabel(g.turn);
+    if (g.winner) $("turn-label").textContent = t("gameOver");
+    else if (g.chainFrom && s.you === g.turn) $("turn-label").textContent = t("turnChain");
+    else
       $("turn-label").textContent =
-        s.you === g.turn ? `Sıra sende (${turnName})` : `Sıra: ${turnName}`;
-    }
+        s.you === g.turn ? `${t("turnYou")} (${turnName})` : `${t("turnOf")}: ${turnName}`;
 
     $("you-label").textContent = s.vsAi
-      ? `Sen: ${LABELS[s.you]} · bilgisayara karşı`
+      ? `${t("youAre")}: ${teamLabel(s.you)} · ${t("vsCpu")}`
       : s.you
-        ? `Sen: ${LABELS[s.you]} · Oda ${s.code}`
-        : `Oda ${s.code}`;
+        ? `${t("youAre")}: ${teamLabel(s.you)} · ${t("room")} ${s.code}`
+        : `${t("room")} ${s.code}`;
 
     const starterEl = $("starter-label");
     if (starterEl) {
-      const st = g.starter || PLAYERS.tomato;
-      starterEl.textContent = `Bu el başlayan: ${LABELS[st]}`;
+      starterEl.textContent = `${t("starter")}: ${teamLabel(g.starter || PLAYERS.tomato)}`;
     }
 
-    if (g.chainFrom && s.you === g.turn) {
-      $("status-msg").textContent = "Aynı taşla yakalamaya devam et.";
-    } else if (s.you === g.turn && !g.winner) {
+    if (g.chainFrom && s.you === g.turn) $("status-msg").textContent = t("statusChain");
+    else if (s.you === g.turn && !g.winner)
       $("status-msg").textContent = anyCapture(g.board, s.you)
-        ? "Yakalama zorunlu — taşını seç."
-        : "Taşını seç, sonra hedef noktaya dokun.";
-    } else if (!g.winner) {
-      $("status-msg").textContent = s.vsAi ? "Bilgisayar düşünüyor…" : "Rakip oynuyor…";
-    } else {
-      $("status-msg").textContent = "";
-    }
+        ? t("statusMustCapture")
+        : t("statusPick");
+    else if (!g.winner) $("status-msg").textContent = s.vsAi ? t("statusCpu") : t("statusOpp");
+    else $("status-msg").textContent = "";
 
     const end = $("end-panel");
     if (g.winner) {
       end.classList.remove("hidden");
-      if (s.you === g.winner) $("end-text").textContent = "Kazandın!";
-      else if (s.vsAi) $("end-text").textContent = "Bilgisayar kazandı.";
-      else $("end-text").textContent = `${LABELS[g.winner]} kazandı.`;
-    } else {
-      end.classList.add("hidden");
-    }
+      if (s.you === g.winner) $("end-text").textContent = t("winYou");
+      else if (s.vsAi) $("end-text").textContent = t("winCpu");
+      else $("end-text").textContent = `${teamLabel(g.winner)} ${t("winOther")}`;
+    } else end.classList.add("hidden");
   }
 
+  // —— Socket ——
   function bindSocketHandlers(s) {
     s.on("hello", (info) => {
       lanIps = info.lanIps || [];
@@ -614,9 +692,9 @@
       applyState(st);
     });
     s.on("room:closed", ({ reason }) => {
-      toast(reason || "Oda kapandı.");
+      toast(reason || t("toHome"));
       state = null;
-      showScreen("lobby");
+      showScreen("home");
     });
     s.on("error:msg", (msg) => toast(msg));
   }
@@ -630,64 +708,126 @@
     const existing = document.querySelector("script[data-socket-io]");
     if (existing) {
       existing.addEventListener("load", () => done());
+      existing.addEventListener("error", () => toast(t("connectFail")));
       return;
     }
     const el = document.createElement("script");
     el.src = src;
     el.dataset.socketIo = "1";
     el.onload = () => done();
-    el.onerror = () => toast("Sunucu script’i yüklenemedi: " + src);
+    el.onerror = () => toast(t("connectFail"));
     document.body.appendChild(el);
   }
 
   function ensureSocket(cb) {
     const base = serverBase();
-    if (!base && isNative) {
-      toast("İki kişilik için PC’deki sunucu adresini yaz (örn. http://192.168.1.10:3847)");
+    if (!base) {
+      toast(t("needServer"));
       return;
     }
-    loadIoScript(isNative ? base : "", () => {
+    loadIoScript(base === location.origin ? "" : base, () => {
       if (typeof io !== "function") {
-        toast("Çok oyunculu için sunucu gerekli.");
+        toast(t("connectFail"));
         return;
       }
       if (socket) {
         socket.removeAllListeners();
         socket.disconnect();
       }
-      const url = isNative ? base : base && base !== location.origin ? base : undefined;
+      const url = base === location.origin ? undefined : base;
       socket = io(url, { transports: ["websocket", "polling"] });
       bindSocketHandlers(socket);
       socket.on("connect", () => cb(socket));
-      socket.on("connect_error", () => toast("Sunucuya bağlanılamadı. Adresi kontrol et."));
+      socket.on("connect_error", () => toast(t("connectFail")));
     });
   }
 
-  function connectOptional() {
-    if (isNative) return;
-    let tries = 0;
-    (function waitIo() {
-      if (typeof io === "function") {
-        ensureSocket(() => {});
-        return;
-      }
-      if (++tries > 40) return;
-      setTimeout(waitIo, 50);
-    })();
+  function fillSettingsForm() {
+    if ($("settings-name")) $("settings-name").value = settings.name || "";
+    if ($("settings-server")) $("settings-server").value = settings.serverUrl || "";
+    if ($("settings-notif")) $("settings-notif").checked = !!settings.notifications;
+    document.querySelectorAll('input[name="lang"]').forEach((r) => {
+      r.checked = r.value === lang();
+    });
+    if ($("player-name") && settings.name) $("player-name").value = settings.name;
+    if ($("online-server-url")) $("online-server-url").value = settings.serverUrl || "";
   }
 
-  $("btn-solo").addEventListener("click", () => startLocalSolo());
+  function goHome() {
+    clearTimeout(aiTimer);
+    selected = null;
+    state = null;
+    localMode = false;
+    showScreen("home");
+  }
+
+  // —— Events ——
+  $("btn-home-play").addEventListener("click", () => showScreen("play"));
+  $("btn-home-settings").addEventListener("click", () => {
+    fillSettingsForm();
+    showScreen("settings");
+  });
+  $("btn-home-help").addEventListener("click", () => {
+    applyI18n();
+    showScreen("help");
+  });
+  $("btn-home-updates").addEventListener("click", () => {
+    applyI18n();
+    showScreen("updates");
+  });
+
+  $("btn-play-back").addEventListener("click", () => showScreen("home"));
+  $("btn-online-back").addEventListener("click", () => showScreen("play"));
+  $("btn-settings-back").addEventListener("click", () => showScreen("home"));
+  $("btn-help-back").addEventListener("click", () => showScreen("home"));
+  $("btn-updates-back").addEventListener("click", () => showScreen("home"));
+
+  $("btn-mode-solo").addEventListener("click", () => startLocalSolo());
+  $("btn-mode-online").addEventListener("click", () => {
+    fillSettingsForm();
+    showScreen("online");
+  });
+
+  $("btn-settings-save").addEventListener("click", async () => {
+    const selectedLang =
+      (document.querySelector('input[name="lang"]:checked') || {}).value || "tr";
+    saveSettings({
+      lang: selectedLang,
+      name: ($("settings-name").value || "").trim(),
+      serverUrl: ($("settings-server").value || "").trim().replace(/\/$/, ""),
+      notifications: !!$("settings-notif").checked,
+    });
+    if (settings.notifications) await ensureNotifPermission();
+    applyI18n();
+    fillSettingsForm();
+    toast(t("saved"));
+  });
+
+  $("btn-updates-seen").addEventListener("click", () => {
+    try {
+      localStorage.setItem(SEEN_VER_KEY, CFG.version);
+    } catch (_) {}
+    updateUpdatesDot();
+    toast(t("saved"));
+    showScreen("home");
+  });
 
   $("btn-create").addEventListener("click", () => {
+    const url = ($("online-server-url").value || "").trim().replace(/\/$/, "");
+    if (url) saveSettings({ serverUrl: url, name: playerName() });
+    else saveSettings({ name: playerName() });
     ensureSocket((s) => s.emit("room:create", { name: playerName() }));
   });
 
   $("btn-join").addEventListener("click", () => {
     const code = ($("join-code").value || "").trim().toUpperCase();
     if (!code) {
-      toast("Oda kodunu yaz.");
+      toast(t("needCode"));
       return;
     }
+    const url = ($("online-server-url").value || "").trim().replace(/\/$/, "");
+    if (url) saveSettings({ serverUrl: url, name: playerName() });
+    else saveSettings({ name: playerName() });
     ensureSocket((s) => s.emit("room:join", { code, name: playerName() }));
   });
 
@@ -703,14 +843,18 @@
 
   $("btn-copy-link").addEventListener("click", async () => {
     if (!state || state.local) return;
-    const base = serverBase() || `${location.protocol}//${lanIps[0] || location.hostname}:${port}`;
-    const text = `${base}  →  kod: ${state.code}`;
+    const text = inviteUrl(state.code);
     try {
       await navigator.clipboard.writeText(text);
-      toast("Bağlantı kopyalandı.");
-    } catch {
+      toast(t("linkCopied"));
+    } catch (_) {
       toast(text);
     }
+  });
+
+  $("btn-room-home").addEventListener("click", () => {
+    if (socket) socket.emit("room:leave");
+    goHome();
   });
 
   $("btn-rematch").addEventListener("click", () => {
@@ -720,36 +864,40 @@
       startLocalSolo();
       return;
     }
-    const vsAi = state.vsAi;
     socket.emit("game:rematch", { code: state.code });
-    if (!vsAi) showScreen("room");
   });
 
   $("btn-lobby").addEventListener("click", () => {
-    selected = null;
-    clearTimeout(aiTimer);
     if (state && state.local) {
-      state = null;
-      localMode = false;
-      showScreen("lobby");
+      goHome();
       return;
     }
     if (socket) socket.emit("room:leave");
-    state = null;
-    showScreen("lobby");
+    goHome();
   });
 
-  function applyNativeUi() {
-    isNative = detectNative();
-    if (!isNative) return;
-    document.body.classList.add("is-native");
-    const hint = $("native-hint");
-    if (hint) hint.classList.remove("hidden");
+  // Auto-join from ?join=CODE
+  function handleInviteQuery() {
+    try {
+      const params = new URLSearchParams(location.search);
+      const code = (params.get("join") || "").toUpperCase();
+      if (!code) return;
+      fillSettingsForm();
+      showScreen("online");
+      if ($("join-code")) $("join-code").value = code;
+      // mild delay for socket.io on same origin
+      setTimeout(() => $("btn-join").click(), 400);
+    } catch (_) {}
   }
 
-  applyNativeUi();
-  setTimeout(applyNativeUi, 300);
-
+  // Boot
+  applyI18n();
+  fillSettingsForm();
   initBoardSvg();
-  connectOptional();
+  if (settings.notifications) ensureNotifPermission();
+  // Same-origin socket preload for web
+  if (!isNative && location.protocol !== "file:") {
+    loadIoScript("", () => {});
+  }
+  handleInviteQuery();
 })();

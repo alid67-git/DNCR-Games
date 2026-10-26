@@ -1,12 +1,13 @@
-# Toprak Kati
+# Kati Arena
 
-Fotoğraftaki toprak tahta oyununun dijital hali:
+Kırmızı takım vs Yeşil takım. Klasik Kati tahtası.
 
-- **Bilgisayara karşı** (telefon/PC, sunucu gerekmez)
-- **Aynı Wi‑Fi’de 2 kişi** (oda kodu + Node sunucu)
-- **Android uygulaması** — bkz. [ANDROID.md](./ANDROID.md)
+- **Bilgisayara karşı** (çevrimdışı)
+- **Çevrimiçi** — telefon ↔ başka ülkedeki PC (aynı public sunucu)
+- **TR / EN**, ayarlar, yardım, sürüm takibi
+- **Android** (Capacitor)
 
-## Hızlı başlangıç (web)
+## Çalıştır
 
 ```bash
 cd sebze-oyunu
@@ -16,12 +17,20 @@ npm start
 
 Tarayıcı: `http://localhost:3847`
 
-- **Bilgisayara karşı** → hemen oyna
-- **Oda kur / Katıl** → aynı Wi‑Fi
+Ana menü: **Oyna · Ayarlar · Yardım · Güncellemeler**
+
+## Ülkeler arası
+
+Bkz. [ONLINE.md](./ONLINE.md)
 
 ## Android
 
-APK için [ANDROID.md](./ANDROID.md). Kurunca telefonda **Bilgisayara karşı** çevrimdışı çalışır.
+```bash
+npm run android:sync
+npm run android:apk
+```
+
+Detay: [ANDROID.md](./ANDROID.md)
 
 ## Test
 
