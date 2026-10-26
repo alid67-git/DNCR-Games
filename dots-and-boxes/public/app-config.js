@@ -1,8 +1,23 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.0.7",
-  build: 8,
+  version: "1.0.8",
+  build: 9,
   changelog: [
+    {
+      version: "1.0.8",
+      build: 9,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "Oyun alanı büyütüldü — skorlar üstte ince şerit, tahta maksimize",
+          "Tek kişilik ve yan yana 2P’de dokunuş için daha geniş tahta",
+        ],
+        en: [
+          "Larger play area — compact score strip on top, board maximized",
+          "Bigger board for solo and side-by-side 2P touch play",
+        ],
+      },
+    },
     {
       version: "1.0.7",
       build: 8,

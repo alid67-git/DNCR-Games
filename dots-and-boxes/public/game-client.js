@@ -197,15 +197,12 @@
     document.body.classList.toggle("game-twop", mode === "twop");
     syncLandscapeClass();
     const hint = $("couch-hint");
-    if (hint) {
-      if (mode === "twop") {
-        hint.classList.remove("hidden");
-        hint.textContent = t("couchHint");
-      } else {
-        hint.classList.add("hidden");
-      }
+    if (hint) hint.classList.add("hidden");
+    if (mode === "twop") {
+      tryLockLandscape(true);
+    } else {
+      tryLockLandscape(false);
     }
-    tryLockLandscape(mode === "twop");
   }
 
   function syncLandscapeClass() {
