@@ -596,11 +596,29 @@ body.game-solo .game-stage {
     "seatA";
 }
 
+body.game-twop .game-top {
+  grid-template-columns: 36px 1fr 36px;
+}
+body.game-twop .btn-icon {
+  width: 36px;
+  height: 36px;
+}
+body.game-twop .game-title {
+  font-size: 0.78rem;
+}
+body.game-twop .couch-hint {
+  font-size: 0.68rem;
+  margin: 0;
+}
+body.game-twop .boxes-left,
+body.game-twop .status-msg {
+  display: none;
+}
 body.game-twop .game-stage {
-  grid-template-columns: minmax(64px, 11vw) minmax(0, 1fr) minmax(64px, 11vw);
+  grid-template-columns: minmax(58px, 10vw) minmax(0, 1fr) minmax(58px, 10vw);
   grid-template-rows: 1fr;
   grid-template-areas: "seatA board seatB";
-  gap: 0.35rem;
+  gap: 0.3rem;
   align-items: stretch;
 }
 
