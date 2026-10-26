@@ -1,8 +1,23 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.0.4",
-  build: 5,
+  version: "1.0.5",
+  build: 6,
   changelog: [
+    {
+      version: "1.0.5",
+      build: 6,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "Bilgisayar hamlesi daha yavaş ve çok daha vurgulu",
+          "Tahta karartılır, kalın sarı ışık + banner, sonra yavaş mavi çizim",
+        ],
+        en: [
+          "Computer moves are slower and much more emphatic",
+          "Board dims, thick yellow glow + banner, then slow blue draw",
+        ],
+      },
+    },
     {
       version: "1.0.4",
       build: 5,

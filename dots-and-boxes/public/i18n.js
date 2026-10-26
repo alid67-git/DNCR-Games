@@ -17,6 +17,7 @@ window.DotsI18n = (function () {
       couchHint: "Yan yana oturun · cihazı yatay tutun · sol kırmızı · sağ mavi",
       sideTurn: "Sıra sende",
       aiMoveHint: "Bilgisayar oynuyor — sarı çizgiyi izle",
+      aiWatchHere: "Bilgisayar buraya çiziyor…",
 
       soloSetupTitle: "Bilgisayara karşı",
       chooseDifficulty: "Zorluk seç",
@@ -111,6 +112,7 @@ window.DotsI18n = (function () {
       couchHint: "Sit side by side · landscape · left red · right blue",
       sideTurn: "Your turn",
       aiMoveHint: "Computer is moving — watch the yellow line",
+      aiWatchHere: "Computer is drawing here…",
 
       soloSetupTitle: "Vs computer",
       chooseDifficulty: "Choose difficulty",
