@@ -2,6 +2,8 @@
 
 Uygulama ekstra kurulum gerektirmez — Safari’de açılan web oyunudur.
 
+**İnternet şart değil.** Oyun ve yapay zeka cihazda çalışır; bilgisayardaki yerel sunucuya aynı Wi‑Fi ile bağlanman yeterli (dış ağ / mobil veri gerekmez).
+
 ## Aynı Wi‑Fi (en kolay)
 
 1. Bilgisayarda:

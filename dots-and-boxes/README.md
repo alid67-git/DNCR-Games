@@ -7,6 +7,7 @@ Klasik **Dots and Boxes** oyunu.
 - **10 oyun alanı** — 6 klasik 8–10 noktalı ızgara + yıldız, kedi, balık, tavşan şekilleri
 - **TR / EN**, ayarlar, yardım, sürüm geçmişi
 - **Android APK** (Capacitor) + **iPhone Safari** (web)
+- **İnternet gerekmez** — tek kişilik ve iki kişilik tamamen çevrimdışı (APK veya yerel sunucu)
 
 ## Çalıştır
 

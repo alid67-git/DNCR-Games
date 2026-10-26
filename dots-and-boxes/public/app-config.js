@@ -1,8 +1,21 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.0.1",
-  build: 2,
+  version: "1.0.2",
+  build: 3,
   changelog: [
+    {
+      version: "1.0.2",
+      build: 3,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "Fontlar yerelleştirildi — internet olmadan da tam oynanır",
+        ],
+        en: [
+          "Fonts bundled locally — fully playable with no internet",
+        ],
+      },
+    },
     {
       version: "1.0.1",
       build: 2,
