@@ -50,3 +50,15 @@ npm start
 ```
 
 Ayrıntı: [dots-and-boxes/README.md](./dots-and-boxes/README.md)
+
+## Üçüncü oyun: Dokuztaş
+
+Klasik Nine Men's Morris — bilgisayara karşı (Kolay/Zor/Çok Zor), aynı cihazda iki kişi, sunucusuz P2P:
+
+```bash
+cd dokuztas
+npm install
+npm start
+```
+
+Tarayıcı: `http://localhost:3867` — ayrıntı: [dokuztas/README.md](./dokuztas/README.md)

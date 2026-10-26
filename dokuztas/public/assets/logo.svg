@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Dokuzta_">
+  <defs>
+    <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c9a66b"/>
+      <stop offset="55%" stop-color="#a67c3d"/>
+      <stop offset="100%" stop-color="#6e4a22"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#wood)"/>
+  <g fill="none" stroke="#2a1808" stroke-width="4" stroke-linejoin="round">
+    <rect x="18" y="18" width="92" height="92" rx="2"/>
+    <rect x="36" y="36" width="56" height="56" rx="1"/>
+    <rect x="52" y="52" width="24" height="24"/>
+    <line x1="64" y1="18" x2="64" y2="52"/>
+    <line x1="64" y1="76" x2="64" y2="110"/>
+    <line x1="18" y1="64" x2="52" y2="64"/>
+    <line x1="76" y1="64" x2="110" y2="64"/>
+  </g>
+  <circle cx="40" cy="40" r="7" fill="#c62828"/>
+  <circle cx="88" cy="88" r="7" fill="#1a1a1a"/>
+  <circle cx="88" cy="40" r="7" fill="#c62828"/>
+</svg>
