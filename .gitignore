@@ -11,3 +11,4 @@ android/captures/
 *.apk
 *.aab
 .idea/
+node_modules/

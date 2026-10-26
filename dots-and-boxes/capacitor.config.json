@@ -1,0 +1,12 @@
+{
+  "appId": "com.noktalarvekutular.app",
+  "appName": "Noktalar ve Kutular",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
