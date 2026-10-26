@@ -7,7 +7,6 @@ Telefon (TR) ile başka ülkedeki bilgisayar aynı **herkese açık sunucuya** b
 Bir VPS / Render / Railway / Fly.io üzerinde:
 
 ```bash
-cd sebze-oyunu
 npm install
 PORT=3847 npm start
 ```

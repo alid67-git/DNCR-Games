@@ -29,7 +29,7 @@ npm run android:sync
 npm run android:apk
 ```
 
-Detay: [ANDROID.md](./ANDROID.md)
+Uygulama açılışta otomatik güncelleme kontrolü yapar ve onayınla yeni APK’yı indirip kurulumu açar. Detay ve sürüm yayınlama adımları: [ANDROID.md](./ANDROID.md)
 
 ## Test
 
