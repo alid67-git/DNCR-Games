@@ -239,14 +239,9 @@
   function clearAiFx() {
     const fx = $("fx-layer");
     if (fx) fx.innerHTML = "";
-    const banner = $("ai-move-banner");
-    if (banner) {
-      banner.classList.add("hidden");
-      banner.textContent = "";
-    }
   }
 
-  /** Sadece hedef kenarı sade renk değişimiyle göster (banner/karartma yok). */
+  /** Hedef kenar: sadece hafif renk + biraz büyüme (yazı/banner yok). */
   function showAiFocusFx(edgeId) {
     const edge = session.graph.edges.get(edgeId);
     const fx = $("fx-layer");
@@ -267,11 +262,11 @@
     return true;
   }
 
-  /** AI hamlesi: sade önizleme → biraz yavaş mavi çizim. */
+  /** AI hamlesi: ince altın önizleme → yavaşça mavi çizgi. */
   async function highlightAndPlayAi(edgeId) {
     showAiFocusFx(edgeId);
     updateHud();
-    await sleep(700);
+    await sleep(550);
 
     const r = applyMove(session.boardId, session.state, edgeId, session.state.turn);
     if (!r.ok) {
@@ -285,10 +280,10 @@
     const drawn = document.querySelector(`#edge-layer line[data-edge="${edgeId}"]`);
     if (drawn) {
       drawn.classList.add("edge-ai-reveal");
-      await sleep(850);
+      await sleep(720);
       drawn.classList.remove("edge-ai-reveal");
     } else {
-      await sleep(300);
+      await sleep(250);
     }
     return true;
   }
@@ -1051,7 +1046,21 @@
     // file:// ve capacitor’da SW gerekmez / desteklenmez
     if (location.protocol === "file:") return;
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
+      navigator.serviceWorker
+        .register("./sw.js?v=1.1.0")
+        .then((reg) => {
+          try {
+            reg.update();
+          } catch (_) {}
+        })
+        .catch(() => {});
+      // Yeni SW alındığında sayfayı bir kez yenile (eski banner/cache kalsın diye)
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (refreshing) return;
+        refreshing = true;
+        location.reload();
+      });
     });
   }
 

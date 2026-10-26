@@ -1,8 +1,23 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.0.9",
-  build: 10,
+  version: "1.1.0",
+  build: 11,
   changelog: [
+    {
+      version: "1.1.0",
+      build: 11,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "Bilgisayar hamlesi minimal: sadece renk + hafif büyüme (yazı yok)",
+          "Başla butonu alta sabit — zorluk/tahta listesi kaydırılır",
+        ],
+        en: [
+          "Minimal computer move: color + slight grow only (no banner text)",
+          "Start button pinned to bottom — options scroll above",
+        ],
+      },
+    },
     {
       version: "1.0.9",
       build: 10,

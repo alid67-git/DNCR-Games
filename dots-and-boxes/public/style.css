@@ -333,7 +333,33 @@ textarea {
 
 .btn-start {
   width: 100%;
-  margin-top: 1.35rem;
+  margin-top: 0;
+}
+
+/* Setup: Başla alta sabit; zorluk/tahta yukarıda kayar */
+.setup-screen.active {
+  display: flex !important;
+  flex-direction: column;
+  height: calc(100dvh - 2rem);
+  height: calc(100svh - 2rem);
+  max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1rem);
+  min-height: 0;
+  gap: 0;
+  padding-bottom: 0;
+}
+.setup-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: 0.75rem;
+}
+.setup-footer {
+  flex-shrink: 0;
+  padding: 0.65rem 0 calc(0.55rem + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, transparent, rgba(6, 18, 20, 0.92) 28%, rgba(6, 18, 20, 0.98));
+  border-top: 1px solid rgba(144, 200, 200, 0.14);
 }
 
 .lobby-form {
@@ -845,7 +871,7 @@ html[lang="en"] .chip-score::before {
   animation: drawEdge 0.35s ease both;
 }
 .edge-b.edge-ai-reveal {
-  animation: aiReveal 0.85s ease both;
+  animation: aiReveal 0.72s ease both;
 }
 @keyframes drawEdge {
   from {
@@ -859,14 +885,20 @@ html[lang="en"] .chip-score::before {
     opacity: 1;
   }
 }
-/* Sade: altın → mavi, biraz yavaş */
+/* Minimal: ince altın → mavi, hafif kalınlaşma */
 @keyframes aiReveal {
   0% {
-    stroke: #f0c35a;
-    stroke-width: 3.2;
-    stroke-dasharray: 48;
-    stroke-dashoffset: 48;
-    opacity: 0.95;
+    stroke: #e8c56a;
+    stroke-width: 2.2;
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    opacity: 0.9;
+  }
+  55% {
+    stroke: #90caf9;
+    stroke-width: 3.1;
+    stroke-dashoffset: 0;
+    opacity: 1;
   }
   100% {
     stroke: var(--ai);
@@ -876,17 +908,24 @@ html[lang="en"] .chip-score::before {
   }
 }
 
-.ai-move-banner {
-  display: none !important;
-}
-
 .fx-ai-preview {
   fill: none;
-  stroke: #f0c35a;
-  stroke-width: 3;
+  stroke: #e8c56a;
+  stroke-width: 2.4;
   stroke-linecap: round;
-  opacity: 0.9;
+  opacity: 0.85;
   pointer-events: none;
+  animation: fxPreviewGrow 0.55s ease both;
+}
+@keyframes fxPreviewGrow {
+  from {
+    stroke-width: 1.8;
+    opacity: 0.45;
+  }
+  to {
+    stroke-width: 2.8;
+    opacity: 0.9;
+  }
 }
 
 .edge-hit {
