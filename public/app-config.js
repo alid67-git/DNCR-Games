@@ -1,10 +1,27 @@
 window.KatiConfig = {
   appName: "Kati Arena",
-  version: "1.3.2",
-  build: 16,
+  version: "1.4.0",
+  build: 17,
   /** tomato = red, gourd = green (engine keys) */
   teams: { tomato: "red", gourd: "green" },
   changelog: [
+    {
+      version: "1.4.0",
+      build: 17,
+      date: "2026-10-26",
+      items: {
+        tr: [
+          "Uygulama açılışında otomatik güncelleme kontrolü",
+          "Güncellemeler ekranında elle 'Güncellemeyi kontrol et' butonu",
+          "Yeni sürüm bulununca onay penceresi — onaylarsan APK indirip kurulumu açar",
+        ],
+        en: [
+          "Automatic update check on app startup",
+          "Manual 'Check for updates' button on the Updates screen",
+          "Confirmation dialog when a new version is found — approving downloads the APK and opens the installer",
+        ],
+      },
+    },
     {
       version: "1.3.2",
       build: 16,

@@ -824,6 +824,45 @@ body.is-native .native-only.hidden {
   animation: rise 0.3s ease both;
 }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(10, 7, 3, 0.65);
+  backdrop-filter: blur(2px);
+  animation: rise 0.2s ease both;
+}
+.modal-card {
+  width: min(420px, 100%);
+  padding: 1.5rem 1.4rem;
+  background: #241709;
+  border: 1px solid rgba(212, 180, 131, 0.3);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+.modal-card h2 {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--sand-light);
+}
+.modal-card p {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(243, 230, 200, 0.85);
+}
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
 .last-move-from,
 .last-move-to {
   animation: flash 0.6s ease;

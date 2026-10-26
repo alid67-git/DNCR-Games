@@ -157,6 +157,7 @@
         <p class="lede"><span data-i18n="updatesCurrent">Yüklü sürüm</span>: <strong id="updates-current">1.3.2</strong></p>
       </header>
       <div id="changelog-list" class="changelog"></div>
+      <button type="button" id="btn-updates-check" class="btn btn-secondary" data-i18n="updatesCheckNow">Güncellemeyi kontrol et</button>
       <button type="button" id="btn-updates-seen" class="btn btn-primary" data-i18n="updatesSeen">Gördüm</button>
     </section>
 
@@ -256,9 +257,21 @@
 
   <div id="toast" class="toast hidden" role="status"></div>
 
+  <div id="update-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="update-modal-title">
+    <div class="modal-card">
+      <h2 id="update-modal-title" data-i18n="updateAvailableTitle">Yeni sürüm hazır</h2>
+      <p id="update-modal-body"></p>
+      <div class="modal-actions">
+        <button type="button" id="btn-update-now" class="btn btn-primary" data-i18n="updateNow">Şimdi güncelle</button>
+        <button type="button" id="btn-update-later" class="btn btn-ghost" data-i18n="updateLater">Daha sonra</button>
+      </div>
+    </div>
+  </div>
+
   <script src="app-config.js"></script>
   <script src="i18n.js"></script>
   <script src="engine.js"></script>
+  <script src="update-check.js"></script>
   <script src="game-client.js" defer></script>
 </body>
 </html>

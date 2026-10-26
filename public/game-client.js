@@ -183,6 +183,69 @@
     else dot.classList.add("hidden");
   }
 
+  // —— Update check (GitHub Releases) ——
+  let pendingUpdate = null;
+
+  function openExternal(url) {
+    if (!url) return;
+    try {
+      if (isNative && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+        window.Capacitor.Plugins.Browser.open({ url });
+        return;
+      }
+    } catch (_) {}
+    window.open(url, "_blank", "noopener");
+  }
+
+  function showUpdateModal(info) {
+    pendingUpdate = info;
+    const modal = $("update-modal");
+    if (!modal) return;
+    const body = $("update-modal-body");
+    if (body) body.textContent = t("updateAvailableBody").replace("{version}", info.version);
+    modal.classList.remove("hidden");
+  }
+
+  function hideUpdateModal() {
+    pendingUpdate = null;
+    const modal = $("update-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  function applyPendingUpdate() {
+    if (!pendingUpdate) return;
+    const info = pendingUpdate;
+    hideUpdateModal();
+    if (!isNative) {
+      toast(t("updateWebNote"));
+      openExternal(info.htmlUrl);
+      return;
+    }
+    if (!info.apkUrl) {
+      toast(t("updateNoApk"));
+      openExternal(info.htmlUrl);
+      return;
+    }
+    toast(t("updateOpeningDownload"));
+    openExternal(info.apkUrl);
+  }
+
+  async function checkForUpdate({ force = false, silent = true } = {}) {
+    if (!window.KatiUpdateCheck) return;
+    if (!silent) toast(t("updatesChecking"));
+    const result = await window.KatiUpdateCheck.run({
+      currentVersion: CFG.version,
+      force,
+    });
+    if (result.status === "available") {
+      showUpdateModal(result);
+    } else if (!silent && result.status === "up-to-date") {
+      toast(t("updatesUpToDate"));
+    } else if (!silent && result.status === "error") {
+      toast(t("updatesCheckFailed"));
+    }
+  }
+
   // —— Notifications ——
   async function ensureNotifPermission() {
     if (!settings.notifications) return false;
@@ -825,6 +888,17 @@
     showScreen("home");
   });
 
+  $("btn-updates-check").addEventListener("click", () => {
+    checkForUpdate({ force: true, silent: false });
+  });
+
+  $("btn-update-now").addEventListener("click", () => {
+    applyPendingUpdate();
+  });
+  $("btn-update-later").addEventListener("click", () => {
+    hideUpdateModal();
+  });
+
   $("btn-create").addEventListener("click", () => {
     const url = ($("online-server-url").value || "").trim().replace(/\/$/, "");
     if (url) saveSettings({ serverUrl: url, name: playerName() });
@@ -913,4 +987,6 @@
     loadIoScript("", () => {});
   }
   handleInviteQuery();
+  // Check for a newer release shortly after the app first opens.
+  setTimeout(() => checkForUpdate({ force: false, silent: true }), 1200);
 })();
