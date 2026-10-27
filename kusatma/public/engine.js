@@ -54,11 +54,13 @@
   function emptyEdgeMap() {
     const drawn = Object.create(null);
     const insured = Object.create(null);
+    const owner = Object.create(null);
     for (const id of ALL_EDGES) {
       drawn[id] = false;
       insured[id] = false;
+      owner[id] = 0;
     }
-    return { drawn, insured };
+    return { drawn, insured, owner };
   }
 
   function cellEdges(i, j) {
@@ -124,7 +126,7 @@
 
   function createGameState(starter) {
     const nodes = Array.from({ length: N }, () => Array(N).fill(0));
-    const { drawn, insured } = emptyEdgeMap();
+    const { drawn, insured, owner } = emptyEdgeMap();
     const owners = Array.from({ length: C }, () => Array(C).fill(0));
     const start = starter === PLAYERS.P2 ? PLAYERS.P2 : PLAYERS.P1;
     return {
@@ -134,6 +136,7 @@
       nodes,
       edgeDrawn: drawn,
       edgeInsured: insured,
+      edgeOwner: owner,
       cellOwner: owners,
       scores: { 1: 0, 2: 0 },
       shieldPoints: { 1: 0, 2: 0 },
@@ -155,6 +158,7 @@
       nodes: state.nodes.map((row) => row.slice()),
       edgeDrawn: { ...state.edgeDrawn },
       edgeInsured: { ...state.edgeInsured },
+      edgeOwner: { ...state.edgeOwner },
       cellOwner: state.cellOwner.map((row) => row.slice()),
       scores: { ...state.scores },
       shieldPoints: { ...state.shieldPoints },
@@ -468,6 +472,7 @@
     }
 
     next.edgeDrawn[edgeId] = true;
+    next.edgeOwner[edgeId] = player;
     next.moveCount += 1;
 
     const completed = [];

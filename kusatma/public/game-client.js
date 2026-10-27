@@ -322,12 +322,15 @@
       hit.setAttribute("x2", b.x);
       hit.setAttribute("y2", b.y);
       hit.setAttribute("stroke", "transparent");
-      hit.setAttribute("stroke-width", "7");
+      hit.setAttribute("stroke-width", "11");
       hit.setAttribute("stroke-linecap", "round");
       hit.setAttribute("class", "edge-hit");
       hit.dataset.edge = id;
       if (!drawn && s.phase === PHASE.BATTLE) {
-        hit.addEventListener("click", () => onEdgeClick(id));
+        hit.addEventListener("pointerup", (ev) => {
+          ev.preventDefault();
+          onEdgeClick(id);
+        });
       }
       svg.appendChild(hit);
 
@@ -339,11 +342,9 @@
       line.setAttribute("stroke-linecap", "round");
       line.setAttribute("class", "edge-line");
       if (drawn) {
-        // drawn by last mover approx: use lastMove or neutral bright
-        const who =
-          s.lastMove && s.lastMove.edgeId === id ? s.lastMove.player : null;
+        const who = s.edgeOwner[id] || 0;
         line.setAttribute("stroke", who ? colorFor(who) : "#c4b7c5");
-        line.setAttribute("stroke-width", "1.35");
+        line.setAttribute("stroke-width", "1.45");
       } else if (insured) {
         line.setAttribute("stroke", "#FFB703");
         line.setAttribute("stroke-width", "1.5");
@@ -367,10 +368,13 @@
         const hit = document.createElementNS(NS, "circle");
         hit.setAttribute("cx", p.x);
         hit.setAttribute("cy", p.y);
-        hit.setAttribute("r", "4.2");
+        hit.setAttribute("r", "5.5");
         hit.setAttribute("fill", "transparent");
         hit.setAttribute("class", "node-hit");
-        hit.addEventListener("click", () => onNodeClick(r, c));
+        hit.addEventListener("pointerup", (ev) => {
+          ev.preventDefault();
+          onNodeClick(r, c);
+        });
         svg.appendChild(hit);
 
         const dot = document.createElementNS(NS, "circle");
