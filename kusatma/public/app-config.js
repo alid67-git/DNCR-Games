@@ -1,10 +1,25 @@
 window.SiegeConfig = {
   appName: "Kuşatma",
-  version: "1.4.0",
-  build: 6,
+  version: "1.4.1",
+  build: 7,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kusatma/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
+    {
+      version: "1.4.1",
+      build: 7,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "Hub + ana ekran: Kuşatma kapak / banner / ikon görselleri",
+          "Menü ve buton tıklama sesleri (ui / back / confirm / toggle)",
+        ],
+        en: [
+          "Hub + home: Kuşatma cover / banner / icon art",
+          "Menu and button click SFX (ui / back / confirm / toggle)",
+        ],
+      },
+    },
     {
       version: "1.4.0",
       build: 6,

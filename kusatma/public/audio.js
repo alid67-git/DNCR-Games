@@ -12,12 +12,13 @@
   let musicNodes = [];
   let musicTimer = null;
   let unlocked = false;
+  let lastUiClickAt = 0;
 
   const state = {
     music: true,
     sfx: true,
     musicVol: 0.22,
-    sfxVol: 0.45,
+    sfxVol: 0.5,
   };
 
   function ensure() {
@@ -49,7 +50,7 @@
     return unlocked;
   }
 
-  function tone(freq, dur, type, gain, when, dest) {
+  function tone(freq, dur, type, gain, when, dest, slideTo) {
     const c = ensure();
     if (!c || !dest) return;
     const t0 = when != null ? when : c.currentTime;
@@ -57,8 +58,11 @@
     const g = c.createGain();
     o.type = type || "sine";
     o.frequency.setValueAtTime(freq, t0);
+    if (slideTo != null) {
+      o.frequency.exponentialRampToValueAtTime(Math.max(20, slideTo), t0 + dur * 0.85);
+    }
     g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(Math.max(0.001, gain), t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.001, gain), t0 + Math.min(0.02, dur * 0.25));
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
     o.connect(g);
     g.connect(dest);
@@ -66,7 +70,7 @@
     o.stop(t0 + dur + 0.02);
   }
 
-  function noiseBurst(dur, gain, when) {
+  function noiseBurst(dur, gain, when, freq) {
     const c = ensure();
     if (!c || !sfxGain) return;
     const t0 = when != null ? when : c.currentTime;
@@ -79,7 +83,8 @@
     const g = c.createGain();
     const f = c.createBiquadFilter();
     f.type = "bandpass";
-    f.frequency.value = 900;
+    f.frequency.value = freq || 900;
+    f.Q.value = 0.8;
     g.gain.setValueAtTime(gain, t0);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
     src.connect(f);
@@ -95,20 +100,43 @@
     if (!c || !sfxGain) return;
     const t = c.currentTime;
     switch (name) {
+      case "ui":
+      case "click": {
+        // Kısa UI tık — yumuşak tick
+        tone(880, 0.035, "triangle", 0.07, t, sfxGain);
+        tone(1320, 0.028, "sine", 0.035, t + 0.012, sfxGain);
+        noiseBurst(0.025, 0.025, t, 2400);
+        break;
+      }
+      case "back":
+        tone(520, 0.05, "triangle", 0.06, t, sfxGain, 360);
+        tone(280, 0.06, "sine", 0.04, t + 0.02, sfxGain);
+        break;
+      case "confirm":
+        tone(520, 0.07, "triangle", 0.09, t, sfxGain);
+        tone(780, 0.1, "sine", 0.08, t + 0.04, sfxGain);
+        break;
+      case "toggle":
+        tone(640, 0.05, "sine", 0.07, t, sfxGain);
+        tone(960, 0.07, "triangle", 0.05, t + 0.03, sfxGain);
+        break;
       case "place":
         tone(520, 0.12, "triangle", 0.18, t, sfxGain);
         tone(780, 0.1, "sine", 0.1, t + 0.04, sfxGain);
+        noiseBurst(0.04, 0.03, t + 0.02, 1200);
         break;
       case "select":
-        tone(440, 0.06, "sine", 0.08, t, sfxGain);
+        tone(480, 0.07, "sine", 0.09, t, sfxGain);
+        tone(720, 0.08, "triangle", 0.05, t + 0.03, sfxGain);
         break;
       case "draw":
-        tone(280, 0.28, "sawtooth", 0.07, t, sfxGain);
-        tone(420, 0.22, "triangle", 0.09, t + 0.05, sfxGain);
+        tone(260, 0.32, "sawtooth", 0.055, t, sfxGain, 420);
+        tone(420, 0.26, "triangle", 0.09, t + 0.05, sfxGain);
+        noiseBurst(0.12, 0.035, t + 0.02, 700);
         break;
       case "move":
-        tone(330, 0.18, "triangle", 0.12, t, sfxGain);
-        tone(390, 0.2, "sine", 0.08, t + 0.08, sfxGain);
+        tone(330, 0.2, "triangle", 0.12, t, sfxGain, 410);
+        tone(390, 0.22, "sine", 0.08, t + 0.08, sfxGain);
         break;
       case "capture":
         tone(220, 0.2, "square", 0.1, t, sfxGain);
@@ -119,11 +147,12 @@
         tone(180, 0.25, "sawtooth", 0.12, t, sfxGain);
         tone(360, 0.28, "triangle", 0.14, t + 0.08, sfxGain);
         tone(540, 0.35, "sine", 0.12, t + 0.16, sfxGain);
-        noiseBurst(0.18, 0.08, t + 0.05);
+        noiseBurst(0.18, 0.08, t + 0.05, 500);
         break;
       case "shield":
         tone(600, 0.15, "sine", 0.1, t, sfxGain);
         tone(900, 0.2, "triangle", 0.08, t + 0.05, sfxGain);
+        tone(1200, 0.18, "sine", 0.05, t + 0.1, sfxGain);
         break;
       case "win":
         [523, 659, 784, 1046].forEach((f, i) =>
@@ -131,18 +160,25 @@
         );
         break;
       case "lose":
-        tone(300, 0.3, "triangle", 0.1, t, sfxGain);
+        tone(300, 0.3, "triangle", 0.1, t, sfxGain, 180);
         tone(220, 0.4, "sine", 0.1, t + 0.15, sfxGain);
         break;
-      case "click":
-        tone(700, 0.04, "square", 0.05, t, sfxGain);
-        break;
       case "invalid":
-        tone(160, 0.12, "square", 0.08, t, sfxGain);
+        tone(180, 0.1, "square", 0.07, t, sfxGain);
+        tone(140, 0.12, "sawtooth", 0.05, t + 0.05, sfxGain);
         break;
       default:
         break;
     }
+  }
+
+  /** Menü / buton tıklamaları — debounce ile çift sesi engeller */
+  function uiClick(kind) {
+    const now = Date.now();
+    if (now - lastUiClickAt < 40) return;
+    lastUiClickAt = now;
+    unlock();
+    playSfx(kind || "ui");
   }
 
   function stopMusic() {
@@ -164,7 +200,6 @@
     stopMusic();
     musicGain.gain.setTargetAtTime(state.musicVol, c.currentTime, 0.3);
 
-    // Yavaş ambient: iki sinüs + hafif üçgen pad
     const freqs = [110, 164.81, 196, 246.94];
     freqs.forEach((f, i) => {
       const o = c.createOscillator();
@@ -178,11 +213,10 @@
       musicNodes.push(o);
     });
 
-    // Yavaş arpej
     let step = 0;
     const arp = [220, 261.63, 329.63, 392, 329.63, 261.63];
     musicTimer = setInterval(() => {
-      if (!state.music || !sfxGain) return;
+      if (!state.music || !musicGain) return;
       const c2 = ensure();
       if (!c2) return;
       const f = arp[step % arp.length];
@@ -236,6 +270,7 @@
   root.SiegeAudio = {
     unlock,
     playSfx,
+    uiClick,
     startMusic,
     stopMusic,
     setMusic,

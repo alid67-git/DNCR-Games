@@ -175,6 +175,38 @@
     bootAudio();
   }
 
+  function uiSound(kind) {
+    if (!Audio) return;
+    if (Audio.uiClick) Audio.uiClick(kind || "ui");
+    else Audio.playSfx(kind || "click");
+  }
+
+  // Menü / buton tıklamalarına ses (capture)
+  document.addEventListener(
+    "click",
+    (ev) => {
+      const el =
+        ev.target && ev.target.closest
+          ? ev.target.closest("button, .mode-card, .btn")
+          : null;
+      if (!el || el.disabled) return;
+      if (el.id === "set-music" || el.id === "set-sfx") return;
+      const id = el.id || "";
+      if (/back|exit|cancel|skip|to-menu/i.test(id) || el.classList.contains("btn-back")) {
+        uiSound("back");
+      } else if (
+        /confirm|start|again|ready|create|join|copy|tut-demo|tut-rules|demo-next|home-play|solo-start|2p-start/i.test(
+          id
+        )
+      ) {
+        uiSound("confirm");
+      } else {
+        uiSound("ui");
+      }
+    },
+    true
+  );
+
   function saveSettings(next) {
     settings = { ...settings, ...next };
     try {
@@ -1324,7 +1356,7 @@
       await ensureAudio();
       if (Audio) {
         Audio.setSfx(on);
-        if (on) Audio.playSfx("click");
+        if (on) uiSound("toggle");
       }
     });
   }
