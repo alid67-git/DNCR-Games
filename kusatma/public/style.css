@@ -144,6 +144,16 @@ html, body {
   font-size: 0.9rem;
   color: var(--muted);
 }
+.check-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.check-row input[type="checkbox"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--p1);
+}
 .field input, .field select {
   appearance: none;
   border: 1px solid var(--line);
@@ -253,6 +263,37 @@ html, body {
 .edge-hit { cursor: pointer; }
 .edge-line { pointer-events: none; }
 .node-hit { cursor: pointer; }
+.edge-line.is-hover {
+  stroke: #cfd3e8 !important;
+  stroke-width: 1.35px !important;
+  opacity: 0.95 !important;
+  filter: url(#siege-glow);
+}
+.edge-line.is-drawing {
+  filter: url(#siege-glow-strong);
+}
+.stone-flying {
+  pointer-events: none;
+  filter: url(#siege-glow-strong);
+}
+.cell-flash {
+  animation: cellFlash 0.85s ease;
+}
+@keyframes cellFlash {
+  0% { opacity: 0.15; }
+  40% { opacity: 0.55; }
+  100% { opacity: 0.28; }
+}
+#board.is-fx-busy {
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .edge-hit:hover + .edge-line:not(.is-drawn):not(.is-insured) {
+    stroke: #d4c6d2;
+    stroke-width: 1.2px;
+    opacity: 0.9;
+  }
+}
 .deploy-actions {
   display: flex;
   gap: 0.55rem;

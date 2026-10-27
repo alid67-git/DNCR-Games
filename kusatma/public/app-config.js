@@ -1,10 +1,27 @@
 window.SiegeConfig = {
   appName: "Kuşatma",
-  version: "1.2.0",
-  build: 3,
+  version: "1.3.0",
+  build: 4,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kusatma/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
+    {
+      version: "1.3.0",
+      build: 4,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "PC: çizgi/taş yavaş hareket + renk geçişi ve hafif glow vurgu",
+          "Kenar üzerine gelince hover vurgusu",
+          "Müzik + ses efektleri (Ayarlar’dan aç/kapa)",
+        ],
+        en: [
+          "PC: slow line/stone motion with color shift and soft glow",
+          "Edge hover highlight",
+          "Music + SFX (toggle in Settings)",
+        ],
+      },
+    },
     {
       version: "1.2.0",
       build: 3,
