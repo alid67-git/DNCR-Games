@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
   <link rel="stylesheet" href="fonts/fonts.css" />
-  <link rel="stylesheet" href="style.css?v=1.1.0" />
+  <link rel="stylesheet" href="style.css?v=1.2.0" />
 </head>
 <body>
   <div class="bg-fx" aria-hidden="true"></div>
@@ -55,8 +55,12 @@
           <span data-i18n="playSoloHint">Yapay zekaya karşı</span>
         </button>
         <button type="button" class="mode-card" id="btn-mode-2p">
-          <strong data-i18n="play2p">İki kişilik</strong>
-          <span data-i18n="play2pHint">Aynı cihazda, sırayla</span>
+          <strong data-i18n="play2p">İki kişilik — yan yana</strong>
+          <span data-i18n="play2pHint">Aynı telefonda, yan yana oturun</span>
+        </button>
+        <button type="button" class="mode-card" id="btn-mode-remote">
+          <strong data-i18n="playRemote">İki kişilik — uzaktan</strong>
+          <span data-i18n="playRemoteHint">Farklı yerler — oda kodu ile (sunucu yok)</span>
         </button>
       </div>
     </section>
@@ -104,6 +108,89 @@
       </div>
       <div class="setup-footer">
         <button type="button" class="btn btn-primary btn-start" id="btn-2p-start" data-i18n="startGame">Başla</button>
+      </div>
+    </section>
+
+    <!-- REMOTE 2P -->
+    <section id="screen-remote" class="screen setup-screen">
+      <div class="setup-scroll">
+        <button type="button" class="btn-back" id="btn-remote-back" data-i18n="back">Geri</button>
+        <header class="brand sm-head">
+          <h1 data-i18n="remoteTitle">Uzaktan oyna</h1>
+        </header>
+        <p class="remote-lead" data-i18n="remoteLead">
+          İki telefon internette; oda kodu ile bağlanır. Kendi sunucun gerekmez.
+        </p>
+
+        <div class="mode-list remote-choice">
+          <button type="button" class="mode-card" id="btn-remote-host">
+            <strong data-i18n="remoteHost">Oda kur</strong>
+            <span data-i18n="remoteHostHint">Kod üret — arkadaşın katılsın</span>
+          </button>
+          <button type="button" class="mode-card" id="btn-remote-join">
+            <strong data-i18n="remoteJoin">Odaya katıl</strong>
+            <span data-i18n="remoteJoinHint">Arkadaşının kodunu yaz</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-remote-host" class="screen setup-screen">
+      <div class="setup-scroll">
+        <button type="button" class="btn-back" id="btn-remote-host-back" data-i18n="back">Geri</button>
+        <header class="brand sm-head">
+          <h1 data-i18n="remoteHost">Oda kur</h1>
+        </header>
+        <form class="lobby-form" onsubmit="return false;">
+          <label>
+            <span data-i18n="yourNameLabel">Adın</span>
+            <input id="remote-host-name" type="text" maxlength="16" data-i18n-ph="player1Ph" autocomplete="off" />
+          </label>
+        </form>
+        <h2 class="section-title" data-i18n="chooseBoard">Oyun alanı seç</h2>
+        <div class="board-grid" id="remote-board-grid" role="radiogroup" aria-label="Oyun alanı"></div>
+        <div id="remote-host-panel" class="remote-panel hidden">
+          <p class="remote-status" id="remote-host-status"></p>
+          <p class="remote-code-label" data-i18n="roomCode">Oda kodu</p>
+          <p class="remote-code" id="remote-room-code">————</p>
+          <p class="remote-hint" data-i18n="remoteWaitHint">Bu kodu arkadaşına söyle; bekleniyor…</p>
+        </div>
+      </div>
+      <div class="setup-footer">
+        <button type="button" class="btn btn-primary btn-start" id="btn-remote-host-go" data-i18n="createRoom">
+          Oda kur ve bekle
+        </button>
+      </div>
+    </section>
+
+    <section id="screen-remote-join" class="screen setup-screen">
+      <div class="setup-scroll">
+        <button type="button" class="btn-back" id="btn-remote-join-back" data-i18n="back">Geri</button>
+        <header class="brand sm-head">
+          <h1 data-i18n="remoteJoin">Odaya katıl</h1>
+        </header>
+        <form class="lobby-form" onsubmit="return false;">
+          <label>
+            <span data-i18n="yourNameLabel">Adın</span>
+            <input id="remote-join-name" type="text" maxlength="16" data-i18n-ph="player2Ph" autocomplete="off" />
+          </label>
+          <label>
+            <span data-i18n="roomCode">Oda kodu</span>
+            <input
+              id="remote-join-code"
+              type="text"
+              maxlength="8"
+              autocapitalize="characters"
+              autocomplete="off"
+              spellcheck="false"
+              data-i18n-ph="roomCodePh"
+            />
+          </label>
+        </form>
+        <p class="remote-status" id="remote-join-status"></p>
+      </div>
+      <div class="setup-footer">
+        <button type="button" class="btn btn-primary btn-start" id="btn-remote-join-go" data-i18n="joinRoom">Katıl</button>
       </div>
     </section>
 
@@ -236,11 +323,12 @@
 
   <div id="toast" class="toast hidden" role="status"></div>
 
-  <script src="app-config.js?v=1.1.0"></script>
-  <script src="i18n.js?v=1.1.0"></script>
-  <script src="boards.js?v=1.1.0"></script>
-  <script src="engine.js?v=1.1.0"></script>
-  <script src="ai.js?v=1.1.0"></script>
-  <script src="game-client.js?v=1.1.0" defer></script>
+  <script src="app-config.js?v=1.2.0"></script>
+  <script src="i18n.js?v=1.2.0"></script>
+  <script src="boards.js?v=1.2.0"></script>
+  <script src="engine.js?v=1.2.0"></script>
+  <script src="ai.js?v=1.2.0"></script>
+  <script src="remote-net.js?v=1.2.0"></script>
+  <script src="game-client.js?v=1.2.0" defer></script>
 </body>
 </html>

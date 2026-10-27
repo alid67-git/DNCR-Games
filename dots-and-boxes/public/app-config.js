@@ -1,8 +1,23 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.1.0",
-  build: 11,
+  version: "1.2.0",
+  build: 12,
   changelog: [
+    {
+      version: "1.2.0",
+      build: 12,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "Uzaktan 2 kişilik: oda kodu ile (sunucu yok, WebRTC)",
+          "Menü: yan yana + uzaktan ayrı seçenekler",
+        ],
+        en: [
+          "Remote 2P: room code (no hosted server, WebRTC)",
+          "Menu: side-by-side + remote as separate options",
+        ],
+      },
+    },
     {
       version: "1.1.0",
       build: 11,

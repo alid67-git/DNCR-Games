@@ -4,6 +4,7 @@
   const Ai = window.DotsAi;
   const CFG = window.DotsConfig;
   const I18N = window.DotsI18n;
+  const Remote = window.DotsRemote;
   if (!Boards || !Engine || !Ai || !CFG || !I18N) {
     console.error("Dots: missing modules");
     return;
@@ -34,11 +35,16 @@
     play: $("screen-play"),
     soloSetup: $("screen-solo-setup"),
     twoPSetup: $("screen-2p-setup"),
+    remote: $("screen-remote"),
+    remoteHost: $("screen-remote-host"),
+    remoteJoin: $("screen-remote-join"),
     settings: $("screen-settings"),
     help: $("screen-help"),
     updates: $("screen-updates"),
     game: $("screen-game"),
   };
+
+  let remotePending = null; // host setup before peer joins
 
   let settings = loadSettings();
   let setup = {
@@ -193,7 +199,7 @@
   }
 
   function applyGameLayout(mode) {
-    document.body.classList.toggle("game-solo", mode === "solo");
+    document.body.classList.toggle("game-solo", mode === "solo" || mode === "remote");
     document.body.classList.toggle("game-twop", mode === "twop");
     syncLandscapeClass();
     const hint = $("couch-hint");
@@ -203,6 +209,16 @@
     } else {
       tryLockLandscape(false);
     }
+  }
+
+  function teardownRemote() {
+    remotePending = null;
+    if (Remote) Remote.destroy();
+    const hostPanel = $("remote-host-panel");
+    if (hostPanel) hostPanel.classList.add("hidden");
+    if ($("remote-host-status")) $("remote-host-status").textContent = "";
+    if ($("remote-join-status")) $("remote-join-status").textContent = "";
+    if ($("remote-room-code")) $("remote-room-code").textContent = "————";
   }
 
   function syncLandscapeClass() {
@@ -409,6 +425,15 @@
     );
     renderBoardPicker(
       "twop-board-grid",
+      setup.boardId,
+      (id) => {
+        setup.boardId = id;
+        renderBoardGrids();
+      },
+      false
+    );
+    renderBoardPicker(
+      "remote-board-grid",
       setup.boardId,
       (id) => {
         setup.boardId = id;
@@ -663,7 +688,13 @@
     statusA.textContent = "";
     statusB.textContent = "";
     if (!state.winner) {
-      if (state.turn === PLAYERS.A) {
+      if (mode === "remote") {
+        if (state.turn === PLAYERS.A) {
+          statusA.textContent = humanPlayer === PLAYERS.A ? t("yourTurn") : t("opponentTurn");
+        } else {
+          statusB.textContent = humanPlayer === PLAYERS.B ? t("yourTurn") : t("opponentTurn");
+        }
+      } else if (state.turn === PLAYERS.A) {
         statusA.textContent = mode === "twop" ? t("sideTurn") : t("yourTurn");
       } else if (mode === "solo") {
         statusB.textContent = session.aiThinking ? t("computerThinking") : t("opponentTurn");
@@ -686,6 +717,8 @@
       msg.textContent = t("extraTurn");
     } else if (mode === "solo" && state.turn !== humanPlayer) {
       msg.textContent = t("aiMoveHint");
+    } else if (mode === "remote") {
+      msg.textContent = state.turn === humanPlayer ? t("yourTurn") : t("opponentTurn");
     } else if (mode === "twop") {
       msg.textContent =
         state.turn === PLAYERS.A
@@ -703,6 +736,8 @@
       if (state.winner === "draw") text = t("draw");
       else if (mode === "solo") {
         text = state.winner === humanPlayer ? t("youWin") : t("computerWins");
+      } else if (mode === "remote") {
+        text = state.winner === humanPlayer ? t("youWin") : `${names[state.winner]} ${t("playerWins")}`;
       } else {
         text = `${names[state.winner]} ${t("playerWins")}`;
       }
@@ -724,9 +759,9 @@
     clearTimeout(aiTimer);
     const boardId = opts.boardId;
     const graph = Boards.getGraph(boardId);
-    const state = createGameState(boardId, PLAYERS.A);
+    const state = opts.state || createGameState(boardId, PLAYERS.A);
     const mode = opts.mode;
-    const humanPlayer = PLAYERS.A;
+    const humanPlayer = opts.humanPlayer || PLAYERS.A;
     const names =
       mode === "solo"
         ? {
@@ -747,12 +782,20 @@
       humanPlayer,
       names,
       aiThinking: false,
+      remoteRole: opts.remoteRole || null,
     };
 
     buildBoardSvg(graph);
     showScreen("game");
     applyGameLayout(mode);
-    startGameTimer();
+    if (opts.startedAt) {
+      timerStartedAt = opts.startedAt;
+      stopGameTimer();
+      updateTimerDisplay();
+      tickTimer();
+    } else {
+      startGameTimer();
+    }
     renderAll();
     maybeScheduleAi();
   }
@@ -762,7 +805,7 @@
     if (session.aiThinking) return;
     if (Date.now() < inputLockUntil) return;
     const { state, mode, humanPlayer } = session;
-    if (mode === "solo" && state.turn !== humanPlayer) {
+    if ((mode === "solo" || mode === "remote") && state.turn !== humanPlayer) {
       toast(t("notYourTurn"));
       return;
     }
@@ -781,7 +824,109 @@
     inputLockUntil = Date.now() + 380;
     session.state = r.state;
     renderAll();
+    if (session.mode === "remote" && Remote) {
+      Remote.send({
+        t: "move",
+        edgeId,
+        moveCount: session.state.moveCount,
+        player,
+      });
+    }
     maybeScheduleAi();
+  }
+
+  function applyRemoteMove(msg) {
+    if (!session || session.mode !== "remote") return;
+    if (!msg || !msg.edgeId) return;
+    if (session.state.winner) return;
+    // Zaten uygulanmış hamle
+    if (session.state.edgeDrawnBy[msg.edgeId]) return;
+    const r = applyMove(session.boardId, session.state, msg.edgeId, session.state.turn);
+    if (!r.ok) return;
+    inputLockUntil = Date.now() + 200;
+    session.state = r.state;
+    renderAll();
+  }
+
+  function handleRemoteMessage(msg) {
+    if (!msg || !msg.t) return;
+    if (msg.t === "hello" && Remote.getRole() === "host" && remotePending) {
+      const guestName = (msg.name || "").trim() || t("player2Ph");
+      remotePending.guestName = guestName;
+      const startedAt = Date.now();
+      const payload = {
+        t: "start",
+        boardId: remotePending.boardId,
+        names: { A: remotePending.hostName, B: guestName },
+        startedAt,
+      };
+      Remote.send(payload);
+      startGame({
+        mode: "remote",
+        boardId: remotePending.boardId,
+        p1: remotePending.hostName,
+        p2: guestName,
+        humanPlayer: PLAYERS.A,
+        remoteRole: "host",
+        startedAt,
+      });
+      remotePending = null;
+      return;
+    }
+    if (msg.t === "start" && Remote.getRole() === "guest") {
+      startGame({
+        mode: "remote",
+        boardId: msg.boardId,
+        p1: (msg.names && msg.names.A) || t("player1Ph"),
+        p2: (msg.names && msg.names.B) || t("you"),
+        humanPlayer: PLAYERS.B,
+        remoteRole: "guest",
+        startedAt: msg.startedAt || Date.now(),
+      });
+      return;
+    }
+    if (msg.t === "move") {
+      applyRemoteMove(msg);
+      return;
+    }
+    if (msg.t === "rematch" && session && session.mode === "remote") {
+      startGame({
+        mode: "remote",
+        boardId: msg.boardId || session.boardId,
+        p1: session.names.A,
+        p2: session.names.B,
+        humanPlayer: session.humanPlayer,
+        remoteRole: session.remoteRole,
+        startedAt: msg.startedAt || Date.now(),
+      });
+    }
+  }
+
+  function onRemoteStatus(status) {
+    const hostStatus = $("remote-host-status");
+    const joinStatus = $("remote-join-status");
+    if (status === "creating" && hostStatus) hostStatus.textContent = t("remoteCreating");
+    if (status === "waiting" && hostStatus) hostStatus.textContent = t("remoteWaiting");
+    if (status === "joining" && joinStatus) joinStatus.textContent = t("remoteJoining");
+    if (status === "connected") {
+      if (hostStatus) hostStatus.textContent = t("remoteConnected");
+      if (joinStatus) joinStatus.textContent = t("remoteConnected");
+      if (Remote.getRole() === "guest") {
+        const name = (($("remote-join-name") && $("remote-join-name").value) || "").trim() || t("player2Ph");
+        Remote.send({ t: "hello", name });
+      }
+    }
+    if (status === "disconnected") {
+      toast(t("remoteDisconnected"));
+      if (session && session.mode === "remote" && !session.state.winner) {
+        // bağlantı koptu — oyunda kal, hamle gönderilemez
+      }
+    }
+    if (status === "error") {
+      toast(t("remoteError"));
+      if (joinStatus) joinStatus.textContent = t("remoteError");
+      if (hostStatus) hostStatus.textContent = t("remoteError");
+    }
   }
 
   function maybeScheduleAi() {
@@ -864,6 +1009,29 @@
 
   function rematch() {
     if (!session) return;
+    if (session.mode === "remote") {
+      if (!Remote || !Remote.isConnected()) {
+        toast(t("remoteDisconnected"));
+        return;
+      }
+      const startedAt = Date.now();
+      const payload = {
+        t: "rematch",
+        boardId: session.boardId,
+        startedAt,
+      };
+      Remote.send(payload);
+      startGame({
+        mode: "remote",
+        boardId: session.boardId,
+        p1: session.names.A,
+        p2: session.names.B,
+        humanPlayer: session.humanPlayer,
+        remoteRole: session.remoteRole,
+        startedAt,
+      });
+      return;
+    }
     startGame({
       mode: session.mode,
       difficulty: session.difficulty,
@@ -882,7 +1050,13 @@
     setup.difficulty = session.difficulty;
     setup.boardId = session.boardId;
     clearTimeout(aiTimer);
+    const wasRemote = session.mode === "remote";
     session = null;
+    if (wasRemote) {
+      teardownRemote();
+      showScreen("remote");
+      return;
+    }
     if (setup.mode === "solo") {
       renderDiffGrid();
       renderBoardGrids();
@@ -895,6 +1069,7 @@
 
   function goHome() {
     clearTimeout(aiTimer);
+    teardownRemote();
     session = null;
     tryLockLandscape(false);
     showScreen("home");
@@ -937,6 +1112,99 @@
     if (!setup.boardId) setup.boardId = "grid-8x8";
     renderBoardGrids();
     showScreen("twoPSetup");
+  });
+
+  $("btn-mode-remote").addEventListener("click", () => {
+    setup.mode = "remote";
+    if (!setup.boardId) setup.boardId = "grid-8x8";
+    teardownRemote();
+    showScreen("remote");
+  });
+
+  $("btn-remote-back").addEventListener("click", () => {
+    teardownRemote();
+    showScreen("play");
+  });
+  $("btn-remote-host-back").addEventListener("click", () => {
+    teardownRemote();
+    showScreen("remote");
+  });
+  $("btn-remote-join-back").addEventListener("click", () => {
+    teardownRemote();
+    showScreen("remote");
+  });
+  $("btn-remote-host").addEventListener("click", () => {
+    if ($("remote-host-name")) $("remote-host-name").value = settings.p1 || "";
+    renderBoardGrids();
+    showScreen("remoteHost");
+  });
+  $("btn-remote-join").addEventListener("click", () => {
+    if ($("remote-join-name")) $("remote-join-name").value = settings.p2 || "";
+    showScreen("remoteJoin");
+  });
+
+  $("btn-remote-host-go").addEventListener("click", async () => {
+    if (!Remote) {
+      toast(t("remoteError"));
+      return;
+    }
+    if (!navigator.onLine) {
+      toast(t("remoteNeedNet"));
+      return;
+    }
+    const hostName = (($("remote-host-name") && $("remote-host-name").value) || "").trim() || t("player1Ph");
+    saveSettings({ p1: hostName });
+    const boardId = setup.boardId || "grid-8x8";
+    const btn = $("btn-remote-host-go");
+    if (btn) btn.disabled = true;
+    try {
+      const { code } = await Remote.hostRoom({
+        onMessage: handleRemoteMessage,
+        onStatus: onRemoteStatus,
+      });
+      remotePending = { hostName, boardId, code };
+      if ($("remote-room-code")) $("remote-room-code").textContent = code;
+      if ($("remote-host-panel")) $("remote-host-panel").classList.remove("hidden");
+      if ($("remote-host-status")) $("remote-host-status").textContent = t("remoteWaiting");
+    } catch (err) {
+      toast(t("remoteError"));
+      teardownRemote();
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
+
+  $("btn-remote-join-go").addEventListener("click", async () => {
+    if (!Remote) {
+      toast(t("remoteError"));
+      return;
+    }
+    if (!navigator.onLine) {
+      toast(t("remoteNeedNet"));
+      return;
+    }
+    const code = Remote.normalizeCode($("remote-join-code") && $("remote-join-code").value);
+    if (code.length < 4) {
+      toast(t("remoteInvalidCode"));
+      return;
+    }
+    const joinName = (($("remote-join-name") && $("remote-join-name").value) || "").trim() || t("player2Ph");
+    saveSettings({ p2: joinName });
+    const btn = $("btn-remote-join-go");
+    if (btn) btn.disabled = true;
+    if ($("remote-join-status")) $("remote-join-status").textContent = t("remoteJoining");
+    try {
+      await Remote.joinRoom(code, {
+        onMessage: handleRemoteMessage,
+        onStatus: onRemoteStatus,
+      });
+    } catch (err) {
+      toast(t("remoteError"));
+      if ($("remote-join-status")) $("remote-join-status").textContent = t("remoteError");
+      teardownRemote();
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   });
 
   $("btn-solo-start").addEventListener("click", () => {
@@ -1047,7 +1315,7 @@
     if (location.protocol === "file:") return;
     window.addEventListener("load", () => {
       navigator.serviceWorker
-        .register("./sw.js?v=1.1.0")
+        .register("./sw.js?v=1.2.0")
         .then((reg) => {
           try {
             reg.update();
