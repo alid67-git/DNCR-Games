@@ -342,6 +342,8 @@ textarea {
 .setup-scroll {
   flex: 1 1 auto;
   min-height: 0;
+  /* Sticky Başla altında son tahta kartları okunabilsin */
+  padding-bottom: 0.35rem;
 }
 .setup-section-title {
   margin: 0.85rem 0 0.45rem;
@@ -356,12 +358,12 @@ textarea {
   bottom: 0;
   z-index: 6;
   flex-shrink: 0;
-  margin-top: 0.65rem;
-  padding: 0.65rem 0 calc(0.55rem + env(safe-area-inset-bottom, 0px));
+  margin-top: 0.35rem;
+  padding: 0.75rem 0 calc(0.65rem + env(safe-area-inset-bottom, 0px));
   background: linear-gradient(
     to top,
-    rgba(10, 31, 34, 0.98) 55%,
-    rgba(10, 31, 34, 0.88) 78%,
+    rgba(10, 31, 34, 1) 42%,
+    rgba(10, 31, 34, 0.94) 70%,
     rgba(10, 31, 34, 0)
   );
 }
@@ -837,18 +839,21 @@ html[lang="en"] .chip-score::before {
   .brand-mark {
     font-size: 1.7rem;
   }
-  /* Zorluk dar ekranda tek sütun olabilir; tahta grid 2 sütun kalsın (Başla görünür kalsın) */
-  .diff-grid {
-    grid-template-columns: 1fr;
-  }
+  /* Dar ekranda da 2 sütun — dikey taşmayı azalt, Başla görünsün */
+  .diff-grid,
   .board-grid {
     grid-template-columns: 1fr 1fr;
   }
+  .diff-card,
   .board-card {
     padding: 0.55rem 0.55rem;
   }
+  .diff-card strong,
   .board-card strong {
     font-size: 0.8rem;
+  }
+  .diff-card span {
+    font-size: 0.65rem;
   }
 }
 
