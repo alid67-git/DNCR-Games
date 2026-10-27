@@ -211,14 +211,24 @@
     }
   }
 
+  function showRemoteCodeOverlay(show) {
+    const overlay = $("remote-code-overlay");
+    if (!overlay) return;
+    overlay.classList.toggle("hidden", !show);
+  }
+
   function teardownRemote() {
     remotePending = null;
     if (Remote) Remote.destroy();
-    const hostPanel = $("remote-host-panel");
-    if (hostPanel) hostPanel.classList.add("hidden");
+    showRemoteCodeOverlay(false);
     if ($("remote-host-status")) $("remote-host-status").textContent = "";
     if ($("remote-join-status")) $("remote-join-status").textContent = "";
     if ($("remote-room-code")) $("remote-room-code").textContent = "————";
+    const go = $("btn-remote-host-go");
+    if (go) {
+      go.disabled = false;
+      go.textContent = t("createRoom");
+    }
   }
 
   function syncLandscapeClass() {
@@ -852,25 +862,26 @@
     if (!msg || !msg.t) return;
     if (msg.t === "hello" && Remote.getRole() === "host" && remotePending) {
       const guestName = (msg.name || "").trim() || t("player2Ph");
-      remotePending.guestName = guestName;
+      const pending = remotePending;
+      remotePending = null;
+      showRemoteCodeOverlay(false);
       const startedAt = Date.now();
       const payload = {
         t: "start",
-        boardId: remotePending.boardId,
-        names: { A: remotePending.hostName, B: guestName },
+        boardId: pending.boardId,
+        names: { A: pending.hostName, B: guestName },
         startedAt,
       };
       Remote.send(payload);
       startGame({
         mode: "remote",
-        boardId: remotePending.boardId,
-        p1: remotePending.hostName,
+        boardId: pending.boardId,
+        p1: pending.hostName,
         p2: guestName,
         humanPlayer: PLAYERS.A,
         remoteRole: "host",
         startedAt,
       });
-      remotePending = null;
       return;
     }
     if (msg.t === "start" && Remote.getRole() === "guest") {
@@ -1156,7 +1167,10 @@
     saveSettings({ p1: hostName });
     const boardId = setup.boardId || "grid-8x8";
     const btn = $("btn-remote-host-go");
-    if (btn) btn.disabled = true;
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = t("remoteCreating");
+    }
     try {
       const { code } = await Remote.hostRoom({
         onMessage: handleRemoteMessage,
@@ -1164,14 +1178,59 @@
       });
       remotePending = { hostName, boardId, code };
       if ($("remote-room-code")) $("remote-room-code").textContent = code;
-      if ($("remote-host-panel")) $("remote-host-panel").classList.remove("hidden");
       if ($("remote-host-status")) $("remote-host-status").textContent = t("remoteWaiting");
+      showRemoteCodeOverlay(true);
+      if (btn) btn.textContent = t("remoteWaiting");
     } catch (err) {
       toast(t("remoteError"));
       teardownRemote();
     } finally {
-      if (btn) btn.disabled = false;
+      if (btn && !remotePending) {
+        btn.disabled = false;
+        btn.textContent = t("createRoom");
+      }
     }
+  });
+
+  if ($("btn-copy-room-code")) {
+    $("btn-copy-room-code").addEventListener("click", async () => {
+      const code = ($("remote-room-code") && $("remote-room-code").textContent) || "";
+      const clean = String(code).replace(/[^A-Z0-9]/gi, "");
+      if (!clean) return;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(clean);
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = clean;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+        }
+        toast(t("codeCopied"));
+      } catch (_) {
+        toast(clean);
+      }
+    });
+  }
+
+  if ($("btn-remote-cancel-wait")) {
+    $("btn-remote-cancel-wait").addEventListener("click", () => {
+      teardownRemote();
+      toast(t("cancelWait"));
+    });
+  }
+
+  // İsimleri bu cihazda sakla
+  ["remote-host-name", "remote-join-name", "p1-name", "p2-name"].forEach((id) => {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener("change", () => {
+      const v = (el.value || "").trim();
+      if (id === "remote-host-name" || id === "p1-name") saveSettings({ p1: v });
+      if (id === "remote-join-name" || id === "p2-name") saveSettings({ p2: v });
+    });
   });
 
   $("btn-remote-join-go").addEventListener("click", async () => {
@@ -1315,7 +1374,7 @@
     if (location.protocol === "file:") return;
     window.addEventListener("load", () => {
       navigator.serviceWorker
-        .register("./sw.js?v=1.2.0")
+        .register("./sw.js?v=1.2.1")
         .then((reg) => {
           try {
             reg.update();

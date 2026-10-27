@@ -1,8 +1,23 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.2.0",
-  build: 12,
+  version: "1.2.1",
+  build: 13,
   changelog: [
+    {
+      version: "1.2.1",
+      build: 13,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "Oda kodu ekranın ortasında büyük overlay",
+          "İsim bu cihazda saklanır; iPhone ↔ Android aynı kod",
+        ],
+        en: [
+          "Room code shown as centered overlay",
+          "Name saved on device; iPhone ↔ Android same code",
+        ],
+      },
+    },
     {
       version: "1.2.0",
       build: 12,

@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
   <link rel="stylesheet" href="fonts/fonts.css" />
-  <link rel="stylesheet" href="style.css?v=1.2.0" />
+  <link rel="stylesheet" href="style.css?v=1.2.1" />
 </head>
 <body>
   <div class="bg-fx" aria-hidden="true"></div>
@@ -144,22 +144,35 @@
         <form class="lobby-form" onsubmit="return false;">
           <label>
             <span data-i18n="yourNameLabel">Adın</span>
-            <input id="remote-host-name" type="text" maxlength="16" data-i18n-ph="player1Ph" autocomplete="off" />
+            <input id="remote-host-name" type="text" maxlength="16" data-i18n-ph="player1Ph" autocomplete="nickname" />
+            <span class="field-hint" data-i18n="nameSavedHint">Bu cihazda hatırlanır</span>
           </label>
         </form>
         <h2 class="section-title" data-i18n="chooseBoard">Oyun alanı seç</h2>
         <div class="board-grid" id="remote-board-grid" role="radiogroup" aria-label="Oyun alanı"></div>
-        <div id="remote-host-panel" class="remote-panel hidden">
-          <p class="remote-status" id="remote-host-status"></p>
-          <p class="remote-code-label" data-i18n="roomCode">Oda kodu</p>
-          <p class="remote-code" id="remote-room-code">————</p>
-          <p class="remote-hint" data-i18n="remoteWaitHint">Bu kodu arkadaşına söyle; bekleniyor…</p>
-        </div>
+        <p class="remote-cross-hint" data-i18n="remoteCrossHint">
+          iPhone ve Android aynı adresi açıp aynı kodla bağlanır.
+        </p>
       </div>
       <div class="setup-footer">
         <button type="button" class="btn btn-primary btn-start" id="btn-remote-host-go" data-i18n="createRoom">
           Oda kur ve bekle
         </button>
+      </div>
+
+      <!-- Oda kodu: ekranın ortasında, her şeyin üstünde -->
+      <div id="remote-code-overlay" class="remote-code-overlay hidden" role="dialog" aria-modal="true">
+        <div class="remote-code-card">
+          <p class="remote-status" id="remote-host-status"></p>
+          <p class="remote-code-label" data-i18n="roomCode">Oda kodu</p>
+          <p class="remote-code" id="remote-room-code">————</p>
+          <button type="button" class="btn btn-ghost" id="btn-copy-room-code" data-i18n="copyCode">Kodu kopyala</button>
+          <p class="remote-hint" data-i18n="remoteWaitHint">Bu kodu arkadaşına söyle; bekleniyor…</p>
+          <p class="remote-cross-hint" data-i18n="remoteCrossHint">
+            iPhone ve Android aynı adresi açıp aynı kodla bağlanır.
+          </p>
+          <button type="button" class="btn btn-ghost" id="btn-remote-cancel-wait" data-i18n="cancelWait">İptal</button>
+        </div>
       </div>
     </section>
 
@@ -172,7 +185,8 @@
         <form class="lobby-form" onsubmit="return false;">
           <label>
             <span data-i18n="yourNameLabel">Adın</span>
-            <input id="remote-join-name" type="text" maxlength="16" data-i18n-ph="player2Ph" autocomplete="off" />
+            <input id="remote-join-name" type="text" maxlength="16" data-i18n-ph="player2Ph" autocomplete="nickname" />
+            <span class="field-hint" data-i18n="nameSavedHint">Bu cihazda hatırlanır</span>
           </label>
           <label>
             <span data-i18n="roomCode">Oda kodu</span>
@@ -323,12 +337,12 @@
 
   <div id="toast" class="toast hidden" role="status"></div>
 
-  <script src="app-config.js?v=1.2.0"></script>
-  <script src="i18n.js?v=1.2.0"></script>
-  <script src="boards.js?v=1.2.0"></script>
-  <script src="engine.js?v=1.2.0"></script>
-  <script src="ai.js?v=1.2.0"></script>
-  <script src="remote-net.js?v=1.2.0"></script>
-  <script src="game-client.js?v=1.2.0" defer></script>
+  <script src="app-config.js?v=1.2.1"></script>
+  <script src="i18n.js?v=1.2.1"></script>
+  <script src="boards.js?v=1.2.1"></script>
+  <script src="engine.js?v=1.2.1"></script>
+  <script src="ai.js?v=1.2.1"></script>
+  <script src="remote-net.js?v=1.2.1"></script>
+  <script src="game-client.js?v=1.2.1" defer></script>
 </body>
 </html>
