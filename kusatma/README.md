@@ -2,6 +2,15 @@
 
 DNCR Games — Ruleset v1.0
 
+## Nasıl oynanır (tutorial)
+
+Uygulamada **Nasıl oynanır** → Türkçe altyazılı adımlar, **İleri / Geri / Bitir**.
+
+Aynı turdan üretilmiş video:
+
+- `public/tutorial-video/kusatma-nasil-oynanir.mp4`
+- Yeniden üret: `npm start` açıkken `node scripts/record-tutorial-video.mjs`
+
 ## Platform
 
 DNCR Games **tek hub**: iPhone/iPad (Safari → Ana Ekrana Ekle), Android (hub APK), web.

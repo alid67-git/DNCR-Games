@@ -41,6 +41,7 @@
   let selectedStone = null; // {r,c}
   let aiTimer = null;
   let hubBackCtl = null;
+  let tutorialCtl = null;
 
   const PAD = 8;
   const SPAN = 100 - PAD * 2;
@@ -715,6 +716,39 @@
   }
   $("btn-settings-back").addEventListener("click", () => showScreen("home"));
   $("btn-help-back").addEventListener("click", () => showScreen("home"));
+
+  function openTutorial() {
+    const overlay = $("tutorial-overlay");
+    if (!overlay || !window.SiegeTutorial) return;
+    overlay.setAttribute("aria-hidden", "false");
+    if (!tutorialCtl) {
+      tutorialCtl = window.SiegeTutorial.createController({
+        root: overlay,
+        onClose() {
+          tutorialCtl.close();
+          overlay.setAttribute("aria-hidden", "true");
+          try {
+            localStorage.setItem("kusatma_tutorial_seen_v1", "1");
+          } catch (_) {}
+        },
+      });
+    }
+    tutorialCtl.open(0);
+  }
+
+  if ($("btn-home-tutorial")) {
+    $("btn-home-tutorial").addEventListener("click", () => openTutorial());
+  }
+  if ($("btn-help-tutorial")) {
+    $("btn-help-tutorial").addEventListener("click", () => openTutorial());
+  }
+
+  // İlk açılışta bir kez otomatik tutorial
+  try {
+    if (!localStorage.getItem("kusatma_tutorial_seen_v1")) {
+      setTimeout(() => openTutorial(), 450);
+    }
+  } catch (_) {}
 
   $("btn-mode-solo").addEventListener("click", () => {
     setup.mode = "solo";
