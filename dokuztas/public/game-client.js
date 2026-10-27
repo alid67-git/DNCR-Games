@@ -870,4 +870,5 @@
   applyI18n();
   fillSettingsForm();
   initBoardSvg();
+  if (window.ArenaSW) window.ArenaSW.register("./sw.js");
 })();

@@ -26,6 +26,7 @@
   const screens = {
     home: $("screen-home"),
     play: $("screen-play"),
+    twoPSetup: $("screen-2p-setup"),
     online: $("screen-online"),
     settings: $("screen-settings"),
     help: $("screen-help"),
@@ -46,6 +47,7 @@
 
   let settings = loadSettings();
   let socket = null;
+  let p2pSession = null;
   let state = null;
   let selected = null;
   let lanIps = [];
@@ -55,6 +57,10 @@
   let animating = false;
   let lastSeenMoveCount = -1;
   let prevGuestJoined = false;
+
+  function useLegacySocket() {
+    return !!(settings.serverUrl && String(settings.serverUrl).trim());
+  }
 
   function loadSettings() {
     const defaults = {
@@ -114,22 +120,103 @@
   }
 
   function serverBase() {
-    const onlineEl = $("online-server-url");
-    const fromOnline = onlineEl && onlineEl.value.trim();
-    const raw = (fromOnline || settings.serverUrl || "").trim().replace(/\/$/, "");
+    const raw = (settings.serverUrl || "").trim().replace(/\/$/, "");
     if (raw) return raw;
     if (isNative) return "";
     return location.origin;
   }
 
   function inviteUrl(code) {
-    const base = serverBase() || location.origin;
+    // Always share the public web URL so APK hosts can invite Safari users.
+    const configured = (CFG.shareBaseUrl || "").trim().replace(/\/$/, "");
+    let base = configured;
+    if (!base && (location.protocol === "http:" || location.protocol === "https:")) {
+      base = location.href.split("?")[0].split("#")[0].replace(/\/index\.html$/i, "");
+      base = base.replace(/\/$/, "");
+    }
+    if (!base) base = "https://alid67-git.github.io/KatiArena";
     try {
-      const u = new URL(base);
+      const u = new URL(base.endsWith("/") ? base : base + "/");
       u.searchParams.set("join", code);
       return u.toString();
     } catch (_) {
       return `${base}?join=${encodeURIComponent(code)}`;
+    }
+  }
+
+  function mapP2pError(err) {
+    const msg = (err && err.message) || String(err || "");
+    if (msg === "timeout" || msg === "join_fail") return t("p2pTimeout");
+    if (msg === "room_full") return t("roomFull");
+    if (msg === "need_code") return t("needCode");
+    return t("p2pFail");
+  }
+
+  function endP2p() {
+    if (p2pSession) {
+      try {
+        p2pSession.leave();
+      } catch (_) {
+        try {
+          p2pSession.destroy();
+        } catch (_) {}
+      }
+      p2pSession = null;
+    }
+  }
+
+  function startP2pHandlers() {
+    return {
+      onState: (st) => {
+        localMode = false;
+        applyState(st);
+      },
+      onError: (msg) => {
+        if (msg === "room_full") toast(t("roomFull"));
+        else if (msg && typeof msg === "string" && msg.length < 80 && !/^[a-z_]+$/.test(msg))
+          toast(msg);
+        else toast(mapP2pError(msg));
+      },
+      onClosed: () => {
+        toast(t("toHome"));
+        p2pSession = null;
+        state = null;
+        showScreen("home");
+      },
+    };
+  }
+
+  async function p2pCreateRoom() {
+    if (!window.KatiP2P) {
+      toast(t("p2pFail"));
+      return;
+    }
+    endP2p();
+    toast(t("connecting"));
+    const session = window.KatiP2P.createSession(startP2pHandlers());
+    p2pSession = session;
+    try {
+      await session.host(playerName());
+    } catch (err) {
+      endP2p();
+      toast(mapP2pError(err));
+    }
+  }
+
+  async function p2pJoinRoom(code) {
+    if (!window.KatiP2P) {
+      toast(t("p2pFail"));
+      return;
+    }
+    endP2p();
+    toast(t("connecting"));
+    const session = window.KatiP2P.createSession(startP2pHandlers());
+    p2pSession = session;
+    try {
+      await session.join(code, playerName());
+    } catch (err) {
+      endP2p();
+      toast(mapP2pError(err));
     }
   }
 
@@ -181,6 +268,69 @@
     if (!dot) return;
     if (seen !== CFG.version) dot.classList.remove("hidden");
     else dot.classList.add("hidden");
+  }
+
+  // —— Update check (GitHub Releases) ——
+  let pendingUpdate = null;
+
+  function openExternal(url) {
+    if (!url) return;
+    try {
+      if (isNative && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+        window.Capacitor.Plugins.Browser.open({ url });
+        return;
+      }
+    } catch (_) {}
+    window.open(url, "_blank", "noopener");
+  }
+
+  function showUpdateModal(info) {
+    pendingUpdate = info;
+    const modal = $("update-modal");
+    if (!modal) return;
+    const body = $("update-modal-body");
+    if (body) body.textContent = t("updateAvailableBody").replace("{version}", info.version);
+    modal.classList.remove("hidden");
+  }
+
+  function hideUpdateModal() {
+    pendingUpdate = null;
+    const modal = $("update-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  function applyPendingUpdate() {
+    if (!pendingUpdate) return;
+    const info = pendingUpdate;
+    hideUpdateModal();
+    if (!isNative) {
+      toast(t("updateWebNote"));
+      openExternal(info.htmlUrl);
+      return;
+    }
+    if (!info.apkUrl) {
+      toast(t("updateNoApk"));
+      openExternal(info.htmlUrl);
+      return;
+    }
+    toast(t("updateOpeningDownload"));
+    openExternal(info.apkUrl);
+  }
+
+  async function checkForUpdate({ force = false, silent = true } = {}) {
+    if (!window.KatiUpdateCheck) return;
+    if (!silent) toast(t("updatesChecking"));
+    const result = await window.KatiUpdateCheck.run({
+      currentVersion: CFG.version,
+      force,
+    });
+    if (result.status === "available") {
+      showUpdateModal(result);
+    } else if (!silent && result.status === "up-to-date") {
+      toast(t("updatesUpToDate"));
+    } else if (!silent && result.status === "error") {
+      toast(t("updatesCheckFailed"));
+    }
   }
 
   // —— Notifications ——
@@ -436,14 +586,20 @@
     } catch (_) {}
   }
 
-  function makeLocalState(game) {
+  function makeLocalState(game, opts) {
+    const hotseat = !!(opts && opts.hotseat);
+    const names = (opts && opts.names) || {
+      tomato: playerName(),
+      gourd: lang() === "en" ? "Computer" : "Bilgisayar",
+    };
     return {
-      code: "SOLO",
+      code: hotseat ? "LOCAL" : "SOLO",
       status: game.winner ? "finished" : "playing",
-      vsAi: true,
+      vsAi: !hotseat,
       local: true,
-      you: PLAYERS.tomato,
-      names: { tomato: playerName(), gourd: lang() === "en" ? "Computer" : "Bilgisayar" },
+      hotseat,
+      you: hotseat ? game.turn : PLAYERS.tomato,
+      names,
       ready: { tomato: true, gourd: true },
       guestJoined: true,
       game,
@@ -455,6 +611,7 @@
     localMode = true;
     selected = null;
     lastSeenMoveCount = -1;
+    endP2p();
     if (socket) {
       try {
         socket.emit("room:leave");
@@ -468,9 +625,35 @@
     if (game.turn === PLAYERS.gourd) scheduleLocalAi(700);
   }
 
+  function startLocalHotseat() {
+    clearTimeout(aiTimer);
+    localMode = true;
+    selected = null;
+    lastSeenMoveCount = -1;
+    endP2p();
+    if (socket) {
+      try {
+        socket.emit("room:leave");
+      } catch (_) {}
+    }
+    const p1 = ($("p1-name") && $("p1-name").value.trim()) || t("red");
+    const p2 = ($("p2-name") && $("p2-name").value.trim()) || t("green");
+    saveSettings({ name: p1 });
+    const starter = readNextStarter();
+    writeNextStarter(starter);
+    const game = createGameState(starter);
+    applyState(
+      makeLocalState(game, {
+        hotseat: true,
+        names: { tomato: p1, gourd: p2 },
+      }),
+      { skipAnim: true }
+    );
+  }
+
   function scheduleLocalAi(delay = 520) {
     clearTimeout(aiTimer);
-    if (!state || !state.local || state.game.winner) return;
+    if (!state || !state.local || state.hotseat || state.game.winner) return;
     if (state.game.turn !== PLAYERS.gourd) return;
     aiTimer = setTimeout(async () => {
       if (!state || !state.local || animating) return;
@@ -497,8 +680,20 @@
     const move = r.state.lastMove;
     await animateMove(prevBoard, move, player);
     lastSeenMoveCount = r.state.moveCount;
-    await applyState(makeLocalState(r.state), { skipAnim: true });
-    if (state && state.local && !state.game.winner && state.game.turn === PLAYERS.gourd) {
+    await applyState(
+      makeLocalState(r.state, {
+        hotseat: !!state.hotseat,
+        names: state.names,
+      }),
+      { skipAnim: true }
+    );
+    if (
+      state &&
+      state.local &&
+      !state.hotseat &&
+      !state.game.winner &&
+      state.game.turn === PLAYERS.gourd
+    ) {
       scheduleLocalAi(move && move.capture ? 480 : 420);
     }
   }
@@ -520,7 +715,8 @@
         selected = null;
         clearHints();
         if (state.local) playLocalMove(move.from, move.to);
-        else socket.emit("game:move", { code: state.code, from: move.from, to: move.to });
+        else if (p2pSession) p2pSession.move(move.from, move.to);
+        else if (socket) socket.emit("game:move", { code: state.code, from: move.from, to: move.to });
         return;
       }
       if (board[nodeId] === state.you && (!game.chainFrom || game.chainFrom === nodeId)) {
@@ -702,7 +898,7 @@
     s.on("error:msg", (msg) => toast(msg));
   }
 
-  function loadIoScript(base, done) {
+  function loadIoScript(base, done, { silent = false } = {}) {
     if (typeof io === "function") {
       done();
       return;
@@ -711,14 +907,18 @@
     const existing = document.querySelector("script[data-socket-io]");
     if (existing) {
       existing.addEventListener("load", () => done());
-      existing.addEventListener("error", () => toast(t("connectFail")));
+      existing.addEventListener("error", () => {
+        if (!silent) toast(t("connectFail"));
+      });
       return;
     }
     const el = document.createElement("script");
     el.src = src;
     el.dataset.socketIo = "1";
     el.onload = () => done();
-    el.onerror = () => toast(t("connectFail"));
+    el.onerror = () => {
+      if (!silent) toast(t("connectFail"));
+    };
     document.body.appendChild(el);
   }
 
@@ -757,7 +957,6 @@
       r.checked = r.value === diff;
     });
     if ($("player-name") && settings.name) $("player-name").value = settings.name;
-    if ($("online-server-url")) $("online-server-url").value = settings.serverUrl || "";
   }
 
   function goHome() {
@@ -765,6 +964,7 @@
     selected = null;
     state = null;
     localMode = false;
+    endP2p();
     showScreen("home");
   }
 
@@ -785,11 +985,24 @@
 
   $("btn-play-back").addEventListener("click", () => showScreen("home"));
   $("btn-online-back").addEventListener("click", () => showScreen("play"));
+  if ($("btn-2p-setup-back")) {
+    $("btn-2p-setup-back").addEventListener("click", () => showScreen("play"));
+  }
   $("btn-settings-back").addEventListener("click", () => showScreen("home"));
   $("btn-help-back").addEventListener("click", () => showScreen("home"));
   $("btn-updates-back").addEventListener("click", () => showScreen("home"));
 
   $("btn-mode-solo").addEventListener("click", () => startLocalSolo());
+  if ($("btn-mode-2p")) {
+    $("btn-mode-2p").addEventListener("click", () => {
+      fillSettingsForm();
+      if ($("p1-name") && settings.name) $("p1-name").value = settings.name;
+      showScreen("twoPSetup");
+    });
+  }
+  if ($("btn-2p-start")) {
+    $("btn-2p-start").addEventListener("click", () => startLocalHotseat());
+  }
   $("btn-mode-online").addEventListener("click", () => {
     fillSettingsForm();
     showScreen("online");
@@ -825,11 +1038,24 @@
     showScreen("home");
   });
 
+  $("btn-updates-check").addEventListener("click", () => {
+    checkForUpdate({ force: true, silent: false });
+  });
+
+  $("btn-update-now").addEventListener("click", () => {
+    applyPendingUpdate();
+  });
+  $("btn-update-later").addEventListener("click", () => {
+    hideUpdateModal();
+  });
+
   $("btn-create").addEventListener("click", () => {
-    const url = ($("online-server-url").value || "").trim().replace(/\/$/, "");
-    if (url) saveSettings({ serverUrl: url, name: playerName() });
-    else saveSettings({ name: playerName() });
-    ensureSocket((s) => s.emit("room:create", { name: playerName() }));
+    saveSettings({ name: playerName() });
+    if (useLegacySocket()) {
+      ensureSocket((s) => s.emit("room:create", { name: playerName() }));
+    } else {
+      p2pCreateRoom();
+    }
   });
 
   $("btn-join").addEventListener("click", () => {
@@ -838,10 +1064,12 @@
       toast(t("needCode"));
       return;
     }
-    const url = ($("online-server-url").value || "").trim().replace(/\/$/, "");
-    if (url) saveSettings({ serverUrl: url, name: playerName() });
-    else saveSettings({ name: playerName() });
-    ensureSocket((s) => s.emit("room:join", { code, name: playerName() }));
+    saveSettings({ name: playerName() });
+    if (useLegacySocket()) {
+      ensureSocket((s) => s.emit("room:join", { code, name: playerName() }));
+    } else {
+      p2pJoinRoom(code);
+    }
   });
 
   $("join-code").addEventListener("keydown", (e) => {
@@ -851,7 +1079,8 @@
   $("btn-ready").addEventListener("click", () => {
     if (!state || state.local) return;
     const iAmReady = state.you === "tomato" ? state.ready.tomato : state.ready.gourd;
-    socket.emit("room:ready", { code: state.code, ready: !iAmReady });
+    if (p2pSession) p2pSession.setReady(!iAmReady);
+    else if (socket) socket.emit("room:ready", { code: state.code, ready: !iAmReady });
   });
 
   $("btn-copy-link").addEventListener("click", async () => {
@@ -873,11 +1102,16 @@
   $("btn-rematch").addEventListener("click", () => {
     if (!state) return;
     selected = null;
+    if (state.hotseat) {
+      startLocalHotseat();
+      return;
+    }
     if (state.local || (state.vsAi && localMode)) {
       startLocalSolo();
       return;
     }
-    socket.emit("game:rematch", { code: state.code });
+    if (p2pSession) p2pSession.rematch();
+    else if (socket) socket.emit("game:rematch", { code: state.code });
   });
 
   $("btn-lobby").addEventListener("click", () => {
@@ -898,8 +1132,7 @@
       fillSettingsForm();
       showScreen("online");
       if ($("join-code")) $("join-code").value = code;
-      // mild delay for socket.io on same origin
-      setTimeout(() => $("btn-join").click(), 400);
+      setTimeout(() => $("btn-join").click(), 700);
     } catch (_) {}
   }
 
@@ -907,10 +1140,13 @@
   applyI18n();
   fillSettingsForm();
   initBoardSvg();
+  if (window.ArenaSW) window.ArenaSW.register("./sw.js");
   if (settings.notifications) ensureNotifPermission();
-  // Same-origin socket preload for web
-  if (!isNative && location.protocol !== "file:") {
-    loadIoScript("", () => {});
+  // Same-origin socket preload for web (silent: static hosts like GitHub Pages have no /socket.io)
+  if (!isNative && location.protocol !== "file:" && location.protocol !== "capacitor:") {
+    loadIoScript("", () => {}, { silent: true });
   }
   handleInviteQuery();
+  // Check for a newer release shortly after the app first opens.
+  setTimeout(() => checkForUpdate({ force: false, silent: true }), 1200);
 })();
