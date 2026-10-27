@@ -56,6 +56,8 @@
   let aiTimer = null;
   let layout = null; // {pad, cell, coords: Map "r,c" -> {x,y}}
   let hubBackCtl = null;
+  let inputLockUntil = 0; // çift dokunuş / pointer+touch çift hamle kilidi
+  let claimFlashTimer = null;
 
   function loadSettings() {
     const defaults = { lang: "tr", aiDifficulty: "medium", p1: "", p2: "" };
@@ -295,6 +297,8 @@
   }
 
   function clearBoardSvg() {
+    clearTimeout(claimFlashTimer);
+    claimFlashTimer = null;
     ["box-layer", "edge-layer", "edge-hit-layer", "dot-layer", "fx-layer"].forEach(
       (id) => {
         const el = $(id);
@@ -357,6 +361,7 @@
 
   function onBoardPointer(ev) {
     if (!session || session.state.winner || session.aiThinking) return;
+    if (Date.now() < inputLockUntil) return;
     // Çoklu dokunuş / sağ tık yok say
     if (ev.pointerType === "mouse" && ev.button !== 0) return;
     const svg = $("board");
@@ -373,25 +378,64 @@
     const svg = $("board");
     if (!svg || svg.dataset.pointerBound === "1") return;
     svg.dataset.pointerBound = "1";
-    // pointerdown: Safari + Chrome + Capacitor tek yol
-    svg.addEventListener("pointerdown", onBoardPointer, { passive: false });
-    // Eski iOS yedek
-    svg.addEventListener(
-      "touchstart",
-      (ev) => {
-        if (!ev.touches || !ev.touches[0]) return;
-        const t = ev.touches[0];
-        const fake = {
-          clientX: t.clientX,
-          clientY: t.clientY,
-          pointerType: "touch",
-          button: 0,
-          preventDefault: () => ev.preventDefault(),
-        };
-        onBoardPointer(fake);
-      },
-      { passive: false }
-    );
+    // Tek yol: pointerdown. touchstart+pointerdown çift hamle ekstra turu çalıyordu.
+    if (window.PointerEvent) {
+      svg.addEventListener("pointerdown", onBoardPointer, { passive: false });
+    } else {
+      svg.addEventListener(
+        "touchstart",
+        (ev) => {
+          if (!ev.touches || !ev.touches[0]) return;
+          const t = ev.touches[0];
+          onBoardPointer({
+            clientX: t.clientX,
+            clientY: t.clientY,
+            pointerType: "touch",
+            button: 0,
+            preventDefault: () => ev.preventDefault(),
+          });
+        },
+        { passive: false }
+      );
+    }
+  }
+
+  /** Çizilen kenarı ~0.5s daha parlak + uçlardan ~%10 uzat (yazı yok). */
+  function flashClaimedEdge(edgeId) {
+    const line = document.querySelector(`#edge-layer line[data-edge="${edgeId}"]`);
+    if (!line) return;
+    clearTimeout(claimFlashTimer);
+    document.querySelectorAll("#edge-layer line.edge-claim-flash").forEach((el) => {
+      restoreEdgeGeometry(el);
+      el.classList.remove("edge-claim-flash");
+    });
+
+    const x1 = Number(line.dataset.x1 != null ? line.dataset.x1 : line.getAttribute("x1"));
+    const y1 = Number(line.dataset.y1 != null ? line.dataset.y1 : line.getAttribute("y1"));
+    const x2 = Number(line.dataset.x2 != null ? line.dataset.x2 : line.getAttribute("x2"));
+    const y2 = Number(line.dataset.y2 != null ? line.dataset.y2 : line.getAttribute("y2"));
+    const mx = (x1 + x2) / 2;
+    const my = (y1 + y2) / 2;
+    const grow = 1.1;
+    line.setAttribute("x1", mx + (x1 - mx) * grow);
+    line.setAttribute("y1", my + (y1 - my) * grow);
+    line.setAttribute("x2", mx + (x2 - mx) * grow);
+    line.setAttribute("y2", my + (y2 - my) * grow);
+    line.classList.add("edge-claim-flash");
+
+    claimFlashTimer = setTimeout(() => {
+      restoreEdgeGeometry(line);
+      line.classList.remove("edge-claim-flash");
+      claimFlashTimer = null;
+    }, 500);
+  }
+
+  function restoreEdgeGeometry(line) {
+    if (!line) return;
+    if (line.dataset.x1 != null) line.setAttribute("x1", line.dataset.x1);
+    if (line.dataset.y1 != null) line.setAttribute("y1", line.dataset.y1);
+    if (line.dataset.x2 != null) line.setAttribute("x2", line.dataset.x2);
+    if (line.dataset.y2 != null) line.setAttribute("y2", line.dataset.y2);
   }
 
   function buildBoardSvg(graph) {
@@ -414,6 +458,10 @@
       line.setAttribute("y2", b.y);
       line.setAttribute("class", "edge-idle");
       line.dataset.edge = edge.id;
+      line.dataset.x1 = String(a.x);
+      line.dataset.y1 = String(a.y);
+      line.dataset.x2 = String(b.x);
+      line.dataset.y2 = String(b.y);
       edgeLayer.appendChild(line);
 
       const hit = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -427,8 +475,8 @@
       hit.addEventListener("pointerenter", () => previewEdge(edge.id, true));
       hit.addEventListener("pointerleave", () => previewEdge(edge.id, false));
       hit.addEventListener("click", (e) => {
-        // pointerdown zaten işlediyse çift hamle olmasın
-        if (Date.now() - lastPointerEdgeAt < 450) {
+        // pointerdown zaten işlediyse / kilit varken çift hamle olmasın
+        if (Date.now() - lastPointerEdgeAt < 450 || Date.now() < inputLockUntil) {
           e.preventDefault();
           return;
         }
@@ -485,10 +533,15 @@
     document.querySelectorAll("#edge-layer line[data-edge]").forEach((line) => {
       const id = line.dataset.edge;
       const owner = state.edgeDrawnBy[id];
-      line.classList.remove("edge-idle", "edge-a", "edge-b", "edge-preview");
+      const flashing = line.classList.contains("edge-claim-flash");
+      line.classList.remove("edge-idle", "edge-a", "edge-b", "edge-preview", "edge-claim-flash");
       if (owner === PLAYERS.A) line.classList.add("edge-a");
       else if (owner === PLAYERS.B) line.classList.add("edge-b");
-      else line.classList.add("edge-idle");
+      else {
+        restoreEdgeGeometry(line);
+        line.classList.add("edge-idle");
+      }
+      if (flashing && owner) line.classList.add("edge-claim-flash");
     });
   }
 
@@ -566,6 +619,9 @@
 
   function startGame(opts) {
     clearTimeout(aiTimer);
+    clearTimeout(claimFlashTimer);
+    claimFlashTimer = null;
+    inputLockUntil = 0;
     const boardId = opts.boardId;
     const graph = Boards.getGraph(boardId);
     const state = createGameState(boardId, PLAYERS.A);
@@ -604,6 +660,7 @@
   function onEdgeClick(edgeId) {
     if (!session || session.state.winner) return;
     if (session.aiThinking) return;
+    if (Date.now() < inputLockUntil) return;
     const { state, mode, humanPlayer } = session;
     if (mode === "solo" && state.turn !== humanPlayer) {
       toast(t("notYourTurn"));
@@ -619,6 +676,7 @@
   function playHumanMove(edgeId, opts) {
     if (!session) return;
     const fromNet = opts && opts.fromNet;
+    if (!fromNet && Date.now() < inputLockUntil) return;
     const player = session.state.turn;
     const r = applyMove(session.boardId, session.state, edgeId, player);
     if (!r.ok) {
@@ -627,8 +685,11 @@
       }
       return;
     }
+    // Kutu kazanınca ikinci dokunuşun yanlışlıkla başka kenarı çizmesini engelle
+    if (!fromNet) inputLockUntil = Date.now() + 380;
     session.state = r.state;
     renderAll();
+    flashClaimedEdge(edgeId);
     if (session.mode === "p2p" && !fromNet && p2pSession) {
       p2pSession.send({ type: "edge", edgeId, moveCount: session.state.moveCount || 0 });
     }
@@ -830,8 +891,17 @@
 
   function maybeScheduleAi() {
     if (!session || session.mode !== "solo") return;
-    if (session.state.winner) return;
-    if (session.state.turn === session.humanPlayer) return;
+    if (session.state.winner) {
+      clearTimeout(aiTimer);
+      session.aiThinking = false;
+      return;
+    }
+    // Ekstra tur insanda: bekleyen AI zamanlayıcısını iptal et
+    if (session.state.turn === session.humanPlayer) {
+      clearTimeout(aiTimer);
+      session.aiThinking = false;
+      return;
+    }
     session.aiThinking = true;
     updateHud();
     clearTimeout(aiTimer);
@@ -868,6 +938,7 @@
     }
     session.state = r.state;
     renderAll();
+    flashClaimedEdge(move.edgeId);
 
     // Ekstra tur: AI yine oynuyor
     if (!session.state.winner && session.state.turn !== session.humanPlayer) {

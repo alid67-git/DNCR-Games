@@ -681,6 +681,19 @@ html[lang="en"] .chip-score::before {
   filter: drop-shadow(0 0 2.5px rgba(30, 136, 229, 0.7));
   animation: drawEdge 0.28s ease both;
 }
+/* Hamle vurgusu: ~0.5s daha parlak + hafif kalınlaşma (yazı/banner yok) */
+.edge-a.edge-claim-flash {
+  stroke: var(--player-glow);
+  stroke-width: 3.05;
+  filter: drop-shadow(0 0 4.5px rgba(255, 107, 107, 0.95));
+  animation: drawEdge 0.28s ease both, edgeClaimFlash 0.5s ease both;
+}
+.edge-b.edge-claim-flash {
+  stroke: var(--ai-glow);
+  stroke-width: 3.05;
+  filter: drop-shadow(0 0 4.5px rgba(100, 181, 246, 0.95));
+  animation: drawEdge 0.28s ease both, edgeClaimFlash 0.5s ease both;
+}
 @keyframes drawEdge {
   from {
     stroke-dasharray: 40;
@@ -690,6 +703,17 @@ html[lang="en"] .chip-score::before {
   to {
     stroke-dasharray: 40;
     stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+@keyframes edgeClaimFlash {
+  0% {
+    opacity: 0.85;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
     opacity: 1;
   }
 }
