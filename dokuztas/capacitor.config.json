@@ -1,0 +1,12 @@
+{
+  "appId": "com.dokuztas.app",
+  "appName": "Dokuztaş",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
