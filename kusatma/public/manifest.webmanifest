@@ -1,7 +1,7 @@
 {
   "name": "Kuşatma",
   "short_name": "Kuşatma",
-  "description": "The Siege — strateji: çizgi, taş, sigorta",
+  "description": "Kuşatma — strateji: çizgi, taş, sigorta",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

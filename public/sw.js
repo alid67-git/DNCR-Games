@@ -1,4 +1,4 @@
-/* Kati Arena — offline cache (solo + local 2P) */
+/* Kati — offline cache (solo + local 2P) */
 const CACHE = "kati-v1.5.1";
 const ASSETS = [
   "./",

@@ -1,7 +1,7 @@
 {
   "name": "Noktalar ve Kutular",
   "short_name": "Noktalar",
-  "description": "Dots and Boxes — tek ve iki kişilik, Safari ve Android",
+  "description": "Noktalar ve Kutular — tek ve iki kişilik, Safari ve Android",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

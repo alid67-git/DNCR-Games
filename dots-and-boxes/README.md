@@ -1,6 +1,6 @@
 # Noktalar ve Kutular
 
-Klasik **Dots and Boxes** oyunu.
+Klasik **Noktalar ve Kutular** (Dots and Boxes) oyunu.
 
 - **Tek kişilik** — yapay zekaya karşı (Kolay / Orta / Zor / Çok Zor)
 - **İki kişilik** — aynı cihazda sırayla

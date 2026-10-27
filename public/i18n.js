@@ -1,7 +1,7 @@
 window.KatiI18n = (function () {
   const STR = {
     tr: {
-      appName: "Kati Arena",
+      appName: "Kati",
       tagline: "Kırmızı takım · Yeşil takım",
       homePlay: "Oyna",
       homeSettings: "Ayarlar",
@@ -148,7 +148,7 @@ window.KatiI18n = (function () {
       versionChip: "sürüm",
     },
     en: {
-      appName: "Kati Arena",
+      appName: "Kati",
       tagline: "Red team · Green team",
       homePlay: "Play",
       homeSettings: "Settings",

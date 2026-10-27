@@ -1,4 +1,4 @@
-// Checks GitHub Releases for a newer Kati Arena build than the one bundled
+// Checks GitHub Releases for a newer Kati build than the one bundled
 // in app-config.js, and (on confirmation) hands the user to the new APK.
 window.KatiUpdateCheck = (function () {
   const REPO = "alid67-git/DNCR-Games";
@@ -77,7 +77,7 @@ window.KatiUpdateCheck = (function () {
         apkUrl: asset ? asset.browser_download_url : null,
       };
     } catch (err) {
-      console.warn("Kati Arena: update check failed", err);
+      console.warn("Kati: update check failed", err);
       return { status: "error" };
     }
   }

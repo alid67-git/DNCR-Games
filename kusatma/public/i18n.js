@@ -104,8 +104,8 @@ window.SiegeI18n = (function () {
       p2Red: "Kırmızı △",
     },
     en: {
-      appName: "The Siege",
-      tagline: "Draw, siege, capture",
+      appName: "Kuşatma",
+      tagline: "The Siege — draw, surround, capture",
       homePlay: "Play",
       homeScores: "Scores",
       homeSettings: "Settings",
