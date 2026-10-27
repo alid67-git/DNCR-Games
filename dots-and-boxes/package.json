@@ -1,11 +1,11 @@
 {
   "name": "noktalar-ve-kutular",
   "version": "1.0.2",
-  "description": "Noktalar ve Kutular — solo (4 difficulty) + local 2P, 10 boards, Android APK + Safari",
+  "description": "Noktalar ve Kutular \u2014 solo (4 difficulty) + local 2P, 10 boards, Android APK + Safari",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node game/boards.test.js && node game/engine.test.js && node game/ai.test.js",
+    "test": "node game/boards.test.js && node game/engine.test.js && node game/ai.test.js && node game/extra-turn-lock.test.js",
     "android:sync": "npx cap sync android",
     "android:open": "npx cap open android",
     "android:apk": "cd android && ./gradlew assembleDebug"

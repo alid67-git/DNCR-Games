@@ -685,8 +685,14 @@
       }
       return;
     }
-    // Kutu kazanınca ikinci dokunuşun yanlışlıkla başka kenarı çizmesini engelle
-    if (!fromNet) inputLockUntil = Date.now() + 380;
+    // Kutu sonrası çift tetikleme (pointer+click/ghost) ekstra turu çalıyordu
+    if (!fromNet) {
+      const boxed =
+        r.state.lastMove && r.state.lastMove.boxesCompleted
+          ? r.state.lastMove.boxesCompleted.length
+          : 0;
+      inputLockUntil = Date.now() + (boxed > 0 ? 520 : 360);
+    }
     session.state = r.state;
     renderAll();
     flashClaimedEdge(edgeId);
