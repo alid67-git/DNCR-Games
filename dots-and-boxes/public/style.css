@@ -277,6 +277,15 @@ textarea {
   /* 10 tahta: 2 sütun kompakt kalsın; dar ekranda tek sütuna düşmesin */
   grid-template-columns: 1fr 1fr;
 }
+/* Kurulumda tahta listesi kendi içinde kayar — Başla hep görünür */
+.setup-screen .board-grid {
+  max-height: min(38vh, 280px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0.15rem;
+  padding-bottom: 0.15rem;
+  -webkit-overflow-scrolling: touch;
+}
 
 .diff-card,
 .board-card {
