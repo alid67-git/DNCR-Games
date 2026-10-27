@@ -63,6 +63,17 @@ html, body {
   text-shadow: 0 0 24px rgba(0, 180, 216, 0.25);
 }
 .lede { margin: 0; color: var(--muted); }
+.app-logo-photo {
+  width: min(148px, 38vw);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 22%;
+  object-fit: cover;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(0, 180, 216, 0.35),
+    0 0 28px rgba(0, 180, 216, 0.18);
+}
 .app-logo {
   width: min(112px, 30vw);
   height: auto;
