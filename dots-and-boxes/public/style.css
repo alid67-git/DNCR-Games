@@ -268,12 +268,13 @@ textarea {
 .diff-grid,
 .board-grid {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.45rem;
 }
 .diff-grid {
   grid-template-columns: 1fr 1fr;
 }
 .board-grid {
+  /* 10 tahta: 2 sütun kompakt kalsın; dar ekranda tek sütuna düşmesin */
   grid-template-columns: 1fr 1fr;
 }
 
@@ -282,8 +283,8 @@ textarea {
   appearance: none;
   text-align: left;
   cursor: pointer;
-  padding: 0.85rem 0.9rem;
-  border-radius: 14px;
+  padding: 0.65rem 0.7rem;
+  border-radius: 12px;
   border: 1px solid rgba(144, 200, 200, 0.18);
   background: var(--panel);
   color: inherit;
@@ -302,28 +303,28 @@ textarea {
 .diff-card strong,
 .board-card strong {
   display: block;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   color: #f2fffd;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.12rem;
 }
 .diff-card span,
 .board-card span {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--muted);
-  line-height: 1.35;
+  line-height: 1.3;
 }
 .board-card .board-meta {
-  margin-top: 0.35rem;
-  font-size: 0.7rem;
+  margin-top: 0.2rem;
+  font-size: 0.68rem;
   color: #9fd8d4;
 }
 .rec-badge {
   display: inline-block;
-  margin-top: 0.4rem;
-  padding: 0.12rem 0.45rem;
+  margin-top: 0.28rem;
+  padding: 0.1rem 0.4rem;
   border-radius: 6px;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -331,9 +332,42 @@ textarea {
   background: var(--gold);
 }
 
+/* Setup: Başla her zaman görünür (sticky alt şerit) */
+.setup-screen.active {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 2.5rem);
+  min-height: calc(100vh - 2.5rem);
+}
+.setup-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.setup-section-title {
+  margin: 0.85rem 0 0.45rem;
+}
+.setup-lobby {
+  margin-top: 0.65rem;
+  padding: 0.85rem;
+  gap: 0.65rem;
+}
+.setup-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  flex-shrink: 0;
+  margin-top: 0.65rem;
+  padding: 0.65rem 0 calc(0.55rem + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(
+    to top,
+    rgba(10, 31, 34, 0.98) 55%,
+    rgba(10, 31, 34, 0.88) 78%,
+    rgba(10, 31, 34, 0)
+  );
+}
 .btn-start {
   width: 100%;
-  margin-top: 1.35rem;
+  margin-top: 0;
 }
 
 .lobby-form {
@@ -703,13 +737,9 @@ html[lang="en"] .chip-score::before {
   pointer-events: stroke;
   -webkit-tap-highlight-color: transparent;
 }
-.edge-hit:hover + .edge-idle,
-.edge-hit.hover-preview {
-  /* handled via JS class on idle twin */
-}
 .edge-preview {
-  stroke: rgba(240, 195, 90, 0.55);
-  stroke-width: 2.2;
+  stroke: rgba(240, 195, 90, 0.7);
+  stroke-width: 2.4;
   stroke-linecap: round;
   fill: none;
 }
@@ -807,9 +837,18 @@ html[lang="en"] .chip-score::before {
   .brand-mark {
     font-size: 1.7rem;
   }
-  .diff-grid,
-  .board-grid {
+  /* Zorluk dar ekranda tek sütun olabilir; tahta grid 2 sütun kalsın (Başla görünür kalsın) */
+  .diff-grid {
     grid-template-columns: 1fr;
+  }
+  .board-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .board-card {
+    padding: 0.55rem 0.55rem;
+  }
+  .board-card strong {
+    font-size: 0.8rem;
   }
 }
 
