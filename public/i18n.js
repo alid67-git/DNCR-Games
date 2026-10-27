@@ -65,6 +65,7 @@ window.KatiI18n = (function () {
       helpRule2: "Rakibin üzerinden düz çizgide boş noktaya zıplayarak ye.",
       helpRule3: "Yakalama zorunlu; zincir varsa aynı taşla devam et.",
       helpRule4: "Rakibin tüm taşlarını ye veya hareket ettirme.",
+      helpRule5: "Zincir yakalamada aynı taşla devam et; zorunlu yakalamayı atlama.",
       helpOnlineTitle: "Ülkeler arası nasıl oynanır?",
       helpOnline1: "Oyna → Çevrimiçi oyna → Oda kur.",
       helpOnline2: "Davet linkini kopyalayıp WhatsApp / e-posta ile gönder.",
@@ -72,9 +73,22 @@ window.KatiI18n = (function () {
       helpOnline4: "İkiniz de Hazırım deyin — aynı Wi‑Fi veya sunucu gerekmez.",
       helpTeamsTitle: "Takımlar",
       helpTeams: "Kırmızı takım solda, yeşil takım sağda. Her elde başlayan taraf değişir.",
+      helpModesTitle: "Oyun modları",
+      helpModes:
+        "Bilgisayara karşı · Aynı cihazda iki kişi · Uzaktan (oda kodu / P2P). İlk ikisi çevrimdışı.",
+      helpOfflineTitle: "İnternet",
+      helpOffline:
+        "Solo ve aynı cihaz internet istemez. Uzaktan yalnızca eşleşme için kısa internet gerekir.",
       helpAiTitle: "Bilgisayara karşı",
       helpAi:
         "Ayarlar → Bilgisayar zorluğu: Kolay (çeşitli, hata yapar), Normal, Zor. Aynı açılışı ezberlemesin diye yakın hamleler arasından seçer.",
+      helpSafariTitle: "iPhone Safari / kısayol",
+      helpSafari1: "DNCR Games hub: https://alid67-git.github.io/DNCR-Games/",
+      helpSafari2: "Safari → Paylaş → Ana Ekrana Ekle (DNCR ikonu).",
+      helpSafari3: "Kati’yi de ayrıca Ana Ekrana ekleyebilirsin.",
+      helpHubTitle: "DNCR Games (çıkış)",
+      helpHub:
+        "Ana menüdeki DNCR Games düğmesi ortak çıkış noktasıdır; onaylayınca hub’a dönersin.",
       updatesTitle: "Güncellemeler",
       updatesCurrent: "Yüklü sürüm",
       updatesNew: "Yeni",
@@ -193,6 +207,20 @@ window.KatiI18n = (function () {
       helpRule2: "Capture by jumping over an opponent to the empty point beyond.",
       helpRule3: "Captures are mandatory; continue chains with the same piece.",
       helpRule4: "Win by capturing all pieces or blocking all moves.",
+      helpRule5: "In a capture chain keep going with the same piece; never skip a forced capture.",
+      helpModesTitle: "Game modes",
+      helpModes:
+        "Vs computer · Same-device two-player · Remote (room code / P2P). The first two work offline.",
+      helpOfflineTitle: "Internet",
+      helpOffline:
+        "Solo and same-device need no internet. Remote only needs brief internet to match.",
+      helpSafariTitle: "iPhone Safari / shortcut",
+      helpSafari1: "DNCR Games hub: https://alid67-git.github.io/DNCR-Games/",
+      helpSafari2: "Safari → Share → Add to Home Screen (DNCR icon).",
+      helpSafari3: "You can also add Kati itself to the Home Screen.",
+      helpHubTitle: "DNCR Games (exit)",
+      helpHub:
+        "The DNCR Games button on the home menu is the shared exit; confirm to return to the hub.",
       helpOnlineTitle: "How to play across countries?",
       helpOnline1: "Play → Play online → Create room.",
       helpOnline2: "Copy the invite link and send it via WhatsApp / email.",

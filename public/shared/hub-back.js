@@ -110,8 +110,20 @@
         color: #f3e6c8;
       }
       .btn-hub-back {
-        margin-top: 0.35rem;
-        opacity: 0.92;
+        margin-top: 0.55rem;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        opacity: 0.96;
+      }
+      .btn-hub-back .hub-mark {
+        width: 1.45rem;
+        height: 1.45rem;
+        border-radius: 28%;
+        object-fit: cover;
+        box-shadow: 0 0 0 1px rgba(232, 200, 120, 0.35);
+        flex: 0 0 auto;
       }
     `;
     document.head.appendChild(s);
@@ -178,7 +190,18 @@
     const getLang = (opts && opts.getLang) || (() => "tr");
     btn.classList.add("btn-hub-back");
     const refresh = () => {
-      btn.textContent = labelFor(getLang);
+      const markSrc = (opts && opts.markSrc) || "assets/dncr-mark.png";
+      btn.innerHTML = "";
+      const img = document.createElement("img");
+      img.className = "hub-mark";
+      img.src = markSrc;
+      img.alt = "";
+      img.width = 24;
+      img.height = 24;
+      const span = document.createElement("span");
+      span.textContent = labelFor(getLang);
+      btn.appendChild(img);
+      btn.appendChild(span);
     };
     refresh();
     btn.addEventListener("click", (e) => {

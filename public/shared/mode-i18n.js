@@ -31,10 +31,16 @@
     helpP2p2: "Kodu veya davet linkini gönder.",
     helpP2p3: "Rakip katılır → ikiniz de Hazırım.",
     helpP2p4: "Kendi sunucunuz gerekmez.",
-    helpSafariTitle: "iPhone Safari",
-    helpSafari1: "Aşağıdaki GitHub Pages linkini Safari’de aç.",
-    helpSafari2: "Paylaş → Ana Ekrana Ekle.",
-    helpSafari3: "İlk açıktan sonra solo ve aynı-cihaz çevrimdışı çalışır.",
+    helpSafariTitle: "iPhone Safari / kısayol",
+    helpSafari1: "DNCR Games hub’ını Safari’de aç: alid67-git.github.io/DNCR-Games/",
+    helpSafari2: "Paylaş → Ana Ekrana Ekle — DNCR ikonu ana ekrana gelir.",
+    helpSafari3: "Oyunlardan birini açıp Ana Ekrana Ekle de yapabilirsin; solo ve aynı-cihaz çevrimdışı çalışır.",
+    helpHubTitle: "DNCR Games (çıkış)",
+    helpHub:
+      "Ana menüdeki DNCR Games düğmesi ortak çıkış noktasıdır. Onaylarsan üç oyunun listelendiği hub’a dönersin. Kurallar ve ipuçları bu Yardım sayfasındadır; hub sade tutulur.",
+    helpOfflineTitle: "İnternet",
+    helpOffline:
+      "Bilgisayara karşı ve aynı cihazda iki kişi tamamen çevrimdışıdır. Uzaktan / iki telefonda yalnızca eşleşme anında internet gerekir; oyun sunucusu yoktur (P2P).",
     offlineYes: "Evet — solo ve aynı cihazda internet gerekmez.",
     offlineP2pNote: "Uzaktan P2P için yalnızca eşleşme anında internet gerekir.",
   };
@@ -65,10 +71,16 @@
     helpP2p2: "Send the code or invite link.",
     helpP2p3: "Opponent joins → both tap Ready.",
     helpP2p4: "No server of yours is required.",
-    helpSafariTitle: "iPhone Safari",
-    helpSafari1: "Open the GitHub Pages link in Safari.",
-    helpSafari2: "Share → Add to Home Screen.",
-    helpSafari3: "After first open, solo and same-device work offline.",
+    helpSafariTitle: "iPhone Safari / shortcut",
+    helpSafari1: "Open the DNCR Games hub in Safari: alid67-git.github.io/DNCR-Games/",
+    helpSafari2: "Share → Add to Home Screen — the DNCR icon lands on your home screen.",
+    helpSafari3: "You can also Add to Home Screen from a game; solo and same-device work offline after first open.",
+    helpHubTitle: "DNCR Games (exit)",
+    helpHub:
+      "The DNCR Games button on the home menu is the shared exit. Confirm to return to the hub listing all three games. Rules live in each game’s Help; the hub stays simple.",
+    helpOfflineTitle: "Internet",
+    helpOffline:
+      "Vs computer and same-device two-player are fully offline. Remote / two phones only need internet to match; there is no game server (P2P).",
     offlineYes: "Yes — solo and same-device need no internet.",
     offlineP2pNote: "Remote P2P only needs internet for matchmaking.",
   };

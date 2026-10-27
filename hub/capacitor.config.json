@@ -1,0 +1,11 @@
+{
+  "appId": "com.dncr.games",
+  "appName": "DNCR Games",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

@@ -75,9 +75,13 @@ window.DokuztasI18n = (function () {
       helpRule2: "Aynı çizgide 3 taş = değirmen; rakibin bir taşını çıkarırsın (değirmendeki taş korunur, hepsi değirmendeyse serbest).",
       helpRule3: "Tüm taşlar bitince taşlarını komşu boş noktaya kaydır. 3 taşın kalınca herhangi bir boş noktaya uçabilirsin.",
       helpRule4: "Rakibin 3’ten az taşı kalırsa veya hiç hamlesi yoksa kazanırsın.",
+      helpRule5: "Değirmen kurulunca üçlü kısa süre vurgulanır; çıkardığın taş renk değiştirip tahtadan uçar.",
       helpModesTitle: "Oyun modları",
       helpModes:
-        "Bilgisayara karşı ve aynı cihazda iki kişi tamamen çevrimdışıdır. İki telefonda / uzaktan modu oda koduyla sunucusuz P2P kullanır (eş bulmak için kısa internet gerekir).",
+        "Bilgisayara karşı · Aynı cihazda iki kişi · İki telefonda / uzaktan (oda kodu, P2P). İlk ikisi tamamen çevrimdışı.",
+      helpOfflineTitle: "İnternet",
+      helpOffline:
+        "Solo ve aynı cihaz internet istemez. Uzaktan yalnızca eşleşme anında internet gerekir; oyun sunucusu yoktur.",
       helpDifficultyTitle: "Zorluk",
       helpDifficulty:
         "Kolay: sık hata. Zor: değirmen ve tehditleri görür. Çok Zor: daha derin arama ile neredeyse en iyi hamleyi seçer.",
@@ -86,6 +90,13 @@ window.DokuztasI18n = (function () {
       helpP2p2: "4 haneli kodu WhatsApp vb. ile gönder.",
       helpP2p3: "Rakip kodu yazıp Katıl → ikiniz de Hazırım.",
       helpP2p4: "Kendi oyun sunucunuz gerekmez; bağlantı eşler arasıdır.",
+      helpSafariTitle: "iPhone Safari / kısayol",
+      helpSafari1: "DNCR Games hub: https://alid67-git.github.io/DNCR-Games/",
+      helpSafari2: "Safari → Paylaş → Ana Ekrana Ekle (DNCR ikonu).",
+      helpSafari3: "Dokuztaş’ı da ayrıca Ana Ekrana ekleyebilirsin.",
+      helpHubTitle: "DNCR Games (çıkış)",
+      helpHub:
+        "Ana menüdeki DNCR Games düğmesi ortak çıkış noktasıdır; onaylayınca hub’a dönersin.",
 
       updatesTitle: "Güncellemeler",
       updatesCurrent: "Yüklü sürüm",
@@ -199,9 +210,13 @@ window.DokuztasI18n = (function () {
       helpRule2: "Three in a line = a mill; remove one opponent piece (pieces in mills are safe unless all are in mills).",
       helpRule3: "After all pieces are placed, slide to an adjacent empty point. With 3 pieces left you may fly to any empty point.",
       helpRule4: "Win when the opponent has fewer than 3 pieces or cannot move.",
+      helpRule5: "When you make a mill the trio flashes; a removed piece recolors and flies off the board.",
       helpModesTitle: "Modes",
       helpModes:
-        "Vs computer and same-device two-player work fully offline. Two-phones / remote uses serverless P2P with a room code (brief internet needed to find each other).",
+        "Vs computer · Same-device two-player · Two phones / remote (room code, P2P). The first two work fully offline.",
+      helpOfflineTitle: "Internet",
+      helpOffline:
+        "Solo and same-device need no internet. Remote only needs internet to match; there is no game server.",
       helpDifficultyTitle: "Difficulty",
       helpDifficulty:
         "Easy: frequent mistakes. Hard: sees mills and threats. Very Hard: deeper search for near-best moves.",
@@ -210,6 +225,13 @@ window.DokuztasI18n = (function () {
       helpP2p2: "Send the 4-character code via chat.",
       helpP2p3: "Opponent joins with the code → both tap Ready.",
       helpP2p4: "No game server of yours is required; the link is peer-to-peer.",
+      helpSafariTitle: "iPhone Safari / shortcut",
+      helpSafari1: "DNCR Games hub: https://alid67-git.github.io/DNCR-Games/",
+      helpSafari2: "Safari → Share → Add to Home Screen (DNCR icon).",
+      helpSafari3: "You can also add Dokuztaş itself to the Home Screen.",
+      helpHubTitle: "DNCR Games (exit)",
+      helpHub:
+        "The DNCR Games button on the home menu is the shared exit; confirm to return to the hub.",
 
       updatesTitle: "Updates",
       updatesCurrent: "Installed version",
