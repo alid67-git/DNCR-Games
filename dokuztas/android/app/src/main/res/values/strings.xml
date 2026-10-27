@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Dokuztaş</string>
+    <string name="title_activity_main">Dokuztaş</string>
+    <string name="package_name">com.dokuztas.app</string>
+    <string name="custom_url_scheme">com.dokuztas.app</string>
+</resources>
