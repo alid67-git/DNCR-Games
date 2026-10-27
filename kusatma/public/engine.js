@@ -326,6 +326,7 @@
     if (state.placed[player] >= STONES_EACH) return { ok: false, error: "Taş hakkın bitti." };
     const next = cloneState(state);
     next.pendingDeploy = { r, c, player };
+    next.lastMove = { type: "PLACE_SELECT", player, r, c };
     return { ok: true, state: next };
   }
 
@@ -336,6 +337,7 @@
     }
     const next = cloneState(state);
     next.pendingDeploy = null;
+    next.lastMove = { type: "PLACE_CANCEL", player };
     return { ok: true, state: next };
   }
 

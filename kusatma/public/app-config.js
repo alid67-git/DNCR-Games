@@ -1,10 +1,25 @@
 window.SiegeConfig = {
   appName: "Kuşatma",
-  version: "1.3.0",
-  build: 4,
+  version: "1.3.1",
+  build: 5,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kusatma/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
+    {
+      version: "1.3.1",
+      build: 5,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "PC köşe tıklama düzeltmesi: SVG koordinat picker, düğüm önceliği",
+          "Kenar hit uçları köşe düğümlerinden içeri alındı",
+        ],
+        en: [
+          "PC corner click fix: SVG coordinate picker, node priority",
+          "Edge hit ends inset away from corner nodes",
+        ],
+      },
+    },
     {
       version: "1.3.0",
       build: 4,

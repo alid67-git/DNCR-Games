@@ -45,12 +45,102 @@
   let fxBusy = false;
   const Audio = window.SiegeAudio || null;
 
-  const PAD = 8;
+  // Kenarlardan uzak tut: köşe tıklamaları düğüme gitsin
+  const PAD = 10;
   const SPAN = 100 - PAD * 2;
   const STEP = SPAN / (Engine.N - 1);
+  const NODE_HIT_R = 7.2;
+  const NODE_PICK_R = 8.5;
+  const EDGE_INSET = 3.2; // kenar hit uçlarını düğüm merkezinden içeri çek
+  const EDGE_PICK_MAX = 5.5;
 
   function xy(r, c) {
     return { x: PAD + c * STEP, y: PAD + r * STEP };
+  }
+
+  function clientToSvg(svg, clientX, clientY) {
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return null;
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    return pt.matrixTransform(ctm.inverse());
+  }
+
+  function distPointToSeg(px, py, ax, ay, bx, by) {
+    const dx = bx - ax;
+    const dy = by - ay;
+    const len2 = dx * dx + dy * dy;
+    if (len2 < 1e-6) return Math.hypot(px - ax, py - ay);
+    let t = ((px - ax) * dx + (py - ay) * dy) / len2;
+    t = Math.max(0, Math.min(1, t));
+    // Uçlara yakın bölgeyi düğüme bırak (köşe çakışması)
+    const insetT = EDGE_INSET / Math.sqrt(len2);
+    if (t < insetT || t > 1 - insetT) return Infinity;
+    const qx = ax + t * dx;
+    const qy = ay + t * dy;
+    return Math.hypot(px - qx, py - qy);
+  }
+
+  function insetEdgeEnds(a, b) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = (dx / len) * EDGE_INSET;
+    const uy = (dy / len) * EDGE_INSET;
+    return {
+      a: { x: a.x + ux, y: a.y + uy },
+      b: { x: b.x - ux, y: b.y - uy },
+    };
+  }
+
+  function pickBoardTarget(svgX, svgY, state) {
+    let bestNode = null;
+    let bestNodeD = NODE_PICK_R;
+    for (let r = 0; r < Engine.N; r++) {
+      for (let c = 0; c < Engine.N; c++) {
+        const p = xy(r, c);
+        const d = Math.hypot(svgX - p.x, svgY - p.y);
+        if (d <= bestNodeD) {
+          bestNodeD = d;
+          bestNode = { type: "node", r, c, d };
+        }
+      }
+    }
+    if (bestNode) return bestNode;
+
+    if (state.phase !== PHASE.BATTLE) return null;
+
+    let bestEdge = null;
+    let bestEdgeD = EDGE_PICK_MAX;
+    for (const id of ALL_EDGES) {
+      if (state.edgeDrawn[id]) continue;
+      const ends = edgeEndpoints(id);
+      if (!ends) continue;
+      const a0 = xy(ends[0][0], ends[0][1]);
+      const b0 = xy(ends[1][0], ends[1][1]);
+      const { a, b } = insetEdgeEnds(a0, b0);
+      const d = distPointToSeg(svgX, svgY, a.x, a.y, b.x, b.y);
+      if (d < bestEdgeD) {
+        bestEdgeD = d;
+        bestEdge = { type: "edge", edgeId: id, d };
+      }
+    }
+    return bestEdge;
+  }
+
+  function onBoardPointer(ev) {
+    if (!session || fxBusy) return;
+    if (ev.button != null && ev.button !== 0) return;
+    const svg = $("board");
+    if (!svg) return;
+    const pt = clientToSvg(svg, ev.clientX, ev.clientY);
+    if (!pt) return;
+    const hit = pickBoardTarget(pt.x, pt.y, session.state);
+    if (!hit) return;
+    ev.preventDefault();
+    if (hit.type === "node") onNodeClick(hit.r, hit.c);
+    else if (hit.type === "edge") onEdgeClick(hit.edgeId);
   }
 
   function loadSettings() {
@@ -397,8 +487,16 @@
       p2pSession.send({ type: "action", player, action });
     }
 
-    const animTypes = { DRAW_LINE: 1, MOVE_PIECE: 1, PLACE: 1 };
-    const needsFx = next.lastMove && animTypes[next.lastMove.type];
+    // Sadece bu hamlenin ürettiği lastMove için FX (eski PLACE artığı tetiklemesin)
+    const fxFromAction = {
+      DRAW_LINE: "DRAW_LINE",
+      MOVE_PIECE: "MOVE_PIECE",
+      PLACE_CONFIRM: "PLACE",
+      RESIGN: "RESIGN",
+    };
+    const expected = fxFromAction[action.type];
+    const needsFx =
+      expected && next.lastMove && next.lastMove.type === expected;
 
     const finish = () => {
       session.state = next;
@@ -556,6 +654,7 @@
         rect.setAttribute("height", b.y - a.y);
         rect.setAttribute("fill", colorFor(owner));
         rect.setAttribute("class", "cell-fill");
+        rect.style.pointerEvents = "none";
         svg.appendChild(rect);
         const label = document.createElementNS(NS, "text");
         label.setAttribute("x", (a.x + b.x) / 2);
@@ -568,7 +667,7 @@
       }
     }
 
-    // Edges (visual + hit)
+    // Edges (görsel). Tıklama SVG koordinat picker ile — köşe çakışması yok.
     for (const id of ALL_EDGES) {
       const ends = edgeEndpoints(id);
       if (!ends) continue;
@@ -578,30 +677,13 @@
       const drawn = s.edgeDrawn[id];
       const insured = s.edgeInsured[id];
 
-      const hit = document.createElementNS(NS, "line");
-      hit.setAttribute("x1", a.x);
-      hit.setAttribute("y1", a.y);
-      hit.setAttribute("x2", b.x);
-      hit.setAttribute("y2", b.y);
-      hit.setAttribute("stroke", "transparent");
-      hit.setAttribute("stroke-width", "11");
-      hit.setAttribute("stroke-linecap", "round");
-      hit.setAttribute("class", "edge-hit");
-      hit.dataset.edge = id;
-      if (!drawn && s.phase === PHASE.BATTLE) {
-        hit.addEventListener("pointerup", (ev) => {
-          ev.preventDefault();
-          onEdgeClick(id);
-        });
-      }
-      svg.appendChild(hit);
-
       const line = document.createElementNS(NS, "line");
       line.setAttribute("x1", a.x);
       line.setAttribute("y1", a.y);
       line.setAttribute("x2", b.x);
       line.setAttribute("y2", b.y);
       line.setAttribute("stroke-linecap", "round");
+      line.dataset.edge = id;
       let cls = "edge-line";
       if (drawn) cls += " is-drawn";
       else if (insured) cls += " is-insured";
@@ -619,35 +701,10 @@
         line.setAttribute("stroke-width", "0.55");
         line.setAttribute("opacity", "0.55");
       }
-      // PC hover: renk + hafif vurgu
-      if (!drawn && s.phase === PHASE.BATTLE) {
-        hit.addEventListener("pointerenter", () => {
-          if (fxBusy) return;
-          line.classList.add("is-hover");
-          if (insured) {
-            line.setAttribute("stroke", "#FFD56A");
-          } else {
-            line.setAttribute("stroke", "#D7CFE0");
-            line.setAttribute("stroke-width", "1.25");
-            line.setAttribute("opacity", "0.95");
-          }
-        });
-        hit.addEventListener("pointerleave", () => {
-          line.classList.remove("is-hover");
-          if (insured) {
-            line.setAttribute("stroke", "#FFB703");
-            line.setAttribute("stroke-width", "1.5");
-          } else {
-            line.setAttribute("stroke", "#9A8C98");
-            line.setAttribute("stroke-width", "0.55");
-            line.setAttribute("opacity", "0.55");
-          }
-        });
-      }
       svg.appendChild(line);
     }
 
-    // Nodes
+    // Nodes (üstte çiz)
     for (let r = 0; r < Engine.N; r++) {
       for (let c = 0; c < Engine.N; c++) {
         const p = xy(r, c);
@@ -658,19 +715,18 @@
         const hit = document.createElementNS(NS, "circle");
         hit.setAttribute("cx", p.x);
         hit.setAttribute("cy", p.y);
-        hit.setAttribute("r", "5.5");
+        hit.setAttribute("r", String(NODE_HIT_R));
         hit.setAttribute("fill", "transparent");
         hit.setAttribute("class", "node-hit");
-        hit.addEventListener("pointerup", (ev) => {
-          ev.preventDefault();
-          onNodeClick(r, c);
-        });
+        hit.dataset.node = `${r},${c}`;
+        hit.style.pointerEvents = "none"; // picker kullanıyoruz
         svg.appendChild(hit);
 
         const dot = document.createElementNS(NS, "circle");
         dot.setAttribute("cx", p.x);
         dot.setAttribute("cy", p.y);
-        dot.setAttribute("r", owner || pend ? "2.35" : "1.15");
+        dot.setAttribute("r", owner || pend ? "2.45" : "1.35");
+        dot.style.pointerEvents = "none";
         if (owner) {
           dot.setAttribute("fill", colorFor(owner));
           if (selectedStone && selectedStone.r === r && selectedStone.c === c) {
@@ -1139,6 +1195,60 @@
         Audio.setSfx(on);
         if (on) Audio.playSfx("click");
       }
+    });
+  }
+
+  // Tahta tıklama: SVG user-space → en yakın düğüm (köşe öncelikli) / kenar
+  const boardEl = $("board");
+  if (boardEl) {
+    boardEl.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    boardEl.addEventListener("pointerup", onBoardPointer);
+    boardEl.addEventListener("pointermove", (ev) => {
+      if (!session || fxBusy || session.state.phase !== PHASE.BATTLE) return;
+      const pt = clientToSvg(boardEl, ev.clientX, ev.clientY);
+      if (!pt) return;
+      const hit = pickBoardTarget(pt.x, pt.y, session.state);
+      boardEl.querySelectorAll(".edge-line.is-hover").forEach((el) => {
+        el.classList.remove("is-hover");
+        const id = el.dataset.edge;
+        if (!id) return;
+        if (session.state.edgeInsured[id]) {
+          el.setAttribute("stroke", "#FFB703");
+          el.setAttribute("stroke-width", "1.5");
+        } else if (!session.state.edgeDrawn[id]) {
+          el.setAttribute("stroke", "#9A8C98");
+          el.setAttribute("stroke-width", "0.55");
+          el.setAttribute("opacity", "0.55");
+        }
+      });
+      if (hit && hit.type === "edge") {
+        const line = boardEl.querySelector(`.edge-line[data-edge="${hit.edgeId}"]`);
+        if (line && !session.state.edgeDrawn[hit.edgeId]) {
+          line.classList.add("is-hover");
+          if (session.state.edgeInsured[hit.edgeId]) {
+            line.setAttribute("stroke", "#FFD56A");
+          } else {
+            line.setAttribute("stroke", "#D7CFE0");
+            line.setAttribute("stroke-width", "1.25");
+            line.setAttribute("opacity", "0.95");
+          }
+        }
+      }
+    });
+    boardEl.addEventListener("pointerleave", () => {
+      boardEl.querySelectorAll(".edge-line.is-hover").forEach((el) => {
+        el.classList.remove("is-hover");
+        const id = el.dataset.edge;
+        if (!id || !session) return;
+        if (session.state.edgeInsured[id]) {
+          el.setAttribute("stroke", "#FFB703");
+          el.setAttribute("stroke-width", "1.5");
+        } else if (!session.state.edgeDrawn[id]) {
+          el.setAttribute("stroke", "#9A8C98");
+          el.setAttribute("stroke-width", "0.55");
+          el.setAttribute("opacity", "0.55");
+        }
+      });
     });
   }
 

@@ -259,10 +259,17 @@ html, body {
   overflow: hidden;
   box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.35);
 }
-#board { width: 100%; height: 100%; display: block; touch-action: none; }
-.edge-hit { cursor: pointer; }
+#board {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: crosshair;
+  user-select: none;
+}
 .edge-line { pointer-events: none; }
-.node-hit { cursor: pointer; }
+.node-hit { pointer-events: none; }
+.cell-fill, .cell-mark { pointer-events: none; }
 .edge-line.is-hover {
   stroke: #cfd3e8 !important;
   stroke-width: 1.35px !important;
