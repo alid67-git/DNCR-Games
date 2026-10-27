@@ -1,6 +1,6 @@
 # DNCR Games
 
-Üç oyun · ortak menü · iPhone kısayol · Android APK.
+Dört oyun · ortak menü · iPhone kısayol · Android APK.
 
 ## Hub (çıkış noktası)
 
@@ -10,25 +10,28 @@
 | **Kati** | …/kati/ |
 | **Noktalar ve Kutular** | …/noktalar/ |
 | **Dokuztaş** | …/dokuztas/ |
+| **Kuşatma** | …/kusatma/ |
 
 **iPhone kısayol:** Safari’de hub’ı aç → **Paylaş → Ana Ekrana Ekle** (DNCR ikonu).
 
-**Android APK (hub):** `hub/` içinden derlenir — üç oyunu da içerir.
+**Tek platform:** Hepsi **DNCR Games hub** altında. Ayrı mağaza / ayrı launcher gerekmez.
+
+| Cihaz | Nasıl |
+|-------|--------|
+| **iPhone / iPad** | Safari → hub → Paylaş → Ana Ekrana Ekle |
+| **Android** | Hub APK (aşağıda) veya Chrome → hub → Ana ekrana ekle |
+| **Web** | https://alid67-git.github.io/DNCR-Games/ |
+
+**Android APK (hub):** `hub/` tek paket — dört oyunu da içerir.
 
 ```bash
 cd hub && npm install && npm run android:sync && npm run android:apk
 # → hub/android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Ayrı oyun APK’leri (isteğe bağlı):
+Ayrı oyun APK’leri isteğe bağlıdır; günlük kullanım için **sadece hub yeter**.
 
-```bash
-npm run android:sync && npm run android:apk                    # Kati
-cd dots-and-boxes && npm run android:sync && npm run android:apk
-cd dokuztas && npm run android:sync && npm run android:apk
-```
-
-Detaylı kurallar ve ipuçları **her oyunun Yardım** ekranındadır. Hub sade tutulur; oyunlardan **DNCR Games** düğmesiyle hub’a dönülür.
+Detaylı kurallar **her oyunun Yardım** ekranındadır. Oyunlardan **DNCR Games** düğmesiyle hub’a dönülür.
 
 ## Ortak oynanış
 

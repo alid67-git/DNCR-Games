@@ -11,8 +11,8 @@
   const DIFF_MULT = { easy: 1, medium: 1.25, hard: 1.5, veryhard: 2, normal: 1.25 };
   const MODE_MULT = { solo: 1, twop: 0.55, local2p: 0.55, p2p: 1.2, remote: 1.2 };
   const GAME_LABELS = {
-    tr: { kati: "Kati", noktalar: "Noktalar", dokuztas: "Dokuztaş", dncr: "DNCR toplam" },
-    en: { kati: "Kati", noktalar: "Dots & Boxes", dokuztas: "Dokuztaş", dncr: "DNCR total" },
+    tr: { kati: "Kati", noktalar: "Noktalar", dokuztas: "Dokuztaş", kusatma: "Kuşatma", dncr: "DNCR toplam" },
+    en: { kati: "Kati", noktalar: "Dots & Boxes", dokuztas: "Dokuztaş", kusatma: "The Siege", dncr: "DNCR total" },
   };
 
   function emptyGame() {
@@ -34,6 +34,7 @@
         kati: emptyGame(),
         noktalar: emptyGame(),
         dokuztas: emptyGame(),
+        kusatma: emptyGame(),
       },
     };
   }
@@ -50,6 +51,7 @@
           kati: { ...base.games.kati, ...(parsed.games && parsed.games.kati) },
           noktalar: { ...base.games.noktalar, ...(parsed.games && parsed.games.noktalar) },
           dokuztas: { ...base.games.dokuztas, ...(parsed.games && parsed.games.dokuztas) },
+          kusatma: { ...base.games.kusatma, ...(parsed.games && parsed.games.kusatma) },
         },
       };
     } catch (_) {
@@ -70,7 +72,7 @@
 
   /**
    * @param {object} opts
-   * @param {'kati'|'noktalar'|'dokuztas'} opts.gameId
+   * @param {'kati'|'noktalar'|'dokuztas'|'kusatma'} opts.gameId
    * @param {'win'|'loss'|'draw'} opts.result
    * @param {string} [opts.difficulty]
    * @param {string} [opts.mode] solo|twop|p2p
@@ -136,7 +138,8 @@
     return (
       (s.games.kati.points || 0) +
       (s.games.noktalar.points || 0) +
-      (s.games.dokuztas.points || 0)
+      (s.games.dokuztas.points || 0) +
+      ((s.games.kusatma && s.games.kusatma.points) || 0)
     );
   }
 
@@ -144,7 +147,7 @@
     const store = load();
     const L = lang === "en" ? "en" : "tr";
     const labels = GAME_LABELS[L];
-    const rows = ["dokuztas", "noktalar", "kati"].map((id) => {
+    const rows = ["kusatma", "dokuztas", "noktalar", "kati"].map((id) => {
       const g = store.games[id];
       return {
         id,

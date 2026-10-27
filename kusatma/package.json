@@ -1,0 +1,27 @@
+{
+  "name": "kusatma-the-siege",
+  "version": "1.1.0",
+  "description": "Kuşatma (The Siege) — DNCR Games: solo + local 2P + P2P, Ruleset v1",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node game/engine.test.js && node game/ai.test.js",
+    "android:sync": "npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:apk": "cd android && ./gradlew assembleDebug"
+  },
+  "keywords": [
+    "siege",
+    "kusatma",
+    "board-game",
+    "dncr-games"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "express": "^5.1.0"
+  }
+}
