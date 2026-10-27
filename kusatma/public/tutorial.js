@@ -8,9 +8,9 @@
   const STEPS = [
     {
       id: "welcome",
-      title: "Kuşatma’ya hoş geldin",
+      title: "Tutorial I · PC anlatsın",
       caption:
-        "Bu kısa turda tahtayı, taşları, çizgileri, puanı ve sigortayı adım adım göreceksin. Her adımda İleri’ye bas.",
+        "Kuralları slayt slayt anlatıyorum. Tahta, taş, çizgi, skor ve sigorta — her adımda İleri’ye bas.",
       visual: "welcome",
     },
     {

@@ -1,10 +1,57 @@
 window.SiegeConfig = {
   appName: "Kuşatma",
-  version: "1.2.0",
-  build: 3,
+  version: "1.4.0",
+  build: 6,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kusatma/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
+    {
+      version: "1.4.0",
+      build: 6,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "Tutorial menüsü: I · PC anlatsın / II · PC oynadı",
+          "Karşılıklı maç demosu: altyazı + renk/vurgu animasyonları",
+        ],
+        en: [
+          "Tutorial menu: I · PC explains / II · PC played",
+          "Mutual match demo: captions + color/glow move FX",
+        ],
+      },
+    },
+    {
+      version: "1.3.1",
+      build: 5,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "PC köşe tıklama düzeltmesi: SVG koordinat picker, düğüm önceliği",
+          "Kenar hit uçları köşe düğümlerinden içeri alındı",
+        ],
+        en: [
+          "PC corner click fix: SVG coordinate picker, node priority",
+          "Edge hit ends inset away from corner nodes",
+        ],
+      },
+    },
+    {
+      version: "1.3.0",
+      build: 4,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "PC: çizgi/taş yavaş hareket + renk geçişi ve hafif glow vurgu",
+          "Kenar üzerine gelince hover vurgusu",
+          "Müzik + ses efektleri (Ayarlar’dan aç/kapa)",
+        ],
+        en: [
+          "PC: slow line/stone motion with color shift and soft glow",
+          "Edge hover highlight",
+          "Music + SFX (toggle in Settings)",
+        ],
+      },
+    },
     {
       version: "1.2.0",
       build: 3,

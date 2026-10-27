@@ -16,6 +16,7 @@
   const screens = {
     home: $("screen-home"),
     play: $("screen-play"),
+    tutorialMenu: $("screen-tutorial-menu"),
     soloSetup: $("screen-solo-setup"),
     twoPSetup: $("screen-2p-setup"),
     p2p: $("screen-p2p"),
@@ -42,17 +43,118 @@
   let aiTimer = null;
   let hubBackCtl = null;
   let tutorialCtl = null;
+  let fxBusy = false;
+  let demo = null; // { index, busy }
+  const Audio = window.SiegeAudio || null;
+  const DemoMatch = window.SiegeDemoMatch || null;
 
-  const PAD = 8;
+  // Kenarlardan uzak tut: köşe tıklamaları düğüme gitsin
+  const PAD = 10;
   const SPAN = 100 - PAD * 2;
   const STEP = SPAN / (Engine.N - 1);
+  const NODE_HIT_R = 7.2;
+  const NODE_PICK_R = 8.5;
+  const EDGE_INSET = 3.2; // kenar hit uçlarını düğüm merkezinden içeri çek
+  const EDGE_PICK_MAX = 5.5;
 
   function xy(r, c) {
     return { x: PAD + c * STEP, y: PAD + r * STEP };
   }
 
+  function clientToSvg(svg, clientX, clientY) {
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return null;
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    return pt.matrixTransform(ctm.inverse());
+  }
+
+  function distPointToSeg(px, py, ax, ay, bx, by) {
+    const dx = bx - ax;
+    const dy = by - ay;
+    const len2 = dx * dx + dy * dy;
+    if (len2 < 1e-6) return Math.hypot(px - ax, py - ay);
+    let t = ((px - ax) * dx + (py - ay) * dy) / len2;
+    t = Math.max(0, Math.min(1, t));
+    // Uçlara yakın bölgeyi düğüme bırak (köşe çakışması)
+    const insetT = EDGE_INSET / Math.sqrt(len2);
+    if (t < insetT || t > 1 - insetT) return Infinity;
+    const qx = ax + t * dx;
+    const qy = ay + t * dy;
+    return Math.hypot(px - qx, py - qy);
+  }
+
+  function insetEdgeEnds(a, b) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = (dx / len) * EDGE_INSET;
+    const uy = (dy / len) * EDGE_INSET;
+    return {
+      a: { x: a.x + ux, y: a.y + uy },
+      b: { x: b.x - ux, y: b.y - uy },
+    };
+  }
+
+  function pickBoardTarget(svgX, svgY, state) {
+    let bestNode = null;
+    let bestNodeD = NODE_PICK_R;
+    for (let r = 0; r < Engine.N; r++) {
+      for (let c = 0; c < Engine.N; c++) {
+        const p = xy(r, c);
+        const d = Math.hypot(svgX - p.x, svgY - p.y);
+        if (d <= bestNodeD) {
+          bestNodeD = d;
+          bestNode = { type: "node", r, c, d };
+        }
+      }
+    }
+    if (bestNode) return bestNode;
+
+    if (state.phase !== PHASE.BATTLE) return null;
+
+    let bestEdge = null;
+    let bestEdgeD = EDGE_PICK_MAX;
+    for (const id of ALL_EDGES) {
+      if (state.edgeDrawn[id]) continue;
+      const ends = edgeEndpoints(id);
+      if (!ends) continue;
+      const a0 = xy(ends[0][0], ends[0][1]);
+      const b0 = xy(ends[1][0], ends[1][1]);
+      const { a, b } = insetEdgeEnds(a0, b0);
+      const d = distPointToSeg(svgX, svgY, a.x, a.y, b.x, b.y);
+      if (d < bestEdgeD) {
+        bestEdgeD = d;
+        bestEdge = { type: "edge", edgeId: id, d };
+      }
+    }
+    return bestEdge;
+  }
+
+  function onBoardPointer(ev) {
+    if (!session || fxBusy || session.mode === "demo") return;
+    if (ev.button != null && ev.button !== 0) return;
+    const svg = $("board");
+    if (!svg) return;
+    const pt = clientToSvg(svg, ev.clientX, ev.clientY);
+    if (!pt) return;
+    const hit = pickBoardTarget(pt.x, pt.y, session.state);
+    if (!hit) return;
+    ev.preventDefault();
+    if (hit.type === "node") onNodeClick(hit.r, hit.c);
+    else if (hit.type === "edge") onEdgeClick(hit.edgeId);
+  }
+
   function loadSettings() {
-    const defaults = { lang: "tr", aiDifficulty: "medium", p1: "", p2: "" };
+    const defaults = {
+      lang: "tr",
+      aiDifficulty: "medium",
+      p1: "",
+      p2: "",
+      music: true,
+      sfx: true,
+    };
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
       if (!raw) return defaults;
@@ -60,6 +162,17 @@
     } catch (_) {
       return defaults;
     }
+  }
+
+  function bootAudio() {
+    if (!Audio) return;
+    Audio.applyPrefs({ music: settings.music !== false, sfx: settings.sfx !== false });
+  }
+
+  async function ensureAudio() {
+    if (!Audio) return;
+    await Audio.unlock();
+    bootAudio();
   }
 
   function saveSettings(next) {
@@ -105,6 +218,8 @@
     if ($("settings-version")) $("settings-version").textContent = ver;
     if ($("set-lang")) $("set-lang").value = lang();
     if ($("set-diff")) $("set-diff").value = settings.aiDifficulty || "medium";
+    if ($("set-music")) $("set-music").checked = settings.music !== false;
+    if ($("set-sfx")) $("set-sfx").checked = settings.sfx !== false;
     renderDiffGrid();
     if (hubBackCtl && hubBackCtl.refresh) hubBackCtl.refresh();
   }
@@ -164,27 +279,249 @@
     return true; // local 2p
   }
 
+  function easeInOut(t) {
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  }
+
+  function runAnim(ms, onFrame) {
+    return new Promise((resolve) => {
+      const t0 = performance.now();
+      function frame(now) {
+        const p = Math.min(1, (now - t0) / ms);
+        onFrame(easeInOut(p), p);
+        if (p < 1) requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  function lerpColor(a, b, t) {
+    const pa = parseInt(a.slice(1), 16);
+    const pb = parseInt(b.slice(1), 16);
+    const ar = (pa >> 16) & 255;
+    const ag = (pa >> 8) & 255;
+    const ab = pa & 255;
+    const br = (pb >> 16) & 255;
+    const bg = (pb >> 8) & 255;
+    const bb = pb & 255;
+    const r = Math.round(lerp(ar, br, t));
+    const g = Math.round(lerp(ag, bg, t));
+    const bl = Math.round(lerp(ab, bb, t));
+    return `#${((1 << 24) + (r << 16) + (g << 8) + bl).toString(16).slice(1)}`;
+  }
+
+  function ensureBoardDefs(svg) {
+    const NS = "http://www.w3.org/2000/svg";
+    if (svg.querySelector("#siege-glow")) return;
+    const defs = document.createElementNS(NS, "defs");
+    defs.innerHTML = `
+      <filter id="siege-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="1.2" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="siege-glow-strong" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur stdDeviation="2.2" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>`;
+    svg.insertBefore(defs, svg.firstChild);
+  }
+
+  async function animateDrawLine(edgeId, player) {
+    const svg = $("board");
+    if (!svg) return;
+    ensureBoardDefs(svg);
+    const ends = edgeEndpoints(edgeId);
+    if (!ends) return;
+    const [p0, p1] = ends;
+    const a = xy(p0[0], p0[1]);
+    const b = xy(p1[0], p1[1]);
+    const NS = "http://www.w3.org/2000/svg";
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+    const line = document.createElementNS(NS, "line");
+    line.setAttribute("x1", a.x);
+    line.setAttribute("y1", a.y);
+    line.setAttribute("x2", b.x);
+    line.setAttribute("y2", b.y);
+    line.setAttribute("stroke-linecap", "round");
+    line.setAttribute("class", "edge-line is-drawing");
+    line.setAttribute("stroke-dasharray", String(len));
+    line.setAttribute("stroke-dashoffset", String(len));
+    line.setAttribute("stroke-width", "2.4");
+    svg.appendChild(line);
+    const base = colorFor(player);
+    const hi = player === 1 ? "#7FE9FF" : "#FF8A93";
+    if (Audio) Audio.playSfx("draw");
+    await runAnim(780, (e) => {
+      line.setAttribute("stroke-dashoffset", String(len * (1 - e)));
+      line.setAttribute("stroke", lerpColor(hi, base, e));
+      line.setAttribute("stroke-width", String(lerp(2.8, 1.55, e)));
+      line.setAttribute("opacity", String(lerp(0.55, 1, e)));
+    });
+    line.remove();
+  }
+
+  async function animateMoveStone(from, to, player) {
+    const svg = $("board");
+    if (!svg) return;
+    ensureBoardDefs(svg);
+    const a = xy(from.r, from.c);
+    const b = xy(to.r, to.c);
+    const NS = "http://www.w3.org/2000/svg";
+    const g = document.createElementNS(NS, "g");
+    g.setAttribute("class", "stone-flying");
+    const glow = document.createElementNS(NS, "circle");
+    glow.setAttribute("r", "4.2");
+    glow.setAttribute("opacity", "0.35");
+    const dot = document.createElementNS(NS, "circle");
+    dot.setAttribute("r", "2.55");
+    const mark = document.createElementNS(NS, "text");
+    mark.setAttribute("text-anchor", "middle");
+    mark.setAttribute("font-size", "2.6");
+    mark.setAttribute("font-weight", "700");
+    mark.setAttribute("fill", "#0a0a0e");
+    mark.textContent = player === 1 ? "○" : "△";
+    g.appendChild(glow);
+    g.appendChild(dot);
+    g.appendChild(mark);
+    svg.appendChild(g);
+    const base = colorFor(player);
+    const hi = player === 1 ? "#9AF0FF" : "#FFB0B6";
+    if (Audio) Audio.playSfx("move");
+    await runAnim(920, (e) => {
+      const x = lerp(a.x, b.x, e);
+      const y = lerp(a.y, b.y, e);
+      const col = lerpColor(base, hi, Math.sin(e * Math.PI));
+      glow.setAttribute("cx", x);
+      glow.setAttribute("cy", y);
+      glow.setAttribute("fill", col);
+      glow.setAttribute("opacity", String(0.2 + 0.35 * Math.sin(e * Math.PI)));
+      dot.setAttribute("cx", x);
+      dot.setAttribute("cy", y);
+      dot.setAttribute("fill", col);
+      mark.setAttribute("x", x);
+      mark.setAttribute("y", y + 1.05);
+    });
+    g.remove();
+  }
+
+  async function animateCaptureFlash(details, player) {
+    if (!details || !details.length) return;
+    const svg = $("board");
+    if (!svg) return;
+    const NS = "http://www.w3.org/2000/svg";
+    const els = [];
+    for (const d of details) {
+      const a = xy(d.i, d.j);
+      const b = xy(d.i + 1, d.j + 1);
+      const rect = document.createElementNS(NS, "rect");
+      rect.setAttribute("x", a.x);
+      rect.setAttribute("y", a.y);
+      rect.setAttribute("width", b.x - a.x);
+      rect.setAttribute("height", b.y - a.y);
+      rect.setAttribute("fill", colorFor(player));
+      rect.setAttribute("class", "cell-flash");
+      rect.setAttribute("opacity", "0.45");
+      svg.appendChild(rect);
+      els.push(rect);
+      if (d.siege && Audio) Audio.playSfx("siege");
+      else if (Audio) Audio.playSfx("capture");
+    }
+    await new Promise((r) => setTimeout(r, 700));
+    els.forEach((el) => el.remove());
+  }
+
+  async function playMoveFx(prevLast, nextState) {
+    const lm = nextState.lastMove;
+    if (!lm) return;
+    const board = $("board");
+    if (board) board.classList.add("is-fx-busy");
+    fxBusy = true;
+    try {
+      if (lm.type === "DRAW_LINE") {
+        if (lm.brokeShield && Audio) Audio.playSfx("shield");
+        await animateDrawLine(lm.edgeId, lm.player);
+        if (lm.captureDetails && lm.captureDetails.length) {
+          await animateCaptureFlash(lm.captureDetails, lm.player);
+        }
+      } else if (lm.type === "MOVE_PIECE") {
+        await animateMoveStone(lm.from, lm.to, lm.player);
+      } else if (lm.type === "PLACE") {
+        if (Audio) Audio.playSfx("place");
+        await runAnim(360, () => {});
+      } else if (lm.type === "RESIGN") {
+        if (Audio) Audio.playSfx("lose");
+      }
+      if (nextState.phase === PHASE.GAME_OVER && nextState.winner !== "draw" && Audio) {
+        const human =
+          session && (session.mode === "solo" || session.mode === "p2p")
+            ? session.humanPlayer
+            : null;
+        if (human != null) {
+          Audio.playSfx(nextState.winner === human ? "win" : "lose");
+        } else if (Audio) Audio.playSfx("win");
+      }
+    } finally {
+      fxBusy = false;
+      if (board) board.classList.remove("is-fx-busy");
+    }
+  }
+
   function commitAction(player, action, opts) {
     const fromNet = opts && opts.fromNet;
-    if (!session) return false;
+    const skipFx = opts && opts.skipFx;
+    const silent = opts && opts.silent;
+    if (!session) return Promise.resolve(false);
+    if (fxBusy && !fromNet && !skipFx) return Promise.resolve(false);
     const r = applyAction(session.state, player, action);
     if (!r.ok) {
-      if (!fromNet) toast(r.error || t("toastInvalid"));
-      return false;
+      if (!fromNet && !silent) {
+        if (Audio) Audio.playSfx("invalid");
+        toast(r.error || t("toastInvalid"));
+      }
+      if (silent) console.warn("demo action fail", action, r.error);
+      return Promise.resolve(false);
     }
-    session.state = r.state;
+    const next = r.state;
     selectedStone = null;
-    renderAll();
+
     if (!fromNet && session.mode === "p2p" && p2pSession) {
       p2pSession.send({ type: "action", player, action });
     }
-    if (!fromNet) maybeAiTurn();
-    return true;
+
+    // Sadece bu hamlenin ürettiği lastMove için FX (eski PLACE artığı tetiklemesin)
+    const fxFromAction = {
+      DRAW_LINE: "DRAW_LINE",
+      MOVE_PIECE: "MOVE_PIECE",
+      PLACE_CONFIRM: "PLACE",
+      RESIGN: "RESIGN",
+    };
+    const expected = fxFromAction[action.type];
+    const needsFx =
+      !skipFx && expected && next.lastMove && next.lastMove.type === expected;
+
+    const finish = () => {
+      session.state = next;
+      renderAll();
+      if (!fromNet && session.mode !== "demo") maybeAiTurn();
+      return true;
+    };
+
+    if (needsFx) {
+      return playMoveFx(session.state.lastMove, next).then(finish);
+    }
+    return Promise.resolve(finish());
   }
 
-  function startGame(mode) {
+  async function startGame(mode) {
     clearTimeout(aiTimer);
     selectedStone = null;
+    await ensureAudio();
+    if (Audio && settings.music !== false) Audio.startMusic();
     const state = createGameState(PLAYERS.P1);
     session = {
       mode,
@@ -307,6 +644,7 @@
     const svg = $("board");
     const NS = "http://www.w3.org/2000/svg";
     while (svg.firstChild) svg.removeChild(svg.firstChild);
+    ensureBoardDefs(svg);
 
     // Cells
     for (let i = 0; i < Engine.C; i++) {
@@ -322,6 +660,7 @@
         rect.setAttribute("height", b.y - a.y);
         rect.setAttribute("fill", colorFor(owner));
         rect.setAttribute("class", "cell-fill");
+        rect.style.pointerEvents = "none";
         svg.appendChild(rect);
         const label = document.createElementNS(NS, "text");
         label.setAttribute("x", (a.x + b.x) / 2);
@@ -334,7 +673,7 @@
       }
     }
 
-    // Edges (visual + hit)
+    // Edges (görsel). Tıklama SVG koordinat picker ile — köşe çakışması yok.
     for (const id of ALL_EDGES) {
       const ends = edgeEndpoints(id);
       if (!ends) continue;
@@ -344,31 +683,17 @@
       const drawn = s.edgeDrawn[id];
       const insured = s.edgeInsured[id];
 
-      const hit = document.createElementNS(NS, "line");
-      hit.setAttribute("x1", a.x);
-      hit.setAttribute("y1", a.y);
-      hit.setAttribute("x2", b.x);
-      hit.setAttribute("y2", b.y);
-      hit.setAttribute("stroke", "transparent");
-      hit.setAttribute("stroke-width", "11");
-      hit.setAttribute("stroke-linecap", "round");
-      hit.setAttribute("class", "edge-hit");
-      hit.dataset.edge = id;
-      if (!drawn && s.phase === PHASE.BATTLE) {
-        hit.addEventListener("pointerup", (ev) => {
-          ev.preventDefault();
-          onEdgeClick(id);
-        });
-      }
-      svg.appendChild(hit);
-
       const line = document.createElementNS(NS, "line");
       line.setAttribute("x1", a.x);
       line.setAttribute("y1", a.y);
       line.setAttribute("x2", b.x);
       line.setAttribute("y2", b.y);
       line.setAttribute("stroke-linecap", "round");
-      line.setAttribute("class", "edge-line");
+      line.dataset.edge = id;
+      let cls = "edge-line";
+      if (drawn) cls += " is-drawn";
+      else if (insured) cls += " is-insured";
+      line.setAttribute("class", cls);
       if (drawn) {
         const who = s.edgeOwner[id] || 0;
         line.setAttribute("stroke", who ? colorFor(who) : "#c4b7c5");
@@ -385,7 +710,7 @@
       svg.appendChild(line);
     }
 
-    // Nodes
+    // Nodes (üstte çiz)
     for (let r = 0; r < Engine.N; r++) {
       for (let c = 0; c < Engine.N; c++) {
         const p = xy(r, c);
@@ -396,19 +721,18 @@
         const hit = document.createElementNS(NS, "circle");
         hit.setAttribute("cx", p.x);
         hit.setAttribute("cy", p.y);
-        hit.setAttribute("r", "5.5");
+        hit.setAttribute("r", String(NODE_HIT_R));
         hit.setAttribute("fill", "transparent");
         hit.setAttribute("class", "node-hit");
-        hit.addEventListener("pointerup", (ev) => {
-          ev.preventDefault();
-          onNodeClick(r, c);
-        });
+        hit.dataset.node = `${r},${c}`;
+        hit.style.pointerEvents = "none"; // picker kullanıyoruz
         svg.appendChild(hit);
 
         const dot = document.createElementNS(NS, "circle");
         dot.setAttribute("cx", p.x);
         dot.setAttribute("cy", p.y);
-        dot.setAttribute("r", owner || pend ? "2.35" : "1.15");
+        dot.setAttribute("r", owner || pend ? "2.45" : "1.35");
+        dot.style.pointerEvents = "none";
         if (owner) {
           dot.setAttribute("fill", colorFor(owner));
           if (selectedStone && selectedStone.r === r && selectedStone.c === c) {
@@ -459,23 +783,27 @@
   }
 
   function onEdgeClick(edgeId) {
-    if (!session || !isHumanTurn()) return;
+    if (!session || !isHumanTurn() || fxBusy) return;
     const s = session.state;
     if (s.phase !== PHASE.BATTLE) return;
     selectedStone = null;
     if (s.edgeInsured[edgeId] && s.shieldPoints[s.turn] < SHIELD_BREAK_COST) {
+      if (Audio) Audio.playSfx("invalid");
       toast(t("insuredHint"));
       return;
     }
+    ensureAudio();
     commitAction(s.turn, { type: "DRAW_LINE", edgeId });
   }
 
   function onNodeClick(r, c) {
-    if (!session || !isHumanTurn()) return;
+    if (!session || !isHumanTurn() || fxBusy) return;
     const s = session.state;
     const player = s.turn;
 
     if (s.phase === PHASE.DEPLOY) {
+      ensureAudio();
+      if (Audio) Audio.playSfx("select");
       commitAction(player, { type: "PLACE_SELECT", r, c });
       return;
     }
@@ -484,6 +812,7 @@
 
     if (s.nodes[r][c] === player) {
       selectedStone = { r, c };
+      if (Audio) Audio.playSfx("select");
       renderBoard();
       return;
     }
@@ -528,6 +857,9 @@
   }
 
   function beginP2PGame(names) {
+    ensureAudio().then(() => {
+      if (Audio && settings.music !== false) Audio.startMusic();
+    });
     const state = createGameState(PLAYERS.P1);
     session = {
       mode: "p2p",
@@ -663,6 +995,7 @@
   function maybeAiTurn() {
     clearTimeout(aiTimer);
     if (!session || session.mode !== "solo") return;
+    if (fxBusy) return;
     const s = session.state;
     if (s.phase === PHASE.GAME_OVER) return;
     if (s.turn === session.humanPlayer) return;
@@ -675,25 +1008,20 @@
 
   function runAiStep() {
     if (!session || session.mode !== "solo") return;
+    if (fxBusy) {
+      aiTimer = setTimeout(runAiStep, 120);
+      return;
+    }
     const s = session.state;
     if (s.phase === PHASE.GAME_OVER) return;
     if (s.turn === session.humanPlayer) return;
 
     const action = Ai.chooseMove(s, s.turn, session.difficulty);
     if (!action) return;
-    const r = applyAction(s, s.turn, action);
-    if (!r.ok) {
-      console.warn("AI invalid", action, r.error);
-      return;
-    }
-    session.state = r.state;
-    selectedStone = null;
-    renderAll();
-
-    // Deploy: select then confirm on next tick; battle extra turns
-    if (session.state.phase !== PHASE.GAME_OVER && session.state.turn !== session.humanPlayer) {
-      aiTimer = setTimeout(runAiStep, session.state.phase === PHASE.DEPLOY ? 200 : 380);
-    }
+    commitAction(s.turn, action).then((ok) => {
+      if (!ok) console.warn("AI invalid", action);
+      // ekstra tur / deploy zinciri: maybeAiTurn finish içinde çağrılır
+    });
   }
 
   // --- Navigation ---
@@ -717,7 +1045,11 @@
   $("btn-settings-back").addEventListener("click", () => showScreen("home"));
   $("btn-help-back").addEventListener("click", () => showScreen("home"));
 
-  function openTutorial() {
+  function openTutorialMenu() {
+    showScreen("tutorialMenu");
+  }
+
+  function openTutorialRules() {
     const overlay = $("tutorial-overlay");
     if (!overlay || !window.SiegeTutorial) return;
     overlay.setAttribute("aria-hidden", "false");
@@ -730,23 +1062,140 @@
           try {
             localStorage.setItem("kusatma_tutorial_seen_v1", "1");
           } catch (_) {}
+          showScreen("tutorialMenu");
         },
       });
     }
     tutorialCtl.open(0);
   }
 
-  if ($("btn-home-tutorial")) {
-    $("btn-home-tutorial").addEventListener("click", () => openTutorial());
-  }
-  if ($("btn-help-tutorial")) {
-    $("btn-help-tutorial").addEventListener("click", () => openTutorial());
+  function updateDemoCaption(step) {
+    if (!$("demo-caption")) return;
+    if ($("demo-kicker")) $("demo-kicker").textContent = t("tutDemoTitle");
+    if ($("demo-title")) $("demo-title").textContent = step.title;
+    if ($("demo-text")) $("demo-text").textContent = step.caption;
+    if ($("demo-step") && demo) {
+      $("demo-step").textContent = `${demo.index + 1} / ${DemoMatch.STEPS.length}`;
+    }
+    if ($("btn-demo-next")) {
+      $("btn-demo-next").textContent = step.finale ? t("demoFinish") : t("demoNext");
+    }
   }
 
-  // İlk açılışta bir kez otomatik tutorial
+  async function runDemoActionSpec(spec, opts) {
+    if (!spec) return true;
+    const player = spec.player;
+    const action = { ...spec };
+    delete action.player;
+    return commitAction(player, action, { silent: true, ...(opts || {}) });
+  }
+
+  async function executeDemoStep(step) {
+    if (step.batch && step.batch.length) {
+      for (const spec of step.batch) {
+        const ok = await runDemoActionSpec(spec, { skipFx: true });
+        if (!ok) break;
+        await new Promise((r) => setTimeout(r, 90));
+      }
+      renderAll();
+      if (Audio) Audio.playSfx("place");
+      return;
+    }
+    if (step.action) {
+      await runDemoActionSpec(step.action);
+      if (step.follow) await runDemoActionSpec(step.follow);
+    }
+  }
+
+  function exitDemo() {
+    demo = null;
+    session = null;
+    document.body.classList.remove("is-demo");
+    if ($("demo-caption")) $("demo-caption").classList.add("hidden");
+    if ($("btn-resign")) $("btn-resign").classList.remove("hidden");
+    if (Audio) Audio.stopMusic();
+    showScreen("tutorialMenu");
+  }
+
+  async function startDemoMatch() {
+    if (!DemoMatch || !DemoMatch.STEPS) {
+      toast("Demo yüklenemedi");
+      return;
+    }
+    clearTimeout(aiTimer);
+    selectedStone = null;
+    await ensureAudio();
+    if (Audio && settings.music !== false) Audio.startMusic();
+    session = {
+      mode: "demo",
+      difficulty: null,
+      humanPlayer: null,
+      names: {
+        p1: lang() === "en" ? "Blue (PC)" : "Mavi (PC)",
+        p2: lang() === "en" ? "Red (PC)" : "Kırmızı (PC)",
+      },
+      state: createGameState(PLAYERS.P1),
+      scoreRecorded: true,
+    };
+    demo = { index: 0, busy: false };
+    document.body.classList.add("is-demo");
+    if ($("demo-caption")) $("demo-caption").classList.remove("hidden");
+    if ($("btn-resign")) $("btn-resign").classList.add("hidden");
+    $("game-over").classList.add("hidden");
+    showScreen("game");
+    renderAll();
+    updateDemoCaption(DemoMatch.STEPS[0]);
+  }
+
+  async function onDemoNext() {
+    if (!demo || !DemoMatch || demo.busy) return;
+    const step = DemoMatch.STEPS[demo.index];
+    if (step.finale) {
+      exitDemo();
+      return;
+    }
+    demo.busy = true;
+    if ($("btn-demo-next")) $("btn-demo-next").disabled = true;
+    try {
+      await executeDemoStep(step);
+      demo.index += 1;
+      if (demo.index >= DemoMatch.STEPS.length) {
+        exitDemo();
+        return;
+      }
+      updateDemoCaption(DemoMatch.STEPS[demo.index]);
+    } finally {
+      demo.busy = false;
+      if ($("btn-demo-next")) $("btn-demo-next").disabled = false;
+    }
+  }
+
+  if ($("btn-home-tutorial")) {
+    $("btn-home-tutorial").addEventListener("click", () => openTutorialMenu());
+  }
+  if ($("btn-help-tutorial")) {
+    $("btn-help-tutorial").addEventListener("click", () => openTutorialMenu());
+  }
+  if ($("btn-tutorial-menu-back")) {
+    $("btn-tutorial-menu-back").addEventListener("click", () => showScreen("home"));
+  }
+  if ($("btn-tut-rules")) {
+    $("btn-tut-rules").addEventListener("click", () => openTutorialRules());
+  }
+  if ($("btn-tut-demo")) {
+    $("btn-tut-demo").addEventListener("click", () => startDemoMatch());
+  }
+  if ($("btn-demo-next")) {
+    $("btn-demo-next").addEventListener("click", () => onDemoNext());
+  }
+  if ($("btn-demo-exit")) {
+    $("btn-demo-exit").addEventListener("click", () => exitDemo());
+  }
+
+  // İlk açılışta tutorial menüsü yerine kurallar turu
   try {
     if (!localStorage.getItem("kusatma_tutorial_seen_v1")) {
-      setTimeout(() => openTutorial(), 450);
+      setTimeout(() => openTutorialRules(), 450);
     }
   } catch (_) {}
 
@@ -818,12 +1267,17 @@
   });
 
   $("btn-game-back").addEventListener("click", () => {
+    if (session && session.mode === "demo") {
+      exitDemo();
+      return;
+    }
     if (session && session.state.phase !== PHASE.GAME_OVER) {
       if (!confirm(lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?")) return;
     }
     clearTimeout(aiTimer);
     if (session && session.mode === "p2p") destroyP2P();
     session = null;
+    if (Audio) Audio.stopMusic();
     showScreen("home");
   });
 
@@ -840,6 +1294,7 @@
   $("btn-to-menu").addEventListener("click", () => {
     if (session && session.mode === "p2p") destroyP2P();
     session = null;
+    if (Audio) Audio.stopMusic();
     showScreen("home");
   });
 
@@ -851,6 +1306,94 @@
     setup.difficulty = e.target.value;
     saveSettings({ aiDifficulty: e.target.value });
   });
+  if ($("set-music")) {
+    $("set-music").addEventListener("change", async (e) => {
+      const on = !!e.target.checked;
+      saveSettings({ music: on });
+      await ensureAudio();
+      if (Audio) {
+        Audio.setMusic(on);
+        if (on && session) Audio.startMusic();
+      }
+    });
+  }
+  if ($("set-sfx")) {
+    $("set-sfx").addEventListener("change", async (e) => {
+      const on = !!e.target.checked;
+      saveSettings({ sfx: on });
+      await ensureAudio();
+      if (Audio) {
+        Audio.setSfx(on);
+        if (on) Audio.playSfx("click");
+      }
+    });
+  }
+
+  // Tahta tıklama: SVG user-space → en yakın düğüm (köşe öncelikli) / kenar
+  const boardEl = $("board");
+  if (boardEl) {
+    boardEl.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    boardEl.addEventListener("pointerup", onBoardPointer);
+    boardEl.addEventListener("pointermove", (ev) => {
+      if (!session || fxBusy || session.state.phase !== PHASE.BATTLE) return;
+      const pt = clientToSvg(boardEl, ev.clientX, ev.clientY);
+      if (!pt) return;
+      const hit = pickBoardTarget(pt.x, pt.y, session.state);
+      boardEl.querySelectorAll(".edge-line.is-hover").forEach((el) => {
+        el.classList.remove("is-hover");
+        const id = el.dataset.edge;
+        if (!id) return;
+        if (session.state.edgeInsured[id]) {
+          el.setAttribute("stroke", "#FFB703");
+          el.setAttribute("stroke-width", "1.5");
+        } else if (!session.state.edgeDrawn[id]) {
+          el.setAttribute("stroke", "#9A8C98");
+          el.setAttribute("stroke-width", "0.55");
+          el.setAttribute("opacity", "0.55");
+        }
+      });
+      if (hit && hit.type === "edge") {
+        const line = boardEl.querySelector(`.edge-line[data-edge="${hit.edgeId}"]`);
+        if (line && !session.state.edgeDrawn[hit.edgeId]) {
+          line.classList.add("is-hover");
+          if (session.state.edgeInsured[hit.edgeId]) {
+            line.setAttribute("stroke", "#FFD56A");
+          } else {
+            line.setAttribute("stroke", "#D7CFE0");
+            line.setAttribute("stroke-width", "1.25");
+            line.setAttribute("opacity", "0.95");
+          }
+        }
+      }
+    });
+    boardEl.addEventListener("pointerleave", () => {
+      boardEl.querySelectorAll(".edge-line.is-hover").forEach((el) => {
+        el.classList.remove("is-hover");
+        const id = el.dataset.edge;
+        if (!id || !session) return;
+        if (session.state.edgeInsured[id]) {
+          el.setAttribute("stroke", "#FFB703");
+          el.setAttribute("stroke-width", "1.5");
+        } else if (!session.state.edgeDrawn[id]) {
+          el.setAttribute("stroke", "#9A8C98");
+          el.setAttribute("stroke-width", "0.55");
+          el.setAttribute("opacity", "0.55");
+        }
+      });
+    });
+  }
+
+  // İlk kullanıcı jestiyle ses kilidini aç
+  ["pointerdown", "keydown"].forEach((ev) => {
+    window.addEventListener(
+      ev,
+      () => {
+        ensureAudio();
+      },
+      { once: true, passive: true }
+    );
+  });
+  bootAudio();
 
   if (window.ArenaHubBack) {
     hubBackCtl = window.ArenaHubBack.bind({ getLang: lang });
