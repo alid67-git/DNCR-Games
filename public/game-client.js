@@ -58,6 +58,14 @@
   let animating = false;
   let lastSeenMoveCount = -1;
   let prevGuestJoined = false;
+  let moveFlashTimer = null;
+  const Sfx = window.DncrMoveSfx || null;
+
+  function playMoveSfx(kind) {
+    if (!Sfx) return;
+    Sfx.unlock();
+    Sfx.play(kind || "move");
+  }
   let hubBackCtl = null;
 
   function useLegacySocket() {
@@ -541,6 +549,34 @@
     showEatBanner._t = setTimeout(() => el.classList.add("hidden"), 900);
   }
 
+  /** Hamle sonrası 0.5 sn parlama + renk vurgusu (kalkış/iniş halkası + taş). */
+  function flashMoveEmphasis(move, attacker) {
+    clearTimeout(moveFlashTimer);
+    document.querySelectorAll(".node-ring.move-flash, .piece.move-flash").forEach((el) => {
+      el.classList.remove("move-flash", "move-flash-from", "move-flash-to");
+    });
+    if (!move) return;
+    document.querySelectorAll(".node-ring").forEach((el) => {
+      if (el.dataset.node === move.from) {
+        el.classList.add("move-flash", "move-flash-from");
+      }
+      if (el.dataset.node === move.to) {
+        el.classList.add("move-flash", "move-flash-to");
+      }
+    });
+    const piece = document.querySelector(`.piece[data-node="${move.to}"]`);
+    if (piece) {
+      piece.classList.add("move-flash", "move-flash-to");
+      if (attacker) piece.classList.add(`move-flash-${attacker}`);
+    }
+    moveFlashTimer = setTimeout(() => {
+      document.querySelectorAll(".move-flash").forEach((el) => {
+        el.classList.remove("move-flash", "move-flash-from", "move-flash-to", "move-flash-tomato", "move-flash-gourd");
+      });
+      moveFlashTimer = null;
+    }, 500);
+  }
+
   async function animateMove(prevBoard, move, attacker) {
     const fx = $("board-fx");
     if (!fx || !move) return;
@@ -565,14 +601,18 @@
       vic.setAttribute("class", `fx-victim ${victim}-piece`);
       fx.appendChild(vic);
       showEatBanner(attacker);
+      playMoveSfx("capture");
+    } else {
+      playMoveSfx("move");
     }
 
     const flyer = makePieceGroup(attacker, from.x, from.y, false);
-    flyer.setAttribute("class", `fx-flyer ${attacker}-piece`);
+    flyer.setAttribute("class", `fx-flyer ${attacker}-piece move-flying`);
     flyer.setAttribute("transform", "translate(0 0)");
     fx.appendChild(flyer);
 
-    const duration = move.capture ? 520 : 300;
+    // Normal hamle de en az ~0.5 sn hissedilsin (vurgu süresiyle hizalı)
+    const duration = move.capture ? 560 : 500;
     const start = performance.now();
     await new Promise((resolve) => {
       function frame(now) {
@@ -580,8 +620,12 @@
         const ease = tt < 0.5 ? 2 * tt * tt : 1 - Math.pow(-2 * tt + 2, 2) / 2;
         const x = from.x + (to.x - from.x) * ease;
         const y = from.y + (to.y - from.y) * ease;
-        const lift = (move.capture ? 5 : 1.8) * Math.sin(Math.PI * ease);
-        flyer.setAttribute("transform", `translate(${x - from.x} ${y - from.y - lift})`);
+        const lift = (move.capture ? 5 : 2.4) * Math.sin(Math.PI * ease);
+        const pulse = 1 + 0.12 * Math.sin(Math.PI * ease);
+        flyer.setAttribute(
+          "transform",
+          `translate(${x - from.x} ${y - from.y - lift}) scale(${pulse})`
+        );
         if (vic && vp && tt >= 0.42) {
           const vt = Math.min(1, (tt - 0.42) / 0.55);
           const s = Math.max(0.05, 1.15 * (1 - vt));
@@ -715,6 +759,7 @@
       }),
       { skipAnim: true }
     );
+    flashMoveEmphasis(move, player);
     if (
       state &&
       state.local &&
@@ -795,6 +840,7 @@
     const prev = state;
     localMode = !!s.local;
 
+    let emphasizedWho = null;
     if (
       !skipAnim &&
       prev &&
@@ -804,8 +850,8 @@
       s.game.moveCount > lastSeenMoveCount &&
       s.game.moveCount === (prev.game.moveCount || 0) + 1
     ) {
-      const who = prev.game.board[s.game.lastMove.from] || prev.game.turn || PLAYERS.tomato;
-      await animateMove(prev.game.board, s.game.lastMove, who);
+      emphasizedWho = prev.game.board[s.game.lastMove.from] || prev.game.turn || PLAYERS.tomato;
+      await animateMove(prev.game.board, s.game.lastMove, emphasizedWho);
       lastSeenMoveCount = s.game.moveCount;
     } else if (s.game) {
       lastSeenMoveCount = s.game.moveCount;
@@ -833,6 +879,9 @@
     if (s.vsAi || s.status === "playing" || s.status === "finished") {
       showScreen("game");
       renderGame(s);
+      if (emphasizedWho && s.game && s.game.lastMove) {
+        flashMoveEmphasis(s.game.lastMove, emphasizedWho);
+      }
     } else if (s.status === "waiting") {
       showScreen("room");
       renderRoom(s);
@@ -1188,6 +1237,7 @@
   }
 
   // Boot
+  if (Sfx && Sfx.bindFirstGesture) Sfx.bindFirstGesture(document);
   if (window.ArenaHubBack) {
     hubBackCtl = window.ArenaHubBack.bind({ getLang: lang });
   }

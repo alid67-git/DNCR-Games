@@ -363,6 +363,57 @@
     svg.insertBefore(defs, svg.firstChild);
   }
 
+  /** Hamle sonrası 0.5 sn parlama + renk vurgusu (çizgi veya taş). */
+  async function flashClaimEmphasis(kind, payload, player) {
+    const svg = $("board");
+    if (!svg) return;
+    ensureBoardDefs(svg);
+    const NS = "http://www.w3.org/2000/svg";
+    const base = colorFor(player);
+    const hi = player === 1 ? "#9AF0FF" : "#FFB0B6";
+    const els = [];
+    if (kind === "edge" && payload) {
+      const ends = edgeEndpoints(payload);
+      if (!ends) return;
+      const [p0, p1] = ends;
+      const a = xy(p0[0], p0[1]);
+      const b = xy(p1[0], p1[1]);
+      const mx = (a.x + b.x) / 2;
+      const my = (a.y + b.y) / 2;
+      const grow = 1.12;
+      const line = document.createElementNS(NS, "line");
+      line.setAttribute("x1", mx + (a.x - mx) * grow);
+      line.setAttribute("y1", my + (a.y - my) * grow);
+      line.setAttribute("x2", mx + (b.x - mx) * grow);
+      line.setAttribute("y2", my + (b.y - my) * grow);
+      line.setAttribute("stroke-linecap", "round");
+      line.setAttribute("class", "edge-line is-claim-flash");
+      svg.appendChild(line);
+      els.push(line);
+      await runAnim(500, (e) => {
+        const pulse = Math.sin(e * Math.PI);
+        line.setAttribute("stroke", lerpColor(hi, base, e * 0.65));
+        line.setAttribute("stroke-width", String(lerp(3.2, 1.7, e)));
+        line.setAttribute("opacity", String(0.75 + 0.25 * pulse));
+      });
+    } else if (kind === "stone" && payload) {
+      const p = xy(payload.r, payload.c);
+      const glow = document.createElementNS(NS, "circle");
+      glow.setAttribute("cx", p.x);
+      glow.setAttribute("cy", p.y);
+      glow.setAttribute("class", "stone-claim-flash");
+      svg.appendChild(glow);
+      els.push(glow);
+      await runAnim(500, (e) => {
+        const pulse = Math.sin(e * Math.PI);
+        glow.setAttribute("r", String(lerp(5.2, 3.2, e)));
+        glow.setAttribute("fill", lerpColor(hi, base, e * 0.55));
+        glow.setAttribute("opacity", String(0.35 + 0.45 * pulse));
+      });
+    }
+    els.forEach((el) => el.remove());
+  }
+
   async function animateDrawLine(edgeId, player) {
     const svg = $("board");
     if (!svg) return;
@@ -383,16 +434,25 @@
     line.setAttribute("class", "edge-line is-drawing");
     line.setAttribute("stroke-dasharray", String(len));
     line.setAttribute("stroke-dashoffset", String(len));
-    line.setAttribute("stroke-width", "2.4");
+    line.setAttribute("stroke-width", "2.8");
     svg.appendChild(line);
     const base = colorFor(player);
-    const hi = player === 1 ? "#7FE9FF" : "#FF8A93";
+    const hi = player === 1 ? "#B8F4FF" : "#FFB3B8";
     if (Audio) Audio.playSfx("draw");
-    await runAnim(780, (e) => {
+    // Çizim + 0.5 sn parlama/renk vurgusu (aynı pencerede)
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2;
+    await runAnim(500, (e) => {
       line.setAttribute("stroke-dashoffset", String(len * (1 - e)));
-      line.setAttribute("stroke", lerpColor(hi, base, e));
-      line.setAttribute("stroke-width", String(lerp(2.8, 1.55, e)));
-      line.setAttribute("opacity", String(lerp(0.55, 1, e)));
+      const flash = Math.sin(e * Math.PI);
+      const grow = 1 + 0.12 * flash;
+      line.setAttribute("x1", mx + (a.x - mx) * grow);
+      line.setAttribute("y1", my + (a.y - my) * grow);
+      line.setAttribute("x2", mx + (b.x - mx) * grow);
+      line.setAttribute("y2", my + (b.y - my) * grow);
+      line.setAttribute("stroke", lerpColor(hi, base, e * 0.55));
+      line.setAttribute("stroke-width", String(lerp(3.35, 1.65, e) + flash * 0.45));
+      line.setAttribute("opacity", String(lerp(0.55, 1, Math.min(1, e * 1.2))));
     });
     line.remove();
   }
@@ -407,10 +467,10 @@
     const g = document.createElementNS(NS, "g");
     g.setAttribute("class", "stone-flying");
     const glow = document.createElementNS(NS, "circle");
-    glow.setAttribute("r", "4.2");
-    glow.setAttribute("opacity", "0.35");
+    glow.setAttribute("r", "5.2");
+    glow.setAttribute("opacity", "0.45");
     const dot = document.createElementNS(NS, "circle");
-    dot.setAttribute("r", "2.55");
+    dot.setAttribute("r", "2.7");
     const mark = document.createElementNS(NS, "text");
     mark.setAttribute("text-anchor", "middle");
     mark.setAttribute("font-size", "2.6");
@@ -422,16 +482,18 @@
     g.appendChild(mark);
     svg.appendChild(g);
     const base = colorFor(player);
-    const hi = player === 1 ? "#9AF0FF" : "#FFB0B6";
+    const hi = player === 1 ? "#B8F4FF" : "#FFB3B8";
     if (Audio) Audio.playSfx("move");
-    await runAnim(920, (e) => {
+    await runAnim(500, (e) => {
       const x = lerp(a.x, b.x, e);
       const y = lerp(a.y, b.y, e);
-      const col = lerpColor(base, hi, Math.sin(e * Math.PI));
+      const pulse = Math.sin(e * Math.PI);
+      const col = lerpColor(base, hi, pulse);
       glow.setAttribute("cx", x);
       glow.setAttribute("cy", y);
+      glow.setAttribute("r", String(4.4 + pulse * 1.8));
       glow.setAttribute("fill", col);
-      glow.setAttribute("opacity", String(0.2 + 0.35 * Math.sin(e * Math.PI)));
+      glow.setAttribute("opacity", String(0.3 + 0.55 * pulse));
       dot.setAttribute("cx", x);
       dot.setAttribute("cy", y);
       dot.setAttribute("fill", col);
@@ -463,7 +525,7 @@
       if (d.siege && Audio) Audio.playSfx("siege");
       else if (Audio) Audio.playSfx("capture");
     }
-    await new Promise((r) => setTimeout(r, 700));
+    await new Promise((r) => setTimeout(r, 500));
     els.forEach((el) => el.remove());
   }
 
@@ -484,7 +546,7 @@
         await animateMoveStone(lm.from, lm.to, lm.player);
       } else if (lm.type === "PLACE") {
         if (Audio) Audio.playSfx("place");
-        await runAnim(360, () => {});
+        await flashClaimEmphasis("stone", { r: lm.r, c: lm.c }, lm.player);
       } else if (lm.type === "RESIGN") {
         if (Audio) Audio.playSfx("lose");
       }

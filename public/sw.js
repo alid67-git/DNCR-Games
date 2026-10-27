@@ -1,5 +1,5 @@
 /* Kati — offline cache (solo + local 2P) */
-const CACHE = "kati-v1.5.1";
+const CACHE = "kati-v1.5.2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -15,6 +15,7 @@ const ASSETS = [
   "./shared/register-sw.js",
   "./shared/mode-i18n.js",
   "./shared/hub-back.js",
+  "./shared/move-sfx.js",
   "./assets/logo.svg",
   "./assets/favicon.png",
   "./assets/apple-touch-icon.png",

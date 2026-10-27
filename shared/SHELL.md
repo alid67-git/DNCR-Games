@@ -46,6 +46,7 @@ Sürüm numarası ana menü altında ve ayarların dibinde görünür.
 | `mode-i18n.js` | Ortak mod / menü çeviri anahtarları |
 | `hub-back.js` | DNCR Games hub’a onaylı dönüş |
 | `score.js` | Yerel kariyer puanı / skor tablosu |
+| `move-sfx.js` | Ortak hamle vurgusu SFX (Web Audio) |
 | `shell-ui.css` | Menü ikonları, mod görselleri, skor UI |
 
 ## iPhone / web linkleri (GitHub Pages)

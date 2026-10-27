@@ -660,14 +660,36 @@ input[type="text"]:focus {
 .piece.selected {
   transform: scale(1.16);
 }
+.piece.move-flash {
+  animation: pieceMoveFlash 0.5s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+  pointer-events: none;
+}
+.piece.move-flash-red .skin {
+  filter: drop-shadow(0 0 4.5px rgba(255, 120, 90, 0.95));
+}
+.piece.move-flash-black .skin {
+  filter: drop-shadow(0 0 4.5px rgba(176, 190, 197, 0.95));
+}
+@keyframes pieceMoveFlash {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.36);
+  }
+  100% {
+    transform: scale(1.08);
+  }
+}
 .piece.mill-flash {
-  animation: millFlash 1.05s cubic-bezier(0.22, 1.35, 0.36, 1) both;
+  animation: millFlash 0.9s cubic-bezier(0.22, 1.35, 0.36, 1) both;
   pointer-events: none;
 }
 .piece.mill-flash .skin {
   fill: #ffd666 !important;
   stroke: #fff3c4;
   stroke-width: 1.1;
+  filter: drop-shadow(0 0 5px rgba(255, 214, 102, 0.95));
 }
 .mill-ring {
   fill: none;
@@ -675,7 +697,7 @@ input[type="text"]:focus {
   stroke-width: 1.35;
   opacity: 0.95;
   pointer-events: none;
-  animation: millRingPulse 1.05s ease-out both;
+  animation: millRingPulse 0.9s ease-out both;
 }
 @keyframes millFlash {
   0% {
