@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Noktalar ve Kutular</title>
+  <meta name="theme-color" content="#0a1f22" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Noktalar" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="description" content="Noktalar ve Kutular — tek kişilik (4 zorluk) ve iki kişilik, 10 farklı oyun alanı. iPhone Safari uyumlu." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <link rel="stylesheet" href="fonts/fonts.css" />
+  <link rel="stylesheet" href="style.css?v=1.2.1" />
+</head>
+<body>
+  <div class="bg-fx" aria-hidden="true"></div>
+
+  <main id="app">
+    <!-- HOME -->
+    <section id="screen-home" class="screen active">
+      <div class="home-center">
+        <header class="brand home-brand">
+          <img class="app-logo" src="assets/logo.svg" width="112" height="112" alt="Noktalar ve Kutular" />
+          <p class="brand-mark" data-i18n="appName">Noktalar ve Kutular</p>
+          <p class="lede" data-i18n="tagline">Çizgiyi çek, kutuyu kapat!</p>
+          <p class="ver-chip" id="home-version">v1.0.0</p>
+        </header>
+        <nav class="home-menu" aria-label="Main">
+          <button type="button" class="btn btn-primary btn-menu" id="btn-home-play" data-i18n="homePlay">Oyna</button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-settings" data-i18n="homeSettings">Ayarlar</button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-help" data-i18n="homeHelp">Yardım</button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-updates" data-i18n="homeUpdates">
+            Güncellemeler <span id="updates-dot" class="updates-dot hidden"></span>
+          </button>
+        </nav>
+        <p id="safari-tip" class="safari-tip hidden" data-i18n="safariTip"></p>
+      </div>
+    </section>
+
+    <!-- PLAY MODE SELECT -->
+    <section id="screen-play" class="screen">
+      <button type="button" class="btn-back" id="btn-play-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="playTitle">Oyun modu</h1>
+      </header>
+      <div class="mode-list">
+        <button type="button" class="mode-card" id="btn-mode-solo">
+          <strong data-i18n="playSolo">Tek kişilik</strong>
+          <span data-i18n="playSoloHint">Yapay zekaya karşı</span>
+        </button>
+        <button type="button" class="mode-card" id="btn-mode-2p">
+          <strong data-i18n="play2p">İki kişilik — yan yana</strong>
+          <span data-i18n="play2pHint">Aynı telefonda, yan yana oturun</span>
+        </button>
+        <button type="button" class="mode-card" id="btn-mode-remote">
+          <strong data-i18n="playRemote">İki kişilik — uzaktan</strong>
+          <span data-i18n="playRemoteHint">Farklı yerler — oda kodu ile (sunucu yok)</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SOLO SETUP (difficulty + board) -->
+    <section id="screen-solo-setup" class="screen setup-screen">
+      <div class="setup-scroll">
+        <button type="button" class="btn-back" id="btn-solo-setup-back" data-i18n="back">Geri</button>
+        <header class="brand sm-head">
+          <h1 data-i18n="soloSetupTitle">Bilgisayara karşı</h1>
+        </header>
+
+        <h2 class="section-title" data-i18n="chooseDifficulty">Zorluk seç</h2>
+        <div class="diff-grid" id="diff-grid" role="radiogroup" aria-label="Zorluk"></div>
+
+        <h2 class="section-title" data-i18n="chooseBoard">Oyun alanı seç</h2>
+        <div class="board-grid" id="solo-board-grid" role="radiogroup" aria-label="Oyun alanı"></div>
+      </div>
+      <div class="setup-footer">
+        <button type="button" class="btn btn-primary btn-start" id="btn-solo-start" data-i18n="startGame">Başla</button>
+      </div>
+    </section>
+
+    <!-- 2P SETUP -->
+    <section id="screen-2p-setup" class="screen setup-screen">
+      <div class="setup-scroll">
+        <button type="button" class="btn-back" id="btn-2p-setup-back" data-i18n="back">Geri</button>
+        <header class="brand sm-head">
+          <h1 data-i18n="twoPSetupTitle">İki kişilik</h1>
+        </header>
+
+        <form class="lobby-form" onsubmit="return false;">
+          <label>
+            <span data-i18n="player1Label">1. Oyuncu adı</span>
+            <input id="p1-name" type="text" maxlength="16" data-i18n-ph="player1Ph" autocomplete="off" />
+          </label>
+          <label>
+            <span data-i18n="player2Label">2. Oyuncu adı</span>
+            <input id="p2-name" type="text" maxlength="16" data-i18n-ph="player2Ph" autocomplete="off" />
+          </label>
+        </form>
+
+        <h2 class="section-title" data-i18n="chooseBoard">Oyun alanı seç</h2>
+        <div class="board-grid" id="twop-board-grid" role="radiogroup" aria-label="Oyun alanı"></div>
+      </div>
+      <div class="setup-footer">
+        <button type="button" class="btn btn-primary btn-start" id="btn-2p-start" data-i18n="startGame">Başla</button>
+      </div>
+    </section>
+
+    <!-- REMOTE 2P -->
+    <section id="screen-remote" class="screen setup-screen">
+      <div class="setup-scroll">
+        <button type="button" class="btn-back" id="btn-remote-back" data-i18n="back">Geri</button>
+        <header class="brand sm-head">
+          <h1 data-i18n="remoteTitle">Uzaktan oyna</h1>
+        </header>
+        <p class="remote-lead" data-i18n="remoteLead">
+          İki telefon internette; oda kodu ile bağlanır. Kendi sunucun gerekmez.
+        </p>
+
+        <div class="mode-list remote-choice">
+          <button type="button" class="mode-card" id="btn-remote-host">
+            <strong data-i18n="remoteHost">Oda kur</strong>
+            <span data-i18n="remoteHostHint">Kod üret — arkadaşın katılsın</span>
+          </button>
+          <button type="button" class="mode-card" id="btn-remote-join">
+            <strong data-i18n="remoteJoin">Odaya katıl</strong>
+            <span data-i18n="remoteJoinHint">Arkadaşının kodunu yaz</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-remote-host" class="screen setup-screen">
+      <div class="setup-scroll">
+        <button type="button" class="btn-back" id="btn-remote-host-back" data-i18n="back">Geri</button>
+        <header class="brand sm-head">
+          <h1 data-i18n="remoteHost">Oda kur</h1>
+        </header>
+        <form class="lobby-form" onsubmit="return false;">
+          <label>
+            <span data-i18n="yourNameLabel">Adın</span>
+            <input id="remote-host-name" type="text" maxlength="16" data-i18n-ph="player1Ph" autocomplete="nickname" />
+            <span class="field-hint" data-i18n="nameSavedHint">Bu cihazda hatırlanır</span>
+          </label>
+        </form>
+        <h2 class="section-title" data-i18n="chooseBoard">Oyun alanı seç</h2>
+        <div class="board-grid" id="remote-board-grid" role="radiogroup" aria-label="Oyun alanı"></div>
+        <p class="remote-cross-hint" data-i18n="remoteCrossHint">
+          iPhone ve Android aynı adresi açıp aynı kodla bağlanır.
+        </p>
+      </div>
+      <div class="setup-footer">
+        <button type="button" class="btn btn-primary btn-start" id="btn-remote-host-go" data-i18n="createRoom">
+          Oda kur ve bekle
+        </button>
+      </div>
+
+      <!-- Oda kodu: ekranın ortasında, her şeyin üstünde -->
+      <div id="remote-code-overlay" class="remote-code-overlay hidden" role="dialog" aria-modal="true">
+        <div class="remote-code-card">
+          <p class="remote-status" id="remote-host-status"></p>
+          <p class="remote-code-label" data-i18n="roomCode">Oda kodu</p>
+          <p class="remote-code" id="remote-room-code">————</p>
+          <button type="button" class="btn btn-ghost" id="btn-copy-room-code" data-i18n="copyCode">Kodu kopyala</button>
+          <p class="remote-hint" data-i18n="remoteWaitHint">Bu kodu arkadaşına söyle; bekleniyor…</p>
+          <p class="remote-cross-hint" data-i18n="remoteCrossHint">
+            iPhone ve Android aynı adresi açıp aynı kodla bağlanır.
+          </p>
+          <button type="button" class="btn btn-ghost" id="btn-remote-cancel-wait" data-i18n="cancelWait">İptal</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-remote-join" class="screen setup-screen">
+      <div class="setup-scroll">
+        <button type="button" class="btn-back" id="btn-remote-join-back" data-i18n="back">Geri</button>
+        <header class="brand sm-head">
+          <h1 data-i18n="remoteJoin">Odaya katıl</h1>
+        </header>
+        <form class="lobby-form" onsubmit="return false;">
+          <label>
+            <span data-i18n="yourNameLabel">Adın</span>
+            <input id="remote-join-name" type="text" maxlength="16" data-i18n-ph="player2Ph" autocomplete="nickname" />
+            <span class="field-hint" data-i18n="nameSavedHint">Bu cihazda hatırlanır</span>
+          </label>
+          <label>
+            <span data-i18n="roomCode">Oda kodu</span>
+            <input
+              id="remote-join-code"
+              type="text"
+              maxlength="8"
+              autocapitalize="characters"
+              autocomplete="off"
+              spellcheck="false"
+              data-i18n-ph="roomCodePh"
+            />
+          </label>
+        </form>
+        <p class="remote-status" id="remote-join-status"></p>
+      </div>
+      <div class="setup-footer">
+        <button type="button" class="btn btn-primary btn-start" id="btn-remote-join-go" data-i18n="joinRoom">Katıl</button>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="screen-settings" class="screen">
+      <button type="button" class="btn-back" id="btn-settings-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="settingsTitle">Ayarlar</h1>
+      </header>
+      <form id="settings-form" class="lobby-form" onsubmit="return false;">
+        <fieldset class="lang-field">
+          <legend data-i18n="language">Dil</legend>
+          <label class="radio-row"><input type="radio" name="lang" value="tr" /> <span data-i18n="langTr">Türkçe</span></label>
+          <label class="radio-row"><input type="radio" name="lang" value="en" /> <span data-i18n="langEn">English</span></label>
+        </fieldset>
+        <fieldset class="lang-field">
+          <legend data-i18n="defaultDifficulty">Varsayılan bilgisayar zorluğu</legend>
+          <label class="radio-row"><input type="radio" name="defDiff" value="easy" /> <span data-i18n="diffEasy">Kolay</span></label>
+          <label class="radio-row"><input type="radio" name="defDiff" value="medium" /> <span data-i18n="diffMedium">Orta</span></label>
+          <label class="radio-row"><input type="radio" name="defDiff" value="hard" /> <span data-i18n="diffHard">Zor</span></label>
+          <label class="radio-row"><input type="radio" name="defDiff" value="veryhard" /> <span data-i18n="diffVeryHard">Çok Zor</span></label>
+        </fieldset>
+        <button type="button" id="btn-settings-save" class="btn btn-primary" data-i18n="save">Kaydet</button>
+      </form>
+    </section>
+
+    <!-- HELP -->
+    <section id="screen-help" class="screen">
+      <button type="button" class="btn-back" id="btn-help-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="helpTitle">Yardım</h1>
+      </header>
+      <article class="help-block">
+        <h2 data-i18n="helpRulesTitle">Kurallar</h2>
+        <ol>
+          <li data-i18n="helpRule1"></li>
+          <li data-i18n="helpRule2"></li>
+          <li data-i18n="helpRule3"></li>
+          <li data-i18n="helpRule4"></li>
+        </ol>
+        <h2 data-i18n="helpBoardsTitle">Oyun alanları</h2>
+        <p data-i18n="helpBoards"></p>
+        <h2 data-i18n="helpDifficultyTitle">Zorluk seviyeleri</h2>
+        <p data-i18n="helpDifficulty"></p>
+        <h2 data-i18n="helpTwoPTitle">İki kişilik</h2>
+        <p data-i18n="helpTwoP"></p>
+        <h2 data-i18n="helpSafariTitle">iPhone Safari</h2>
+        <ol>
+          <li data-i18n="helpSafari1"></li>
+          <li data-i18n="helpSafari2"></li>
+          <li data-i18n="helpSafari3"></li>
+        </ol>
+      </article>
+    </section>
+
+    <!-- UPDATES -->
+    <section id="screen-updates" class="screen">
+      <button type="button" class="btn-back" id="btn-updates-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="updatesTitle">Güncellemeler</h1>
+        <p class="lede"><span data-i18n="updatesCurrent">Yüklü sürüm</span>: <strong id="updates-current">1.0.0</strong></p>
+      </header>
+      <div id="changelog-list" class="changelog"></div>
+      <button type="button" id="btn-updates-seen" class="btn btn-primary" data-i18n="updatesSeen">Gördüm</button>
+    </section>
+
+    <!-- GAME -->
+    <section id="screen-game" class="screen">
+      <header class="game-top">
+        <button type="button" class="btn-icon" id="btn-game-back" aria-label="Geri" title="Geri">←</button>
+        <aside class="seat seat-a" id="chip-a">
+          <span class="chip-dot dot-a"></span>
+          <div class="chip-info">
+            <strong id="name-a">—</strong>
+            <span id="status-a" class="chip-status"></span>
+          </div>
+          <span class="chip-score" id="score-a">0</span>
+        </aside>
+        <div class="game-top-center">
+          <p class="game-title" data-i18n="appName">Noktalar ve Kutular</p>
+          <div id="game-timer" class="game-timer" aria-live="off">1:00:00</div>
+        </div>
+        <aside class="seat seat-b" id="chip-b">
+          <span class="chip-dot dot-b"></span>
+          <div class="chip-info">
+            <strong id="name-b">—</strong>
+            <span id="status-b" class="chip-status"></span>
+          </div>
+          <span class="chip-score" id="score-b">0</span>
+        </aside>
+        <button type="button" class="btn-icon btn-end-game" id="btn-game-end" aria-label="Oyunu sonlandır" title="Oyunu sonlandır">✕</button>
+      </header>
+
+      <div id="confirm-leave" class="confirm-leave hidden" role="dialog" aria-modal="true">
+        <div class="confirm-leave-card">
+          <p id="confirm-leave-text" data-i18n="confirmLeave">Oyunu sonlandırmak istediğine emin misin?</p>
+          <p class="confirm-leave-hint" data-i18n="confirmLeaveHint">İlerleme kaybolur.</p>
+          <button type="button" id="btn-confirm-leave-yes" class="btn btn-primary" data-i18n="confirmLeaveYes">Evet, çık</button>
+          <button type="button" id="btn-confirm-leave-no" class="btn btn-ghost" data-i18n="confirmLeaveNo">Vazgeç</button>
+        </div>
+      </div>
+
+      <p id="couch-hint" class="couch-hint hidden" data-i18n="couchHint"></p>
+
+      <div class="game-stage">
+        <div class="board-column">
+          <p id="boxes-left" class="boxes-left"></p>
+          <div class="board-wrap">
+            <svg id="board" viewBox="0 0 100 100" role="img" aria-label="Oyun alanı">
+              <g id="box-layer"></g>
+              <g id="edge-layer"></g>
+              <g id="edge-hit-layer"></g>
+              <g id="dot-layer"></g>
+              <g id="fx-layer"></g>
+            </svg>
+          </div>
+          <p id="status-msg" class="status-msg" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div id="end-panel" class="end-panel hidden">
+        <p id="end-text"></p>
+        <p id="end-score" class="end-score"></p>
+        <button type="button" id="btn-rematch" class="btn btn-primary" data-i18n="playAgain">Yeniden oyna</button>
+        <button type="button" id="btn-change-board" class="btn btn-ghost" data-i18n="changeBoard">Tahta değiştir</button>
+        <button type="button" id="btn-game-home" class="btn btn-ghost" data-i18n="toHome">Ana menü</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <script src="app-config.js?v=1.2.1"></script>
+  <script src="i18n.js?v=1.2.1"></script>
+  <script src="boards.js?v=1.2.1"></script>
+  <script src="engine.js?v=1.2.1"></script>
+  <script src="ai.js?v=1.2.1"></script>
+  <script src="remote-net.js?v=1.2.1"></script>
+  <script src="game-client.js?v=1.2.1" defer></script>
+</body>
+</html>

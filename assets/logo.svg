@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Kati Arena">
+  <defs>
+    <radialGradient id="soil" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#5c4224"/>
+      <stop offset="55%" stop-color="#3d2a16"/>
+      <stop offset="100%" stop-color="#1a1208"/>
+    </radialGradient>
+    <radialGradient id="redStone" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#ef5350"/>
+      <stop offset="55%" stop-color="#c62828"/>
+      <stop offset="100%" stop-color="#7f1414"/>
+    </radialGradient>
+    <radialGradient id="greenStone" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#81c784"/>
+      <stop offset="55%" stop-color="#2e7d32"/>
+      <stop offset="100%" stop-color="#1b4d20"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#soil)"/>
+  <!-- Butterfly Kati board (normalized) -->
+  <g fill="none" stroke="#e8d4a8" stroke-width="2.2" stroke-linecap="round" opacity="0.92">
+    <!-- outer diamond-ish frame -->
+    <path d="M64 18 L98 40 L98 88 L64 110 L30 88 L30 40 Z"/>
+    <!-- cross -->
+    <path d="M64 18 V110"/>
+    <path d="M30 64 H98"/>
+    <!-- inner wings -->
+    <path d="M30 40 L64 64 L30 88"/>
+    <path d="M98 40 L64 64 L98 88"/>
+    <path d="M64 18 L30 64 L64 110"/>
+    <path d="M64 18 L98 64 L64 110"/>
+  </g>
+  <!-- nodes -->
+  <g fill="#f3e6c8">
+    <circle cx="64" cy="18" r="3.2"/>
+    <circle cx="30" cy="40" r="3.2"/>
+    <circle cx="98" cy="40" r="3.2"/>
+    <circle cx="30" cy="64" r="3.2"/>
+    <circle cx="98" cy="64" r="3.2"/>
+    <circle cx="30" cy="88" r="3.2"/>
+    <circle cx="98" cy="88" r="3.2"/>
+    <circle cx="64" cy="110" r="3.2"/>
+    <circle cx="46" cy="64" r="3"/>
+    <circle cx="82" cy="64" r="3"/>
+  </g>
+  <!-- Red (left) / Green (right) stones -->
+  <circle cx="46" cy="64" r="11" fill="url(#redStone)" filter="url(#soft)"/>
+  <circle cx="46" cy="60" r="3.5" fill="#fff" opacity="0.28"/>
+  <circle cx="82" cy="64" r="11" fill="url(#greenStone)" filter="url(#soft)"/>
+  <circle cx="82" cy="60" r="3.5" fill="#fff" opacity="0.28"/>
+  <!-- center node peek -->
+  <circle cx="64" cy="64" r="3.4" fill="#d4b483" stroke="#1a1208" stroke-width="1"/>
+</svg>

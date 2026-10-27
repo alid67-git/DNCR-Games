@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Kati Arena</title>
+  <meta name="theme-color" content="#2a1c0e" />
+  <meta name="description" content="Kati Arena — Red vs Green. Solo, online across countries." />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="soil" aria-hidden="true"></div>
+
+  <main id="app">
+    <!-- HOME -->
+    <section id="screen-home" class="screen active">
+      <div class="home-center">
+        <header class="brand home-brand">
+          <img class="app-logo" src="assets/logo.svg" width="112" height="112" alt="Kati Arena" />
+          <p class="brand-mark" data-i18n="appName">Kati Arena</p>
+          <p class="lede" data-i18n="tagline">Kırmızı takım · Yeşil takım</p>
+          <p class="ver-chip" id="home-version">v1.3.2</p>
+        </header>
+        <nav class="home-menu" aria-label="Main">
+          <button type="button" class="btn btn-primary btn-menu" id="btn-home-play" data-i18n="homePlay">Oyna</button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-settings" data-i18n="homeSettings">Ayarlar</button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-help" data-i18n="homeHelp">Yardım</button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-updates" data-i18n="homeUpdates">
+            Güncellemeler <span id="updates-dot" class="updates-dot hidden"></span>
+          </button>
+        </nav>
+      </div>
+    </section>
+
+    <!-- PLAY MODES -->
+    <section id="screen-play" class="screen">
+      <button type="button" class="btn-back" id="btn-play-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <img class="app-logo-sm" src="assets/logo.svg" width="36" height="36" alt="" />
+        <p class="brand-mark sm" data-i18n="appName">Kati Arena</p>
+        <h1 data-i18n="playTitle">Oyun seç</h1>
+      </header>
+      <div class="mode-list">
+        <button type="button" class="mode-card" id="btn-mode-solo">
+          <strong data-i18n="playSolo">Bilgisayara karşı</strong>
+          <span data-i18n="playSoloHint">Tek başına, internet gerekmez</span>
+        </button>
+        <button type="button" class="mode-card" id="btn-mode-online">
+          <strong data-i18n="playOnline">Çevrimiçi oyna</strong>
+          <span data-i18n="playOnlineHint">Telefondan başka ülkedeki PC ile</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ONLINE LOBBY -->
+    <section id="screen-online" class="screen">
+      <button type="button" class="btn-back" id="btn-online-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <p class="brand-mark sm" data-i18n="appName">Kati Arena</p>
+        <h1 data-i18n="onlineTitle">Çevrimiçi</h1>
+        <p class="lede" data-i18n="onlineLead">Aynı sunucuya bağlanın — Wi‑Fi şart değil.</p>
+      </header>
+      <form id="online-form" class="lobby-form" onsubmit="return false;">
+        <label>
+          <span data-i18n="yourName">Adın</span>
+          <input id="player-name" type="text" maxlength="20" data-i18n-ph="namePh" placeholder="Örn. Ali" autocomplete="nickname" />
+        </label>
+        <label>
+          <span data-i18n="serverUrl">Çevrimiçi sunucu adresi</span>
+          <input id="online-server-url" type="url" inputmode="url" data-i18n-ph="serverPh" placeholder="https://..." autocomplete="url" />
+        </label>
+        <div class="lobby-actions">
+          <button type="button" id="btn-create" class="btn btn-primary" data-i18n="createRoom">Oda kur</button>
+          <div class="join-row">
+            <input id="join-code" type="text" maxlength="6" data-i18n-ph="roomCode" placeholder="Oda kodu" autocomplete="off" spellcheck="false" />
+            <button type="button" id="btn-join" class="btn btn-secondary" data-i18n="joinRoom">Katıl</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="screen-settings" class="screen">
+      <button type="button" class="btn-back" id="btn-settings-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="settingsTitle">Ayarlar</h1>
+      </header>
+      <form id="settings-form" class="lobby-form" onsubmit="return false;">
+        <label>
+          <span data-i18n="yourName">Adın</span>
+          <input id="settings-name" type="text" maxlength="20" autocomplete="nickname" />
+        </label>
+        <fieldset class="lang-field">
+          <legend data-i18n="language">Dil</legend>
+          <label class="radio-row"><input type="radio" name="lang" value="tr" /> <span data-i18n="langTr">Türkçe</span></label>
+          <label class="radio-row"><input type="radio" name="lang" value="en" /> <span data-i18n="langEn">English</span></label>
+        </fieldset>
+        <fieldset class="lang-field">
+          <legend data-i18n="aiDifficulty">Bilgisayar zorluğu</legend>
+          <label class="radio-row"><input type="radio" name="aiDiff" value="easy" /> <span data-i18n="aiEasy">Kolay — daha çeşitli, hata yapar</span></label>
+          <label class="radio-row"><input type="radio" name="aiDiff" value="normal" /> <span data-i18n="aiNormal">Normal — dengeli</span></label>
+          <label class="radio-row"><input type="radio" name="aiDiff" value="hard" /> <span data-i18n="aiHard">Zor — güçlü, az çeşitlilik</span></label>
+        </fieldset>
+        <p class="field-hint" data-i18n="aiHint"></p>
+        <label>
+          <span data-i18n="serverUrl">Çevrimiçi sunucu adresi</span>
+          <input id="settings-server" type="url" inputmode="url" data-i18n-ph="serverPh" placeholder="https://..." />
+        </label>
+        <p class="field-hint" data-i18n="serverHint"></p>
+        <label class="check-row">
+          <input type="checkbox" id="settings-notif" />
+          <span data-i18n="notifications">Bildirimler</span>
+        </label>
+        <p class="field-hint" id="notif-hint" data-i18n="notifOn"></p>
+        <button type="button" id="btn-settings-save" class="btn btn-primary" data-i18n="save">Kaydet</button>
+      </form>
+    </section>
+
+    <!-- HELP -->
+    <section id="screen-help" class="screen">
+      <button type="button" class="btn-back" id="btn-help-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="helpTitle">Yardım</h1>
+      </header>
+      <article class="help-block">
+        <h2 data-i18n="helpRulesTitle">Kurallar</h2>
+        <ol>
+          <li data-i18n="helpRule1"></li>
+          <li data-i18n="helpRule2"></li>
+          <li data-i18n="helpRule3"></li>
+          <li data-i18n="helpRule4"></li>
+        </ol>
+        <h2 data-i18n="helpTeamsTitle">Takımlar</h2>
+        <p data-i18n="helpTeams"></p>
+        <h2 data-i18n="helpAiTitle">Bilgisayara karşı</h2>
+        <p data-i18n="helpAi"></p>
+        <h2 data-i18n="helpOnlineTitle">Ülkeler arası</h2>
+        <ol>
+          <li data-i18n="helpOnline1"></li>
+          <li data-i18n="helpOnline2"></li>
+          <li data-i18n="helpOnline3"></li>
+          <li data-i18n="helpOnline4"></li>
+        </ol>
+      </article>
+    </section>
+
+    <!-- UPDATES -->
+    <section id="screen-updates" class="screen">
+      <button type="button" class="btn-back" id="btn-updates-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="updatesTitle">Güncellemeler</h1>
+        <p class="lede"><span data-i18n="updatesCurrent">Yüklü sürüm</span>: <strong id="updates-current">1.3.2</strong></p>
+      </header>
+      <div id="changelog-list" class="changelog"></div>
+      <button type="button" id="btn-updates-seen" class="btn btn-primary" data-i18n="updatesSeen">Gördüm</button>
+    </section>
+
+    <!-- ROOM WAIT -->
+    <section id="screen-room" class="screen">
+      <header class="room-head">
+        <p class="brand-mark sm" data-i18n="appName">Kati Arena</p>
+        <h1><span data-i18n="room">Oda</span> <span id="room-code-display">----</span></h1>
+        <p id="share-hint" class="lede"></p>
+      </header>
+      <div class="roster">
+        <div class="seat tomato" id="seat-tomato">
+          <span class="seat-piece" aria-hidden="true"></span>
+          <div>
+            <strong id="name-tomato">—</strong>
+            <span id="ready-tomato" class="pill">…</span>
+          </div>
+        </div>
+        <div class="seat gourd" id="seat-gourd">
+          <span class="seat-piece" aria-hidden="true"></span>
+          <div>
+            <strong id="name-gourd">—</strong>
+            <span id="ready-gourd" class="pill">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="room-actions">
+        <button type="button" id="btn-ready" class="btn btn-primary" disabled data-i18n="ready">Hazırım</button>
+        <button type="button" id="btn-copy-link" class="btn btn-ghost" data-i18n="copyLink">Davet linkini kopyala</button>
+        <button type="button" id="btn-room-home" class="btn btn-ghost" data-i18n="toHome">Ana menü</button>
+      </div>
+    </section>
+
+    <!-- GAME -->
+    <section id="screen-game" class="screen">
+      <header class="game-bar">
+        <p class="brand-mark sm" data-i18n="appName">Kati Arena</p>
+        <p id="turn-label" class="turn-label">—</p>
+        <p id="you-label" class="you-label"></p>
+        <p id="starter-label" class="starter-label"></p>
+      </header>
+
+      <div class="score-trays" aria-live="polite">
+        <div class="tray tomato-tray">
+          <span class="tray-title" data-i18n="redAte">Kırmızı yedi</span>
+          <div id="tray-tomato" class="tray-dots"></div>
+        </div>
+        <div class="tray gourd-tray">
+          <span class="tray-title" data-i18n="greenAte">Yeşil yedi</span>
+          <div id="tray-gourd" class="tray-dots"></div>
+        </div>
+      </div>
+
+      <div class="board-wrap">
+        <div id="eat-banner" class="eat-banner hidden" aria-live="assertive"></div>
+        <svg id="board" viewBox="0 0 100 100" role="img" aria-label="Board">
+          <defs>
+            <radialGradient id="dirtGrad" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stop-color="#c4a574" />
+              <stop offset="55%" stop-color="#9a7b4f" />
+              <stop offset="100%" stop-color="#6e5333" />
+            </radialGradient>
+            <filter id="pieceShadow" x="-40%" y="-40%" width="180%" height="180%">
+              <feDropShadow dx="0.4" dy="0.8" stdDeviation="0.7" flood-opacity="0.35" />
+            </filter>
+            <radialGradient id="tomatoFill" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#ff8a80"/>
+              <stop offset="55%" stop-color="#c62828"/>
+              <stop offset="100%" stop-color="#7f0000"/>
+            </radialGradient>
+            <radialGradient id="gourdFill" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#c8e6c9"/>
+              <stop offset="45%" stop-color="#43a047"/>
+              <stop offset="100%" stop-color="#1b5e20"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="50" cy="50" rx="46" ry="46" fill="url(#dirtGrad)" class="board-soil" />
+          <g id="board-lines" fill="none" stroke="#3d2a16" stroke-width="1.1" stroke-linecap="round"></g>
+          <path id="left-arc" d="" fill="none" stroke="#3d2a16" stroke-width="1.1" />
+          <path id="right-arc" d="" fill="none" stroke="#3d2a16" stroke-width="1.1" />
+          <g id="board-nodes"></g>
+          <g id="board-pieces" filter="url(#pieceShadow)"></g>
+          <g id="board-hints"></g>
+          <g id="board-fx"></g>
+        </svg>
+      </div>
+
+      <p id="status-msg" class="status-msg" aria-live="polite"></p>
+
+      <div id="end-panel" class="end-panel hidden">
+        <p id="end-text"></p>
+        <button type="button" id="btn-rematch" class="btn btn-primary" data-i18n="rematch">Yeniden oyna</button>
+        <button type="button" id="btn-lobby" class="btn btn-ghost" data-i18n="toHome">Ana menü</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <script src="app-config.js"></script>
+  <script src="i18n.js"></script>
+  <script src="engine.js"></script>
+  <script src="game-client.js" defer></script>
+</body>
+</html>
