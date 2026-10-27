@@ -247,6 +247,49 @@ html, body {
   color: var(--muted);
   text-align: center;
 }
+.demo-caption {
+  margin: 0 0 0.55rem;
+  padding: 0.7rem 0.8rem 0.75rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 183, 3, 0.35);
+  background: linear-gradient(165deg, rgba(30, 30, 40, 0.96), rgba(12, 12, 18, 0.94));
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+.demo-caption.hidden { display: none !important; }
+.demo-caption-kicker {
+  margin: 0 0 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--insured);
+}
+.demo-caption-title {
+  margin: 0 0 0.35rem;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  color: var(--p1);
+}
+.demo-caption-text {
+  margin: 0 0 0.65rem;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.demo-caption-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+.demo-step {
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+body.is-demo #btn-resign { display: none !important; }
+body.is-demo #game-hint { display: none; }
 .board-wrap {
   position: relative;
   width: 100%;

@@ -38,7 +38,7 @@
             <span class="menu-label" data-i18n="homeSettings">Ayarlar</span>
           </button>
           <button type="button" class="btn btn-ghost btn-menu" id="btn-home-tutorial">
-            <span class="menu-label" data-i18n="homeTutorial">Nasıl oynanır</span>
+            <span class="menu-label" data-i18n="homeTutorial">Tutorial</span>
           </button>
           <button type="button" class="btn btn-ghost btn-menu" id="btn-home-help">
             <span class="menu-label" data-i18n="homeHelp">Yardım</span>
@@ -53,6 +53,28 @@
       <button type="button" class="btn-back" id="btn-scores-back" data-i18n="back">Geri</button>
       <header class="brand sm-head"><h1 data-i18n="scoresTitle">Skorlar</h1></header>
       <div id="scores-panel" class="scores-panel"></div>
+    </section>
+
+    <section id="screen-tutorial-menu" class="screen">
+      <button type="button" class="btn-back" id="btn-tutorial-menu-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="tutorialMenuTitle">Tutorial</h1>
+        <p class="lede" data-i18n="tutorialMenuLead">PC anlatır veya PC oynar — sen İleri ile ilerlersin</p>
+      </header>
+      <div class="mode-list">
+        <button type="button" class="mode-card" id="btn-tut-rules">
+          <div class="mode-copy">
+            <strong data-i18n="tutRulesTitle">Tutorial I · PC anlatsın</strong>
+            <span data-i18n="tutRulesHint">Kurallar, skor, sigorta — slayt slayt altyazı</span>
+          </div>
+        </button>
+        <button type="button" class="mode-card" id="btn-tut-demo">
+          <div class="mode-copy">
+            <strong data-i18n="tutDemoTitle">Tutorial II · PC oynadı</strong>
+            <span data-i18n="tutDemoHint">Karşılıklı iki taraf; hareketler renk ve vurguyla gösterilir</span>
+          </div>
+        </button>
+      </div>
     </section>
 
     <section id="screen-play" class="screen">
@@ -156,7 +178,7 @@
     <section id="screen-help" class="screen">
       <button type="button" class="btn-back" id="btn-help-back" data-i18n="back">Geri</button>
       <header class="brand sm-head"><h1 data-i18n="helpTitle">Yardım</h1></header>
-      <button type="button" class="btn btn-primary btn-block" id="btn-help-tutorial" data-i18n="homeTutorial">Nasıl oynanır</button>
+      <button type="button" class="btn btn-primary btn-block" id="btn-help-tutorial" data-i18n="homeTutorial">Tutorial</button>
       <article class="help-block">
         <h2 data-i18n="helpRulesTitle">Kurallar</h2>
         <p class="help-body" data-i18n="helpRules"></p>
@@ -184,6 +206,16 @@
         <button type="button" class="btn-back compact" id="btn-game-back" data-i18n="back">Geri</button>
         <div class="phase-pill" id="phase-pill">—</div>
         <button type="button" class="btn btn-ghost compact" id="btn-resign" data-i18n="resign">Teslim Ol</button>
+      </div>
+      <div id="demo-caption" class="demo-caption hidden" aria-live="polite">
+        <p class="demo-caption-kicker" id="demo-kicker">Tutorial II · PC oynadı</p>
+        <h2 class="demo-caption-title" id="demo-title">—</h2>
+        <p class="demo-caption-text" id="demo-text">—</p>
+        <div class="demo-caption-nav">
+          <button type="button" class="btn btn-ghost compact" id="btn-demo-exit" data-i18n="demoExit">Çık</button>
+          <span class="demo-step" id="demo-step">1 / 1</span>
+          <button type="button" class="btn btn-primary compact" id="btn-demo-next" data-i18n="demoNext">İleri</button>
+        </div>
       </div>
       <div class="hud" id="hud"></div>
       <p class="hint" id="game-hint"></p>
@@ -215,6 +247,7 @@
   <script src="ai.js"></script>
   <script src="audio.js"></script>
   <script src="tutorial.js"></script>
+  <script src="demo-match.js"></script>
   <script src="shared/hub-back.js"></script>
   <script src="shared/score.js"></script>
   <script src="shared/p2p-session.js"></script>

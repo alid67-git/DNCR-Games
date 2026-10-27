@@ -16,6 +16,7 @@
   const screens = {
     home: $("screen-home"),
     play: $("screen-play"),
+    tutorialMenu: $("screen-tutorial-menu"),
     soloSetup: $("screen-solo-setup"),
     twoPSetup: $("screen-2p-setup"),
     p2p: $("screen-p2p"),
@@ -43,7 +44,9 @@
   let hubBackCtl = null;
   let tutorialCtl = null;
   let fxBusy = false;
+  let demo = null; // { index, busy }
   const Audio = window.SiegeAudio || null;
+  const DemoMatch = window.SiegeDemoMatch || null;
 
   // Kenarlardan uzak tut: köşe tıklamaları düğüme gitsin
   const PAD = 10;
@@ -130,7 +133,7 @@
   }
 
   function onBoardPointer(ev) {
-    if (!session || fxBusy) return;
+    if (!session || fxBusy || session.mode === "demo") return;
     if (ev.button != null && ev.button !== 0) return;
     const svg = $("board");
     if (!svg) return;
@@ -470,14 +473,17 @@
 
   function commitAction(player, action, opts) {
     const fromNet = opts && opts.fromNet;
+    const skipFx = opts && opts.skipFx;
+    const silent = opts && opts.silent;
     if (!session) return Promise.resolve(false);
-    if (fxBusy && !fromNet) return Promise.resolve(false);
+    if (fxBusy && !fromNet && !skipFx) return Promise.resolve(false);
     const r = applyAction(session.state, player, action);
     if (!r.ok) {
-      if (!fromNet) {
+      if (!fromNet && !silent) {
         if (Audio) Audio.playSfx("invalid");
         toast(r.error || t("toastInvalid"));
       }
+      if (silent) console.warn("demo action fail", action, r.error);
       return Promise.resolve(false);
     }
     const next = r.state;
@@ -496,12 +502,12 @@
     };
     const expected = fxFromAction[action.type];
     const needsFx =
-      expected && next.lastMove && next.lastMove.type === expected;
+      !skipFx && expected && next.lastMove && next.lastMove.type === expected;
 
     const finish = () => {
       session.state = next;
       renderAll();
-      if (!fromNet) maybeAiTurn();
+      if (!fromNet && session.mode !== "demo") maybeAiTurn();
       return true;
     };
 
@@ -1039,7 +1045,11 @@
   $("btn-settings-back").addEventListener("click", () => showScreen("home"));
   $("btn-help-back").addEventListener("click", () => showScreen("home"));
 
-  function openTutorial() {
+  function openTutorialMenu() {
+    showScreen("tutorialMenu");
+  }
+
+  function openTutorialRules() {
     const overlay = $("tutorial-overlay");
     if (!overlay || !window.SiegeTutorial) return;
     overlay.setAttribute("aria-hidden", "false");
@@ -1052,23 +1062,140 @@
           try {
             localStorage.setItem("kusatma_tutorial_seen_v1", "1");
           } catch (_) {}
+          showScreen("tutorialMenu");
         },
       });
     }
     tutorialCtl.open(0);
   }
 
-  if ($("btn-home-tutorial")) {
-    $("btn-home-tutorial").addEventListener("click", () => openTutorial());
-  }
-  if ($("btn-help-tutorial")) {
-    $("btn-help-tutorial").addEventListener("click", () => openTutorial());
+  function updateDemoCaption(step) {
+    if (!$("demo-caption")) return;
+    if ($("demo-kicker")) $("demo-kicker").textContent = t("tutDemoTitle");
+    if ($("demo-title")) $("demo-title").textContent = step.title;
+    if ($("demo-text")) $("demo-text").textContent = step.caption;
+    if ($("demo-step") && demo) {
+      $("demo-step").textContent = `${demo.index + 1} / ${DemoMatch.STEPS.length}`;
+    }
+    if ($("btn-demo-next")) {
+      $("btn-demo-next").textContent = step.finale ? t("demoFinish") : t("demoNext");
+    }
   }
 
-  // İlk açılışta bir kez otomatik tutorial
+  async function runDemoActionSpec(spec, opts) {
+    if (!spec) return true;
+    const player = spec.player;
+    const action = { ...spec };
+    delete action.player;
+    return commitAction(player, action, { silent: true, ...(opts || {}) });
+  }
+
+  async function executeDemoStep(step) {
+    if (step.batch && step.batch.length) {
+      for (const spec of step.batch) {
+        const ok = await runDemoActionSpec(spec, { skipFx: true });
+        if (!ok) break;
+        await new Promise((r) => setTimeout(r, 90));
+      }
+      renderAll();
+      if (Audio) Audio.playSfx("place");
+      return;
+    }
+    if (step.action) {
+      await runDemoActionSpec(step.action);
+      if (step.follow) await runDemoActionSpec(step.follow);
+    }
+  }
+
+  function exitDemo() {
+    demo = null;
+    session = null;
+    document.body.classList.remove("is-demo");
+    if ($("demo-caption")) $("demo-caption").classList.add("hidden");
+    if ($("btn-resign")) $("btn-resign").classList.remove("hidden");
+    if (Audio) Audio.stopMusic();
+    showScreen("tutorialMenu");
+  }
+
+  async function startDemoMatch() {
+    if (!DemoMatch || !DemoMatch.STEPS) {
+      toast("Demo yüklenemedi");
+      return;
+    }
+    clearTimeout(aiTimer);
+    selectedStone = null;
+    await ensureAudio();
+    if (Audio && settings.music !== false) Audio.startMusic();
+    session = {
+      mode: "demo",
+      difficulty: null,
+      humanPlayer: null,
+      names: {
+        p1: lang() === "en" ? "Blue (PC)" : "Mavi (PC)",
+        p2: lang() === "en" ? "Red (PC)" : "Kırmızı (PC)",
+      },
+      state: createGameState(PLAYERS.P1),
+      scoreRecorded: true,
+    };
+    demo = { index: 0, busy: false };
+    document.body.classList.add("is-demo");
+    if ($("demo-caption")) $("demo-caption").classList.remove("hidden");
+    if ($("btn-resign")) $("btn-resign").classList.add("hidden");
+    $("game-over").classList.add("hidden");
+    showScreen("game");
+    renderAll();
+    updateDemoCaption(DemoMatch.STEPS[0]);
+  }
+
+  async function onDemoNext() {
+    if (!demo || !DemoMatch || demo.busy) return;
+    const step = DemoMatch.STEPS[demo.index];
+    if (step.finale) {
+      exitDemo();
+      return;
+    }
+    demo.busy = true;
+    if ($("btn-demo-next")) $("btn-demo-next").disabled = true;
+    try {
+      await executeDemoStep(step);
+      demo.index += 1;
+      if (demo.index >= DemoMatch.STEPS.length) {
+        exitDemo();
+        return;
+      }
+      updateDemoCaption(DemoMatch.STEPS[demo.index]);
+    } finally {
+      demo.busy = false;
+      if ($("btn-demo-next")) $("btn-demo-next").disabled = false;
+    }
+  }
+
+  if ($("btn-home-tutorial")) {
+    $("btn-home-tutorial").addEventListener("click", () => openTutorialMenu());
+  }
+  if ($("btn-help-tutorial")) {
+    $("btn-help-tutorial").addEventListener("click", () => openTutorialMenu());
+  }
+  if ($("btn-tutorial-menu-back")) {
+    $("btn-tutorial-menu-back").addEventListener("click", () => showScreen("home"));
+  }
+  if ($("btn-tut-rules")) {
+    $("btn-tut-rules").addEventListener("click", () => openTutorialRules());
+  }
+  if ($("btn-tut-demo")) {
+    $("btn-tut-demo").addEventListener("click", () => startDemoMatch());
+  }
+  if ($("btn-demo-next")) {
+    $("btn-demo-next").addEventListener("click", () => onDemoNext());
+  }
+  if ($("btn-demo-exit")) {
+    $("btn-demo-exit").addEventListener("click", () => exitDemo());
+  }
+
+  // İlk açılışta tutorial menüsü yerine kurallar turu
   try {
     if (!localStorage.getItem("kusatma_tutorial_seen_v1")) {
-      setTimeout(() => openTutorial(), 450);
+      setTimeout(() => openTutorialRules(), 450);
     }
   } catch (_) {}
 
@@ -1140,6 +1267,10 @@
   });
 
   $("btn-game-back").addEventListener("click", () => {
+    if (session && session.mode === "demo") {
+      exitDemo();
+      return;
+    }
     if (session && session.state.phase !== PHASE.GAME_OVER) {
       if (!confirm(lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?")) return;
     }

@@ -1,10 +1,25 @@
 window.SiegeConfig = {
   appName: "Kuşatma",
-  version: "1.3.1",
-  build: 5,
+  version: "1.4.0",
+  build: 6,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kusatma/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
+    {
+      version: "1.4.0",
+      build: 6,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "Tutorial menüsü: I · PC anlatsın / II · PC oynadı",
+          "Karşılıklı maç demosu: altyazı + renk/vurgu animasyonları",
+        ],
+        en: [
+          "Tutorial menu: I · PC explains / II · PC played",
+          "Mutual match demo: captions + color/glow move FX",
+        ],
+      },
+    },
     {
       version: "1.3.1",
       build: 5,
