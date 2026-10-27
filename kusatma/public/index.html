@@ -37,6 +37,9 @@
           <button type="button" class="btn btn-ghost btn-menu" id="btn-home-settings">
             <span class="menu-label" data-i18n="homeSettings">Ayarlar</span>
           </button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-tutorial">
+            <span class="menu-label" data-i18n="homeTutorial">Nasıl oynanır</span>
+          </button>
           <button type="button" class="btn btn-ghost btn-menu" id="btn-home-help">
             <span class="menu-label" data-i18n="homeHelp">Yardım</span>
           </button>
@@ -145,6 +148,7 @@
     <section id="screen-help" class="screen">
       <button type="button" class="btn-back" id="btn-help-back" data-i18n="back">Geri</button>
       <header class="brand sm-head"><h1 data-i18n="helpTitle">Yardım</h1></header>
+      <button type="button" class="btn btn-primary btn-block" id="btn-help-tutorial" data-i18n="homeTutorial">Nasıl oynanır</button>
       <article class="help-block">
         <h2 data-i18n="helpRulesTitle">Kurallar</h2>
         <p class="help-body" data-i18n="helpRules"></p>
@@ -195,11 +199,13 @@
   </main>
 
   <div id="toast" class="toast hidden" role="status"></div>
+  <div id="tutorial-overlay" class="tutorial-overlay hidden" aria-hidden="true"></div>
 
   <script src="app-config.js"></script>
   <script src="i18n.js"></script>
   <script src="engine.js"></script>
   <script src="ai.js"></script>
+  <script src="tutorial.js"></script>
   <script src="shared/hub-back.js"></script>
   <script src="shared/score.js"></script>
   <script src="shared/p2p-session.js"></script>
