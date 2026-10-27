@@ -1,9 +1,24 @@
 window.DokuztasConfig = {
   appName: "Dokuztaş",
-  version: "1.0.2",
-  build: 3,
+  version: "1.0.3",
+  build: 4,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/dokuztas/",
   changelog: [
+    {
+      version: "1.0.3",
+      build: 4,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "Değirmen üçlüsü daha belirgin altın vurgu + halka",
+          "Alınan taş renk değişip tahta dışına uçuyor (görünür animasyon)",
+        ],
+        en: [
+          "Clearer mill trio gold highlight + rings",
+          "Captured piece recolors and flies off the board (visible FX)",
+        ],
+      },
+    },
     {
       version: "1.0.2",
       build: 3,

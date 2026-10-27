@@ -606,6 +606,7 @@ input[type="text"]:focus {
   margin: 0 auto;
   width: min(100%, 420px);
   aspect-ratio: 1;
+  overflow: visible;
   animation: boardIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes boardIn {
@@ -621,8 +622,16 @@ input[type="text"]:focus {
 #board {
   width: 100%;
   height: 100%;
+  overflow: visible;
   filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.45));
   touch-action: manipulation;
+}
+.board-fx-html {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
 }
 .board-wood {
   filter: url();
@@ -652,58 +661,97 @@ input[type="text"]:focus {
   transform: scale(1.16);
 }
 .piece.mill-flash {
-  animation: millFlash 0.72s cubic-bezier(0.22, 1.35, 0.36, 1) both;
+  animation: millFlash 1.05s cubic-bezier(0.22, 1.35, 0.36, 1) both;
   pointer-events: none;
 }
 .piece.mill-flash .skin {
-  fill: #ffe29a !important;
-  stroke: #fff6d2;
-  stroke-width: 0.85;
-  filter: drop-shadow(0 0 2.2px rgba(255, 220, 120, 0.95));
+  fill: #ffd666 !important;
+  stroke: #fff3c4;
+  stroke-width: 1.1;
+}
+.mill-ring {
+  fill: none;
+  stroke: #ffe08a;
+  stroke-width: 1.35;
+  opacity: 0.95;
+  pointer-events: none;
+  animation: millRingPulse 1.05s ease-out both;
 }
 @keyframes millFlash {
   0% {
     transform: scale(1);
   }
-  28% {
-    transform: scale(1.55);
+  22% {
+    transform: scale(1.48);
   }
-  62% {
-    transform: scale(1.28);
+  48% {
+    transform: scale(1.22);
+  }
+  72% {
+    transform: scale(1.38);
   }
   100% {
-    transform: scale(1);
+    transform: scale(1.08);
   }
 }
-.piece-eject {
-  pointer-events: none;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: pieceEject 0.78s cubic-bezier(0.25, 0.7, 0.35, 1) both;
-}
-.piece-eject .skin {
-  fill: #ff8a65 !important;
-  stroke: #ffe0b2;
-  stroke-width: 0.7;
-  filter: drop-shadow(0 0 2px rgba(255, 140, 90, 0.9));
-}
-@keyframes pieceEject {
+@keyframes millRingPulse {
   0% {
-    opacity: 1;
-    transform: translate(0, 0) scale(1.2) rotate(0deg);
+    opacity: 0;
+    stroke-width: 0.4;
   }
-  40% {
+  25% {
     opacity: 1;
-    transform: translate(
-        calc(var(--ej-x, 160px) * 0.45),
-        calc(var(--ej-y, -120px) * 0.45)
-      )
-      scale(1.05) rotate(72deg);
+    stroke-width: 1.6;
   }
   100% {
     opacity: 0;
-    transform: translate(var(--ej-x, 160px), var(--ej-y, -120px)) scale(0.45)
-      rotate(var(--ej-rot, 200deg));
+    stroke-width: 2.4;
+  }
+}
+.eject-orb {
+  position: absolute;
+  width: 12.5%;
+  height: 12.5%;
+  margin: -6.25% 0 0 -6.25%;
+  border-radius: 50%;
+  box-sizing: border-box;
+  border: 2px solid #ffe0b2;
+  box-shadow:
+    0 0 0 3px rgba(255, 140, 80, 0.35),
+    0 8px 18px rgba(0, 0, 0, 0.35);
+  z-index: 7;
+  will-change: transform, opacity;
+}
+.eject-orb.from-red {
+  background: radial-gradient(circle at 35% 30%, #ffab91, #ff5722 55%, #bf360c);
+}
+.eject-orb.from-black {
+  background: radial-gradient(circle at 35% 30%, #b0bec5, #ff7043 50%, #e64a19);
+}
+.eject-orb.is-charged {
+  background: radial-gradient(circle at 35% 30%, #ffe082, #ff9800 48%, #f4511e) !important;
+  border-color: #fff8e1;
+  transform: scale(1.28);
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+.eject-orb.is-flying {
+  transition: none;
+  animation: ejectFly 0.95s cubic-bezier(0.2, 0.75, 0.25, 1) forwards;
+}
+@keyframes ejectFly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.28) rotate(0deg);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(var(--ej-mid-x, 40px), var(--ej-mid-y, -50px)) scale(1.05)
+      rotate(80deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--ej-x, 180px), var(--ej-y, -160px)) scale(0.35)
+      rotate(var(--ej-rot, 240deg));
   }
 }
 

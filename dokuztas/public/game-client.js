@@ -289,40 +289,136 @@
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  /** Değirmen üçlüsünü kısa süre büyütüp altın tonla göster. */
+  function svgPointToWrap(nodeId) {
+    const svg = $("board");
+    const wrap = document.querySelector("#screen-game .board-wrap");
+    const p = POSITIONS[nodeId];
+    if (!svg || !wrap || !p) return null;
+    try {
+      const pt = svg.createSVGPoint();
+      pt.x = p.x;
+      pt.y = p.y;
+      const ctm = svg.getScreenCTM();
+      if (!ctm) return null;
+      const screen = pt.matrixTransform(ctm);
+      const rect = wrap.getBoundingClientRect();
+      if (!rect.width || !rect.height) return null;
+      return {
+        leftPct: ((screen.x - rect.left) / rect.width) * 100,
+        topPct: ((screen.y - rect.top) / rect.height) * 100,
+        sizePx: Math.max(28, rect.width * 0.11),
+      };
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /** Değirmen üçlüsünü hafifçe altın tona çekip halka ile vurgula. */
   function flashMillNodes(nodeIds) {
     if (!nodeIds || !nodeIds.length) return Promise.resolve();
     const g = $("board-pieces");
+    const fx = $("board-fx");
     if (!g) return Promise.resolve();
     const set = new Set(nodeIds);
+    if (fx) fx.innerHTML = "";
     g.querySelectorAll(".piece").forEach((el) => {
-      if (set.has(el.dataset.node)) el.classList.add("mill-flash");
+      if (!set.has(el.dataset.node)) return;
+      el.classList.add("mill-flash");
+      const skin = el.querySelector(".skin");
+      if (skin) {
+        skin.dataset.prevFill = skin.getAttribute("fill") || "";
+        skin.setAttribute("fill", "#ffd666");
+        skin.setAttribute("stroke", "#fff6d0");
+        skin.setAttribute("stroke-width", "1.05");
+      }
+      const pos = POSITIONS[el.dataset.node];
+      if (fx && pos) {
+        const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        ring.setAttribute("cx", pos.x);
+        ring.setAttribute("cy", pos.y);
+        ring.setAttribute("r", "6.4");
+        ring.setAttribute("class", "mill-ring");
+        fx.appendChild(ring);
+      }
     });
-    return waitMs(720).then(() => {
+    return waitMs(1100).then(() => {
       g.querySelectorAll(".piece.mill-flash").forEach((el) => {
         el.classList.remove("mill-flash");
+        const skin = el.querySelector(".skin");
+        if (skin) {
+          const prev = skin.dataset.prevFill;
+          if (prev) skin.setAttribute("fill", prev);
+          else skin.removeAttribute("fill");
+          skin.removeAttribute("stroke");
+          skin.removeAttribute("stroke-width");
+          delete skin.dataset.prevFill;
+        }
       });
+      if (fx) fx.innerHTML = "";
+      // Taş renklerini state'ten yeniden çiz (gradient fill geri gelsin)
+      if (session) renderPieces(session.state.board);
     });
   }
 
-  /** Alınan taşı renklendirip ekranın dışına uçur. */
-  function animateEjectPiece(nodeId, owner) {
-    const fx = $("board-fx");
-    const p = POSITIONS[nodeId];
-    if (!fx || !p || !owner) return Promise.resolve();
-    fx.innerHTML = "";
-    const piece = makePiece(owner, p.x, p.y, false);
-    piece.classList.add("piece-eject");
-    const dx = (Math.random() > 0.5 ? 1 : -1) * (140 + Math.random() * 110);
-    const dy = -90 - Math.random() * 130;
-    const rot = (Math.random() > 0.5 ? 1 : -1) * (170 + Math.random() * 240);
-    piece.style.setProperty("--ej-x", `${dx.toFixed(0)}px`);
-    piece.style.setProperty("--ej-y", `${dy.toFixed(0)}px`);
-    piece.style.setProperty("--ej-rot", `${rot.toFixed(0)}deg`);
-    fx.appendChild(piece);
-    return waitMs(780).then(() => {
-      if (piece.parentNode) piece.parentNode.removeChild(piece);
-    });
+  /** Alınan taşı HTML katmanda renklendirip tahta dışına uçur (SVG clip yok). */
+  async function animateEjectPiece(nodeId, owner) {
+    const layer = $("board-fx-html");
+    const loc = svgPointToWrap(nodeId);
+    if (!layer || !loc || !owner) return;
+    layer.innerHTML = "";
+    const orb = document.createElement("div");
+    orb.className = `eject-orb from-${owner}`;
+    orb.style.left = `${loc.leftPct}%`;
+    orb.style.top = `${loc.topPct}%`;
+    orb.style.width = `${loc.sizePx}px`;
+    orb.style.height = `${loc.sizePx}px`;
+    orb.style.marginLeft = `${-loc.sizePx / 2}px`;
+    orb.style.marginTop = `${-loc.sizePx / 2}px`;
+    layer.appendChild(orb);
+
+    // Renk değişimini net göster
+    await waitMs(40);
+    orb.classList.add("is-charged");
+    await waitMs(220);
+
+    const dirX = Math.random() > 0.5 ? 1 : -1;
+    const dx = dirX * (170 + Math.random() * 130);
+    const dy = -(130 + Math.random() * 150);
+    const midX = dx * 0.4;
+    const midY = dy * 0.45;
+    const rot = dirX * (200 + Math.random() * 200);
+
+    if (typeof orb.animate === "function") {
+      const anim = orb.animate(
+        [
+          { transform: "translate(0,0) scale(1.28) rotate(0deg)", opacity: 1 },
+          {
+            transform: `translate(${midX.toFixed(0)}px, ${midY.toFixed(0)}px) scale(1.05) rotate(85deg)`,
+            opacity: 1,
+            offset: 0.38,
+          },
+          {
+            transform: `translate(${dx.toFixed(0)}px, ${dy.toFixed(0)}px) scale(0.3) rotate(${rot.toFixed(0)}deg)`,
+            opacity: 0,
+          },
+        ],
+        {
+          duration: 980,
+          easing: "cubic-bezier(0.2, 0.75, 0.25, 1)",
+          fill: "forwards",
+        }
+      );
+      await anim.finished.catch(() => waitMs(980));
+    } else {
+      orb.style.setProperty("--ej-x", `${dx.toFixed(0)}px`);
+      orb.style.setProperty("--ej-y", `${dy.toFixed(0)}px`);
+      orb.style.setProperty("--ej-mid-x", `${midX.toFixed(0)}px`);
+      orb.style.setProperty("--ej-mid-y", `${midY.toFixed(0)}px`);
+      orb.style.setProperty("--ej-rot", `${rot.toFixed(0)}deg`);
+      orb.classList.add("is-flying");
+      await waitMs(980);
+    }
+    if (orb.parentNode) orb.parentNode.removeChild(orb);
   }
 
   function teamLabel(p) {
@@ -456,21 +552,25 @@
     if (formedMill) showMillBanner();
     session.state = r.state;
     selected = null;
+
+    // Alınan taşı HTML katmanda hemen başlat (SVG clip yok); sonra tahtayı güncelle
+    let ejectWait = null;
+    if (action.type === "remove" && removedOwner) {
+      ejectWait = animateEjectPiece(action.at, removedOwner);
+    }
     renderGame();
 
     if (formedMill && millNodes.length) {
       await flashMillNodes(millNodes);
     }
-    if (action.type === "remove" && removedOwner) {
-      await animateEjectPiece(action.at, removedOwner);
-    }
+    if (ejectWait) await ejectWait;
 
     if (session.mode === "p2p" && !fromNet && p2p) {
       p2p.send({ type: "action", action, moveCount: r.state.moveCount });
     }
 
     if (session.mode === "solo" && !session.state.winner && session.state.turn === PLAYERS.black) {
-      scheduleAi(formedMill ? 120 : 480);
+      scheduleAi(formedMill ? 180 : action.type === "remove" ? 200 : 480);
     }
   }
 
