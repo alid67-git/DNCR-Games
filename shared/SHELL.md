@@ -45,10 +45,13 @@ Ana ekran sırası (değiştirme):
 
 ## iPhone / web linkleri (GitHub Pages)
 
-- Hub: https://alid67-git.github.io/DNCR-Games/
+- Hub (çıkış noktası): https://alid67-git.github.io/DNCR-Games/
 - Kati: …/kati/
 - Noktalar: …/noktalar/
 - Dokuztaş: …/dokuztas/
+
+Hub sade kalır (ikon + oyun listesi). Kurallar / internet / Safari / P2P her oyunun **Yardım** sayfasındadır.
+Ana menüdeki **DNCR Games** düğmesi onay sonrası hub’a döner.
 
 ## Sync
 

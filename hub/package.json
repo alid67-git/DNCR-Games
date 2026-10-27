@@ -1,0 +1,16 @@
+{
+  "name": "dncr-games-hub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DNCR Games hub — launcher for Kati, Noktalar, Dokuztaş",
+  "scripts": {
+    "build:www": "node ../scripts/build-pages.mjs && rm -rf www && cp -a ../_site www",
+    "android:sync": "npm run build:www && npx cap sync android",
+    "android:apk": "cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3"
+  }
+}

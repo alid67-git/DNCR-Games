@@ -6,18 +6,24 @@
   <title>DNCR Games</title>
   <meta name="theme-color" content="#1a1208" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="DNCR Games" />
-  <meta name="description" content="DNCR Games — Kati, Noktalar ve Kutular, Dokuztaş. iPhone Safari’de oyna." />
-  <link rel="icon" type="image/png" href="kati/assets/favicon.png" />
+  <meta name="description" content="DNCR Games — Kati, Noktalar ve Kutular, Dokuztaş." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #140e08;
-      --ink: #f3e6c8;
-      --muted: rgba(243,230,200,.62);
-      --card: rgba(32,22,12,.82);
-      --line: rgba(212,180,131,.28);
-      --accent: #e8c878;
-      --font: "Segoe UI", system-ui, sans-serif;
+      --ink: #f7ecd4;
+      --muted: rgba(247, 236, 212, 0.62);
+      --accent: #f0c75a;
+      --line: rgba(240, 199, 90, 0.28);
+      --card: rgba(28, 18, 10, 0.72);
+      --font: "Manrope", system-ui, sans-serif;
+      --display: "Sora", system-ui, sans-serif;
     }
     * { box-sizing: border-box; }
     body {
@@ -26,95 +32,116 @@
       font-family: var(--font);
       color: var(--ink);
       background:
-        radial-gradient(ellipse 90% 50% at 50% -10%, #4a3218 0%, transparent 55%),
-        linear-gradient(165deg, #2a1c0e, #140e08 55%, #0a0704);
-      padding: max(1.25rem, env(safe-area-inset-top)) 1.1rem max(2rem, env(safe-area-inset-bottom));
+        radial-gradient(ellipse 80% 45% at 50% -8%, #6b3d1c 0%, transparent 55%),
+        radial-gradient(circle at 85% 75%, rgba(30, 120, 110, 0.22), transparent 42%),
+        radial-gradient(circle at 12% 70%, rgba(180, 60, 40, 0.18), transparent 40%),
+        linear-gradient(165deg, #2a1a0e, #120c07 58%, #070504);
+      padding: max(1.4rem, env(safe-area-inset-top)) 1.15rem max(2rem, env(safe-area-inset-bottom));
     }
-    main { width: min(520px, 100%); margin: 0 auto; }
+    main {
+      width: min(440px, 100%);
+      margin: 0 auto;
+      text-align: center;
+    }
+    .brand {
+      margin: 0.4rem 0 1.35rem;
+      animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .brand img {
+      width: min(148px, 38vw);
+      height: auto;
+      border-radius: 28%;
+      box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(240, 199, 90, 0.22);
+    }
     h1 {
-      margin: 1.5rem 0 0.35rem;
-      font-size: clamp(1.9rem, 8vw, 2.6rem);
-      letter-spacing: -0.03em;
+      margin: 0.95rem 0 0.3rem;
+      font-family: var(--display);
+      font-size: clamp(2rem, 9vw, 2.55rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
       color: var(--accent);
+      text-shadow: 0 2px 18px rgba(240, 199, 90, 0.25);
     }
-    .lede { color: var(--muted); line-height: 1.45; margin: 0 0 1.25rem; }
-    .note {
-      padding: 0.85rem 1rem;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: var(--card);
-      font-size: 0.9rem;
+    .lede {
+      margin: 0;
       color: var(--muted);
-      line-height: 1.45;
-      margin-bottom: 1.1rem;
+      font-size: 0.98rem;
     }
-    .note strong { color: var(--accent); }
+    .games {
+      display: flex;
+      flex-direction: column;
+      gap: 0.72rem;
+      margin-top: 0.35rem;
+    }
     .game {
       display: block;
       text-decoration: none;
       color: inherit;
-      padding: 1.1rem 1.15rem;
-      margin: 0.65rem 0;
-      border-radius: 16px;
+      padding: 1.05rem 1.15rem;
+      border-radius: 18px;
       border: 1px solid var(--line);
       background: var(--card);
-      transition: transform .15s ease;
+      backdrop-filter: blur(6px);
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      animation: rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
+    .game:nth-child(1) { animation-delay: 0.06s; }
+    .game:nth-child(2) { animation-delay: 0.12s; }
+    .game:nth-child(3) { animation-delay: 0.18s; }
     .game:active { transform: scale(0.98); }
     .game strong {
       display: block;
-      font-size: 1.15rem;
+      font-family: var(--display);
+      font-size: 1.18rem;
+      font-weight: 700;
       color: var(--accent);
-      margin-bottom: 0.25rem;
+      letter-spacing: -0.02em;
     }
-    .game span { font-size: 0.88rem; color: var(--muted); }
-    .modes {
-      margin-top: 0.55rem;
-      font-size: 0.78rem;
-      letter-spacing: 0.02em;
-      color: rgba(243,230,200,.48);
+    .game span {
+      display: block;
+      margin-top: 0.22rem;
+      font-size: 0.86rem;
+      color: var(--muted);
     }
     footer {
-      margin-top: 1.75rem;
-      font-size: 0.8rem;
-      color: rgba(243,230,200,.4);
-      line-height: 1.4;
+      margin-top: 1.6rem;
+      font-size: 0.78rem;
+      color: rgba(247, 236, 212, 0.38);
+      animation: rise 0.8s ease both;
+      animation-delay: 0.22s;
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: none; }
     }
   </style>
 </head>
 <body>
   <main>
-    <h1>DNCR Games</h1>
-    <p class="lede">Üç oyun · aynı menü · iPhone Safari</p>
+    <header class="brand">
+      <img src="assets/icon-512.png" width="148" height="148" alt="DNCR Games" />
+      <h1>DNCR Games</h1>
+      <p class="lede">Oyununu seç</p>
+    </header>
 
-    <div class="note">
-      <strong>İnternet olmadan?</strong> Evet — <em>Bilgisayara karşı</em> ve
-      <em>Aynı cihazda iki kişi</em> tamamen çevrimdışı.
-      <em>İki telefonda / uzaktan</em> için yalnızca eşleşme anında internet gerekir; oyun sunucusu yok (P2P).
-      <br /><br />
-      iPhone: Safari’de oyunu aç → <strong>Paylaş → Ana Ekrana Ekle</strong>.
-    </div>
+    <nav class="games" aria-label="Oyunlar">
+      <a class="game" href="kati/">
+        <strong>Kati</strong>
+        <span>Kırmızı vs yeşil</span>
+      </a>
+      <a class="game" href="noktalar/">
+        <strong>Noktalar ve Kutular</strong>
+        <span>Çizgi çek, kutuyu kapat</span>
+      </a>
+      <a class="game" href="dokuztas/">
+        <strong>Dokuztaş</strong>
+        <span>Değirmen kur</span>
+      </a>
+    </nav>
 
-    <a class="game" href="kati/">
-      <strong>Kati</strong>
-      <span>Kırmızı vs yeşil — klasik kati tahtası</span>
-      <div class="modes">Solo · Aynı cihaz · Uzaktan P2P</div>
-    </a>
-    <a class="game" href="noktalar/">
-      <strong>Noktalar ve Kutular</strong>
-      <span>Çizgi çek, kutuyu kapat</span>
-      <div class="modes">Solo · Aynı cihaz · Uzaktan P2P</div>
-    </a>
-    <a class="game" href="dokuztas/">
-      <strong>Dokuztaş</strong>
-      <span>Klasik dokuz taş — değirmen kur</span>
-      <div class="modes">Solo · Aynı cihaz · Uzaktan P2P</div>
-    </a>
-
-    <footer>
-      DNCR Games · Oyna / Ayarlar / Yardım / Güncellemeler · TR/EN<br />
-      Yapısal değişiklikler <code>shared/</code> üzerinden tüm oyunlara yayılır.
-    </footer>
+    <footer>Ana ekrana ekle · Yardım her oyunun içinde</footer>
   </main>
 </body>
 </html>

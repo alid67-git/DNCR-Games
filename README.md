@@ -1,39 +1,40 @@
 # DNCR Games
 
-Üç oyun · aynı menü kabuğu · iPhone Safari · Android APK.
+Üç oyun · ortak menü · iPhone kısayol · Android APK.
 
-| | iPhone / web |
+## Hub (çıkış noktası)
+
+| | |
 |--|--|
-| **Hub — DNCR Games** | https://alid67-git.github.io/DNCR-Games/ |
-| **Kati** | https://alid67-git.github.io/DNCR-Games/kati/ |
-| **Noktalar ve Kutular** | https://alid67-git.github.io/DNCR-Games/noktalar/ |
-| **Dokuztaş** | https://alid67-git.github.io/DNCR-Games/dokuztas/ |
+| **Web / iPhone** | https://alid67-git.github.io/DNCR-Games/ |
+| **Kati** | …/kati/ |
+| **Noktalar ve Kutular** | …/noktalar/ |
+| **Dokuztaş** | …/dokuztas/ |
 
-Safari → **Paylaş → Ana Ekrana Ekle**.
+**iPhone kısayol:** Safari’de hub’ı aç → **Paylaş → Ana Ekrana Ekle** (DNCR ikonu).
 
-## Ortak oynanış (her oyunda)
-
-1. **Bilgisayara karşı** — internet gerekmez  
-2. **Aynı cihazda iki kişi** — ağ gerekmez  
-3. **İki telefonda / uzaktan** — oda kodu, oyun sunucusu yok (P2P)
-
-Menü: **Oyna · Ayarlar · Yardım · Güncellemeler** · TR/EN
-
-## Android APK
+**Android APK (hub):** `hub/` içinden derlenir — üç oyunu da içerir.
 
 ```bash
-# Kati
-npm run android:sync && npm run android:apk
-
-# Noktalar
-cd dots-and-boxes && npm run android:sync && npm run android:apk
-
-# Dokuztaş
-cd dokuztas && npx cap add android   # ilk kez
-npm run android:sync && npm run android:apk
+cd hub && npm install && npm run android:sync && npm run android:apk
+# → hub/android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-APK çıktıları: `*/android/app/build/outputs/apk/debug/app-debug.apk`
+Ayrı oyun APK’leri (isteğe bağlı):
+
+```bash
+npm run android:sync && npm run android:apk                    # Kati
+cd dots-and-boxes && npm run android:sync && npm run android:apk
+cd dokuztas && npm run android:sync && npm run android:apk
+```
+
+Detaylı kurallar ve ipuçları **her oyunun Yardım** ekranındadır. Hub sade tutulur; oyunlardan **DNCR Games** düğmesiyle hub’a dönülür.
+
+## Ortak oynanış
+
+1. Bilgisayara karşı — internet yok  
+2. Aynı cihazda iki kişi — ağ yok  
+3. İki telefonda / uzaktan — oda kodu, sunucusuz P2P  
 
 ## Ortak kabuk
 
@@ -43,11 +44,3 @@ npm run build:pages
 ```
 
 Sözleşme: [shared/SHELL.md](./shared/SHELL.md)
-
-## Yerel
-
-```bash
-npm start                      # Kati :3847
-cd dots-and-boxes && npm start # :3857
-cd dokuztas && npm start       # :3867
-```
