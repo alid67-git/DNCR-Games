@@ -9,3 +9,4 @@ android/app/src/main/assets/public/
 .env
 .idea/
 .vscode/
+android/local.properties
