@@ -339,44 +339,23 @@
     };
   }
 
-  // ——— 10 oyun alanı tanımı ———
-  // 6 tanesi 8-10 nokta aralığında klasik ızgara, 4 tanesi yıldız/hayvan şekli.
+  // ——— 6 oyun alanı ———
+  // 6×6 / 8×8 / 10×10 klasik ızgara + yıldız / balık / kalp.
 
   const BOARD_DEFS = [
+    {
+      id: "grid-6x6",
+      category: "grid",
+      names: { tr: "Klasik 6×6", en: "Classic 6×6" },
+      mask: fullMask(5, 5),
+      difficulty: "easy",
+    },
     {
       id: "grid-8x8",
       category: "grid",
       names: { tr: "Klasik 8×8", en: "Classic 8×8" },
       mask: fullMask(7, 7),
-      difficulty: "easy",
-    },
-    {
-      id: "grid-8x9",
-      category: "grid",
-      names: { tr: "Klasik 8×9", en: "Classic 8×9" },
-      mask: fullMask(7, 8),
-      difficulty: "easy",
-    },
-    {
-      id: "grid-9x9",
-      category: "grid",
-      names: { tr: "Klasik 9×9", en: "Classic 9×9" },
-      mask: fullMask(8, 8),
       difficulty: "medium",
-    },
-    {
-      id: "grid-8x10",
-      category: "grid",
-      names: { tr: "Klasik 8×10", en: "Classic 8×10" },
-      mask: fullMask(7, 9),
-      difficulty: "medium",
-    },
-    {
-      id: "grid-9x10",
-      category: "grid",
-      names: { tr: "Klasik 9×10", en: "Classic 9×10" },
-      mask: fullMask(8, 9),
-      difficulty: "hard",
     },
     {
       id: "grid-10x10",
@@ -393,13 +372,6 @@
       difficulty: "medium",
     },
     {
-      id: "shape-cat",
-      category: "shape",
-      names: { tr: "Kedi", en: "Cat" },
-      mask: catMask(),
-      difficulty: "medium",
-    },
-    {
       id: "shape-fish",
       category: "shape",
       names: { tr: "Balık", en: "Fish" },
@@ -407,10 +379,10 @@
       difficulty: "hard",
     },
     {
-      id: "shape-rabbit",
+      id: "shape-heart",
       category: "shape",
-      names: { tr: "Tavşan", en: "Rabbit" },
-      mask: rabbitMask(),
+      names: { tr: "Kalp", en: "Heart" },
+      mask: heartMask(),
       difficulty: "hard",
     },
   ];

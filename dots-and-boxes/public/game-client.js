@@ -22,10 +22,10 @@
 
   /** Zorluk → önerilen tahta id'leri (önceden tanımlanmış eşleme). */
   const DIFF_BOARDS = {
-    easy: ["grid-8x8", "grid-8x9", "shape-star"],
-    medium: ["grid-9x9", "grid-8x10", "shape-cat", "shape-star"],
-    hard: ["grid-9x10", "shape-fish", "shape-rabbit", "grid-8x10"],
-    veryhard: ["grid-10x10", "shape-rabbit", "grid-9x10", "shape-fish"],
+    easy: ["grid-6x6", "shape-star"],
+    medium: ["grid-8x8", "shape-fish", "shape-star"],
+    hard: ["grid-8x8", "grid-10x10", "shape-heart", "shape-fish"],
+    veryhard: ["grid-10x10", "shape-heart", "shape-fish"],
   };
 
   const $ = (id) => document.getElementById(id);
@@ -449,8 +449,13 @@
     svg.addEventListener("pointerleave", onBoardHoverLeave);
   }
 
-  /** Çizilen kenarı 0.5s parlat + renk değiştir + uçlardan ~%10 uzat. */
-  function flashClaimedEdge(edgeId, boxed) {
+  /**
+   * Çizilen kenarı 0.5s parlak sarı + uçlardan ~%20 uzat.
+   * @param {string} edgeId
+   * @param {boolean} boxed
+   * @param {"human"|"ai"|"a"|"b"} [who]
+   */
+  function flashClaimedEdge(edgeId, boxed, who) {
     const line = document.querySelector(`#edge-layer line[data-edge="${edgeId}"]`);
     if (!line) return;
     clearTimeout(claimFlashTimer);
@@ -465,13 +470,15 @@
     const y2 = Number(line.dataset.y2 != null ? line.dataset.y2 : line.getAttribute("y2"));
     const mx = (x1 + x2) / 2;
     const my = (y1 + y2) / 2;
-    const grow = 1.1;
+    const grow = 1.22;
     line.setAttribute("x1", mx + (x1 - mx) * grow);
     line.setAttribute("y1", my + (y1 - my) * grow);
     line.setAttribute("x2", mx + (x2 - mx) * grow);
     line.setAttribute("y2", my + (y2 - my) * grow);
     line.classList.add("edge-claim-flash");
-    playMoveSfx(boxed ? "box" : "claim");
+    const side = who === "ai" || who === "b" ? "ai" : "human";
+    if (boxed) playMoveSfx(side === "ai" ? "box-ai" : "box-human");
+    else playMoveSfx(side === "ai" ? "claim-ai" : "claim-human");
 
     claimFlashTimer = setTimeout(() => {
       restoreEdgeGeometry(line);
@@ -736,7 +743,14 @@
     }
     session.state = r.state;
     renderAll();
-    flashClaimedEdge(edgeId, boxed > 0);
+    // A / insan: yüksek ton; B (2P diğer oyuncu): AI tonuyla ayrılsın
+    const who =
+      session.mode === "solo"
+        ? "human"
+        : player === PLAYERS.A
+          ? "human"
+          : "ai";
+    flashClaimedEdge(edgeId, boxed > 0, who);
     if (session.mode === "p2p" && !fromNet && p2pSession) {
       p2pSession.send({ type: "edge", edgeId, moveCount: session.state.moveCount || 0 });
     }
@@ -989,7 +1003,7 @@
       r.state.lastMove && r.state.lastMove.boxesCompleted
         ? r.state.lastMove.boxesCompleted.length
         : 0;
-    flashClaimedEdge(move.edgeId, boxed > 0);
+    flashClaimedEdge(move.edgeId, boxed > 0, "ai");
 
     // Ekstra tur: AI yine oynuyor
     if (!session.state.winner && session.state.turn !== session.humanPlayer) {
@@ -1083,7 +1097,9 @@
     setup.mode = "twop";
     if ($("p1-name")) $("p1-name").value = settings.p1 || "";
     if ($("p2-name")) $("p2-name").value = settings.p2 || "";
-    if (!setup.boardId) setup.boardId = "grid-8x8";
+    if (!setup.boardId || !Boards.getBoardDef(setup.boardId)) {
+      setup.boardId = "grid-6x6";
+    }
     renderBoardGrids();
     showScreen("twoPSetup");
   });

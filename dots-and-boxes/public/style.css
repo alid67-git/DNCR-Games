@@ -726,17 +726,13 @@ html[lang="en"] .chip-score::before {
   filter: drop-shadow(0 0 2.5px rgba(30, 136, 229, 0.7));
   animation: drawEdge 0.28s ease both;
 }
-/* Hamle vurgusu: 0.5s parlama + renk değişimi */
-.edge-a.edge-claim-flash {
-  stroke: #ff8a80;
-  stroke-width: 3.2;
-  filter: drop-shadow(0 0 6px rgba(255, 120, 100, 1));
-  animation: drawEdge 0.28s ease both, edgeClaimFlash 0.5s ease both;
-}
+/* Hamle vurgusu: 0.5s parlak sarı + belirgin büyüme */
+.edge-a.edge-claim-flash,
 .edge-b.edge-claim-flash {
-  stroke: #82b1ff;
-  stroke-width: 3.2;
-  filter: drop-shadow(0 0 6px rgba(100, 180, 255, 1));
+  stroke: #ffe566 !important;
+  stroke-width: 4.2;
+  filter: drop-shadow(0 0 8px rgba(255, 230, 80, 1))
+    drop-shadow(0 0 14px rgba(255, 210, 40, 0.85));
   animation: drawEdge 0.28s ease both, edgeClaimFlash 0.5s ease both;
 }
 @keyframes drawEdge {
@@ -753,16 +749,16 @@ html[lang="en"] .chip-score::before {
 }
 @keyframes edgeClaimFlash {
   0% {
-    opacity: 0.7;
-    stroke-width: 2.4;
+    opacity: 0.75;
+    stroke-width: 2.6;
   }
-  35% {
+  40% {
     opacity: 1;
-    stroke-width: 3.45;
+    stroke-width: 4.6;
   }
   100% {
     opacity: 1;
-    stroke-width: 2.55;
+    stroke-width: 3.2;
   }
 }
 
@@ -776,10 +772,12 @@ html[lang="en"] .chip-score::before {
   -webkit-tap-highlight-color: transparent;
 }
 .edge-preview {
-  stroke: rgba(240, 195, 90, 0.7);
-  stroke-width: 2.4;
+  stroke: #ffe566;
+  stroke-width: 3.1;
   stroke-linecap: round;
   fill: none;
+  filter: drop-shadow(0 0 5px rgba(255, 220, 60, 0.95));
+  opacity: 0.95;
 }
 
 .board-dot {

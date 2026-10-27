@@ -2,7 +2,9 @@
  * DNCR Games — ortak hamle vurgusu SFX (Web Audio, dosya yok)
  * window.DncrMoveSfx
  *
- * Kullanım: unlock() ilk kullanıcı jestinde; play("move"|"place"|"claim"|"capture"|"mill"|"select"|"box")
+ * İnsan vs bilgisayar tonları ayrı:
+ *   claim-human / claim-ai, move-human / move-ai, box-human / box-ai, …
+ * Eski adlar (claim, move, …) insan tonuna düşer.
  */
 (function (root) {
   "use strict";
@@ -74,36 +76,79 @@
         tone(520, 0.05, "sine", 0.07, t);
         tone(780, 0.06, "triangle", 0.04, t + 0.02);
         break;
+
+      // —— İnsan (yüksek, parlak) ——
       case "place":
-        tone(440, 0.09, "triangle", 0.11, t);
-        tone(660, 0.12, "sine", 0.08, t + 0.04);
+      case "place-human":
+        tone(520, 0.09, "triangle", 0.12, t);
+        tone(780, 0.11, "sine", 0.09, t + 0.04);
         break;
       case "claim":
       case "move":
-        // Kısa parlak vurgu tonu (~0.5s görsel ile birlikte)
-        tone(360, 0.12, "triangle", 0.12, t, 520);
-        tone(620, 0.16, "sine", 0.09, t + 0.05);
-        tone(880, 0.1, "triangle", 0.05, t + 0.12);
+      case "claim-human":
+      case "move-human":
+        tone(440, 0.1, "triangle", 0.13, t, 660);
+        tone(740, 0.14, "sine", 0.1, t + 0.04);
+        tone(990, 0.09, "triangle", 0.055, t + 0.11);
         break;
       case "box":
-        tone(480, 0.1, "triangle", 0.12, t);
-        tone(720, 0.14, "sine", 0.1, t + 0.06);
-        tone(960, 0.12, "triangle", 0.06, t + 0.12);
+      case "box-human":
+        tone(560, 0.1, "triangle", 0.13, t);
+        tone(840, 0.13, "sine", 0.11, t + 0.05);
+        tone(1120, 0.11, "triangle", 0.07, t + 0.11);
         break;
       case "capture":
-        tone(240, 0.14, "square", 0.09, t);
-        tone(380, 0.18, "triangle", 0.11, t + 0.05);
-        tone(560, 0.2, "sine", 0.08, t + 0.12);
+      case "capture-human":
+        tone(300, 0.12, "square", 0.09, t);
+        tone(480, 0.16, "triangle", 0.11, t + 0.05);
+        tone(720, 0.18, "sine", 0.08, t + 0.12);
         break;
       case "mill":
+      case "mill-human":
         tone(523, 0.14, "triangle", 0.12, t);
         tone(659, 0.16, "sine", 0.1, t + 0.08);
         tone(784, 0.18, "triangle", 0.08, t + 0.16);
         break;
+
+      // —— Bilgisayar / rakip (alçak, yumuşak) ——
+      case "place-ai":
+        tone(280, 0.11, "sine", 0.1, t);
+        tone(360, 0.14, "triangle", 0.08, t + 0.05);
+        break;
+      case "claim-ai":
+      case "move-ai":
+        tone(220, 0.14, "sine", 0.11, t, 320);
+        tone(300, 0.16, "triangle", 0.09, t + 0.06);
+        tone(180, 0.12, "sine", 0.05, t + 0.14);
+        break;
+      case "box-ai":
+        tone(260, 0.12, "triangle", 0.11, t);
+        tone(340, 0.14, "sine", 0.09, t + 0.06);
+        tone(420, 0.12, "triangle", 0.06, t + 0.13);
+        break;
+      case "capture-ai":
+        tone(160, 0.16, "sawtooth", 0.08, t);
+        tone(240, 0.18, "triangle", 0.1, t + 0.06);
+        tone(200, 0.2, "sine", 0.07, t + 0.14);
+        break;
+      case "mill-ai":
+        tone(330, 0.16, "triangle", 0.1, t);
+        tone(392, 0.18, "sine", 0.09, t + 0.1);
+        tone(262, 0.2, "triangle", 0.07, t + 0.2);
+        break;
+
       default:
         tone(500, 0.08, "sine", 0.08, t);
         break;
     }
+  }
+
+  /** side: "human" | "ai" — name'e sonek ekler (claim → claim-human). */
+  function playFor(side, name) {
+    const base = name || "move";
+    const tag = side === "ai" || side === "b" || side === 2 ? "ai" : "human";
+    if (/-human$|-ai$/.test(base)) play(base);
+    else play(`${base}-${tag}`);
   }
 
   function setEnabled(on) {
@@ -121,7 +166,6 @@
     return enabled;
   }
 
-  /** İlk dokunuşta AudioContext’i aç (iOS/Safari). */
   function bindFirstGesture(el) {
     const target = el || (typeof document !== "undefined" ? document : null);
     if (!target || target.__dncrSfxBound) return;
@@ -137,6 +181,7 @@
   root.DncrMoveSfx = {
     unlock,
     play,
+    playFor,
     setEnabled,
     isEnabled,
     bindFirstGesture,

@@ -1,9 +1,18 @@
 window.DokuztasConfig = {
   appName: "Dokuztaş",
-  version: "1.0.4",
-  build: 5,
+  version: "1.0.5",
+  build: 6,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/dokuztas/",
   changelog: [
+    {
+      version: "1.0.5",
+      build: 6,
+      date: "2026-10-27",
+      items: {
+        tr: ["İnsan ve bilgisayar hamle sesleri ayrı (yüksek / alçak ton)"],
+        en: ["Distinct human vs computer move SFX (high / low tone)"],
+      },
+    },
     {
       version: "1.0.4",
       build: 5,

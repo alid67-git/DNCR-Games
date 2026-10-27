@@ -62,10 +62,16 @@
   let moveFlashTimer = null;
   const Sfx = window.DncrMoveSfx || null;
 
-  function playMoveSfx(kind) {
+  function playMoveSfx(kind, side) {
     if (!Sfx) return;
     Sfx.unlock();
-    Sfx.play(kind || "move");
+    if (Sfx.playFor && side) Sfx.playFor(side, kind || "move");
+    else Sfx.play(kind || "move");
+  }
+
+  function sfxSideFor(actor) {
+    if (session && session.mode === "solo" && actor === PLAYERS.black) return "ai";
+    return "human";
   }
 
   function loadSettings() {
@@ -400,7 +406,11 @@
   /** Değirmen üçlüsünü altın tona çekip halka ile vurgula. */
   function flashMillNodes(nodeIds) {
     if (!nodeIds || !nodeIds.length) return Promise.resolve();
-    playMoveSfx("mill");
+    const millActor =
+      session && session.state && session.state.board
+        ? session.state.board[nodeIds[0]]
+        : null;
+    playMoveSfx("mill", sfxSideFor(millActor));
     const g = $("board-pieces");
     const fx = $("board-fx");
     if (!g) return Promise.resolve();
@@ -642,13 +652,14 @@
 
     // Alınan taşı HTML katmanda hemen başlat (SVG clip yok); sonra tahtayı güncelle
     let ejectWait = null;
+    const side = sfxSideFor(actor);
     if (action.type === "remove" && removedOwner) {
-      playMoveSfx("capture");
+      playMoveSfx("capture", side);
       ejectWait = animateEjectPiece(action.at, removedOwner);
     } else if (action.type === "place") {
-      playMoveSfx("place");
+      playMoveSfx("place", side);
     } else if (action.type === "move" || action.type === "fly") {
-      playMoveSfx("move");
+      playMoveSfx("move", side);
     }
     renderGame();
 

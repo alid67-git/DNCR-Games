@@ -1,9 +1,26 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.1.3",
-  build: 6,
+  version: "1.2.0",
+  build: 7,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/noktalar/",
   changelog: [
+    {
+      version: "1.2.0",
+      build: 7,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "6 tahta: 6×6, 8×8, 10×10, yıldız, balık, kalp",
+          "Hamle vurgusu: daha parlak sarı + daha büyük",
+          "İnsan ve bilgisayar hamle sesleri ayrı",
+        ],
+        en: [
+          "6 boards: 6×6, 8×8, 10×10, star, fish, heart",
+          "Move highlight: brighter yellow + larger",
+          "Distinct human vs computer move SFX",
+        ],
+      },
+    },
     {
       version: "1.1.3",
       build: 6,

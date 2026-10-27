@@ -1,29 +1,44 @@
 const assert = require("assert");
 const Boards = require("../public/boards.js");
 
-function testTenBoards() {
-  assert.strictEqual(Boards.BOARD_DEFS.length, 10, "tam olarak 10 oyun alanı olmalı");
+function testSixBoards() {
+  assert.strictEqual(Boards.BOARD_DEFS.length, 6, "tam olarak 6 oyun alanı olmalı");
   const ids = new Set(Boards.BOARD_DEFS.map((b) => b.id));
-  assert.strictEqual(ids.size, 10, "board id'leri benzersiz olmalı");
-}
-
-function testSixGridsInRange() {
-  const grids = Boards.BOARD_DEFS.filter((b) => b.category === "grid");
-  assert.strictEqual(grids.length, 6, "6 klasik ızgara tahtası olmalı");
-  for (const def of grids) {
-    const g = Boards.getGraph(def.id);
-    assert.ok(g.dotRows >= 8 && g.dotRows <= 10, `${def.id} dot satırı 8-10 aralığında olmalı`);
-    assert.ok(g.dotCols >= 8 && g.dotCols <= 10, `${def.id} dot sütunu 8-10 aralığında olmalı`);
+  assert.strictEqual(ids.size, 6, "board id'leri benzersiz olmalı");
+  for (const id of [
+    "grid-6x6",
+    "grid-8x8",
+    "grid-10x10",
+    "shape-star",
+    "shape-fish",
+    "shape-heart",
+  ]) {
+    assert.ok(ids.has(id), `${id} tanımlı olmalı`);
   }
 }
 
-function testFourShapes() {
+function testThreeGrids() {
+  const grids = Boards.BOARD_DEFS.filter((b) => b.category === "grid");
+  assert.strictEqual(grids.length, 3, "3 klasik ızgara tahtası olmalı");
+  const sizes = {
+    "grid-6x6": 6,
+    "grid-8x8": 8,
+    "grid-10x10": 10,
+  };
+  for (const def of grids) {
+    const g = Boards.getGraph(def.id);
+    const expect = sizes[def.id];
+    assert.strictEqual(g.dotRows, expect, `${def.id} satır`);
+    assert.strictEqual(g.dotCols, expect, `${def.id} sütun`);
+  }
+}
+
+function testThreeShapes() {
   const shapes = Boards.BOARD_DEFS.filter((b) => b.category === "shape");
-  assert.strictEqual(shapes.length, 4, "4 şekilli (yıldız/hayvan) tahta olmalı");
+  assert.strictEqual(shapes.length, 3, "3 şekilli (yıldız/balık/kalp) tahta olmalı");
   for (const def of shapes) {
     const g = Boards.getGraph(def.id);
     assert.ok(g.totalBoxes > 10, `${def.id} yeterince kutuya sahip olmalı`);
-    // Dikdörtgen olmayan bir şekil olmalı (en az bir satırda eksik kutu var)
     const rowLens = def.mask.map((row) => row.filter(Boolean).length);
     assert.ok(
       new Set(rowLens).size > 1 || rowLens[0] < def.mask[0].length,
@@ -45,7 +60,6 @@ function testGraphIntegrity() {
     for (const [eid, boxIdxs] of g.edgeToBoxes) {
       assert.ok(boxIdxs.length === 1 || boxIdxs.length === 2, "bir kenar en fazla 2 kutuya ait olabilir");
     }
-    // Her aktif nokta en az bir kenara bağlı olmalı.
     const dotHasEdge = new Set();
     for (const e of g.edges.values()) {
       dotHasEdge.add(e.dotA.join(","));
@@ -57,8 +71,8 @@ function testGraphIntegrity() {
   }
 }
 
-testTenBoards();
-testSixGridsInRange();
-testFourShapes();
+testSixBoards();
+testThreeGrids();
+testThreeShapes();
 testGraphIntegrity();
 console.log("boards.test.js — tüm testler geçti");

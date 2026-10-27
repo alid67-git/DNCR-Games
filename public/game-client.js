@@ -61,10 +61,11 @@
   let moveFlashTimer = null;
   const Sfx = window.DncrMoveSfx || null;
 
-  function playMoveSfx(kind) {
+  function playMoveSfx(kind, side) {
     if (!Sfx) return;
     Sfx.unlock();
-    Sfx.play(kind || "move");
+    if (Sfx.playFor && side) Sfx.playFor(side, kind || "move");
+    else Sfx.play(kind || "move");
   }
   let hubBackCtl = null;
 
@@ -601,9 +602,15 @@
       vic.setAttribute("class", `fx-victim ${victim}-piece`);
       fx.appendChild(vic);
       showEatBanner(attacker);
-      playMoveSfx("capture");
+      playMoveSfx(
+        "capture",
+        state && state.vsAi && attacker === PLAYERS.gourd ? "ai" : "human"
+      );
     } else {
-      playMoveSfx("move");
+      playMoveSfx(
+        "move",
+        state && state.vsAi && attacker === PLAYERS.gourd ? "ai" : "human"
+      );
     }
 
     const flyer = makePieceGroup(attacker, from.x, from.y, false);
