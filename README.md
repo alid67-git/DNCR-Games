@@ -1,6 +1,6 @@
 # DNCR Games
 
-Üç oyun · ortak menü · iPhone kısayol · Android APK.
+Dört oyun · ortak menü · iPhone kısayol · Android APK.
 
 ## Hub (çıkış noktası)
 
@@ -10,6 +10,7 @@
 | **Kati** | …/kati/ |
 | **Noktalar ve Kutular** | …/noktalar/ |
 | **Dokuztaş** | …/dokuztas/ |
+| **Kuşatma** | …/kusatma/ |
 
 **iPhone kısayol:** Safari’de hub’ı aç → **Paylaş → Ana Ekrana Ekle** (DNCR ikonu).
 

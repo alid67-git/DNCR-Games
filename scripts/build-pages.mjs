@@ -5,6 +5,7 @@
  *   /kati/      Kati Arena
  *   /noktalar/  Noktalar ve Kutular
  *   /dokuztas/  Dokuztaş
+ *   /kusatma/   Kuşatma (The Siege)
  */
 import fs from "fs";
 import path from "path";
@@ -44,6 +45,7 @@ cpDir(path.join(root, "site", "hub"), out);
 cpDir(path.join(root, "public"), path.join(out, "kati"));
 cpDir(path.join(root, "dots-and-boxes", "public"), path.join(out, "noktalar"));
 cpDir(path.join(root, "dokuztas", "public"), path.join(out, "dokuztas"));
+cpDir(path.join(root, "kusatma", "public"), path.join(out, "kusatma"));
 
 // robots
 fs.writeFileSync(
@@ -56,3 +58,4 @@ console.log("  /           hub");
 console.log("  /kati/      Kati Arena");
 console.log("  /noktalar/  Noktalar ve Kutular");
 console.log("  /dokuztas/  Dokuztaş");
+console.log("  /kusatma/   Kuşatma");
