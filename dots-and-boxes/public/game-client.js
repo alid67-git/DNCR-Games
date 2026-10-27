@@ -34,6 +34,7 @@
     play: $("screen-play"),
     soloSetup: $("screen-solo-setup"),
     twoPSetup: $("screen-2p-setup"),
+    p2p: $("screen-p2p"),
     settings: $("screen-settings"),
     help: $("screen-help"),
     updates: $("screen-updates"),
@@ -559,20 +560,223 @@
       toast(t("notYourTurn"));
       return;
     }
+    if (mode === "p2p" && state.turn !== humanPlayer) {
+      toast(t("notYourTurn"));
+      return;
+    }
     playHumanMove(edgeId);
   }
 
-  function playHumanMove(edgeId) {
+  function playHumanMove(edgeId, opts) {
     if (!session) return;
+    const fromNet = opts && opts.fromNet;
     const player = session.state.turn;
     const r = applyMove(session.boardId, session.state, edgeId, player);
     if (!r.ok) {
-      toast(r.error === "Bu çizgi zaten çizili." ? t("edgeTaken") : r.error);
+      if (!fromNet) {
+        toast(r.error === "Bu çizgi zaten çizili." ? t("edgeTaken") : r.error);
+      }
       return;
     }
     session.state = r.state;
     renderAll();
+    if (session.mode === "p2p" && !fromNet && p2pSession) {
+      p2pSession.send({ type: "edge", edgeId, moveCount: session.state.moveCount || 0 });
+    }
     maybeScheduleAi();
+  }
+
+  // —— P2P ——
+  let p2pSession = null;
+  let p2pLobby = null;
+
+  function destroyDotsP2P() {
+    if (p2pSession) {
+      try {
+        p2pSession.destroy();
+      } catch (_) {}
+    }
+    p2pSession = null;
+    p2pLobby = null;
+  }
+
+  function renderP2pBoardGrid() {
+    renderBoardPicker(
+      "p2p-board-grid",
+      setup.boardId,
+      (id) => {
+        setup.boardId = id;
+        renderP2pBoardGrid();
+      },
+      false
+    );
+  }
+
+  function bindDotsP2P(sessionP2P) {
+    sessionP2P.on("connected", () => {
+      toast(t("connected"));
+      if (sessionP2P.isHost) {
+        p2pLobby.guestJoined = true;
+        sessionP2P.send({
+          type: "hello",
+          name: p2pLobby.names.A,
+          role: "host",
+          boardId: p2pLobby.boardId,
+        });
+      } else {
+        sessionP2P.send({
+          type: "hello",
+          name: p2pLobby.names.B,
+          role: "guest",
+        });
+      }
+      updateP2pRoomUi();
+    });
+    sessionP2P.on("error", () => toast(t("peerFail")));
+    sessionP2P.on("disconnected", () => toast(t("peerFail")));
+    sessionP2P.on("message", (data) => {
+      if (!data || !data.type) return;
+      if (data.type === "hello") {
+        if (p2pLobby.you === "A" && data.role === "guest") {
+          p2pLobby.names.B = data.name || t("player2Ph");
+          p2pLobby.guestJoined = true;
+          sessionP2P.send({
+            type: "lobby",
+            names: p2pLobby.names,
+            ready: p2pLobby.ready,
+            boardId: p2pLobby.boardId,
+            guestJoined: true,
+          });
+        } else if (p2pLobby.you === "B" && data.role === "host") {
+          p2pLobby.names.A = data.name || t("player1Ph");
+          if (data.boardId) p2pLobby.boardId = data.boardId;
+          p2pLobby.guestJoined = true;
+        }
+        updateP2pRoomUi();
+      } else if (data.type === "lobby") {
+        p2pLobby.names = data.names || p2pLobby.names;
+        p2pLobby.ready = data.ready || p2pLobby.ready;
+        if (data.boardId) p2pLobby.boardId = data.boardId;
+        p2pLobby.guestJoined = !!data.guestJoined;
+        updateP2pRoomUi();
+      } else if (data.type === "ready") {
+        p2pLobby.ready[data.who] = !!data.value;
+        updateP2pRoomUi();
+        maybeStartDotsP2P();
+      } else if (data.type === "start") {
+        beginDotsP2PGame(data.boardId, data.names || p2pLobby.names);
+      } else if (data.type === "edge") {
+        if (!session || session.mode !== "p2p") return;
+        playHumanMove(data.edgeId, { fromNet: true });
+      }
+    });
+  }
+
+  function updateP2pRoomUi() {
+    if (!p2pLobby) return;
+    const room = $("p2p-room");
+    if (room) room.classList.remove("hidden");
+    if ($("p2p-room-code")) $("p2p-room-code").textContent = p2pLobby.code;
+    if ($("p2p-room-hint")) {
+      $("p2p-room-hint").textContent = p2pLobby.guestJoined
+        ? `${p2pLobby.names.A} vs ${p2pLobby.names.B || "…"}`
+        : t("waitingGuest");
+    }
+    const btn = $("btn-p2p-ready");
+    if (btn) {
+      btn.disabled = !p2pLobby.guestJoined;
+      const me = p2pLobby.you;
+      btn.textContent = p2pLobby.ready[me] ? t("readyOn") : t("ready");
+    }
+  }
+
+  function maybeStartDotsP2P() {
+    if (!p2pLobby || !p2pLobby.guestJoined) return;
+    if (!p2pLobby.ready.A || !p2pLobby.ready.B) return;
+    if (p2pLobby.you !== "A") return;
+    p2pSession.send({
+      type: "start",
+      boardId: p2pLobby.boardId,
+      names: p2pLobby.names,
+    });
+    beginDotsP2PGame(p2pLobby.boardId, p2pLobby.names);
+  }
+
+  function beginDotsP2PGame(boardId, names) {
+    const graph = Boards.getGraph(boardId);
+    const state = createGameState(boardId);
+    session = {
+      mode: "p2p",
+      difficulty: null,
+      boardId,
+      graph,
+      state,
+      humanPlayer: p2pLobby.you === "A" ? PLAYERS.A : PLAYERS.B,
+      names: { A: names.A, B: names.B },
+      aiThinking: false,
+    };
+    buildBoardSvg(graph);
+    showScreen("game");
+    renderAll();
+  }
+
+  async function hostDotsP2P() {
+    if (!window.ArenaP2P) {
+      toast(t("peerFail"));
+      return;
+    }
+    destroyDotsP2P();
+    const name = ($("p2p-name").value || "").trim() || t("player1Ph");
+    toast(t("connecting"));
+    try {
+      p2pSession = new ArenaP2P.P2PSession({ prefix: "noktalar" });
+      bindDotsP2P(p2pSession);
+      const code = await p2pSession.host();
+      p2pLobby = {
+        code,
+        you: "A",
+        names: { A: name, B: null },
+        ready: { A: false, B: false },
+        guestJoined: false,
+        boardId: setup.boardId,
+      };
+      updateP2pRoomUi();
+    } catch (_) {
+      toast(t("peerFail"));
+      destroyDotsP2P();
+    }
+  }
+
+  async function joinDotsP2P() {
+    if (!window.ArenaP2P) {
+      toast(t("peerFail"));
+      return;
+    }
+    const code = ($("p2p-code").value || "").trim().toUpperCase();
+    if (!code) {
+      toast(t("needCode"));
+      return;
+    }
+    destroyDotsP2P();
+    const name = ($("p2p-name").value || "").trim() || t("player2Ph");
+    toast(t("connecting"));
+    try {
+      p2pSession = new ArenaP2P.P2PSession({ prefix: "noktalar" });
+      bindDotsP2P(p2pSession);
+      await p2pSession.join(code);
+      p2pLobby = {
+        code,
+        you: "B",
+        names: { A: "—", B: name },
+        ready: { A: false, B: false },
+        guestJoined: false,
+        boardId: setup.boardId,
+      };
+      updateP2pRoomUi();
+    } catch (_) {
+      toast(t("peerFail"));
+      destroyDotsP2P();
+    }
   }
 
   function maybeScheduleAi() {
@@ -791,8 +995,58 @@
     }
   }
 
+  if ($("btn-mode-p2p")) {
+    $("btn-mode-p2p").addEventListener("click", () => {
+      destroyDotsP2P();
+      if ($("p2p-room")) $("p2p-room").classList.add("hidden");
+      renderP2pBoardGrid();
+      showScreen("p2p");
+    });
+  }
+  if ($("btn-p2p-back")) {
+    $("btn-p2p-back").addEventListener("click", () => {
+      destroyDotsP2P();
+      showScreen("play");
+    });
+  }
+  if ($("btn-p2p-create")) {
+    $("btn-p2p-create").addEventListener("click", () => hostDotsP2P());
+  }
+  if ($("btn-p2p-join")) {
+    $("btn-p2p-join").addEventListener("click", () => joinDotsP2P());
+  }
+  if ($("btn-p2p-ready")) {
+    $("btn-p2p-ready").addEventListener("click", () => {
+      if (!p2pLobby || !p2pSession) return;
+      const who = p2pLobby.you;
+      p2pLobby.ready[who] = !p2pLobby.ready[who];
+      p2pSession.send({ type: "ready", who, value: p2pLobby.ready[who] });
+      p2pSession.send({
+        type: "lobby",
+        names: p2pLobby.names,
+        ready: p2pLobby.ready,
+        boardId: p2pLobby.boardId,
+        guestJoined: p2pLobby.guestJoined,
+      });
+      updateP2pRoomUi();
+      maybeStartDotsP2P();
+    });
+  }
+  if ($("btn-p2p-copy")) {
+    $("btn-p2p-copy").addEventListener("click", async () => {
+      if (!p2pLobby) return;
+      try {
+        await navigator.clipboard.writeText(p2pLobby.code);
+        toast(t("codeCopied"));
+      } catch (_) {
+        toast(p2pLobby.code);
+      }
+    });
+  }
+
   // Boot
   applyI18n();
   fillSettingsForm();
   showSafariTipIfNeeded();
+  if (window.ArenaSW) window.ArenaSW.register("./sw.js");
 })();

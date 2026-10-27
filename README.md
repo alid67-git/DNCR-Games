@@ -1,64 +1,59 @@
 # Kati Arena
 
-Kırmızı takım vs Yeşil takım. Klasik Kati tahtası.
+Üç oyun · aynı menü kabuğu · iPhone Safari.
 
-- **Bilgisayara karşı** (çevrimdışı)
-- **Çevrimiçi** — telefon ↔ başka ülkedeki PC (aynı public sunucu)
-- **TR / EN**, ayarlar, yardım, sürüm takibi
-- **Android** (Capacitor)
+| Oyun | iPhone / web linki |
+|------|---------------------|
+| **Hub** | https://alid67-git.github.io/KatiArena/ |
+| **Kati Arena** | https://alid67-git.github.io/KatiArena/kati/ |
+| **Noktalar ve Kutular** | https://alid67-git.github.io/KatiArena/noktalar/ |
+| **Dokuztaş** | https://alid67-git.github.io/KatiArena/dokuztas/ |
 
-## Çalıştır
+## Ortak oynanış (her oyunda)
+
+1. **Bilgisayara karşı** — internet gerekmez  
+2. **Aynı cihazda iki kişi** — ağ gerekmez  
+3. **İki telefonda / uzaktan** — oda kodu, **oyun sunucusu yok** (P2P; eşleşme için kısa internet)
+
+Menü her yerde aynı: **Oyna · Ayarlar · Yardım · Güncellemeler** · TR/EN · sürüm geçmişi.
+
+### İnternet olmadan?
+
+**Evet** — solo ve aynı-cihaz tamamen çevrimdışı (ilk indirmeden / Ana Ekrana Ekle sonrası).  
+Uzaktan P2P yalnızca eş bulurken internet ister.
+
+## Ortak kabuk (`shared/`)
+
+Yapısal değişiklikler **önce** `shared/` içinde yapılır, sonra tüm oyunlara kopyalanır:
 
 ```bash
-npm install
-npm start
+npm run sync-shared
 ```
 
-Tarayıcı: `http://localhost:3847`
+Sözleşme: [shared/SHELL.md](./shared/SHELL.md)
 
-Ana menü: **Oyna · Ayarlar · Yardım · Güncellemeler**
+## Yerel çalıştırma
 
-## Ülkeler arası
+```bash
+# Kati
+npm install && npm start          # :3847
 
-Bkz. [ONLINE.md](./ONLINE.md)
+# Noktalar
+cd dots-and-boxes && npm install && npm start   # :3857
+
+# Dokuztaş
+cd dokuztas && npm install && npm start         # :3867
+```
+
+## GitHub Pages derlemesi
+
+```bash
+npm run build:pages   # → _site/ (hub + 3 oyun)
+```
+
+Push to `main` tetikler: `.github/workflows/pages.yml`
 
 ## Android
 
-```bash
-npm run android:sync
-npm run android:apk
-```
-
-Detay: [ANDROID.md](./ANDROID.md)
-
-## Test
-
-```bash
-npm test
-```
-
-Bu repo, CudyTurkiye içindeki `sebze-oyunu/` klasöründen ayrılmıştır.
-
-## İkinci oyun: Noktalar ve Kutular
-
-Klasik Dots and Boxes — tek/iki kişilik, 4 zorluk, 10 tahta, Android + Safari:
-
-```bash
-cd dots-and-boxes
-npm install
-npm start
-```
-
-Ayrıntı: [dots-and-boxes/README.md](./dots-and-boxes/README.md)
-
-## Üçüncü oyun: Dokuztaş
-
-Klasik Nine Men's Morris — bilgisayara karşı (Kolay/Zor/Çok Zor), aynı cihazda iki kişi, sunucusuz P2P:
-
-```bash
-cd dokuztas
-npm install
-npm start
-```
-
-Tarayıcı: `http://localhost:3867` — ayrıntı: [dokuztas/README.md](./dokuztas/README.md)
+Her oyunun kendi `ANDROID.md` dosyasına bakın. Kati release APK örneği:  
+https://github.com/alid67-git/KatiArena/releases

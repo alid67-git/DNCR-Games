@@ -1,8 +1,26 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.0.2",
-  build: 3,
+  version: "1.1.0",
+  build: 4,
+  shareBaseUrl: "https://alid67-git.github.io/KatiArena/noktalar/",
   changelog: [
+    {
+      version: "1.1.0",
+      build: 4,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "İki telefonda / uzaktan — sunucusuz P2P (oda kodu)",
+          "Ortak Arena kabuğu ile menü/mod hizası",
+          "iPhone linki: GitHub Pages /noktalar/",
+        ],
+        en: [
+          "Two phones / remote — serverless P2P (room code)",
+          "Menus/modes aligned with shared Arena shell",
+          "iPhone link: GitHub Pages /noktalar/",
+        ],
+      },
+    },
     {
       version: "1.0.2",
       build: 3,

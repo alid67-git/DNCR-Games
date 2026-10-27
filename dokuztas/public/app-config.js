@@ -1,8 +1,26 @@
 window.DokuztasConfig = {
   appName: "Dokuztaş",
-  version: "1.0.0",
-  build: 1,
+  version: "1.0.1",
+  build: 2,
+  shareBaseUrl: "https://alid67-git.github.io/KatiArena/dokuztas/",
   changelog: [
+    {
+      version: "1.0.1",
+      build: 2,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "iPhone Safari linki (GitHub Pages /dokuztas/)",
+          "Çevrimdışı service worker — solo ve aynı cihaz",
+          "Ortak Arena kabuğu (shared/) ile hizalandı",
+        ],
+        en: [
+          "iPhone Safari link (GitHub Pages /dokuztas/)",
+          "Offline service worker — solo and same-device",
+          "Aligned with shared Arena shell",
+        ],
+      },
+    },
     {
       version: "1.0.0",
       build: 1,

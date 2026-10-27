@@ -1,0 +1,59 @@
+# Ortak oyun kabuğu (Arena Shell)
+
+Bu repodaki **her oyun** aynı yapısal sözleşmeyi izler. Yapısal değişiklikler önce burada yapılır, sonra `npm run sync-shared` ile oyunlara kopyalanır.
+
+## Zorunlu menü
+
+Ana ekran sırası (değiştirme):
+
+1. **Oyna**
+2. **Ayarlar**
+3. **Yardım**
+4. **Güncellemeler**
+
+## Zorunlu oyun modları (Oyna ekranı)
+
+| id | TR | Ağ |
+|----|----|-----|
+| `solo` | Bilgisayara karşı | Gerekmez |
+| `local2p` | Aynı cihazda iki kişi | Gerekmez |
+| `remote` | İki telefonda / uzaktan (P2P) | Eş bulmak için kısa internet; **oyun sunucusu yok** |
+
+## Zorunlu ayarlar
+
+- Dil: Türkçe / English
+- Varsayılan bilgisayar zorluğu (oyuna göre seçenekler)
+- (APK) Güncelleme kontrolü — `shared/update-check.js`
+
+## Zorunlu yardım bölümleri
+
+1. Kurallar (oyuna özel)
+2. Oyun modları (ortak metin + offline/P2P notu)
+3. Zorluk
+4. Uzaktan (sunucusuz) adımlar
+5. iPhone Safari → Ana Ekrana Ekle
+
+## Ortak dosyalar (`shared/js/` → her oyunun `public/shared/`)
+
+| Dosya | Görev |
+|-------|--------|
+| `p2p-session.js` | PeerJS oda kur / katıl |
+| `update-check.js` | GitHub Releases sürüm kontrolü |
+| `register-sw.js` | Service worker kaydı |
+| `mode-i18n.js` | Ortak mod / menü çeviri anahtarları |
+
+## iPhone / web linkleri (GitHub Pages)
+
+- Hub: https://alid67-git.github.io/KatiArena/
+- Kati: …/kati/
+- Noktalar: …/noktalar/
+- Dokuztaş: …/dokuztas/
+
+## Sync
+
+```bash
+npm run sync-shared   # shared/js → public/shared, dots…, dokuztas…
+npm run build:pages   # _site hub + 3 oyun
+```
+
+Yeni yapısal özellik: **önce `shared/`**, sonra sync, sonra gerekirse oyuna özel kanca.

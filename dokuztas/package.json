@@ -1,7 +1,7 @@
 {
   "name": "dokuztas",
-  "version": "1.0.0",
-  "description": "Dokuztaş (Nine Men's Morris) — solo AI, local 2P, serverless P2P",
+  "version": "1.0.1",
+  "description": "Dokuzta\u015f (Nine Men's Morris) \u2014 solo AI, local 2P, serverless P2P",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

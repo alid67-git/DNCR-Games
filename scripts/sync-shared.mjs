@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+/**
+ * shared/js → her oyunun public/shared/
+ * Yapısal değişiklik: shared/'da yap, sonra bu scripti çalıştır.
+ */
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const root = path.join(__dirname, "..");
+const srcDir = path.join(root, "shared", "js");
+
+const targets = [
+  path.join(root, "public", "shared"),
+  path.join(root, "dots-and-boxes", "public", "shared"),
+  path.join(root, "dokuztas", "public", "shared"),
+];
+
+function copyDir(src, dest) {
+  fs.mkdirSync(dest, { recursive: true });
+  for (const name of fs.readdirSync(src)) {
+    const from = path.join(src, name);
+    const to = path.join(dest, name);
+    if (fs.statSync(from).isDirectory()) copyDir(from, to);
+    else fs.copyFileSync(from, to);
+  }
+}
+
+if (!fs.existsSync(srcDir)) {
+  console.error("missing", srcDir);
+  process.exit(1);
+}
+
+for (const dest of targets) {
+  copyDir(srcDir, dest);
+  console.log("synced →", path.relative(root, dest));
+}

@@ -51,13 +51,48 @@
       </header>
       <div class="mode-list">
         <button type="button" class="mode-card" id="btn-mode-solo">
-          <strong data-i18n="playSolo">Tek kişilik</strong>
-          <span data-i18n="playSoloHint">Yapay zekaya karşı</span>
+          <strong data-i18n="playSolo">Bilgisayara karşı</strong>
+          <span data-i18n="playSoloHint">Tek kişi — internet gerekmez</span>
         </button>
         <button type="button" class="mode-card" id="btn-mode-2p">
-          <strong data-i18n="play2p">İki kişilik</strong>
-          <span data-i18n="play2pHint">Aynı cihazda, sırayla</span>
+          <strong data-i18n="play2p">Aynı cihazda iki kişi</strong>
+          <span data-i18n="play2pHint">Telefon/tablet elden ele — ağ gerekmez</span>
         </button>
+        <button type="button" class="mode-card" id="btn-mode-p2p">
+          <strong data-i18n="playP2p">İki telefonda / uzaktan</strong>
+          <span data-i18n="playP2pHint">Oda kodu — sunucu gerekmez (P2P)</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- P2P LOBBY -->
+    <section id="screen-p2p" class="screen">
+      <button type="button" class="btn-back" id="btn-p2p-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="playP2p">İki telefonda / uzaktan</h1>
+        <p class="lede" data-i18n="p2pLead">Sunucu yok — oda koduyla eşleşin.</p>
+      </header>
+      <form class="lobby-form" onsubmit="return false;">
+        <label>
+          <span data-i18n="yourName">Adın</span>
+          <input id="p2p-name" type="text" maxlength="20" data-i18n-ph="player1Ph" autocomplete="nickname" />
+        </label>
+        <p class="field-hint" data-i18n="p2pNeedNet"></p>
+        <h2 class="section-title" data-i18n="chooseBoard">Oyun alanı seç</h2>
+        <div class="board-grid" id="p2p-board-grid" role="radiogroup"></div>
+        <div class="lobby-actions" style="margin-top:1rem;display:flex;flex-direction:column;gap:0.65rem;">
+          <button type="button" id="btn-p2p-create" class="btn btn-primary" data-i18n="createRoom">Oda kur</button>
+          <div class="join-row" style="display:grid;grid-template-columns:1fr auto;gap:0.5rem;">
+            <input id="p2p-code" type="text" maxlength="6" data-i18n-ph="roomCode" autocomplete="off" spellcheck="false" style="text-transform:uppercase;letter-spacing:0.12em;text-align:center;" />
+            <button type="button" id="btn-p2p-join" class="btn btn-secondary" data-i18n="joinRoom">Katıl</button>
+          </div>
+        </div>
+      </form>
+      <div id="p2p-room" class="lobby-form hidden" style="margin-top:1rem;">
+        <p><span data-i18n="roomCode">Oda kodu</span>: <strong id="p2p-room-code">----</strong></p>
+        <p id="p2p-room-hint" class="field-hint"></p>
+        <button type="button" id="btn-p2p-ready" class="btn btn-primary" data-i18n="ready">Hazırım</button>
+        <button type="button" id="btn-p2p-copy" class="btn btn-ghost" data-i18n="copyCode">Kodu kopyala</button>
       </div>
     </section>
 
@@ -142,8 +177,12 @@
         <p data-i18n="helpBoards"></p>
         <h2 data-i18n="helpDifficultyTitle">Zorluk seviyeleri</h2>
         <p data-i18n="helpDifficulty"></p>
+        <h2 data-i18n="helpModesTitle">Oyun modları</h2>
+        <p data-i18n="helpModes"></p>
         <h2 data-i18n="helpTwoPTitle">İki kişilik</h2>
         <p data-i18n="helpTwoP"></p>
+        <h2 data-i18n="helpP2pTitle">Uzaktan (sunucusuz)</h2>
+        <p data-i18n="helpModes"></p>
         <h2 data-i18n="helpSafariTitle">iPhone Safari</h2>
         <ol>
           <li data-i18n="helpSafari1"></li>
@@ -222,6 +261,8 @@
   <script src="boards.js"></script>
   <script src="engine.js"></script>
   <script src="ai.js"></script>
+  <script src="shared/register-sw.js"></script>
+  <script src="shared/p2p-session.js"></script>
   <script src="game-client.js" defer></script>
 </body>
 </html>
