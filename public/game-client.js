@@ -30,6 +30,7 @@
     online: $("screen-online"),
     settings: $("screen-settings"),
     help: $("screen-help"),
+    scores: $("screen-scores"),
     updates: $("screen-updates"),
     room: $("screen-room"),
     game: $("screen-game"),
@@ -235,10 +236,35 @@
     });
     const ver = `v${CFG.version} · build ${CFG.build}`;
     if ($("home-version")) $("home-version").textContent = ver;
+    if ($("settings-version")) $("settings-version").textContent = ver;
     if ($("updates-current")) $("updates-current").textContent = `${CFG.version} (${CFG.build})`;
+    if ($("settings-updates-current"))
+      $("settings-updates-current").textContent = `${CFG.version} (${CFG.build})`;
     renderChangelog();
     updateUpdatesDot();
     if (hubBackCtl && hubBackCtl.refresh) hubBackCtl.refresh();
+  }
+
+  function renderScores() {
+    if (!window.ArenaScore || !$("scores-panel")) return;
+    window.ArenaScore.renderInto($("scores-panel"), { lang: lang(), gameId: "kati" });
+  }
+
+  function maybeRecordKatiScore(s, g) {
+    if (!s || !g || !g.winner || s.scoreRecorded || !window.ArenaScore) return;
+    s.scoreRecorded = true;
+    let result = "loss";
+    if (s.you === g.winner) result = "win";
+    const cap = g.capturedBy || {};
+    const captures =
+      s.you === PLAYERS.tomato ? cap.tomato || 0 : cap.gourd || 0;
+    window.ArenaScore.record({
+      gameId: "kati",
+      result,
+      difficulty: s.vsAi ? settings.aiDifficulty || "normal" : "hard",
+      mode: s.vsAi ? "solo" : s.hotseat ? "twop" : "p2p",
+      stats: { captures },
+    });
   }
 
   function renderChangelog() {
@@ -871,6 +897,7 @@
 
     const end = $("end-panel");
     if (g.winner) {
+      maybeRecordKatiScore(s, g);
       end.classList.remove("hidden");
       if (s.you === g.winner) $("end-text").textContent = t("winYou");
       else if (s.vsAi) $("end-text").textContent = t("winCpu");
@@ -959,6 +986,10 @@
       r.checked = r.value === diff;
     });
     if ($("player-name") && settings.name) $("player-name").value = settings.name;
+    if (window.ArenaScore && settings.name) {
+      const store = window.ArenaScore.load();
+      if (!store.displayName) window.ArenaScore.setDisplayName(settings.name);
+    }
   }
 
   function goHome() {
@@ -972,6 +1003,12 @@
 
   // —— Events ——
   $("btn-home-play").addEventListener("click", () => showScreen("play"));
+  if ($("btn-home-scores")) {
+    $("btn-home-scores").addEventListener("click", () => {
+      renderScores();
+      showScreen("scores");
+    });
+  }
   $("btn-home-settings").addEventListener("click", () => {
     fillSettingsForm();
     showScreen("settings");
@@ -980,19 +1017,29 @@
     applyI18n();
     showScreen("help");
   });
-  $("btn-home-updates").addEventListener("click", () => {
-    applyI18n();
-    showScreen("updates");
-  });
 
   $("btn-play-back").addEventListener("click", () => showScreen("home"));
+  if ($("btn-scores-back")) {
+    $("btn-scores-back").addEventListener("click", () => showScreen("home"));
+  }
   $("btn-online-back").addEventListener("click", () => showScreen("play"));
   if ($("btn-2p-setup-back")) {
     $("btn-2p-setup-back").addEventListener("click", () => showScreen("play"));
   }
   $("btn-settings-back").addEventListener("click", () => showScreen("home"));
   $("btn-help-back").addEventListener("click", () => showScreen("home"));
-  $("btn-updates-back").addEventListener("click", () => showScreen("home"));
+  $("btn-updates-back").addEventListener("click", () => showScreen("settings"));
+  if ($("btn-open-updates")) {
+    $("btn-open-updates").addEventListener("click", () => {
+      applyI18n();
+      showScreen("updates");
+    });
+  }
+  if ($("btn-settings-check-update")) {
+    $("btn-settings-check-update").addEventListener("click", () => {
+      checkForUpdate({ force: true, silent: false });
+    });
+  }
 
   $("btn-mode-solo").addEventListener("click", () => startLocalSolo());
   if ($("btn-mode-2p")) {
@@ -1016,15 +1063,17 @@
     const selectedDiff =
       (document.querySelector('input[name="aiDiff"]:checked') || {}).value ||
       "normal";
+    const name = ($("settings-name").value || "").trim();
     saveSettings({
       lang: selectedLang,
-      name: ($("settings-name").value || "").trim(),
+      name,
       serverUrl: ($("settings-server").value || "").trim().replace(/\/$/, ""),
       notifications: !!$("settings-notif").checked,
       aiDifficulty: ["easy", "normal", "hard"].includes(selectedDiff)
         ? selectedDiff
         : "normal",
     });
+    if (window.ArenaScore) window.ArenaScore.setDisplayName(name);
     if (settings.notifications) await ensureNotifPermission();
     applyI18n();
     fillSettingsForm();
@@ -1037,7 +1086,7 @@
     } catch (_) {}
     updateUpdatesDot();
     toast(t("saved"));
-    showScreen("home");
+    showScreen("settings");
   });
 
   $("btn-updates-check").addEventListener("click", () => {

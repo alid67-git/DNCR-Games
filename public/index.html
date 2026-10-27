@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="shared/shell-ui.css" />
 </head>
 <body>
   <div class="soil" aria-hidden="true"></div>
@@ -24,18 +25,37 @@
           <img class="app-logo" src="assets/logo.svg" width="112" height="112" alt="Kati Arena" />
           <p class="brand-mark" data-i18n="appName">Kati Arena</p>
           <p class="lede" data-i18n="tagline">Kırmızı takım · Yeşil takım</p>
-          <p class="ver-chip" id="home-version">v1.3.2</p>
         </header>
         <nav class="home-menu" aria-label="Main">
-          <button type="button" class="btn btn-primary btn-menu" id="btn-home-play" data-i18n="homePlay">Oyna</button>
-          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-settings" data-i18n="homeSettings">Ayarlar</button>
-          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-help" data-i18n="homeHelp">Yardım</button>
-          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-updates" data-i18n="homeUpdates">
-            Güncellemeler <span id="updates-dot" class="updates-dot hidden"></span>
+          <button type="button" class="btn btn-primary btn-menu" id="btn-home-play">
+            <svg class="menu-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+            <span class="menu-label" data-i18n="homePlay">Oyna</span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-scores">
+            <svg class="menu-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 19h4v-8H4v8zm6 0h4V5h-4v14zm6 0h4v-5h-4v5z"/></svg>
+            <span class="menu-label" data-i18n="homeScores">Skorlar</span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-settings">
+            <svg class="menu-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.1 7.1 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.62.94l-2.4-.96a.5.5 0 0 0-.6.22L2.77 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.07.63-.07.94s.03.63.07.94L2.89 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.04.72 1.63.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.58-.22 1.13-.54 1.63-.94l2.39.96c.24.1.51 0 .64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5z"/></svg>
+            <span class="menu-label" data-i18n="homeSettings">Ayarlar</span>
+            <span id="updates-dot" class="updates-dot hidden"></span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-help">
+            <svg class="menu-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm1 15h-2v-2h2v2zm1.07-7.75-.9.92A1.8 1.8 0 0 0 12.5 12H11v-.5c0-.83.34-1.58.88-2.12l1.24-1.26A1.5 1.5 0 0 0 12 6.5 1.5 1.5 0 0 0 10.5 8H8.5A3.5 3.5 0 0 1 12 4.5a3.5 3.5 0 0 1 2.07 6.25z"/></svg>
+            <span class="menu-label" data-i18n="homeHelp">Yardım</span>
           </button>
           <button type="button" class="btn btn-ghost btn-menu btn-hub-back" id="btn-hub-back" data-i18n="hubBack">DNCR Games</button>
         </nav>
+        <p class="home-footer-ver" id="home-version">v1.3.2</p>
       </div>
+    </section>
+
+    <section id="screen-scores" class="screen">
+      <button type="button" class="btn-back" id="btn-scores-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="scoresTitle">Skorlar</h1>
+      </header>
+      <div id="scores-panel" class="scores-panel"></div>
     </section>
 
     <!-- PLAY MODES -->
@@ -48,16 +68,37 @@
       </header>
       <div class="mode-list">
         <button type="button" class="mode-card" id="btn-mode-solo">
-          <strong data-i18n="playSolo">Bilgisayara karşı</strong>
-          <span data-i18n="playSoloHint">Tek kişi — internet gerekmez</span>
+          <div class="mode-visual solo" aria-hidden="true">
+            <span class="mv-person"></span>
+            <span class="mv-vs">VS</span>
+            <span class="mv-cpu"></span>
+          </div>
+          <div class="mode-copy">
+            <strong data-i18n="playSolo">Bilgisayara karşı</strong>
+            <span data-i18n="playSoloHint">Tek kişi — internet gerekmez</span>
+          </div>
         </button>
         <button type="button" class="mode-card" id="btn-mode-2p">
-          <strong data-i18n="play2p">Aynı cihazda iki kişi</strong>
-          <span data-i18n="play2pHint">Telefon/tablet elden ele — ağ gerekmez</span>
+          <div class="mode-visual local" aria-hidden="true">
+            <span class="mv-person is-left"></span>
+            <span class="mv-person is-right"></span>
+          </div>
+          <div class="mode-copy">
+            <strong data-i18n="play2p">Aynı cihazda iki kişi</strong>
+            <span data-i18n="play2pHint">Telefon/tablet elden ele — ağ gerekmez</span>
+          </div>
         </button>
         <button type="button" class="mode-card" id="btn-mode-online">
-          <strong data-i18n="playP2p">İki telefonda / uzaktan</strong>
-          <span data-i18n="playP2pHint">Oda kodu — sunucu gerekmez (P2P)</span>
+          <div class="mode-visual remote" aria-hidden="true">
+            <span class="mv-person is-left"></span>
+            <span class="mv-phone"></span>
+            <span class="mv-phone"></span>
+            <span class="mv-person is-dark"></span>
+          </div>
+          <div class="mode-copy">
+            <strong data-i18n="playP2p">İki telefonda / uzaktan</strong>
+            <span data-i18n="playP2pHint">Oda kodu — sunucu gerekmez (P2P)</span>
+          </div>
         </button>
       </div>
     </section>
@@ -142,6 +183,15 @@
         <p class="field-hint" id="notif-hint" data-i18n="notifOn"></p>
         <button type="button" id="btn-settings-save" class="btn btn-primary" data-i18n="save">Kaydet</button>
       </form>
+      <div class="settings-block">
+        <h2 data-i18n="updatesTitle">Güncellemeler</h2>
+        <p class="lede"><span data-i18n="updatesCurrent">Yüklü sürüm</span>: <strong id="settings-updates-current">1.5.0</strong></p>
+        <div class="settings-actions">
+          <button type="button" id="btn-open-updates" class="btn btn-ghost" data-i18n="updatesInSettings">Sürüm notları</button>
+          <button type="button" id="btn-settings-check-update" class="btn btn-secondary" data-i18n="updatesCheckNow">Güncellemeyi kontrol et</button>
+        </div>
+      </div>
+      <p class="settings-ver" id="settings-version">v1.5.0</p>
     </section>
 
     <!-- HELP -->
@@ -310,6 +360,7 @@
   <script src="shared/update-check.js"></script>
   <script src="shared/register-sw.js"></script>
   <script src="shared/hub-back.js"></script>
+  <script src="shared/score.js"></script>
   <script src="update-check.js"></script>
   <script src="p2p-online.js"></script>
   <script src="game-client.js" defer></script>

@@ -7,9 +7,12 @@ Bu repodaki **her oyun** aynı yapısal sözleşmeyi izler. Yapısal değişikli
 Ana ekran sırası (değiştirme):
 
 1. **Oyna**
-2. **Ayarlar**
-3. **Yardım**
-4. **Güncellemeler**
+2. **Skorlar**
+3. **Ayarlar** (dil + güncelleme buraya)
+4. **Yardım**
+5. **DNCR Games** (hub çıkışı)
+
+Sürüm numarası ana menü altında ve ayarların dibinde görünür.
 
 ## Zorunlu oyun modları (Oyna ekranı)
 
@@ -42,6 +45,8 @@ Ana ekran sırası (değiştirme):
 | `register-sw.js` | Service worker kaydı |
 | `mode-i18n.js` | Ortak mod / menü çeviri anahtarları |
 | `hub-back.js` | DNCR Games hub’a onaylı dönüş |
+| `score.js` | Yerel kariyer puanı / skor tablosu |
+| `shell-ui.css` | Menü ikonları, mod görselleri, skor UI |
 
 ## iPhone / web linkleri (GitHub Pages)
 
