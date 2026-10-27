@@ -883,12 +883,71 @@ body.is-native .native-only.hidden {
 
 .last-move-from,
 .last-move-to {
-  animation: flash 0.6s ease;
+  animation: flash 0.5s ease;
 }
 @keyframes flash {
   from {
     stroke: #fff3c4;
     stroke-width: 1.4;
+  }
+}
+
+/* Genel hamle vurgusu: 0.5 sn parlama + renk değişimi */
+.node-ring.move-flash {
+  animation: nodeMoveFlash 0.5s ease both;
+}
+.node-ring.move-flash-from {
+  stroke: #ffe082;
+  stroke-width: 1.55;
+  fill: rgba(255, 224, 130, 0.22);
+}
+.node-ring.move-flash-to {
+  stroke: #fff8e1;
+  stroke-width: 1.85;
+  fill: rgba(255, 248, 225, 0.35);
+}
+.piece.move-flash {
+  animation: pieceMoveFlash 0.5s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+  pointer-events: none;
+}
+.piece.move-flash-tomato .skin {
+  fill: #ff8a80 !important;
+  stroke: #ffe0b2;
+  stroke-width: 1.1;
+  filter: drop-shadow(0 0 4px rgba(255, 120, 90, 0.95));
+}
+.piece.move-flash-gourd .skin {
+  fill: #a5d6a7 !important;
+  stroke: #e8f5e9;
+  stroke-width: 1.1;
+  filter: drop-shadow(0 0 4px rgba(100, 200, 120, 0.95));
+}
+.fx-flyer.move-flying .skin {
+  filter: drop-shadow(0 0 3.5px rgba(255, 236, 179, 0.9));
+}
+@keyframes nodeMoveFlash {
+  0% {
+    opacity: 0.35;
+    stroke-width: 0.6;
+  }
+  40% {
+    opacity: 1;
+    stroke-width: 2.1;
+  }
+  100% {
+    opacity: 0.85;
+    stroke-width: 1.35;
+  }
+}
+@keyframes pieceMoveFlash {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.32);
+  }
+  100% {
+    transform: scale(1.06);
   }
 }
 

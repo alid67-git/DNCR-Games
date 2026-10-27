@@ -1,9 +1,24 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.1.2",
-  build: 5,
+  version: "1.1.3",
+  build: 6,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/noktalar/",
   changelog: [
+    {
+      version: "1.1.3",
+      build: 6,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "Çizgi hamlesi: 0.5 sn parlama + renk vurgusu + ses",
+          "Kutu sonrası çift dokunuşun sırayı çalması düzeltildi",
+        ],
+        en: [
+          "Edge claim: 0.5s flash + color highlight + SFX",
+          "Fixed double-tap stealing the turn after completing a box",
+        ],
+      },
+    },
     {
       version: "1.1.2",
       build: 5,

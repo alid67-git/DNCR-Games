@@ -1,9 +1,24 @@
 window.DokuztasConfig = {
   appName: "Dokuztaş",
-  version: "1.0.3",
-  build: 4,
+  version: "1.0.4",
+  build: 5,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/dokuztas/",
   changelog: [
+    {
+      version: "1.0.4",
+      build: 5,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "Hamle/yerleştirme: 0.5 sn parlama + renk vurgusu + ses",
+          "Değirmen ve alma hareketlerinde ses efekti",
+        ],
+        en: [
+          "Place/move: 0.5s flash + color highlight + SFX",
+          "SFX on mill and capture actions",
+        ],
+      },
+    },
     {
       version: "1.0.3",
       build: 4,

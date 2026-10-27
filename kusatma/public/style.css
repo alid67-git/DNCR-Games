@@ -333,17 +333,25 @@ body.is-demo #game-hint { display: none; }
 .edge-line.is-drawing {
   filter: url(#siege-glow-strong);
 }
+.edge-line.is-claim-flash {
+  pointer-events: none;
+  filter: url(#siege-glow-strong);
+}
 .stone-flying {
   pointer-events: none;
   filter: url(#siege-glow-strong);
 }
+.stone-claim-flash {
+  pointer-events: none;
+  filter: url(#siege-glow-strong);
+}
 .cell-flash {
-  animation: cellFlash 0.85s ease;
+  animation: cellFlash 0.5s ease;
 }
 @keyframes cellFlash {
-  0% { opacity: 0.15; }
-  40% { opacity: 0.55; }
-  100% { opacity: 0.28; }
+  0% { opacity: 0.2; }
+  40% { opacity: 0.7; }
+  100% { opacity: 0.3; }
 }
 #board.is-fx-busy {
   pointer-events: none;

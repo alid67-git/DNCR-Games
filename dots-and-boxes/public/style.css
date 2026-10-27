@@ -726,6 +726,19 @@ html[lang="en"] .chip-score::before {
   filter: drop-shadow(0 0 2.5px rgba(30, 136, 229, 0.7));
   animation: drawEdge 0.28s ease both;
 }
+/* Hamle vurgusu: 0.5s parlama + renk değişimi */
+.edge-a.edge-claim-flash {
+  stroke: #ff8a80;
+  stroke-width: 3.2;
+  filter: drop-shadow(0 0 6px rgba(255, 120, 100, 1));
+  animation: drawEdge 0.28s ease both, edgeClaimFlash 0.5s ease both;
+}
+.edge-b.edge-claim-flash {
+  stroke: #82b1ff;
+  stroke-width: 3.2;
+  filter: drop-shadow(0 0 6px rgba(100, 180, 255, 1));
+  animation: drawEdge 0.28s ease both, edgeClaimFlash 0.5s ease both;
+}
 @keyframes drawEdge {
   from {
     stroke-dasharray: 40;
@@ -736,6 +749,20 @@ html[lang="en"] .chip-score::before {
     stroke-dasharray: 40;
     stroke-dashoffset: 0;
     opacity: 1;
+  }
+}
+@keyframes edgeClaimFlash {
+  0% {
+    opacity: 0.7;
+    stroke-width: 2.4;
+  }
+  35% {
+    opacity: 1;
+    stroke-width: 3.45;
+  }
+  100% {
+    opacity: 1;
+    stroke-width: 2.55;
   }
 }
 

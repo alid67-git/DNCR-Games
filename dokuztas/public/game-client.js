@@ -59,6 +59,14 @@
   let p2p = null;
   let p2pLobby = null;
   let hubBackCtl = null;
+  let moveFlashTimer = null;
+  const Sfx = window.DncrMoveSfx || null;
+
+  function playMoveSfx(kind) {
+    if (!Sfx) return;
+    Sfx.unlock();
+    Sfx.play(kind || "move");
+  }
 
   function loadSettings() {
     const defaults = {
@@ -352,9 +360,47 @@
     }
   }
 
-  /** Değirmen üçlüsünü hafifçe altın tona çekip halka ile vurgula. */
+  /** Genel hamle vurgusu: 0.5 sn parlama + renk değişimi. */
+  function flashMoveNode(nodeId, owner) {
+    if (!nodeId) return;
+    clearTimeout(moveFlashTimer);
+    document.querySelectorAll(".piece.move-flash").forEach((el) => {
+      el.classList.remove("move-flash", "move-flash-red", "move-flash-black");
+    });
+    const el = document.querySelector(`.piece[data-node="${nodeId}"]`);
+    if (!el) return;
+    el.classList.add("move-flash");
+    if (owner === PLAYERS.red) el.classList.add("move-flash-red");
+    else if (owner === PLAYERS.black) el.classList.add("move-flash-black");
+    const skin = el.querySelector(".skin");
+    if (skin) {
+      skin.dataset.prevFill = skin.getAttribute("fill") || "";
+      skin.setAttribute("fill", owner === PLAYERS.red ? "#ff8a80" : "#b0bec5");
+      skin.setAttribute("stroke", "#fff8e1");
+      skin.setAttribute("stroke-width", "1.15");
+    }
+    moveFlashTimer = setTimeout(() => {
+      document.querySelectorAll(".piece.move-flash").forEach((p) => {
+        p.classList.remove("move-flash", "move-flash-red", "move-flash-black");
+        const sk = p.querySelector(".skin");
+        if (sk) {
+          const prev = sk.dataset.prevFill;
+          if (prev) sk.setAttribute("fill", prev);
+          else sk.removeAttribute("fill");
+          sk.removeAttribute("stroke");
+          sk.removeAttribute("stroke-width");
+          delete sk.dataset.prevFill;
+        }
+      });
+      if (session) renderPieces(session.state.board);
+      moveFlashTimer = null;
+    }, 500);
+  }
+
+  /** Değirmen üçlüsünü altın tona çekip halka ile vurgula. */
   function flashMillNodes(nodeIds) {
     if (!nodeIds || !nodeIds.length) return Promise.resolve();
+    playMoveSfx("mill");
     const g = $("board-pieces");
     const fx = $("board-fx");
     if (!g) return Promise.resolve();
@@ -380,7 +426,8 @@
         fx.appendChild(ring);
       }
     });
-    return waitMs(1100).then(() => {
+    // Değirmen özel vurgu; genel hamle 0.5 sn — değirmen biraz daha uzun kalır
+    return waitMs(900).then(() => {
       g.querySelectorAll(".piece.mill-flash").forEach((el) => {
         el.classList.remove("mill-flash");
         const skin = el.querySelector(".skin");
@@ -596,9 +643,19 @@
     // Alınan taşı HTML katmanda hemen başlat (SVG clip yok); sonra tahtayı güncelle
     let ejectWait = null;
     if (action.type === "remove" && removedOwner) {
+      playMoveSfx("capture");
       ejectWait = animateEjectPiece(action.at, removedOwner);
+    } else if (action.type === "place") {
+      playMoveSfx("place");
+    } else if (action.type === "move" || action.type === "fly") {
+      playMoveSfx("move");
     }
     renderGame();
+
+    // Genel hamle vurgusu (değirmen oluşmadıysa)
+    if (!formedMill && action.to) {
+      flashMoveNode(action.to, actor);
+    }
 
     if (formedMill && millNodes.length) {
       await flashMillNodes(millNodes);
@@ -1083,6 +1140,7 @@
   });
 
   // Boot
+  if (Sfx && Sfx.bindFirstGesture) Sfx.bindFirstGesture(document);
   if (window.ArenaHubBack) {
     hubBackCtl = window.ArenaHubBack.bind({ getLang: lang });
   }

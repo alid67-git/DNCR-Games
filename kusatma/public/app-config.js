@@ -1,10 +1,25 @@
 window.SiegeConfig = {
   appName: "Kuşatma",
-  version: "1.4.1",
-  build: 7,
+  version: "1.4.2",
+  build: 8,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kusatma/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
+    {
+      version: "1.4.2",
+      build: 8,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "Hamle vurgusu güçlendirildi: 0.5 sn parlama + renk değişimi",
+          "Çizgi/taş hareketi daha belirgin glow ile",
+        ],
+        en: [
+          "Stronger move highlight: 0.5s flash + color shift",
+          "Line/stone motion with clearer glow",
+        ],
+      },
+    },
     {
       version: "1.4.1",
       build: 7,
