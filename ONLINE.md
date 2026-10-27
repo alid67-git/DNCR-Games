@@ -3,7 +3,7 @@
 **Sunucu kurmana gerek yok.** Oyun cihazlar arasında doğrudan bağlanır (WebRTC).  
 iPhone Safari, Android APK ve bilgisayar tarayıcısı aynı şekilde oynar.
 
-Canlı link: **https://alid67-git.github.io/KatiArena/**
+Canlı link: **https://alid67-git.github.io/DNCR-Games/**
 
 ## Nasıl oynanır
 

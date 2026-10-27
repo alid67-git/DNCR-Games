@@ -134,7 +134,7 @@
       base = location.href.split("?")[0].split("#")[0].replace(/\/index\.html$/i, "");
       base = base.replace(/\/$/, "");
     }
-    if (!base) base = "https://alid67-git.github.io/KatiArena";
+    if (!base) base = "https://alid67-git.github.io/DNCR-Games";
     try {
       const u = new URL(base.endsWith("/") ? base : base + "/");
       u.searchParams.set("join", code);

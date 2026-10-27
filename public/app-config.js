@@ -5,7 +5,7 @@ window.KatiConfig = {
   /** tomato = red, gourd = green (engine keys) */
   teams: { tomato: "red", gourd: "green" },
   /** Public web URL used in invite links (works from APK too). */
-  shareBaseUrl: "https://alid67-git.github.io/KatiArena/kati/",
+  shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kati/",
   changelog: [
     {
       version: "1.5.0",

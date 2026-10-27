@@ -2,7 +2,7 @@ window.DotsConfig = {
   appName: "Noktalar ve Kutular",
   version: "1.1.0",
   build: 4,
-  shareBaseUrl: "https://alid67-git.github.io/KatiArena/noktalar/",
+  shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/noktalar/",
   changelog: [
     {
       version: "1.1.0",

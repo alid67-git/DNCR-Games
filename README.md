@@ -1,59 +1,53 @@
-# Kati Arena
+# DNCR Games
 
-Üç oyun · aynı menü kabuğu · iPhone Safari.
+Üç oyun · aynı menü kabuğu · iPhone Safari · Android APK.
 
-| Oyun | iPhone / web linki |
-|------|---------------------|
-| **Hub** | https://alid67-git.github.io/KatiArena/ |
-| **Kati Arena** | https://alid67-git.github.io/KatiArena/kati/ |
-| **Noktalar ve Kutular** | https://alid67-git.github.io/KatiArena/noktalar/ |
-| **Dokuztaş** | https://alid67-git.github.io/KatiArena/dokuztas/ |
+| | iPhone / web |
+|--|--|
+| **Hub — DNCR Games** | https://alid67-git.github.io/DNCR-Games/ |
+| **Kati** | https://alid67-git.github.io/DNCR-Games/kati/ |
+| **Noktalar ve Kutular** | https://alid67-git.github.io/DNCR-Games/noktalar/ |
+| **Dokuztaş** | https://alid67-git.github.io/DNCR-Games/dokuztas/ |
+
+Safari → **Paylaş → Ana Ekrana Ekle**.
 
 ## Ortak oynanış (her oyunda)
 
 1. **Bilgisayara karşı** — internet gerekmez  
 2. **Aynı cihazda iki kişi** — ağ gerekmez  
-3. **İki telefonda / uzaktan** — oda kodu, **oyun sunucusu yok** (P2P; eşleşme için kısa internet)
+3. **İki telefonda / uzaktan** — oda kodu, oyun sunucusu yok (P2P)
 
-Menü her yerde aynı: **Oyna · Ayarlar · Yardım · Güncellemeler** · TR/EN · sürüm geçmişi.
+Menü: **Oyna · Ayarlar · Yardım · Güncellemeler** · TR/EN
 
-### İnternet olmadan?
+## Android APK
 
-**Evet** — solo ve aynı-cihaz tamamen çevrimdışı (ilk indirmeden / Ana Ekrana Ekle sonrası).  
-Uzaktan P2P yalnızca eş bulurken internet ister.
+```bash
+# Kati
+npm run android:sync && npm run android:apk
 
-## Ortak kabuk (`shared/`)
+# Noktalar
+cd dots-and-boxes && npm run android:sync && npm run android:apk
 
-Yapısal değişiklikler **önce** `shared/` içinde yapılır, sonra tüm oyunlara kopyalanır:
+# Dokuztaş
+cd dokuztas && npx cap add android   # ilk kez
+npm run android:sync && npm run android:apk
+```
+
+APK çıktıları: `*/android/app/build/outputs/apk/debug/app-debug.apk`
+
+## Ortak kabuk
 
 ```bash
 npm run sync-shared
+npm run build:pages
 ```
 
 Sözleşme: [shared/SHELL.md](./shared/SHELL.md)
 
-## Yerel çalıştırma
+## Yerel
 
 ```bash
-# Kati
-npm install && npm start          # :3847
-
-# Noktalar
-cd dots-and-boxes && npm install && npm start   # :3857
-
-# Dokuztaş
-cd dokuztas && npm install && npm start         # :3867
+npm start                      # Kati :3847
+cd dots-and-boxes && npm start # :3857
+cd dokuztas && npm start       # :3867
 ```
-
-## GitHub Pages derlemesi
-
-```bash
-npm run build:pages   # → _site/ (hub + 3 oyun)
-```
-
-Push to `main` tetikler: `.github/workflows/pages.yml`
-
-## Android
-
-Her oyunun kendi `ANDROID.md` dosyasına bakın. Kati release APK örneği:  
-https://github.com/alid67-git/KatiArena/releases

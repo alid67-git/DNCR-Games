@@ -4,7 +4,7 @@
 
 Adres:
 
-**https://alid67-git.github.io/KatiArena/noktalar/**
+**https://alid67-git.github.io/DNCR-Games/noktalar/**
 
 ## 2) Ana Ekrana Ekle (önerilir)
 

@@ -44,7 +44,7 @@ Ana ekran sırası (değiştirme):
 
 ## iPhone / web linkleri (GitHub Pages)
 
-- Hub: https://alid67-git.github.io/KatiArena/
+- Hub: https://alid67-git.github.io/DNCR-Games/
 - Kati: …/kati/
 - Noktalar: …/noktalar/
 - Dokuztaş: …/dokuztas/

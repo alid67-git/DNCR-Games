@@ -2,7 +2,7 @@ window.DokuztasConfig = {
   appName: "Dokuztaş",
   version: "1.0.1",
   build: 2,
-  shareBaseUrl: "https://alid67-git.github.io/KatiArena/dokuztas/",
+  shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/dokuztas/",
   changelog: [
     {
       version: "1.0.1",
