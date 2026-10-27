@@ -1,7 +1,7 @@
 // Checks GitHub Releases for a newer Kati Arena build than the one bundled
 // in app-config.js, and (on confirmation) hands the user to the new APK.
 window.KatiUpdateCheck = (function () {
-  const REPO = "alid67-git/KatiArena";
+  const REPO = "alid67-git/DNCR-Games";
   const API_URL = `https://api.github.com/repos/${REPO}/releases/latest`;
   const LAST_CHECK_KEY = "kati_arena_update_last_check";
   const MIN_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000; // avoid hammering the API on every app open

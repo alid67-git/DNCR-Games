@@ -1,4 +1,4 @@
-# Kati Arena — Android
+# DNCR Games — Android (Kati)
 
 APK’yı telefona kurunca **bilgisayara karşı** çevrimdışı oynarsın.
 

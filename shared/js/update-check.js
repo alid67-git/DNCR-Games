@@ -26,7 +26,7 @@
 
   async function check(opts) {
     const owner = opts.owner || "alid67-git";
-    const repo = opts.repo || "KatiArena";
+    const repo = opts.repo || "DNCR-Games";
     const current = opts.currentVersion || "0";
     const url = `https://api.github.com/repos/${owner}/${repo}/releases/latest`;
     const res = await fetch(url, {
