@@ -3,7 +3,7 @@ name: Deploy GitHub Pages
 # Hub + Kati + Noktalar + Dokuztaş → https://alid67-git.github.io/KatiArena/
 on:
   push:
-    branches: [main, cursor/shared-shell-iphone-8401]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
