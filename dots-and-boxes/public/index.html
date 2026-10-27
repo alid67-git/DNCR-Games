@@ -139,43 +139,49 @@
     </section>
 
     <!-- SOLO SETUP (difficulty + board) -->
-    <section id="screen-solo-setup" class="screen">
-      <button type="button" class="btn-back" id="btn-solo-setup-back" data-i18n="back">Geri</button>
-      <header class="brand sm-head">
-        <h1 data-i18n="soloSetupTitle">Bilgisayara karşı</h1>
-      </header>
+    <section id="screen-solo-setup" class="screen setup-screen">
+      <div class="setup-scroll">
+        <button type="button" class="btn-back" id="btn-solo-setup-back" data-i18n="back">Geri</button>
+        <header class="brand sm-head">
+          <h1 data-i18n="soloSetupTitle">Bilgisayara karşı</h1>
+        </header>
 
-      <h2 class="section-title" data-i18n="chooseDifficulty">Zorluk seç</h2>
-      <div class="diff-grid" id="diff-grid" role="radiogroup" aria-label="Zorluk"></div>
+        <h2 class="section-title setup-section-title" data-i18n="chooseDifficulty">Zorluk seç</h2>
+        <div class="diff-grid" id="diff-grid" role="radiogroup" aria-label="Zorluk"></div>
 
-      <h2 class="section-title" data-i18n="chooseBoard">Oyun alanı seç</h2>
-      <div class="board-grid" id="solo-board-grid" role="radiogroup" aria-label="Oyun alanı"></div>
-
-      <button type="button" class="btn btn-primary btn-start" id="btn-solo-start" data-i18n="startGame">Başla</button>
+        <h2 class="section-title setup-section-title" data-i18n="chooseBoard">Oyun alanı seç</h2>
+        <div class="board-grid" id="solo-board-grid" role="radiogroup" aria-label="Oyun alanı"></div>
+      </div>
+      <div class="setup-actions">
+        <button type="button" class="btn btn-primary btn-start" id="btn-solo-start" data-i18n="startGame">Başla</button>
+      </div>
     </section>
 
     <!-- 2P SETUP -->
-    <section id="screen-2p-setup" class="screen">
-      <button type="button" class="btn-back" id="btn-2p-setup-back" data-i18n="back">Geri</button>
-      <header class="brand sm-head">
-        <h1 data-i18n="twoPSetupTitle">İki kişilik</h1>
-      </header>
+    <section id="screen-2p-setup" class="screen setup-screen">
+      <div class="setup-scroll">
+        <button type="button" class="btn-back" id="btn-2p-setup-back" data-i18n="back">Geri</button>
+        <header class="brand sm-head">
+          <h1 data-i18n="twoPSetupTitle">İki kişilik</h1>
+        </header>
 
-      <form class="lobby-form" onsubmit="return false;">
-        <label>
-          <span data-i18n="player1Label">1. Oyuncu adı</span>
-          <input id="p1-name" type="text" maxlength="16" data-i18n-ph="player1Ph" autocomplete="off" />
-        </label>
-        <label>
-          <span data-i18n="player2Label">2. Oyuncu adı</span>
-          <input id="p2-name" type="text" maxlength="16" data-i18n-ph="player2Ph" autocomplete="off" />
-        </label>
-      </form>
+        <form class="lobby-form setup-lobby" onsubmit="return false;">
+          <label>
+            <span data-i18n="player1Label">1. Oyuncu adı</span>
+            <input id="p1-name" type="text" maxlength="16" data-i18n-ph="player1Ph" autocomplete="off" />
+          </label>
+          <label>
+            <span data-i18n="player2Label">2. Oyuncu adı</span>
+            <input id="p2-name" type="text" maxlength="16" data-i18n-ph="player2Ph" autocomplete="off" />
+          </label>
+        </form>
 
-      <h2 class="section-title" data-i18n="chooseBoard">Oyun alanı seç</h2>
-      <div class="board-grid" id="twop-board-grid" role="radiogroup" aria-label="Oyun alanı"></div>
-
-      <button type="button" class="btn btn-primary btn-start" id="btn-2p-start" data-i18n="startGame">Başla</button>
+        <h2 class="section-title setup-section-title" data-i18n="chooseBoard">Oyun alanı seç</h2>
+        <div class="board-grid" id="twop-board-grid" role="radiogroup" aria-label="Oyun alanı"></div>
+      </div>
+      <div class="setup-actions">
+        <button type="button" class="btn btn-primary btn-start" id="btn-2p-start" data-i18n="startGame">Başla</button>
+      </div>
     </section>
 
     <!-- SETTINGS -->

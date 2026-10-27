@@ -234,8 +234,7 @@
           : "";
       btn.innerHTML = `
         <strong>${name}</strong>
-        <span class="board-meta">${g.dotRows}×${g.dotCols} · ${g.totalBoxes} ${t("boxesCount")}</span>
-        <span>${t("winTarget")} ${winNeed}</span>
+        <span class="board-meta">${g.dotRows}×${g.dotCols} · ${g.totalBoxes} ${t("boxesCount")} · ≥${winNeed}</span>
         ${rec}
       `;
       btn.addEventListener("click", () => onPick(def.id));
@@ -354,6 +353,45 @@
   }
 
   let lastPointerEdgeAt = 0;
+  let previewedEdgeId = null;
+
+  /** Hover önizlemesi — tıklama ile aynı nearestUndrawnEdge mantığı (kalın hit stroke çakışmasın). */
+  function setEdgePreview(edgeId) {
+    if (previewedEdgeId === edgeId) return;
+    if (previewedEdgeId) {
+      const prev = document.querySelector(
+        `#edge-layer line[data-edge="${previewedEdgeId}"]`
+      );
+      if (prev) prev.classList.remove("edge-preview");
+    }
+    previewedEdgeId = edgeId || null;
+    if (!previewedEdgeId) return;
+    if (session && session.state.edgeDrawnBy[previewedEdgeId]) {
+      previewedEdgeId = null;
+      return;
+    }
+    const line = document.querySelector(
+      `#edge-layer line[data-edge="${previewedEdgeId}"]`
+    );
+    if (line) line.classList.add("edge-preview");
+  }
+
+  function onBoardHoverMove(ev) {
+    // Sadece fare: dokunmada sarı flash istenmez
+    if (ev.pointerType && ev.pointerType !== "mouse") return;
+    if (!session || session.state.winner || session.aiThinking) {
+      setEdgePreview(null);
+      return;
+    }
+    const svg = $("board");
+    if (!svg) return;
+    const p = clientToSvgPoint(svg, ev.clientX, ev.clientY);
+    setEdgePreview(nearestUndrawnEdge(p.x, p.y));
+  }
+
+  function onBoardHoverLeave() {
+    setEdgePreview(null);
+  }
 
   function onBoardPointer(ev) {
     if (!session || session.state.winner || session.aiThinking) return;
@@ -366,6 +404,7 @@
     if (!edgeId) return;
     ev.preventDefault();
     lastPointerEdgeAt = Date.now();
+    setEdgePreview(null);
     onEdgeClick(edgeId);
   }
 
@@ -375,6 +414,9 @@
     svg.dataset.pointerBound = "1";
     // pointerdown: Safari + Chrome + Capacitor tek yol
     svg.addEventListener("pointerdown", onBoardPointer, { passive: false });
+    // Masaüstü hover: en yakın kenar (hit stroke sırasına değil)
+    svg.addEventListener("pointermove", onBoardHoverMove, { passive: true });
+    svg.addEventListener("pointerleave", onBoardHoverLeave);
     // Eski iOS yedek
     svg.addEventListener(
       "touchstart",
@@ -423,9 +465,7 @@
       hit.setAttribute("y2", b.y);
       hit.setAttribute("class", "edge-hit");
       hit.dataset.edge = edge.id;
-      // Masaüstü hover önizleme; dokunma ana yol board pointer
-      hit.addEventListener("pointerenter", () => previewEdge(edge.id, true));
-      hit.addEventListener("pointerleave", () => previewEdge(edge.id, false));
+      // Hover SVG pointermove ile (nearestUndrawnEdge); hit sadece dokunma/yedek tık
       hit.addEventListener("click", (e) => {
         // pointerdown zaten işlediyse çift hamle olmasın
         if (Date.now() - lastPointerEdgeAt < 450) {
@@ -447,14 +487,6 @@
       circle.setAttribute("pointer-events", "none");
       dotLayer.appendChild(circle);
     }
-  }
-
-  function previewEdge(edgeId, on) {
-    if (!session || session.state.edgeDrawnBy[edgeId]) return;
-    const line = document.querySelector(`.edge-idle[data-edge="${edgeId}"]`);
-    if (!line) return;
-    if (on) line.classList.add("edge-preview");
-    else line.classList.remove("edge-preview");
   }
 
   function renderBoxes(graph, state) {
@@ -482,6 +514,7 @@
   }
 
   function renderEdges(state) {
+    previewedEdgeId = null;
     document.querySelectorAll("#edge-layer line[data-edge]").forEach((line) => {
       const id = line.dataset.edge;
       const owner = state.edgeDrawnBy[id];

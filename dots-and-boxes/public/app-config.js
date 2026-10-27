@@ -1,9 +1,26 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.1.0",
-  build: 4,
+  version: "1.1.2",
+  build: 5,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/noktalar/",
   changelog: [
+    {
+      version: "1.1.2",
+      build: 5,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "Fare hover: sarı önizleme artık imlecin altındaki kenarı gösterir",
+          "Tahta seçiminde Başla butonu sticky — ekrandan kaybolmaz",
+          "Kurulum menüsü daha kompakt (2 sütun tahta grid)",
+        ],
+        en: [
+          "Mouse hover: yellow preview now matches the edge under the cursor",
+          "Start button sticky on board setup — stays on screen",
+          "Setup menus more compact (2-column board grid)",
+        ],
+      },
+    },
     {
       version: "1.1.0",
       build: 4,
