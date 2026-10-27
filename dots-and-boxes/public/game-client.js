@@ -37,6 +37,7 @@
     p2p: $("screen-p2p"),
     settings: $("screen-settings"),
     help: $("screen-help"),
+    scores: $("screen-scores"),
     updates: $("screen-updates"),
     game: $("screen-game"),
   };
@@ -112,6 +113,7 @@
     });
     const ver = `v${CFG.version} · build ${CFG.build}`;
     if ($("home-version")) $("home-version").textContent = ver;
+    if ($("settings-version")) $("settings-version").textContent = ver;
     if ($("updates-current"))
       $("updates-current").textContent = `${CFG.version} (${CFG.build})`;
     renderChangelog();
@@ -119,6 +121,46 @@
     renderDiffGrid();
     renderBoardGrids();
     if (hubBackCtl && hubBackCtl.refresh) hubBackCtl.refresh();
+  }
+
+  function renderScores() {
+    if (!window.ArenaScore || !$("scores-panel")) return;
+    window.ArenaScore.renderInto($("scores-panel"), {
+      lang: lang(),
+      gameId: "noktalar",
+    });
+  }
+
+  function maybeRecordNoktalarScore() {
+    if (!session || !session.state || !session.state.winner || session.scoreRecorded) return;
+    if (!window.ArenaScore) return;
+    session.scoreRecorded = true;
+    const state = session.state;
+    let result = "loss";
+    if (state.winner === "draw") result = "draw";
+    else if (session.mode === "solo") {
+      result = state.winner === session.humanPlayer ? "win" : "loss";
+    } else if (session.mode === "p2p") {
+      result = state.winner === session.you ? "win" : "loss";
+    } else result = "win";
+    const myScore =
+      session.mode === "solo" || session.mode === "p2p"
+        ? state.scores[session.mode === "solo" ? session.humanPlayer : session.you]
+        : Math.max(state.scores.A, state.scores.B);
+    const oppScore =
+      session.mode === "solo"
+        ? state.scores[session.humanPlayer === PLAYERS.A ? PLAYERS.B : PLAYERS.A]
+        : Math.min(state.scores.A, state.scores.B);
+    window.ArenaScore.record({
+      gameId: "noktalar",
+      result,
+      difficulty: session.difficulty || "medium",
+      mode: session.mode === "twop" ? "twop" : session.mode,
+      stats: {
+        boxes: myScore || 0,
+        boxLead: Math.max(0, (myScore || 0) - (oppScore || 0)),
+      },
+    });
   }
 
   function renderChangelog() {
@@ -230,6 +272,10 @@
     document.querySelectorAll('input[name="defDiff"]').forEach((r) => {
       r.checked = r.value === diff;
     });
+    if ($("settings-display-name") && window.ArenaScore) {
+      $("settings-display-name").value =
+        window.ArenaScore.load().displayName || settings.p1 || "";
+    }
   }
 
   // —— Board layout / SVG ——
@@ -495,6 +541,7 @@
 
     const end = $("end-panel");
     if (state.winner) {
+      maybeRecordNoktalarScore();
       end.classList.remove("hidden");
       let text;
       if (state.winner === "draw") text = t("draw");
@@ -871,6 +918,12 @@
 
   // —— Events ——
   $("btn-home-play").addEventListener("click", () => showScreen("play"));
+  if ($("btn-home-scores")) {
+    $("btn-home-scores").addEventListener("click", () => {
+      renderScores();
+      showScreen("scores");
+    });
+  }
   $("btn-home-settings").addEventListener("click", () => {
     fillSettingsForm();
     showScreen("settings");
@@ -879,17 +932,22 @@
     applyI18n();
     showScreen("help");
   });
-  $("btn-home-updates").addEventListener("click", () => {
-    applyI18n();
-    showScreen("updates");
-  });
 
   $("btn-play-back").addEventListener("click", () => showScreen("home"));
+  if ($("btn-scores-back")) {
+    $("btn-scores-back").addEventListener("click", () => showScreen("home"));
+  }
   $("btn-solo-setup-back").addEventListener("click", () => showScreen("play"));
   $("btn-2p-setup-back").addEventListener("click", () => showScreen("play"));
   $("btn-settings-back").addEventListener("click", () => showScreen("home"));
   $("btn-help-back").addEventListener("click", () => showScreen("home"));
-  $("btn-updates-back").addEventListener("click", () => showScreen("home"));
+  $("btn-updates-back").addEventListener("click", () => showScreen("settings"));
+  if ($("btn-open-updates")) {
+    $("btn-open-updates").addEventListener("click", () => {
+      applyI18n();
+      showScreen("updates");
+    });
+  }
 
   $("btn-mode-solo").addEventListener("click", () => {
     setup.mode = "solo";
@@ -936,12 +994,15 @@
     const selectedDiff =
       (document.querySelector('input[name="defDiff"]:checked') || {}).value ||
       "medium";
+    const displayName =
+      ($("settings-display-name") && $("settings-display-name").value) || "";
     saveSettings({
       lang: selectedLang,
       aiDifficulty: ["easy", "medium", "hard", "veryhard"].includes(selectedDiff)
         ? selectedDiff
         : "medium",
     });
+    if (window.ArenaScore) window.ArenaScore.setDisplayName(displayName);
     applyI18n();
     toast(t("saved"));
   });
@@ -952,7 +1013,7 @@
     } catch (_) {}
     updateUpdatesDot();
     toast(t("saved"));
-    showScreen("home");
+    showScreen("settings");
   });
 
   $("btn-rematch").addEventListener("click", rematch);
