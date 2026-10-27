@@ -282,6 +282,34 @@ html, body {
 }
 .go-actions { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.9rem; }
 .muted { color: var(--muted); font-size: 0.85rem; }
+.join-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+.join-row input {
+  flex: 1;
+  appearance: none;
+  border: 1px solid var(--line);
+  background: #121218;
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+  font: inherit;
+  text-transform: uppercase;
+}
+.field-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.p2p-room {
+  margin-top: 1.1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--card);
+}
 .toast {
   position: fixed;
   left: 50%;

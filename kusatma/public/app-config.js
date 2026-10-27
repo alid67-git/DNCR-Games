@@ -1,10 +1,25 @@
 window.SiegeConfig = {
   appName: "Kuşatma",
-  version: "1.0.0",
-  build: 1,
+  version: "1.1.0",
+  build: 2,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kusatma/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
+    {
+      version: "1.1.0",
+      build: 2,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "Uzaktan P2P (oda kodu) — DNCR ortak kabuk",
+          "Tek platform: hub (iPhone / iPad / Android / web)",
+        ],
+        en: [
+          "Remote P2P (room code) — shared DNCR shell",
+          "One platform: hub (iPhone / iPad / Android / web)",
+        ],
+      },
+    },
     {
       version: "1.0.0",
       build: 1,

@@ -66,4 +66,6 @@ npm run sync-shared   # shared/js → public/shared, dots…, dokuztas…, kusat
 npm run build:pages   # _site hub + 4 oyun
 ```
 
+**Tek dağıtım yüzeyi:** GitHub Pages hub + hub Capacitor APK. Oyunlar ayrı platformlara bölünmez; hepsi aynı kabukta (solo / local2p / P2P).
+
 Yeni yapısal özellik: **önce `shared/`**, sonra sync, sonra gerekirse oyuna özel kanca.

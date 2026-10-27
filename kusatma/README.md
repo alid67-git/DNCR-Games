@@ -2,11 +2,20 @@
 
 DNCR Games — Ruleset v1.0
 
+## Platform
+
+DNCR Games **tek hub**: iPhone/iPad (Safari → Ana Ekrana Ekle), Android (hub APK), web.
+
+```text
+https://alid67-git.github.io/DNCR-Games/          ← hub
+https://alid67-git.github.io/DNCR-Games/kusatma/  ← bu oyun
+```
+
 ## Modlar
 
-- Bilgisayara karşı (Kolay / Orta / Zor)
-- Aynı cihazda iki kişi
-- Uzaktan P2P — sonraki sürüm
+- Bilgisayara karşı (Kolay / Orta / Zor) — çevrimdışı
+- Aynı cihazda iki kişi — çevrimdışı
+- İki telefonda / uzaktan — oda kodu, sunucusuz P2P
 
 ## Çalıştır
 

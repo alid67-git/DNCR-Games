@@ -68,10 +68,10 @@
             <span data-i18n="play2pHint">Telefon/tablet elden ele — ağ gerekmez</span>
           </div>
         </button>
-        <button type="button" class="mode-card" id="btn-mode-remote">
+        <button type="button" class="mode-card" id="btn-mode-p2p">
           <div class="mode-copy">
             <strong data-i18n="playRemote">İki telefonda / uzaktan</strong>
-            <span data-i18n="playRemoteHint">Yakında — bu sürümde yerel ve AI</span>
+            <span data-i18n="playRemoteHint">Oda kodu — sunucu yok (P2P)</span>
           </div>
         </button>
       </div>
@@ -100,10 +100,27 @@
       <button type="button" class="btn btn-primary btn-block" id="btn-2p-start" data-i18n="startGame">Başla</button>
     </section>
 
-    <section id="screen-remote" class="screen">
-      <button type="button" class="btn-back" id="btn-remote-back" data-i18n="back">Geri</button>
-      <header class="brand sm-head"><h1 data-i18n="playRemote">Uzaktan</h1></header>
-      <p class="help-body" data-i18n="remoteSoon"></p>
+    <section id="screen-p2p" class="screen">
+      <button type="button" class="btn-back" id="btn-p2p-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="p2pTitle">İki telefonda oyna</h1>
+        <p class="lede" data-i18n="p2pLead"></p>
+      </header>
+      <label class="field"><span data-i18n="yourName">Adın</span>
+        <input id="p2p-name" type="text" maxlength="20" data-i18n-ph="namePh" autocomplete="nickname" />
+      </label>
+      <p class="field-hint" data-i18n="p2pNeedNet"></p>
+      <button type="button" class="btn btn-primary btn-block" id="btn-p2p-create" data-i18n="createRoom">Oda kur</button>
+      <div class="join-row">
+        <input id="p2p-code" type="text" maxlength="6" data-i18n-ph="roomCode" autocomplete="off" spellcheck="false" />
+        <button type="button" class="btn btn-ghost" id="btn-p2p-join" data-i18n="joinRoom">Katıl</button>
+      </div>
+      <div id="p2p-room" class="p2p-room hidden">
+        <p class="section-label"><span data-i18n="room">Oda</span> <strong id="p2p-room-code">----</strong></p>
+        <p id="p2p-room-hint" class="help-body"></p>
+        <button type="button" class="btn btn-primary btn-block" id="btn-p2p-ready" data-i18n="ready">Hazırım</button>
+        <button type="button" class="btn btn-ghost btn-block" id="btn-p2p-copy" data-i18n="copyCode">Kodu kopyala</button>
+      </div>
     </section>
 
     <section id="screen-settings" class="screen">
@@ -185,6 +202,7 @@
   <script src="ai.js"></script>
   <script src="shared/hub-back.js"></script>
   <script src="shared/score.js"></script>
+  <script src="shared/p2p-session.js"></script>
   <script src="shared/register-sw.js"></script>
   <script src="game-client.js"></script>
 </body>

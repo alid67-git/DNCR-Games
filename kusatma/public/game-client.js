@@ -18,12 +18,15 @@
     play: $("screen-play"),
     soloSetup: $("screen-solo-setup"),
     twoPSetup: $("screen-2p-setup"),
-    remote: $("screen-remote"),
+    p2p: $("screen-p2p"),
     settings: $("screen-settings"),
     help: $("screen-help"),
     scores: $("screen-scores"),
     game: $("screen-game"),
   };
+
+  let p2pSession = null;
+  let p2pLobby = null;
 
   let settings = loadSettings();
   let setup = {
@@ -142,6 +145,11 @@
       if (player === session.humanPlayer) return session.names.human || t("youAre");
       return t("computer");
     }
+    if (session.mode === "p2p") {
+      return player === 1
+        ? session.names.p1 || t("player1")
+        : session.names.p2 || t("player2");
+    }
     return player === 1
       ? session.names.p1 || t("player1")
       : session.names.p2 || t("player2");
@@ -151,6 +159,25 @@
     if (!session || !session.state) return false;
     if (session.state.phase === PHASE.GAME_OVER) return false;
     if (session.mode === "solo") return session.state.turn === session.humanPlayer;
+    if (session.mode === "p2p") return session.state.turn === session.humanPlayer;
+    return true; // local 2p
+  }
+
+  function commitAction(player, action, opts) {
+    const fromNet = opts && opts.fromNet;
+    if (!session) return false;
+    const r = applyAction(session.state, player, action);
+    if (!r.ok) {
+      if (!fromNet) toast(r.error || t("toastInvalid"));
+      return false;
+    }
+    session.state = r.state;
+    selectedStone = null;
+    renderAll();
+    if (!fromNet && session.mode === "p2p" && p2pSession) {
+      p2pSession.send({ type: "action", player, action });
+    }
+    if (!fromNet) maybeAiTurn();
     return true;
   }
 
@@ -256,16 +283,16 @@
     const s = session.state;
     let result = "loss";
     if (s.winner === "draw") result = "draw";
-    else if (session.mode === "solo") {
+    else if (session.mode === "solo" || session.mode === "p2p") {
       result = s.winner === session.humanPlayer ? "win" : "loss";
     } else result = "win";
     window.ArenaScore.record({
       gameId: "kusatma",
       result,
       difficulty: session.mode === "solo" ? session.difficulty : "normal",
-      mode: session.mode === "solo" ? "solo" : "local2p",
+      mode: session.mode === "solo" ? "solo" : session.mode === "p2p" ? "p2p" : "local2p",
       stats: {
-        score: s.scores[session.mode === "solo" ? session.humanPlayer : 1],
+        score: s.scores[session.humanPlayer || 1],
       },
     });
   }
@@ -439,14 +466,7 @@
       toast(t("insuredHint"));
       return;
     }
-    const r = applyAction(s, s.turn, { type: "DRAW_LINE", edgeId });
-    if (!r.ok) {
-      toast(r.error || t("toastInvalid"));
-      return;
-    }
-    session.state = r.state;
-    renderAll();
-    maybeAiTurn();
+    commitAction(s.turn, { type: "DRAW_LINE", edgeId });
   }
 
   function onNodeClick(r, c) {
@@ -455,19 +475,12 @@
     const player = s.turn;
 
     if (s.phase === PHASE.DEPLOY) {
-      const res = applyAction(s, player, { type: "PLACE_SELECT", r, c });
-      if (!res.ok) {
-        toast(res.error || t("toastInvalid"));
-        return;
-      }
-      session.state = res.state;
-      renderAll();
+      commitAction(player, { type: "PLACE_SELECT", r, c });
       return;
     }
 
     if (s.phase !== PHASE.BATTLE) return;
 
-    // Select own stone or move to highlight
     if (s.nodes[r][c] === player) {
       selectedStone = { r, c };
       renderBoard();
@@ -475,25 +488,175 @@
     }
 
     if (selectedStone && s.nodes[r][c] === 0) {
-      const res = applyAction(s, player, {
-        type: "MOVE_PIECE",
-        from: { ...selectedStone },
-        to: { r, c },
-      });
+      const from = { ...selectedStone };
       selectedStone = null;
-      if (!res.ok) {
-        toast(res.error || t("toastInvalid"));
-        renderBoard();
-        return;
-      }
-      session.state = res.state;
-      renderAll();
-      maybeAiTurn();
+      commitAction(player, { type: "MOVE_PIECE", from, to: { r, c } });
       return;
     }
 
     selectedStone = null;
     renderBoard();
+  }
+
+  function destroyP2P() {
+    if (p2pSession) {
+      try {
+        p2pSession.destroy();
+      } catch (_) {}
+    }
+    p2pSession = null;
+    p2pLobby = null;
+    if ($("p2p-room")) $("p2p-room").classList.add("hidden");
+  }
+
+  function updateP2pRoomUi() {
+    if (!p2pLobby || !$("p2p-room")) return;
+    $("p2p-room").classList.remove("hidden");
+    if ($("p2p-room-code")) $("p2p-room-code").textContent = p2pLobby.code;
+    if ($("p2p-room-hint")) {
+      $("p2p-room-hint").textContent = p2pLobby.guestJoined
+        ? `${p2pLobby.names.p1} vs ${p2pLobby.names.p2 || "…"}`
+        : t("waitingGuest");
+    }
+    const btn = $("btn-p2p-ready");
+    if (btn) {
+      btn.disabled = !p2pLobby.guestJoined;
+      const me = p2pLobby.you;
+      btn.textContent = p2pLobby.ready[me] ? t("readyOn") : t("ready");
+    }
+  }
+
+  function beginP2PGame(names) {
+    const state = createGameState(PLAYERS.P1);
+    session = {
+      mode: "p2p",
+      difficulty: null,
+      humanPlayer: p2pLobby.you === "A" ? PLAYERS.P1 : PLAYERS.P2,
+      names: { p1: names.p1, p2: names.p2 },
+      state,
+      scoreRecorded: false,
+    };
+    $("game-over").classList.add("hidden");
+    showScreen("game");
+    renderAll();
+  }
+
+  function maybeStartP2P() {
+    if (!p2pLobby || !p2pLobby.guestJoined) return;
+    if (!p2pLobby.ready.A || !p2pLobby.ready.B) return;
+    if (p2pLobby.you !== "A") return;
+    p2pSession.send({ type: "start", names: p2pLobby.names });
+    beginP2PGame(p2pLobby.names);
+  }
+
+  function bindP2P(sessionObj) {
+    sessionObj.on("message", (data) => {
+      if (!data || !data.type) return;
+      if (data.type === "hello") {
+        if (p2pLobby.you === "A" && data.role === "guest") {
+          p2pLobby.names.p2 = data.name || t("player2");
+          p2pLobby.guestJoined = true;
+          p2pSession.send({
+            type: "lobby",
+            names: p2pLobby.names,
+            ready: p2pLobby.ready,
+            guestJoined: true,
+          });
+          updateP2pRoomUi();
+        } else if (p2pLobby.you === "B" && data.role === "host") {
+          p2pLobby.names.p1 = data.name || t("player1");
+          p2pLobby.guestJoined = true;
+          updateP2pRoomUi();
+        }
+      } else if (data.type === "lobby") {
+        p2pLobby.names = data.names || p2pLobby.names;
+        p2pLobby.ready = data.ready || p2pLobby.ready;
+        p2pLobby.guestJoined = !!data.guestJoined;
+        updateP2pRoomUi();
+      } else if (data.type === "ready") {
+        p2pLobby.ready[data.who] = !!data.value;
+        updateP2pRoomUi();
+        maybeStartP2P();
+      } else if (data.type === "start") {
+        beginP2PGame(data.names || p2pLobby.names);
+      } else if (data.type === "action") {
+        if (!session || session.mode !== "p2p") return;
+        commitAction(data.player, data.action, { fromNet: true });
+      }
+    });
+    sessionObj.on("connected", () => {
+      if (!p2pLobby) return;
+      if (p2pLobby.you === "A") {
+        p2pSession.send({
+          type: "hello",
+          role: "host",
+          name: p2pLobby.names.p1,
+        });
+      } else {
+        p2pSession.send({
+          type: "hello",
+          role: "guest",
+          name: p2pLobby.names.p2,
+        });
+      }
+    });
+  }
+
+  async function hostP2P() {
+    if (!window.ArenaP2P) {
+      toast(t("peerFail"));
+      return;
+    }
+    destroyP2P();
+    const name = ($("p2p-name").value || "").trim() || t("player1");
+    toast(t("connecting"));
+    try {
+      p2pSession = new ArenaP2P.P2PSession({ prefix: "kusatma" });
+      bindP2P(p2pSession);
+      const code = await p2pSession.host();
+      p2pLobby = {
+        code,
+        you: "A",
+        names: { p1: name, p2: null },
+        ready: { A: false, B: false },
+        guestJoined: false,
+      };
+      updateP2pRoomUi();
+    } catch (_) {
+      toast(t("peerFail"));
+      destroyP2P();
+    }
+  }
+
+  async function joinP2P() {
+    if (!window.ArenaP2P) {
+      toast(t("peerFail"));
+      return;
+    }
+    const code = ($("p2p-code").value || "").trim().toUpperCase();
+    if (!code) {
+      toast(t("needCode"));
+      return;
+    }
+    destroyP2P();
+    const name = ($("p2p-name").value || "").trim() || t("player2");
+    toast(t("connecting"));
+    try {
+      p2pSession = new ArenaP2P.P2PSession({ prefix: "kusatma" });
+      bindP2P(p2pSession);
+      await p2pSession.join(code);
+      p2pLobby = {
+        code,
+        you: "B",
+        names: { p1: "—", p2: name },
+        ready: { A: false, B: false },
+        guestJoined: false,
+      };
+      updateP2pRoomUi();
+    } catch (_) {
+      toast(t("peerFail"));
+      destroyP2P();
+    }
   }
 
   function maybeAiTurn() {
@@ -544,7 +707,12 @@
   $("btn-play-back").addEventListener("click", () => showScreen("home"));
   $("btn-solo-back").addEventListener("click", () => showScreen("play"));
   $("btn-2p-back").addEventListener("click", () => showScreen("play"));
-  $("btn-remote-back").addEventListener("click", () => showScreen("play"));
+  if ($("btn-p2p-back")) {
+    $("btn-p2p-back").addEventListener("click", () => {
+      destroyP2P();
+      showScreen("play");
+    });
+  }
   $("btn-settings-back").addEventListener("click", () => showScreen("home"));
   $("btn-help-back").addEventListener("click", () => showScreen("home"));
 
@@ -556,39 +724,63 @@
     setup.mode = "twop";
     showScreen("twoPSetup");
   });
-  $("btn-mode-remote").addEventListener("click", () => showScreen("remote"));
+  if ($("btn-mode-p2p")) {
+    $("btn-mode-p2p").addEventListener("click", () => {
+      setup.mode = "p2p";
+      if ($("p2p-room")) $("p2p-room").classList.add("hidden");
+      showScreen("p2p");
+    });
+  }
 
   $("btn-solo-start").addEventListener("click", () => startGame("solo"));
   $("btn-2p-start").addEventListener("click", () => startGame("twop"));
 
+  if ($("btn-p2p-create")) $("btn-p2p-create").addEventListener("click", () => hostP2P());
+  if ($("btn-p2p-join")) $("btn-p2p-join").addEventListener("click", () => joinP2P());
+  if ($("btn-p2p-ready")) {
+    $("btn-p2p-ready").addEventListener("click", () => {
+      if (!p2pLobby || !p2pSession) return;
+      const who = p2pLobby.you;
+      p2pLobby.ready[who] = !p2pLobby.ready[who];
+      p2pSession.send({ type: "ready", who, value: p2pLobby.ready[who] });
+      p2pSession.send({
+        type: "lobby",
+        names: p2pLobby.names,
+        ready: p2pLobby.ready,
+        guestJoined: p2pLobby.guestJoined,
+      });
+      updateP2pRoomUi();
+      maybeStartP2P();
+    });
+  }
+  if ($("btn-p2p-copy")) {
+    $("btn-p2p-copy").addEventListener("click", async () => {
+      if (!p2pLobby) return;
+      try {
+        await navigator.clipboard.writeText(p2pLobby.code);
+        toast(t("copied"));
+      } catch (_) {
+        toast(p2pLobby.code);
+      }
+    });
+  }
+
   $("btn-deploy-confirm").addEventListener("click", () => {
     if (!session || !isHumanTurn()) return;
-    const s = session.state;
-    const r = applyAction(s, s.turn, { type: "PLACE_CONFIRM" });
-    if (!r.ok) {
-      toast(r.error || t("toastInvalid"));
-      return;
-    }
-    session.state = r.state;
-    renderAll();
-    maybeAiTurn();
+    commitAction(session.state.turn, { type: "PLACE_CONFIRM" });
   });
   $("btn-deploy-cancel").addEventListener("click", () => {
     if (!session || !isHumanTurn()) return;
-    const s = session.state;
-    const r = applyAction(s, s.turn, { type: "PLACE_CANCEL" });
-    if (!r.ok) return;
-    session.state = r.state;
-    renderAll();
+    commitAction(session.state.turn, { type: "PLACE_CANCEL" });
   });
 
   $("btn-resign").addEventListener("click", () => {
     if (!session || session.state.phase === PHASE.GAME_OVER) return;
-    const p = session.mode === "solo" ? session.humanPlayer : session.state.turn;
-    const r = applyAction(session.state, p, { type: "RESIGN" });
-    if (!r.ok) return;
-    session.state = r.state;
-    renderAll();
+    const p =
+      session.mode === "solo" || session.mode === "p2p"
+        ? session.humanPlayer
+        : session.state.turn;
+    commitAction(p, { type: "RESIGN" });
   });
 
   $("btn-game-back").addEventListener("click", () => {
@@ -596,15 +788,23 @@
       if (!confirm(lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?")) return;
     }
     clearTimeout(aiTimer);
+    if (session && session.mode === "p2p") destroyP2P();
     session = null;
     showScreen("home");
   });
 
   $("btn-again").addEventListener("click", () => {
     if (!session) return;
+    if (session.mode === "p2p") {
+      destroyP2P();
+      session = null;
+      showScreen("p2p");
+      return;
+    }
     startGame(session.mode);
   });
   $("btn-to-menu").addEventListener("click", () => {
+    if (session && session.mode === "p2p") destroyP2P();
     session = null;
     showScreen("home");
   });
