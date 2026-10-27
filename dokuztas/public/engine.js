@@ -91,17 +91,28 @@
     return n;
   }
 
+  function millsAt(board, node, player) {
+    if (board[node] !== player) return [];
+    return MILLS.filter(
+      (mill) => mill.includes(node) && mill.every((p) => board[p] === player)
+    );
+  }
+
   function inMill(board, node, player) {
-    if (board[node] !== player) return false;
-    for (const mill of MILLS) {
-      if (!mill.includes(node)) continue;
-      if (mill.every((p) => board[p] === player)) return true;
-    }
-    return false;
+    return millsAt(board, node, player).length > 0;
   }
 
   function formsMillAt(board, node, player) {
     return inMill(board, node, player);
+  }
+
+  /** Yeni kurulan değirmen(ler)deki düğümler (çift değirmende birleşik). */
+  function millNodesAt(board, node, player) {
+    const set = new Set();
+    for (const mill of millsAt(board, node, player)) {
+      for (const p of mill) set.add(p);
+    }
+    return [...set];
   }
 
   function allPlaced(state) {
@@ -334,6 +345,8 @@
     countPieces,
     inMill,
     formsMillAt,
+    millsAt,
+    millNodesAt,
     allPlaced,
     canFly,
     removableTargets,

@@ -1,5 +1,5 @@
 /* Kati Arena — offline cache (solo + local 2P) */
-const CACHE = "kati-v1.5.0";
+const CACHE = "kati-v1.5.1";
 const ASSETS = [
   "./",
   "./index.html",
@@ -14,6 +14,7 @@ const ASSETS = [
   "./shared/update-check.js",
   "./shared/register-sw.js",
   "./shared/mode-i18n.js",
+  "./shared/hub-back.js",
   "./assets/logo.svg",
   "./assets/favicon.png",
   "./assets/apple-touch-icon.png",

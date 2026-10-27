@@ -57,6 +57,7 @@
   let animating = false;
   let lastSeenMoveCount = -1;
   let prevGuestJoined = false;
+  let hubBackCtl = null;
 
   function useLegacySocket() {
     return !!(settings.serverUrl && String(settings.serverUrl).trim());
@@ -237,6 +238,7 @@
     if ($("updates-current")) $("updates-current").textContent = `${CFG.version} (${CFG.build})`;
     renderChangelog();
     updateUpdatesDot();
+    if (hubBackCtl && hubBackCtl.refresh) hubBackCtl.refresh();
   }
 
   function renderChangelog() {
@@ -1137,6 +1139,9 @@
   }
 
   // Boot
+  if (window.ArenaHubBack) {
+    hubBackCtl = window.ArenaHubBack.bind({ getLang: lang });
+  }
   applyI18n();
   fillSettingsForm();
   initBoardSvg();
