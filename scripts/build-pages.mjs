@@ -2,10 +2,10 @@
 /**
  * GitHub Pages statik site:
  *   /           hub (iPhone giriş)
- *   /kati/      Kati Arena
+ *   /kati/      Kati
  *   /noktalar/  Noktalar ve Kutular
  *   /dokuztas/  Dokuztaş
- *   /kusatma/   Kuşatma (The Siege)
+ *   /kusatma/   Kuşatma
  */
 import fs from "fs";
 import path from "path";
@@ -55,7 +55,7 @@ fs.writeFileSync(
 
 console.log("built", out);
 console.log("  /           hub");
-console.log("  /kati/      Kati Arena");
+console.log("  /kati/      Kati");
 console.log("  /noktalar/  Noktalar ve Kutular");
 console.log("  /dokuztas/  Dokuztaş");
 console.log("  /kusatma/   Kuşatma");

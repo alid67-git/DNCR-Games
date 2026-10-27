@@ -3,7 +3,7 @@
   const CFG = window.KatiConfig;
   const I18N = window.KatiI18n;
   if (!E || !CFG || !I18N) {
-    console.error("Kati Arena: missing modules");
+    console.error("Kati: missing modules");
     return;
   }
 

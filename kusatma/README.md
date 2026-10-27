@@ -1,4 +1,4 @@
-# Kuşatma (The Siege)
+# Kuşatma
 
 DNCR Games — Ruleset v1.0
 

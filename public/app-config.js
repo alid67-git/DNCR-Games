@@ -1,5 +1,5 @@
 window.KatiConfig = {
-  appName: "Kati Arena",
+  appName: "Kati",
   version: "1.5.0",
   build: 18,
   /** tomato = red, gourd = green (engine keys) */

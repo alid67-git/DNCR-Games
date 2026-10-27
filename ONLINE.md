@@ -1,4 +1,4 @@
-# Kati Arena — ülkeler arası (online)
+# Kati — ülkeler arası (online)
 
 **Sunucu kurmana gerek yok.** Oyun cihazlar arasında doğrudan bağlanır (WebRTC).  
 iPhone Safari, Android APK ve bilgisayar tarayıcısı aynı şekilde oynar.

@@ -132,8 +132,8 @@ window.DotsI18n = (function () {
       notYourTurn: "Sıra sende değil.",
     },
     en: {
-      appName: "Dots and Boxes",
-      tagline: "Draw a line, close a box, keep your turn!",
+      appName: "Noktalar ve Kutular",
+      tagline: "Dots and Boxes — draw a line, close a box, keep your turn!",
       homePlay: "Play",
       homeSettings: "Settings",
       homeHelp: "Help",
@@ -231,7 +231,7 @@ window.DotsI18n = (function () {
       helpSafariTitle: "iPhone Safari / shortcut",
       helpSafari1: "DNCR Games hub: https://alid67-git.github.io/DNCR-Games/",
       helpSafari2: "Safari → Share → Add to Home Screen (DNCR icon).",
-      helpSafari3: "You can also add Dots and Boxes itself to the Home Screen.",
+      helpSafari3: "You can also add Noktalar ve Kutular itself to the Home Screen.",
       helpHubTitle: "DNCR Games (exit)",
       helpHub:
         "The DNCR Games button on the home menu is the shared exit; confirm to return to the hub.",

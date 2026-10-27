@@ -32,14 +32,14 @@ app.get("/api/meta", (_req, res) => {
     port: PORT,
     lanIps: getLanIps(),
     version: APP_VERSION,
-    app: "Kati Arena",
+    app: "Kati",
     board: { nodes: NODES, positions: POSITIONS, edges: BOARD_EDGES, players: PLAYERS },
   });
 });
 
 app.get("/api/version", (_req, res) => {
   res.json({
-    name: "Kati Arena",
+    name: "Kati",
     version: APP_VERSION,
     teams: { tomato: "red", gourd: "green" },
   });
@@ -209,7 +209,7 @@ io.on("connection", (socket) => {
 server.listen(PORT, "0.0.0.0", () => {
   const ips = getLanIps();
   console.log("");
-  console.log("  Kati Arena — solo + online (Red vs Green)");
+  console.log("  Kati — solo + online (Red vs Green)");
   console.log(`  Local:   http://localhost:${PORT}`);
   for (const ip of ips) {
     console.log(`  LAN:     http://${ip}:${PORT}`);

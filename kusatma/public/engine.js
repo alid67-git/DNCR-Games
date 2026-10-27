@@ -1,5 +1,5 @@
 /**
- * Kuşatma (The Siege) — Ruleset v1.0 oyun motoru
+ * Kuşatma — Ruleset v1.0 oyun motoru
  * Tarayıcı (window.SiegeEngine) ve Node (require) uyumlu.
  *
  * Tahta: Nodes[6][6], Cells[5][5]

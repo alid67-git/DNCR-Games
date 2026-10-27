@@ -55,7 +55,7 @@ function getLanIps() {
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log("");
-  console.log("  Kuşatma (The Siege) — solo + local 2P");
+  console.log("  Kuşatma — solo + local 2P");
   console.log(`  Local:   http://localhost:${PORT}`);
   for (const ip of getLanIps()) {
     console.log(`  LAN:     http://${ip}:${PORT}`);

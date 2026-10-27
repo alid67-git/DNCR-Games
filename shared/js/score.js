@@ -11,8 +11,8 @@
   const DIFF_MULT = { easy: 1, medium: 1.25, hard: 1.5, veryhard: 2, normal: 1.25 };
   const MODE_MULT = { solo: 1, twop: 0.55, local2p: 0.55, p2p: 1.2, remote: 1.2 };
   const GAME_LABELS = {
-    tr: { kati: "Kati", noktalar: "Noktalar", dokuztas: "Dokuztaş", kusatma: "Kuşatma", dncr: "DNCR toplam" },
-    en: { kati: "Kati", noktalar: "Dots & Boxes", dokuztas: "Dokuztaş", kusatma: "The Siege", dncr: "DNCR total" },
+    tr: { kati: "Kati", noktalar: "Noktalar ve Kutular", dokuztas: "Dokuztaş", kusatma: "Kuşatma", dncr: "DNCR toplam" },
+    en: { kati: "Kati", noktalar: "Noktalar ve Kutular", dokuztas: "Dokuztaş", kusatma: "Kuşatma", dncr: "DNCR total" },
   };
 
   function emptyGame() {
