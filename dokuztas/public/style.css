@@ -651,6 +651,61 @@ input[type="text"]:focus {
 .piece.selected {
   transform: scale(1.16);
 }
+.piece.mill-flash {
+  animation: millFlash 0.72s cubic-bezier(0.22, 1.35, 0.36, 1) both;
+  pointer-events: none;
+}
+.piece.mill-flash .skin {
+  fill: #ffe29a !important;
+  stroke: #fff6d2;
+  stroke-width: 0.85;
+  filter: drop-shadow(0 0 2.2px rgba(255, 220, 120, 0.95));
+}
+@keyframes millFlash {
+  0% {
+    transform: scale(1);
+  }
+  28% {
+    transform: scale(1.55);
+  }
+  62% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.piece-eject {
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pieceEject 0.78s cubic-bezier(0.25, 0.7, 0.35, 1) both;
+}
+.piece-eject .skin {
+  fill: #ff8a65 !important;
+  stroke: #ffe0b2;
+  stroke-width: 0.7;
+  filter: drop-shadow(0 0 2px rgba(255, 140, 90, 0.9));
+}
+@keyframes pieceEject {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.2) rotate(0deg);
+  }
+  40% {
+    opacity: 1;
+    transform: translate(
+        calc(var(--ej-x, 160px) * 0.45),
+        calc(var(--ej-y, -120px) * 0.45)
+      )
+      scale(1.05) rotate(72deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--ej-x, 160px), var(--ej-y, -120px)) scale(0.45)
+      rotate(var(--ej-rot, 200deg));
+  }
+}
 
 .hint-dot {
   fill: rgba(255, 248, 220, 0.55);

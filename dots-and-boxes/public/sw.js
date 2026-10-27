@@ -1,5 +1,5 @@
 /* Noktalar ve Kutular — çevrimdışı cache (iPhone Ana Ekran) */
-const CACHE = "noktalar-v1.1.0";
+const CACHE = "noktalar-v1.1.1";
 const ASSETS = [
   "./",
   "./index.html",
@@ -15,6 +15,7 @@ const ASSETS = [
   "./shared/update-check.js",
   "./shared/register-sw.js",
   "./shared/mode-i18n.js",
+  "./shared/hub-back.js",
   "./fonts/fonts.css",
   "./fonts/manrope-latin.woff2",
   "./fonts/manrope-latinext.woff2",

@@ -20,6 +20,7 @@
     canFly,
     opponent,
     allPlaced,
+    millNodesAt,
   } = E;
 
   const SETTINGS_KEY = "dokuztas_settings";
@@ -56,6 +57,7 @@
   /** @type {null | import('./p2p').P2PSession} */
   let p2p = null;
   let p2pLobby = null;
+  let hubBackCtl = null;
 
   function loadSettings() {
     const defaults = {
@@ -119,6 +121,7 @@
     renderChangelog();
     updateUpdatesDot();
     renderDiffGrid();
+    if (hubBackCtl && hubBackCtl.refresh) hubBackCtl.refresh();
   }
 
   function renderChangelog() {
@@ -282,6 +285,46 @@
     showMillBanner._t = setTimeout(() => el.classList.add("hidden"), 900);
   }
 
+  function waitMs(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /** Değirmen üçlüsünü kısa süre büyütüp altın tonla göster. */
+  function flashMillNodes(nodeIds) {
+    if (!nodeIds || !nodeIds.length) return Promise.resolve();
+    const g = $("board-pieces");
+    if (!g) return Promise.resolve();
+    const set = new Set(nodeIds);
+    g.querySelectorAll(".piece").forEach((el) => {
+      if (set.has(el.dataset.node)) el.classList.add("mill-flash");
+    });
+    return waitMs(720).then(() => {
+      g.querySelectorAll(".piece.mill-flash").forEach((el) => {
+        el.classList.remove("mill-flash");
+      });
+    });
+  }
+
+  /** Alınan taşı renklendirip ekranın dışına uçur. */
+  function animateEjectPiece(nodeId, owner) {
+    const fx = $("board-fx");
+    const p = POSITIONS[nodeId];
+    if (!fx || !p || !owner) return Promise.resolve();
+    fx.innerHTML = "";
+    const piece = makePiece(owner, p.x, p.y, false);
+    piece.classList.add("piece-eject");
+    const dx = (Math.random() > 0.5 ? 1 : -1) * (140 + Math.random() * 110);
+    const dy = -90 - Math.random() * 130;
+    const rot = (Math.random() > 0.5 ? 1 : -1) * (170 + Math.random() * 240);
+    piece.style.setProperty("--ej-x", `${dx.toFixed(0)}px`);
+    piece.style.setProperty("--ej-y", `${dy.toFixed(0)}px`);
+    piece.style.setProperty("--ej-rot", `${rot.toFixed(0)}deg`);
+    fx.appendChild(piece);
+    return waitMs(780).then(() => {
+      if (piece.parentNode) piece.parentNode.removeChild(piece);
+    });
+  }
+
   function teamLabel(p) {
     return p === PLAYERS.red ? t("red") : t("black");
   }
@@ -389,7 +432,7 @@
     } else clearHints();
   }
 
-  function applyAction(action, opts) {
+  async function applyAction(action, opts) {
     if (!session) return;
     const fromNet = opts && opts.fromNet;
     const actor = session.state.turn;
@@ -398,22 +441,36 @@
       return;
     }
     const prevPhase = session.state.phase;
+    const removedOwner =
+      action && action.type === "remove" ? session.state.board[action.at] : null;
     const r = tryAction(session.state, actor, action);
     if (!r.ok) {
       if (!fromNet) toast(r.error);
       return;
     }
-    if (prevPhase !== "remove" && r.state.phase === "remove") showMillBanner();
+    const formedMill = prevPhase !== "remove" && r.state.phase === "remove";
+    const millNodes =
+      formedMill && action.to
+        ? millNodesAt(r.state.board, action.to, actor)
+        : [];
+    if (formedMill) showMillBanner();
     session.state = r.state;
     selected = null;
     renderGame();
+
+    if (formedMill && millNodes.length) {
+      await flashMillNodes(millNodes);
+    }
+    if (action.type === "remove" && removedOwner) {
+      await animateEjectPiece(action.at, removedOwner);
+    }
 
     if (session.mode === "p2p" && !fromNet && p2p) {
       p2p.send({ type: "action", action, moveCount: r.state.moveCount });
     }
 
     if (session.mode === "solo" && !session.state.winner && session.state.turn === PLAYERS.black) {
-      scheduleAi();
+      scheduleAi(formedMill ? 120 : 480);
     }
   }
 
@@ -867,6 +924,9 @@
   });
 
   // Boot
+  if (window.ArenaHubBack) {
+    hubBackCtl = window.ArenaHubBack.bind({ getLang: lang });
+  }
   applyI18n();
   fillSettingsForm();
   initBoardSvg();

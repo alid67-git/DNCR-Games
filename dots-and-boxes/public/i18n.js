@@ -7,6 +7,7 @@ window.DotsI18n = (function () {
       homeSettings: "Ayarlar",
       homeHelp: "Yardım",
       homeUpdates: "Güncellemeler",
+      hubBack: "DNCR Games",
       back: "Geri",
 
       playTitle: "Oyun modu",
@@ -117,6 +118,7 @@ window.DotsI18n = (function () {
       homeSettings: "Settings",
       homeHelp: "Help",
       homeUpdates: "Updates",
+      hubBack: "DNCR Games",
       back: "Back",
 
       playTitle: "Game mode",

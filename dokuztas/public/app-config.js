@@ -1,9 +1,26 @@
 window.DokuztasConfig = {
   appName: "Dokuztaş",
-  version: "1.0.1",
-  build: 2,
+  version: "1.0.2",
+  build: 3,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/dokuztas/",
   changelog: [
+    {
+      version: "1.0.2",
+      build: 3,
+      date: "2026-10-27",
+      items: {
+        tr: [
+          "DNCR Games hub’a onaylı dönüş",
+          "Değirmen üçlüsü vurgusu (renk + büyüme)",
+          "Alınan taş uçarak ekrandan çıkar",
+        ],
+        en: [
+          "Confirmed return to DNCR Games hub",
+          "Mill trio highlight (color + scale)",
+          "Captured piece flies off the board",
+        ],
+      },
+    },
     {
       version: "1.0.1",
       build: 2,

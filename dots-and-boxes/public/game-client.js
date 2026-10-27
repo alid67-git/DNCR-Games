@@ -54,6 +54,7 @@
   let session = null;
   let aiTimer = null;
   let layout = null; // {pad, cell, coords: Map "r,c" -> {x,y}}
+  let hubBackCtl = null;
 
   function loadSettings() {
     const defaults = { lang: "tr", aiDifficulty: "medium", p1: "", p2: "" };
@@ -117,6 +118,7 @@
     updateUpdatesDot();
     renderDiffGrid();
     renderBoardGrids();
+    if (hubBackCtl && hubBackCtl.refresh) hubBackCtl.refresh();
   }
 
   function renderChangelog() {
@@ -1045,6 +1047,9 @@
   }
 
   // Boot
+  if (window.ArenaHubBack) {
+    hubBackCtl = window.ArenaHubBack.bind({ getLang: lang });
+  }
   applyI18n();
   fillSettingsForm();
   showSafariTipIfNeeded();

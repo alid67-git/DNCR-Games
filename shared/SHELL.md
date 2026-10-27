@@ -41,6 +41,7 @@ Ana ekran sırası (değiştirme):
 | `update-check.js` | GitHub Releases sürüm kontrolü |
 | `register-sw.js` | Service worker kaydı |
 | `mode-i18n.js` | Ortak mod / menü çeviri anahtarları |
+| `hub-back.js` | DNCR Games hub’a onaylı dönüş |
 
 ## iPhone / web linkleri (GitHub Pages)
 

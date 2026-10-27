@@ -7,6 +7,11 @@ window.DokuztasI18n = (function () {
       homeSettings: "Ayarlar",
       homeHelp: "Yardım",
       homeUpdates: "Güncellemeler",
+      hubBack: "DNCR Games",
+      hubBackTitle: "Hub’a dön?",
+      hubBackConfirm: "DNCR Games ana sayfasına dönmek istediğine emin misin?",
+      hubBackYes: "Evet, dön",
+      hubBackNo: "Vazgeç",
       back: "Geri",
 
       playTitle: "Oyun modu",
@@ -126,6 +131,11 @@ window.DokuztasI18n = (function () {
       homeSettings: "Settings",
       homeHelp: "Help",
       homeUpdates: "Updates",
+      hubBack: "DNCR Games",
+      hubBackTitle: "Back to hub?",
+      hubBackConfirm: "Return to the DNCR Games home page?",
+      hubBackYes: "Yes, go back",
+      hubBackNo: "Cancel",
       back: "Back",
 
       playTitle: "Game mode",

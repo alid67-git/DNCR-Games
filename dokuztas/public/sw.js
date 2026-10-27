@@ -1,5 +1,5 @@
 /* Dokuztaş — offline cache (solo + local 2P) */
-const CACHE = "dokuztas-v1.0.1";
+const CACHE = "dokuztas-v1.0.2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -15,6 +15,7 @@ const ASSETS = [
   "./shared/update-check.js",
   "./shared/register-sw.js",
   "./shared/mode-i18n.js",
+  "./shared/hub-back.js",
   "./fonts/fonts.css",
   "./fonts/manrope-latin.woff2",
   "./fonts/manrope-latinext.woff2",
