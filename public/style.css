@@ -254,6 +254,9 @@ body {
 .screen.active {
   display: block;
 }
+#screen-game {
+  position: relative;
+}
 
 @keyframes rise {
   from {
