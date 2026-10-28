@@ -722,22 +722,30 @@ input[type="text"]:focus {
 .note-digit:active {
   transform: scale(0.96);
 }
-.note-digit.is-struck {
-  color: rgba(232, 244, 240, 0.35);
-  border-color: rgba(255, 107, 107, 0.45);
-  background: rgba(255, 107, 107, 0.08);
+.note-digit.is-out {
+  color: rgba(232, 244, 240, 0.28);
+  border-color: rgba(255, 107, 107, 0.55);
+  background: rgba(255, 107, 107, 0.1);
 }
-.note-digit.is-struck::after {
-  content: "";
+.note-digit.is-out::after {
+  content: "×";
   position: absolute;
-  left: 18%;
-  right: 18%;
-  top: 50%;
-  height: 2px;
-  background: #ff6b6b;
-  transform: rotate(-18deg);
-  border-radius: 2px;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ff6b6b;
+  line-height: 1;
   pointer-events: none;
+}
+.note-digit.is-in {
+  color: #ffe566;
+  border-color: #ffe566;
+  background: rgba(255, 229, 102, 0.12);
+  box-shadow: inset 0 0 0 2px rgba(255, 229, 102, 0.85);
+  border-radius: 999px;
 }
 
 .score-row {
@@ -869,23 +877,46 @@ input[type="text"]:focus {
   flex: 0 0 auto;
 }
 
-/* Oyun ekranı: kompakt giriş — geçmişe yer aç */
+/* Oyun ekranı: kompakt 4’lü sıra; geçmiş panelleri yan yana 2 kutu */
 #screen-game .guess-slots {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.28rem;
-  margin: 0 0 0.3rem;
+  margin: 0 auto 0.3rem;
+  max-width: 14rem;
 }
 #screen-game .guess-slots .digit-slot {
   aspect-ratio: auto;
-  min-height: 1.85rem;
-  max-height: 2.1rem;
+  min-height: 1.75rem;
+  max-height: 2rem;
   border-radius: 8px;
   border-width: 1.5px;
-  font-size: 1.05rem;
+  font-size: 1rem;
   box-shadow: none;
 }
 #screen-game .guess-slots .digit-slot::before,
 #screen-game .guess-slots .digit-slot::after {
   display: none;
+}
+#screen-game .guess-stage.hidden {
+  display: none;
+}
+#screen-game .history-wrap {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.35rem;
+}
+#screen-game .history-col {
+  border: 1px solid rgba(46, 196, 182, 0.2);
+  border-radius: 10px;
+  padding: 0.3rem 0.28rem 0.28rem;
+  background: rgba(2, 20, 26, 0.35);
+  min-height: 0;
+}
+#screen-game .history-col .guess-history {
+  border: none;
+  background: transparent;
+  padding: 0;
 }
 #screen-game .digit-pad {
   gap: 0.22rem;

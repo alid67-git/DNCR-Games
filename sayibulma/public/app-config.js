@@ -1,9 +1,26 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.8",
-  build: 9,
+  version: "1.0.9",
+  build: 10,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.9",
+      build: 10,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "0–9 not: 1. dokunuş × (yok), 2. dokunuş sarı halka (var)",
+          "Zorluk seçenekleri kaldırıldı — bilgisayar düşük performansta",
+          "Geçmiş panelleri yan yana 2 kutu; bitişte pad gizlenir, geçmiş büyür",
+        ],
+        en: [
+          "0–9 notes: 1st tap × (absent), 2nd tap yellow ring (present)",
+          "Difficulty options removed — computer plays at low performance",
+          "History as two side-by-side panels; pad hides at game over",
+        ],
+      },
+    },
     {
       version: "1.0.8",
       build: 9,

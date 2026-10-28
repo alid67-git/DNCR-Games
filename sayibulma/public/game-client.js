@@ -24,12 +24,8 @@
   const STARTER_KEY = "sayibulma_next_starter";
   const GAME_ID = "sayi";
 
-  const DIFFS = [
-    { id: "easy", i18n: "diffEasy", hint: "diffEasyHint" },
-    { id: "normal", i18n: "diffNormal", hint: "diffNormalHint" },
-    { id: "hard", i18n: "diffHard", hint: "diffHardHint" },
-    { id: "veryhard", i18n: "diffVeryHard", hint: "diffVeryHardHint" },
-  ];
+  /** Bilgisayar her zaman düşük performans (kolay) */
+  const AI_DIFFICULTY = "easy";
   const $ = (id) => document.getElementById(id);
   const screens = {
     home: $("screen-home"),
@@ -46,7 +42,6 @@
   };
 
   let settings = loadSettings();
-  let setupDiff = settings.aiDifficulty || "hard";
   /** @type {null | object} */
   let session = null;
   let aiTimer = null;
@@ -74,7 +69,7 @@
   function loadSettings() {
     const defaults = {
       lang: "tr",
-      aiDifficulty: "hard",
+      aiDifficulty: AI_DIFFICULTY,
       name: "",
       p1: "",
       p2: "",
@@ -242,7 +237,6 @@
     if ($("updates-current-game")) $("updates-current-game").textContent = cur;
     renderChangelog();
     updateUpdatesDot();
-    renderDiffGrid();
     if (hubBackCtl && hubBackCtl.refresh) hubBackCtl.refresh();
   }
 
@@ -276,7 +270,7 @@
     window.ArenaScore.record({
       gameId: GAME_ID,
       result: session.mode === "twop" ? "win" : result,
-      difficulty: session.difficulty || settings.aiDifficulty || "hard",
+      difficulty: AI_DIFFICULTY,
       mode: session.mode === "twop" ? "twop" : session.mode,
       stats: { guesses },
     });
@@ -311,23 +305,6 @@
     if (!dot) return;
     if (seen !== CFG.version) dot.classList.remove("hidden");
     else dot.classList.add("hidden");
-  }
-
-  function renderDiffGrid() {
-    const grid = $("diff-grid");
-    if (!grid) return;
-    grid.innerHTML = "";
-    for (const d of DIFFS) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "diff-card" + (setupDiff === d.id ? " selected" : "");
-      btn.innerHTML = `<strong>${t(d.i18n)}</strong><span>${t(d.hint)}</span>`;
-      btn.addEventListener("click", () => {
-        setupDiff = d.id;
-        renderDiffGrid();
-      });
-      grid.appendChild(btn);
-    }
   }
 
   function readNextStarter() {
@@ -469,9 +446,11 @@
 
     const end = $("end-panel");
     const showResultBtn = $("btn-show-result");
+    const stage = $("guess-stage");
     if (s.winner) {
       fillEndPanelText();
       maybeRecordScore();
+      if (stage) stage.classList.add("hidden");
       if (!session.endDismissed) {
         end.classList.remove("hidden");
         if (showResultBtn) showResultBtn.classList.add("hidden");
@@ -482,6 +461,7 @@
     } else {
       end.classList.add("hidden");
       if (showResultBtn) showResultBtn.classList.add("hidden");
+      if (stage) stage.classList.remove("hidden");
       session.endDismissed = false;
     }
     renderNoteDigits();
@@ -530,29 +510,55 @@
     if ($("btn-show-result")) $("btn-show-result").classList.add("hidden");
   }
 
-  function noteStruck() {
+  function noteMarks() {
     if (!session) return Object.create(null);
-    if (!session.noteStruck) session.noteStruck = Object.create(null);
-    return session.noteStruck;
+    if (!session.noteMarks) {
+      // Eski oturumlarda noteStruck → out
+      session.noteMarks = Object.create(null);
+      if (session.noteStruck) {
+        Object.keys(session.noteStruck).forEach((k) => {
+          if (session.noteStruck[k]) session.noteMarks[k] = "out";
+        });
+      }
+    }
+    return session.noteMarks;
+  }
+
+  function cycleNoteMark(dig) {
+    const map = noteMarks();
+    const cur = map[dig] || "";
+    if (cur === "out") map[dig] = "in";
+    else if (cur === "in") delete map[dig];
+    else map[dig] = "out";
   }
 
   function renderNoteDigits() {
     const wrap = $("note-digits");
     if (!wrap) return;
-    const struck = noteStruck();
+    const marks = noteMarks();
     wrap.innerHTML = "";
     for (let d = 0; d <= 9; d++) {
       const dig = String(d);
+      const mark = marks[dig] || "";
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "note-digit" + (struck[dig] ? " is-struck" : "");
+      btn.className =
+        "note-digit" +
+        (mark === "out" ? " is-out" : "") +
+        (mark === "in" ? " is-in" : "");
       btn.textContent = dig;
-      btn.setAttribute("aria-pressed", struck[dig] ? "true" : "false");
+      btn.setAttribute("aria-pressed", mark ? "true" : "false");
+      btn.setAttribute(
+        "aria-label",
+        mark === "out"
+          ? `${dig}: ${t("noteMarkOut")}`
+          : mark === "in"
+            ? `${dig}: ${t("noteMarkIn")}`
+            : dig
+      );
       btn.title = t("noteDigitsHint");
       btn.addEventListener("click", () => {
-        const map = noteStruck();
-        if (map[dig]) delete map[dig];
-        else map[dig] = true;
+        cycleNoteMark(dig);
         renderNoteDigits();
       });
       wrap.appendChild(btn);
@@ -637,7 +643,7 @@
       });
       let guess = null;
       try {
-        guess = Ai.pickGuess(session.state.histories.b, session.difficulty || "hard");
+        guess = Ai.pickGuess(session.state.histories.b, AI_DIFFICULTY);
       } catch (err) {
         console.warn("Sayı Bulma AI:", err);
       }
@@ -689,12 +695,12 @@
     writeNextStarter(starter);
     session = {
       mode: "solo",
-      difficulty: setupDiff,
+      difficulty: AI_DIFFICULTY,
       names: { a: t("you"), b: t("computer") },
       state: createMatch({ secretA, secretB, starter }),
       aiThinking: false,
       endDismissed: false,
-      noteStruck: Object.create(null),
+      noteMarks: Object.create(null),
     };
     pads.guess.clear();
     showScreen("game");
@@ -740,7 +746,7 @@
         starter,
       }),
       endDismissed: false,
-      noteStruck: Object.create(null),
+      noteMarks: Object.create(null),
     };
     $("twop-secret-step").classList.add("hidden");
     $("btn-2p-start").classList.remove("hidden");
@@ -813,7 +819,7 @@
       names: names || p2pLobby.names,
       state,
       endDismissed: false,
-      noteStruck: Object.create(null),
+      noteMarks: Object.create(null),
     };
     pads.guess.clear();
     showScreen("game");
@@ -979,10 +985,6 @@
     document.querySelectorAll('input[name="lang"]').forEach((r) => {
       r.checked = r.value === lang();
     });
-    const diff = settings.aiDifficulty || "hard";
-    document.querySelectorAll('input[name="defDiff"]').forEach((r) => {
-      r.checked = r.value === diff;
-    });
     if ($("p1-name")) $("p1-name").value = settings.p1 || "";
     if ($("p2-name")) $("p2-name").value = settings.p2 || "";
     if ($("p2p-name")) $("p2p-name").value = settings.name || "";
@@ -1053,8 +1055,6 @@
   }
 
   $("btn-mode-solo").addEventListener("click", () => {
-    setupDiff = settings.aiDifficulty || "hard";
-    renderDiffGrid();
     pads.soloSecret.clear();
     showScreen("soloSetup");
   });
@@ -1074,7 +1074,7 @@
     pads.soloSecret.set(randomSecret());
   });
   $("btn-solo-start").addEventListener("click", () => {
-    saveSettings({ aiDifficulty: setupDiff });
+    saveSettings({ aiDifficulty: AI_DIFFICULTY });
     startSolo();
   });
 
@@ -1160,20 +1160,14 @@
   $("btn-settings-save").addEventListener("click", () => {
     const selectedLang =
       (document.querySelector('input[name="lang"]:checked') || {}).value || "tr";
-    const selectedDiff =
-      (document.querySelector('input[name="defDiff"]:checked') || {}).value ||
-      "hard";
     const displayName =
       ($("settings-display-name") && $("settings-display-name").value) || "";
     saveSettings({
       lang: selectedLang,
-      aiDifficulty: ["easy", "hard", "veryhard"].includes(selectedDiff)
-        ? selectedDiff
-        : "hard",
+      aiDifficulty: AI_DIFFICULTY,
       name: displayName.trim() || settings.name,
     });
     if (window.ArenaScore) window.ArenaScore.setDisplayName(displayName);
-    setupDiff = settings.aiDifficulty;
     applyI18n();
     toast(t("saved"));
   });

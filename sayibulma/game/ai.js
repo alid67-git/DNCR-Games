@@ -127,8 +127,8 @@
     const pool = filterPool(history);
 
     if (diff === "easy" || diff === "normal" || diff === "medium") {
-      // easy: more noise; normal/medium: lighter noise
-      const noiseChance = diff === "easy" ? 0.42 : 0.18;
+      // easy / düşük performans: sık rastgele; normal/medium daha az
+      const noiseChance = diff === "easy" ? 0.58 : 0.18;
       const noise = typeof rng === "function" ? rng() : Math.random();
       if (noise < noiseChance || !pool.length) {
         let g = randomSecret(rng);
