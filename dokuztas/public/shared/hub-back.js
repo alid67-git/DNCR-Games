@@ -25,7 +25,32 @@
     },
   };
 
+  function isNativeShell() {
+    try {
+      if (root.Capacitor && typeof root.Capacitor.isNativePlatform === "function") {
+        return !!root.Capacitor.isNativePlatform();
+      }
+    } catch (_) {}
+    try {
+      const proto = root.location && root.location.protocol;
+      const host = root.location && root.location.hostname;
+      return proto === "capacitor:" || host === "localhost";
+    } catch (_) {}
+    return false;
+  }
+
   function resolveHubUrl() {
+    // APK / Capacitor: hub dış URL’ye değil, paket içi relative path’e dön
+    try {
+      if (isNativeShell()) {
+        const path = root.location && root.location.pathname;
+        if (path && /\/(kati|noktalar|dokuztas|kusatma)(\/|$)/i.test(path)) {
+          return new URL("../index.html", root.location.href).href;
+        }
+        return new URL("./index.html", root.location.href).href;
+      }
+    } catch (_) {}
+
     try {
       const cfg =
         root.SiegeConfig ||

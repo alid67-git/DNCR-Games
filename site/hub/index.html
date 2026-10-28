@@ -148,28 +148,28 @@
     </header>
 
     <nav class="games" aria-label="Oyunlar">
-      <a class="game" href="kati/">
+      <a class="game" href="kati/index.html" data-game="kati">
         <img class="game-art" src="assets/kati-icon.png" width="64" height="64" alt="" />
         <span class="game-copy">
           <strong>Kati</strong>
           <span>Kırmızı vs yeşil</span>
         </span>
       </a>
-      <a class="game" href="noktalar/">
+      <a class="game" href="noktalar/index.html" data-game="noktalar">
         <img class="game-art" src="assets/noktalar-icon.png" width="64" height="64" alt="" />
         <span class="game-copy">
           <strong>Noktalar ve Kutular</strong>
           <span>Çizgi çek, kutuyu kapat</span>
         </span>
       </a>
-      <a class="game" href="dokuztas/">
+      <a class="game" href="dokuztas/index.html" data-game="dokuztas">
         <img class="game-art" src="assets/dokuztas-icon.png" width="64" height="64" alt="" />
         <span class="game-copy">
           <strong>Dokuztaş</strong>
           <span>Değirmen kur</span>
         </span>
       </a>
-      <a class="game" href="kusatma/">
+      <a class="game" href="kusatma/index.html" data-game="kusatma">
         <img class="game-art" src="assets/kusatma-icon.png" width="64" height="64" alt="" />
         <span class="game-copy">
           <strong>Kuşatma</strong>
@@ -178,7 +178,23 @@
       </a>
     </nav>
 
-    <footer>Tek uygulama · iPhone / iPad / Android · Yardım her oyunun içinde</footer>
+    <footer>Tek uygulama · iPhone / iPad / Android · Yardım her oyunun içinde<br /><span id="hub-ver">v1.0.2</span></footer>
   </main>
+  <script>
+    (function () {
+      // Capacitor: klasör URL’leri (kati/) html5mode ile hub’a düşer — her zaman …/index.html
+      document.querySelectorAll("a.game[data-game]").forEach(function (a) {
+        a.addEventListener("click", function (e) {
+          var id = a.getAttribute("data-game");
+          if (!id) return;
+          e.preventDefault();
+          var target = new URL(id + "/index.html", window.location.href).href;
+          window.location.assign(target);
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
+
+
