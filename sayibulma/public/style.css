@@ -86,10 +86,14 @@ textarea {
 #screen-game.active {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 1.25rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  max-height: calc(100dvh - 0.75rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  min-height: calc(100dvh - 2.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100dvh - 1.75rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow: hidden;
-  margin: -0.35rem -0.15rem 0;
+}
+/* Oyun ekranında üst/alt boşluğu biraz azalt */
+#app:has(#screen-game.active) {
+  padding-top: max(0.65rem, env(safe-area-inset-top));
+  padding-bottom: max(0.85rem, env(safe-area-inset-bottom));
 }
 
 @keyframes rise {
