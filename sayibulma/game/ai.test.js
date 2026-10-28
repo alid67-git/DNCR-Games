@@ -57,6 +57,14 @@ function testPickGuessEasyReturnsValid() {
   }
 }
 
+function testPickGuessNormalReturnsValid() {
+  const hist = [{ guess: "1234", plus: 1, minus: 2 }];
+  for (let i = 0; i < 12; i++) {
+    const g = pickGuess(hist, "normal");
+    assert.ok(isValidSecret(g), g);
+  }
+}
+
 function run() {
   testPoolSize();
   testFilterAfterExactHint();
@@ -64,6 +72,7 @@ function run() {
   testPickGuessHardFromPool();
   testPickGuessVeryHard();
   testPickGuessEasyReturnsValid();
+  testPickGuessNormalReturnsValid();
   console.log("ai.test.js OK");
 }
 

@@ -1,9 +1,60 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.5",
-  build: 6,
+  version: "1.0.8",
+  build: 9,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.8",
+      build: 9,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Sil yalnızca son basamağı siler",
+          "Oyun ekranı küçültüldü; geçmiş yan yana ve daha fazla tahmin görünür",
+        ],
+        en: [
+          "Delete removes only the last digit",
+          "Game screen compacted; side-by-side history shows more guesses",
+        ],
+      },
+    },
+    {
+      version: "1.0.7",
+      build: 8,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Android dar ekranda tahmin geçmişleri yan yana kalır (artık alt alta düşmez)",
+          "Geçmiş, tahmin padinin üstünde; pad ve skorlar daha kompakt",
+        ],
+        en: [
+          "Guess histories stay side-by-side on narrow Android screens",
+          "History sits above the pad; pad and scores are more compact",
+        ],
+      },
+    },
+    {
+      version: "1.0.6",
+      build: 7,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Oyun sonu paneli kapatılıp tahta / geçmiş incelenebilir; Sonuç ile yeniden açılır",
+          "Başlıkta Yeniden solda, Geri sağ üstte",
+          "Solo zorluk: Kolay · Normal · Zor · Çok Zor",
+          "Üstte 0–9 not çubuğu — elemek için rakama çizgi",
+          "Zorluk yalnızca bilgisayara karşı; iki kişi / P2P’de yok",
+        ],
+        en: [
+          "End panel can be dismissed to inspect the board/history; reopen via Result",
+          "Header: Restart on the left, Back on the top-right",
+          "Solo difficulty: Easy · Normal · Hard · Very Hard",
+          "Top 0–9 scratch bar — cross out eliminated digits",
+          "Difficulty is solo-only; no difficulty in local 2P / P2P",
+        ],
+      },
+    },
     {
       version: "1.0.5",
       build: 6,

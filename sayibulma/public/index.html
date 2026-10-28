@@ -233,6 +233,7 @@
         <fieldset class="lang-field">
           <legend data-i18n="defaultDifficulty">Varsayılan bilgisayar zorluğu</legend>
           <label class="radio-row"><input type="radio" name="defDiff" value="easy" /> <span data-i18n="diffEasy">Kolay</span></label>
+          <label class="radio-row"><input type="radio" name="defDiff" value="normal" /> <span data-i18n="diffNormal">Normal</span></label>
           <label class="radio-row"><input type="radio" name="defDiff" value="hard" /> <span data-i18n="diffHard">Zor</span></label>
           <label class="radio-row"><input type="radio" name="defDiff" value="veryhard" /> <span data-i18n="diffVeryHard">Çok Zor</span></label>
         </fieldset>
@@ -268,6 +269,7 @@
         <p data-i18n="helpOffline"></p>
         <h2 data-i18n="helpDifficultyTitle">Zorluk</h2>
         <p data-i18n="helpDifficulty"></p>
+        <p data-i18n="helpDiffOnlySolo"></p>
         <h2 data-i18n="helpP2pTitle">Ülkeler arası (sunucusuz)</h2>
         <ol>
           <li data-i18n="helpP2p1"></li>
@@ -298,10 +300,12 @@
 
     <section id="screen-game" class="screen">
       <header class="game-top">
-        <button type="button" class="btn-icon" id="btn-game-back" aria-label="Geri">←</button>
-        <p class="game-title" data-i18n="appName">Sayı Bulma</p>
         <button type="button" class="btn-icon" id="btn-game-restart" aria-label="Yeniden">↻</button>
+        <p class="game-title" data-i18n="appName">Sayı Bulma</p>
+        <button type="button" class="btn-icon" id="btn-game-back" aria-label="Geri">←</button>
       </header>
+
+      <div class="note-digits" id="note-digits" aria-label="Rakam notları"></div>
 
       <div class="score-row">
         <div class="score-chip chip-a" id="chip-a">
@@ -320,30 +324,16 @@
         </div>
       </div>
 
-      <p id="attempts-label" class="attempts-label"></p>
-      <p id="phase-label" class="phase-label"></p>
+      <div class="game-meta-row">
+        <p id="attempts-label" class="attempts-label"></p>
+        <p id="phase-label" class="phase-label"></p>
+      </div>
       <div id="last-feedback" class="last-feedback hidden" aria-live="assertive">
         <span class="lf-guess" id="lf-guess"></span>
         <span class="lf-scores">
           <span class="chip-plus" id="lf-plus">+0</span>
           <span class="chip-minus" id="lf-minus">−0</span>
         </span>
-      </div>
-
-      <div class="guess-stage" id="guess-stage">
-        <div id="guess-input-panel">
-          <p class="wheel-hint" data-i18n="wheelHint">Her tekerde farklı rakam seç</p>
-          <div class="digit-slots guess-slots" id="guess-slots" aria-live="polite"></div>
-          <div class="digit-pad" id="guess-pad"></div>
-          <div class="guess-actions">
-            <button type="button" class="btn btn-ghost" id="btn-guess-clear" data-i18n="clearBtn">Sil</button>
-            <button type="button" class="btn btn-try" id="btn-guess-submit" data-i18n="tryCode">Tahmin et</button>
-          </div>
-        </div>
-        <div id="cpu-wait-panel" class="cpu-wait-panel hidden" aria-live="polite">
-          <div class="cpu-wait-spinner" aria-hidden="true"></div>
-          <p class="cpu-wait-text" data-i18n="statusCpu">Bilgisayar düşünüyor…</p>
-        </div>
       </div>
 
       <div class="history-wrap">
@@ -357,12 +347,31 @@
         </div>
       </div>
 
+      <div class="guess-stage" id="guess-stage">
+        <div id="guess-input-panel">
+          <div class="digit-slots guess-slots" id="guess-slots" aria-live="polite"></div>
+          <div class="digit-pad" id="guess-pad"></div>
+          <div class="guess-actions">
+            <button type="button" class="btn btn-ghost" id="btn-guess-clear" data-i18n="clearBtn" title="Son basamağı sil">Sil</button>
+            <button type="button" class="btn btn-try" id="btn-guess-submit" data-i18n="tryCode">Tahmin et</button>
+          </div>
+        </div>
+        <div id="cpu-wait-panel" class="cpu-wait-panel hidden" aria-live="polite">
+          <div class="cpu-wait-spinner" aria-hidden="true"></div>
+          <p class="cpu-wait-text" data-i18n="statusCpu">Bilgisayar düşünüyor…</p>
+        </div>
+      </div>
+
       <p id="status-msg" class="status-msg" aria-live="polite"></p>
+
+      <button type="button" id="btn-show-result" class="btn-show-result hidden" data-i18n="showResult">Sonuç</button>
 
       <div id="end-panel" class="end-panel hidden" role="dialog" aria-modal="true" aria-labelledby="end-text">
         <div class="end-card">
+          <button type="button" class="btn-end-close" id="btn-end-close" aria-label="Kapat">×</button>
           <p id="end-text"></p>
           <p id="end-reveal" class="end-reveal"></p>
+          <p class="end-hint" data-i18n="endCloseHint">Detayları görmek için kapat</p>
           <button type="button" id="btn-rematch" class="btn btn-primary" data-i18n="rematch">Yeniden oyna</button>
           <button type="button" id="btn-game-home" class="btn btn-ghost" data-i18n="toHome">Ana menü</button>
         </div>

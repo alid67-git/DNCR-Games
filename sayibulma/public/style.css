@@ -87,8 +87,13 @@ textarea {
   display: flex;
   flex-direction: column;
   min-height: calc(100dvh - 2.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  max-height: calc(100dvh - 1.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100dvh - 1.75rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow: hidden;
+}
+/* Oyun ekranında üst/alt boşluğu biraz azalt */
+#app:has(#screen-game.active) {
+  padding-top: max(0.65rem, env(safe-area-inset-top));
+  padding-bottom: max(0.85rem, env(safe-area-inset-bottom));
 }
 
 @keyframes rise {
@@ -529,45 +534,37 @@ input[type="text"]:focus {
 }
 
 /* —— Digit UI (wheel-like slots) —— */
-.attempts-label {
+.wheel-hint {
   margin: 0 0 0.35rem;
   text-align: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--lime);
-  letter-spacing: 0.02em;
-}
-.wheel-hint {
-  margin: 0 0 0.55rem;
-  text-align: center;
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   color: var(--muted);
 }
 .digit-slots {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
-  margin: 0.35rem 0 0.9rem;
+  gap: 0.4rem;
+  margin: 0.2rem 0 0.55rem;
 }
 .digit-slot {
-  aspect-ratio: 0.72;
+  aspect-ratio: 1.05;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 16px;
+  border-radius: 12px;
   border: 2px solid rgba(157, 255, 87, 0.4);
   background:
     linear-gradient(180deg, rgba(46, 196, 182, 0.18), transparent 40%),
     rgba(2, 20, 26, 0.72);
   font-family: var(--font-display);
-  font-size: clamp(1.55rem, 6vw, 2rem);
+  font-size: clamp(1.25rem, 5vw, 1.65rem);
   font-weight: 700;
   color: var(--lime);
-  min-height: 3.6rem;
+  min-height: 2.55rem;
+  max-height: 3.4rem;
   box-shadow:
     inset 0 1px 0 rgba(232, 255, 244, 0.12),
-    0 8px 18px rgba(0, 0, 0, 0.28);
+    0 4px 12px rgba(0, 0, 0, 0.22);
   position: relative;
 }
 .digit-slot::before,
@@ -607,7 +604,7 @@ input[type="text"]:focus {
 .digit-pad {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 0.4rem;
+  gap: 0.32rem;
 }
 .digit-key {
   appearance: none;
@@ -615,10 +612,10 @@ input[type="text"]:focus {
   background: rgba(6, 37, 46, 0.9);
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  border-radius: 12px;
-  padding: 0.7rem 0;
+  border-radius: 10px;
+  padding: 0.48rem 0;
   cursor: pointer;
   transition: transform 0.12s ease, background 0.12s;
 }
@@ -636,38 +633,40 @@ input[type="text"]:focus {
 .secret-actions,
 .guess-actions {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.85rem;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
   align-items: stretch;
 }
 .secret-actions .btn {
   flex: 1;
 }
 .guess-actions .btn-ghost {
-  flex: 0 0 28%;
+  flex: 0 0 26%;
+  padding: 0.55rem 0.5rem;
+  font-size: 0.9rem;
 }
 .guess-actions .btn-try {
   flex: 1;
   appearance: none;
   border: none;
   border-radius: 999px;
-  padding: 0.95rem 1.1rem;
+  padding: 0.7rem 0.9rem;
   font-family: var(--font-display);
-  font-size: 1.12rem;
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.01em;
   color: #06252e;
   background: linear-gradient(180deg, #b8ff6e, #9dff57 45%, #6bc22a);
   box-shadow:
-    0 6px 0 #3d7a12,
-    0 12px 24px rgba(157, 255, 87, 0.28);
+    0 4px 0 #3d7a12,
+    0 8px 18px rgba(157, 255, 87, 0.24);
   cursor: pointer;
 }
 .guess-actions .btn-try:active {
-  transform: translateY(3px);
+  transform: translateY(2px);
   box-shadow:
-    0 3px 0 #3d7a12,
-    0 8px 16px rgba(157, 255, 87, 0.22);
+    0 2px 0 #3d7a12,
+    0 6px 12px rgba(157, 255, 87, 0.2);
 }
 
 .secret-step {
@@ -683,29 +682,77 @@ input[type="text"]:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.35rem;
+  gap: 0.35rem;
 }
 .game-title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.15rem;
+  font-size: 1rem;
   color: var(--lime);
+}
+#screen-game .btn-icon {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.95rem;
+}
+
+.note-digits {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 0.16rem;
+  margin: 0 0 0.3rem;
+}
+.note-digit {
+  appearance: none;
+  border: 1px solid rgba(46, 196, 182, 0.28);
+  background: rgba(6, 37, 46, 0.65);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1;
+  padding: 0.28rem 0;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.note-digit:active {
+  transform: scale(0.96);
+}
+.note-digit.is-struck {
+  color: rgba(232, 244, 240, 0.35);
+  border-color: rgba(255, 107, 107, 0.45);
+  background: rgba(255, 107, 107, 0.08);
+}
+.note-digit.is-struck::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 50%;
+  height: 2px;
+  background: #ff6b6b;
+  transform: rotate(-18deg);
+  border-radius: 2px;
+  pointer-events: none;
 }
 
 .score-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.55rem;
-  margin-bottom: 0.65rem;
+  gap: 0.3rem;
+  margin-bottom: 0.25rem;
 }
 .score-chip {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.65rem 0.75rem;
-  border-radius: 12px;
+  gap: 0.25rem;
+  padding: 0.28rem 0.45rem;
+  border-radius: 8px;
   background: var(--panel);
   border: 1px solid rgba(46, 196, 182, 0.18);
 }
@@ -718,46 +765,65 @@ input[type="text"]:focus {
 }
 .chip-info strong {
   display: block;
-  font-size: 0.92rem;
+  font-size: 0.78rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .chip-status {
-  font-size: 0.72rem;
-  color: var(--muted);
+  font-size: 0.62rem;
+  color: var(--lime);
+  line-height: 1;
+  min-height: 0;
 }
 .chip-score {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   color: var(--lime);
 }
 .chip-b .chip-score {
   color: var(--coral);
 }
 
+.game-meta-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0 0 0.25rem;
+}
+.attempts-label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--lime);
+  flex: 0 0 auto;
+}
 .phase-label {
-  margin: 0 0 0.55rem;
-  text-align: center;
+  margin: 0;
+  text-align: right;
   font-weight: 600;
   color: var(--teal-glow);
-  font-size: 0.95rem;
+  font-size: 0.74rem;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .last-feedback {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.85rem;
-  margin: 0 0 0.75rem;
-  padding: 0.7rem 1rem;
-  border-radius: 14px;
+  gap: 0.45rem;
+  margin: 0 0 0.3rem;
+  padding: 0.28rem 0.5rem;
+  border-radius: 8px;
   background:
     linear-gradient(135deg, rgba(157, 255, 87, 0.12), transparent 55%),
     rgba(6, 37, 46, 0.85);
   border: 1px solid rgba(157, 255, 87, 0.28);
-  min-height: 3.1rem;
+  min-height: 1.7rem;
 }
 .last-feedback.hidden {
   display: none;
@@ -778,35 +844,79 @@ input[type="text"]:focus {
 .lf-guess {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.35rem;
-  letter-spacing: 0.18em;
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
   color: var(--ink);
 }
 .lf-scores {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.28rem;
 }
 .lf-scores .chip-plus,
 .lf-scores .chip-minus {
-  min-width: 3.1rem;
-  min-height: 2.35rem;
-  font-size: 1.35rem;
-  border-radius: 10px;
+  min-width: 2rem;
+  min-height: 1.45rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
 }
 
 .guess-stage {
-  padding: 0.85rem;
-  border-radius: var(--radius);
+  padding: 0.35rem 0.4rem 0.4rem;
+  border-radius: 12px;
   background: var(--panel);
   border: 1px solid rgba(46, 196, 182, 0.18);
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.2rem;
   flex: 0 0 auto;
 }
+
+/* Oyun ekranı: kompakt giriş — geçmişe yer aç */
+#screen-game .guess-slots {
+  gap: 0.28rem;
+  margin: 0 0 0.3rem;
+}
+#screen-game .guess-slots .digit-slot {
+  aspect-ratio: auto;
+  min-height: 1.85rem;
+  max-height: 2.1rem;
+  border-radius: 8px;
+  border-width: 1.5px;
+  font-size: 1.05rem;
+  box-shadow: none;
+}
+#screen-game .guess-slots .digit-slot::before,
+#screen-game .guess-slots .digit-slot::after {
+  display: none;
+}
+#screen-game .digit-pad {
+  gap: 0.22rem;
+}
+#screen-game .digit-key {
+  padding: 0.28rem 0;
+  font-size: 0.9rem;
+  border-radius: 7px;
+}
+#screen-game .guess-actions {
+  margin-top: 0.3rem;
+  gap: 0.35rem;
+}
+#screen-game .guess-actions .btn-ghost {
+  flex: 0 0 22%;
+  padding: 0.4rem 0.35rem;
+  font-size: 0.82rem;
+}
+#screen-game .guess-actions .btn-try {
+  padding: 0.45rem 0.7rem;
+  font-size: 0.9rem;
+  box-shadow:
+    0 3px 0 #3d7a12,
+    0 6px 12px rgba(157, 255, 87, 0.2);
+}
 #screen-game .game-top,
+#screen-game .note-digits,
 #screen-game .score-row,
-#screen-game .attempts-label,
-#screen-game .phase-label,
+#screen-game .game-meta-row,
 #screen-game .last-feedback,
+#screen-game .guess-stage,
 #screen-game .status-msg {
   flex: 0 0 auto;
 }
@@ -820,9 +930,9 @@ input[type="text"]:focus {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  min-height: 10.5rem;
-  padding: 1.1rem 0.75rem;
+  gap: 0.4rem;
+  min-height: 5.25rem;
+  padding: 0.55rem 0.45rem;
   text-align: center;
 }
 .cpu-wait-panel.hidden {
@@ -875,12 +985,12 @@ input[type="text"]:focus {
 }
 
 .history-wrap {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.55rem;
-  margin-bottom: 0.35rem;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.3rem;
+  margin-bottom: 0.3rem;
   flex: 1 1 auto;
-  min-height: 8.5rem;
+  min-height: 9rem;
   max-height: 100%;
   align-items: stretch;
 }
@@ -891,18 +1001,21 @@ input[type="text"]:focus {
   min-width: 0;
 }
 .history-col h3 {
-  margin: 0 0 0.4rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
+  margin: 0 0 0.2rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 600;
   flex: 0 0 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .guess-history {
   list-style: none;
   margin: 0;
-  padding: 0.15rem 0.2rem 0.5rem;
+  padding: 0.1rem 0.12rem 0.25rem;
   flex: 1 1 auto;
   min-height: 0;
   max-height: none;
@@ -913,8 +1026,8 @@ input[type="text"]:focus {
   touch-action: pan-y;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  border-radius: 12px;
+  gap: 0.18rem;
+  border-radius: 8px;
   border: 1px solid rgba(46, 196, 182, 0.16);
   background:
     linear-gradient(rgba(2, 20, 26, 0.35), rgba(2, 20, 26, 0.35)),
@@ -937,14 +1050,14 @@ input[type="text"]:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.55rem 0.6rem;
-  border-radius: 10px;
+  gap: 0.22rem;
+  padding: 0.22rem 0.3rem;
+  border-radius: 6px;
   background: rgba(2, 20, 26, 0.45);
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 1rem;
-  letter-spacing: 0.06em;
+  font-size: 0.76rem;
+  letter-spacing: 0.03em;
   animation: guessSlide 0.35s ease both;
 }
 .guess-row.is-latest {
@@ -975,15 +1088,15 @@ input[type="text"]:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.6rem;
-  min-height: 2rem;
-  padding: 0.2rem 0.45rem;
-  border-radius: 8px;
-  font-size: 1.15rem;
+  min-width: 1.55rem;
+  min-height: 1.2rem;
+  padding: 0.08rem 0.22rem;
+  border-radius: 5px;
+  font-size: 0.78rem;
   font-weight: 800;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   line-height: 1;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 }
 .guess-row.is-latest .chip-plus,
 .guess-row.is-latest .chip-minus {
@@ -1014,10 +1127,13 @@ input[type="text"]:focus {
 
 .status-msg {
   text-align: center;
-  min-height: 1.35rem;
-  margin: 0.35rem 0 0;
+  min-height: 0;
+  margin: 0.15rem 0 0;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+}
+.status-msg:empty {
+  display: none;
 }
 
 .end-panel {
@@ -1032,12 +1148,37 @@ input[type="text"]:focus {
   animation: rise 0.35s ease both;
 }
 .end-card {
+  position: relative;
   width: min(100%, 320px);
   padding: 1.35rem 1.2rem;
   border-radius: var(--radius);
   background: #0a3038;
   border: 1px solid rgba(157, 255, 87, 0.35);
   text-align: center;
+}
+.btn-end-close {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid rgba(46, 196, 182, 0.35);
+  border-radius: 999px;
+  background: rgba(2, 20, 26, 0.55);
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.btn-end-close:active {
+  transform: scale(0.94);
+}
+.end-hint {
+  font-family: var(--font-body) !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  color: var(--muted) !important;
+  margin: -0.35rem 0 0.85rem !important;
 }
 .end-card p {
   margin: 0 0 0.85rem;
@@ -1056,6 +1197,27 @@ input[type="text"]:focus {
 .end-card .btn {
   width: 100%;
   margin-top: 0.45rem;
+}
+.btn-show-result {
+  position: sticky;
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  z-index: 4;
+  display: block;
+  width: 100%;
+  margin: 0.65rem 0 0;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(157, 255, 87, 0.45);
+  background: rgba(10, 48, 56, 0.95);
+  color: var(--lime);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.btn-show-result:active {
+  transform: scale(0.98);
 }
 
 .toast {
@@ -1078,12 +1240,60 @@ input[type="text"]:focus {
   display: none;
 }
 
-@media (max-width: 380px) {
+/* Dar / kısa telefon: geçmiş yan yana + daha fazla satır */
+@media (max-width: 400px) {
   .history-wrap {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.25rem;
     min-height: 10rem;
   }
   .digit-pad {
     grid-template-columns: repeat(5, 1fr);
+  }
+  #screen-game .digit-key {
+    padding: 0.24rem 0;
+    font-size: 0.85rem;
+  }
+  .guess-row {
+    font-size: 0.72rem;
+    padding: 0.18rem 0.25rem;
+  }
+  .chip-plus,
+  .chip-minus {
+    min-width: 1.4rem;
+    min-height: 1.1rem;
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-height: 760px) {
+  #screen-game .guess-slots .digit-slot {
+    min-height: 1.65rem;
+    max-height: 1.85rem;
+    font-size: 0.95rem;
+  }
+  #screen-game .digit-key {
+    padding: 0.22rem 0;
+  }
+  #screen-game .guess-actions .btn-try {
+    padding: 0.38rem 0.6rem;
+  }
+  .cpu-wait-panel {
+    min-height: 4.25rem;
+  }
+  .history-wrap {
+    min-height: 11rem;
+  }
+}
+
+@media (max-height: 640px) {
+  .history-wrap {
+    min-height: 8.5rem;
+  }
+  #screen-game .note-digits {
+    margin-bottom: 0.2rem;
+  }
+  .game-meta-row {
+    margin-bottom: 0.15rem;
   }
 }
