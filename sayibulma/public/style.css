@@ -1181,9 +1181,11 @@ input[type="text"]:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(2, 20, 26, 0.72);
+  /* Hafif perde — kart kayınca alt tahta görünsün; tıklar karta gider */
+  background: rgba(2, 20, 26, 0.38);
   z-index: 5;
   padding: 1rem;
+  pointer-events: none;
   animation: rise 0.35s ease both;
 }
 .end-card {
@@ -1194,6 +1196,25 @@ input[type="text"]:focus {
   background: #0a3038;
   border: 1px solid rgba(157, 255, 87, 0.35);
   text-align: center;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  will-change: transform;
+}
+.end-card.is-dragging {
+  cursor: grabbing;
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.55);
+}
+.end-card .end-drag-handle {
+  display: block;
+  width: 2.4rem;
+  height: 0.28rem;
+  margin: 0 auto 0.75rem;
+  border-radius: 999px;
+  background: rgba(157, 255, 87, 0.35);
 }
 .btn-end-close {
   position: absolute;
@@ -1208,6 +1229,8 @@ input[type="text"]:focus {
   font-size: 1.05rem;
   line-height: 1;
   cursor: pointer;
+  touch-action: manipulation;
+  z-index: 2;
 }
 .btn-end-close:active {
   transform: scale(0.94);
@@ -1236,6 +1259,8 @@ input[type="text"]:focus {
 .end-card .btn {
   width: 100%;
   margin-top: 0.45rem;
+  cursor: pointer;
+  touch-action: manipulation;
 }
 .btn-show-result {
   position: sticky;

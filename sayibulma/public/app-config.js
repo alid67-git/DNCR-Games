@@ -1,9 +1,24 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.10",
-  build: 11,
+  version: "1.0.11",
+  build: 12,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.11",
+      build: 12,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Sonuç penceresi parmakla sürüklenebilir — altındaki tahta görünür",
+          "Aynı cihazda iki kişi modu kapatıldı — gizli sayı tek ekranda saklanamaz",
+        ],
+        en: [
+          "Result window is draggable so you can see the board underneath",
+          "Same-device two-player removed — a secret cannot stay hidden on one screen",
+        ],
+      },
+    },
     {
       version: "1.0.10",
       build: 11,

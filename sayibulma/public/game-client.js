@@ -31,7 +31,6 @@
     home: $("screen-home"),
     play: $("screen-play"),
     soloSetup: $("screen-solo-setup"),
-    twoPSetup: $("screen-2p-setup"),
     p2p: $("screen-p2p"),
     room: $("screen-room"),
     settings: $("screen-settings"),
@@ -53,12 +52,9 @@
 
   const pads = {
     soloSecret: makeDigitPad("solo-secret-slots", "solo-secret-pad", { mask: true }),
-    twopSecret: makeDigitPad("twop-secret-slots", "twop-secret-pad", { mask: true }),
     roomSecret: makeDigitPad("room-secret-slots", "room-secret-pad", { mask: true }),
     guess: makeDigitPad("guess-slots", "guess-pad", { mask: false }),
   };
-
-  let twopDraft = { step: 0, secretA: "", secretB: "", names: { a: "", b: "" } };
 
   function playSfx(kind) {
     if (!Sfx) return;
@@ -71,8 +67,6 @@
       lang: "tr",
       aiDifficulty: AI_DIFFICULTY,
       name: "",
-      p1: "",
-      p2: "",
     };
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
@@ -268,7 +262,7 @@
       stage.classList.toggle("is-locked", on);
       stage.setAttribute("aria-disabled", on ? "true" : "false");
     }
-    ["btn-guess-clear", "btn-guess-random", "btn-guess-submit"].forEach((id) => {
+    ["btn-guess-clear", "btn-guess-submit"].forEach((id) => {
       const el = $(id);
       if (el) el.disabled = on;
     });
@@ -313,21 +307,17 @@
       result = session.state.winner === PLAYERS.a ? "win" : "loss";
     } else if (session.mode === "p2p") {
       result = session.state.winner === session.you ? "win" : "loss";
-    } else {
-      result = "win";
     }
     const youKey =
       session.mode === "p2p"
         ? session.you
-        : session.mode === "solo"
-          ? PLAYERS.a
-          : session.state.winner;
+        : PLAYERS.a;
     const guesses = (session.state.histories[youKey] || []).length;
     window.ArenaScore.record({
       gameId: GAME_ID,
-      result: session.mode === "twop" ? "win" : result,
+      result,
       difficulty: AI_DIFFICULTY,
-      mode: session.mode === "twop" ? "twop" : session.mode,
+      mode: session.mode,
       stats: { guesses },
     });
   }
@@ -382,7 +372,6 @@
     if (session.mode === "solo") {
       return session.state.turn === PLAYERS.a && !session.aiThinking;
     }
-    if (session.mode === "twop") return true;
     if (session.mode === "p2p") {
       return session.you === session.state.turn && session.status === "playing";
     }
@@ -443,11 +432,9 @@
     $("score-b").textContent = String(attemptsB);
     if ($("attempts-label")) {
       const mine =
-        session.mode === "solo"
-          ? attemptsA
-          : session.mode === "p2p"
-            ? (s.histories[session.you] || []).length
-            : attemptsA + attemptsB;
+        session.mode === "p2p"
+          ? (s.histories[session.you] || []).length
+          : attemptsA;
       $("attempts-label").textContent = `${t("attemptsLabel")}: ${mine}`;
     }
     $("chip-a").classList.toggle("is-turn", s.turn === PLAYERS.a && !s.winner);
@@ -461,9 +448,6 @@
     if (session.mode === "solo") {
       $("hist-title-a").textContent = t("historyYou");
       $("hist-title-b").textContent = t("historyOpp");
-    } else if (session.mode === "twop") {
-      $("hist-title-a").textContent = session.names.a || t("historyP1");
-      $("hist-title-b").textContent = session.names.b || t("historyP2");
     } else {
       const you = session.you;
       $("hist-title-a").textContent =
@@ -486,8 +470,6 @@
       phase = t("gameOver");
     } else if (cpuWait) {
       phase = t("statusCpu");
-    } else if (session.mode === "twop") {
-      phase = `${t("turnPass")} ${session.names[s.turn]}`;
     } else if (canAct()) {
       phase = t("turnYou");
     } else {
@@ -508,6 +490,10 @@
       maybeRecordScore();
       if (stage) stage.classList.add("hidden");
       if (!session.endDismissed) {
+        if (!session.endCardShown) {
+          resetEndCardPosition();
+          session.endCardShown = true;
+        }
         end.classList.remove("hidden");
         if (showResultBtn) showResultBtn.classList.add("hidden");
       } else {
@@ -519,6 +505,8 @@
       if (showResultBtn) showResultBtn.classList.add("hidden");
       if (stage) stage.classList.remove("hidden");
       session.endDismissed = false;
+      session.endCardShown = false;
+      resetEndCardPosition();
     }
     renderNoteDigits();
   }
@@ -531,8 +519,6 @@
       msg = s.winner === PLAYERS.a ? t("winYou") : t("winCpu");
     } else if (session.mode === "p2p") {
       msg = s.winner === session.you ? t("winYou") : `${session.names[s.winner]} ${t("winOther")}`;
-    } else {
-      msg = `${session.names[s.winner]} ${t("winOther")}`;
     }
     $("end-text").textContent = msg;
     const revealBits = [];
@@ -542,11 +528,18 @@
     } else if (session.mode === "p2p") {
       const opp = opponent(session.you);
       revealBits.push(`${t("revealSecret")}: ${s.secrets[opp]}`);
-    } else {
-      revealBits.push(`${session.names.a}: ${s.secrets.a}`);
-      revealBits.push(`${session.names.b}: ${s.secrets.b}`);
     }
     $("end-reveal").textContent = revealBits.join(" · ");
+  }
+
+
+  function resetEndCardPosition() {
+    const card = $("end-card");
+    if (!card) return;
+    card.style.transform = "";
+    card.dataset.dragX = "0";
+    card.dataset.dragY = "0";
+    card.classList.remove("is-dragging");
   }
 
   function dismissEndPanel() {
@@ -560,10 +553,80 @@
   function openEndPanel() {
     if (!session || !session.state || !session.state.winner) return;
     session.endDismissed = false;
+    session.endCardShown = true;
     fillEndPanelText();
+    resetEndCardPosition();
     const end = $("end-panel");
     if (end) end.classList.remove("hidden");
     if ($("btn-show-result")) $("btn-show-result").classList.add("hidden");
+  }
+
+  function bindEndCardDrag() {
+    const card = $("end-card");
+    if (!card || card.dataset.dragBound) return;
+    card.dataset.dragBound = "1";
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let baseX = 0;
+    let baseY = 0;
+    let moved = false;
+
+    function apply(x, y) {
+      card.dataset.dragX = String(x);
+      card.dataset.dragY = String(y);
+      card.style.transform = "translate(" + x + "px," + y + "px)";
+    }
+
+    function onPointerDown(e) {
+      if (e.button != null && e.button !== 0) return;
+      const t = e.target;
+      if (t && t.closest && t.closest("button, a, input")) return;
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startY = e.clientY;
+      baseX = parseFloat(card.dataset.dragX || "0") || 0;
+      baseY = parseFloat(card.dataset.dragY || "0") || 0;
+      card.classList.add("is-dragging");
+      try {
+        card.setPointerCapture(e.pointerId);
+      } catch (_) {}
+      e.preventDefault();
+    }
+
+    function onPointerMove(e) {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+      apply(baseX + dx, baseY + dy);
+    }
+
+    function onPointerUp(e) {
+      if (!dragging) return;
+      dragging = false;
+      card.classList.remove("is-dragging");
+      try {
+        card.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+    }
+
+    card.addEventListener("pointerdown", onPointerDown);
+    card.addEventListener("pointermove", onPointerMove);
+    card.addEventListener("pointerup", onPointerUp);
+    card.addEventListener("pointercancel", onPointerUp);
+    card.addEventListener(
+      "click",
+      (e) => {
+        if (moved) {
+          e.preventDefault();
+          e.stopPropagation();
+          moved = false;
+        }
+      },
+      true
+    );
   }
 
   function noteMarks() {
@@ -763,52 +826,6 @@
     renderGame();
     toast(starter === PLAYERS.b ? t("cpuStarts") : t("youStart"));
     if (starter === PLAYERS.b) scheduleAi(650);
-  }
-
-  function beginTwoPSecrets() {
-    const p1 = ($("p1-name").value || "").trim() || t("player1Ph");
-    const p2 = ($("p2-name").value || "").trim() || t("player2Ph");
-    saveSettings({ p1, p2 });
-    twopDraft = { step: 1, secretA: "", secretB: "", names: { a: p1, b: p2 } };
-    $("btn-2p-start").classList.add("hidden");
-    $("twop-secret-step").classList.remove("hidden");
-    $("twop-secret-lead").textContent = `${t("passPhone")} — ${t("enterSecretP1")}`;
-    pads.twopSecret.clear();
-  }
-
-  function confirmTwoPSecret() {
-    const val = pads.twopSecret.value();
-    if (!isValidSecret(val)) {
-      toast(t("secretInvalid"));
-      return;
-    }
-    if (twopDraft.step === 1) {
-      twopDraft.secretA = val;
-      twopDraft.step = 2;
-      pads.twopSecret.clear();
-      $("twop-secret-lead").textContent = `${t("passPhone")} — ${t("enterSecretP2")}`;
-      toast(t("secretSaved"));
-      return;
-    }
-    twopDraft.secretB = val;
-    const starter = readNextStarter();
-    writeNextStarter(starter);
-    session = {
-      mode: "twop",
-      names: twopDraft.names,
-      state: createMatch({
-        secretA: twopDraft.secretA,
-        secretB: twopDraft.secretB,
-        starter,
-      }),
-      endDismissed: false,
-      noteMarks: Object.create(null),
-    };
-    $("twop-secret-step").classList.add("hidden");
-    $("btn-2p-start").classList.remove("hidden");
-    pads.guess.clear();
-    showScreen("game");
-    renderGame();
   }
 
   function destroyP2P() {
@@ -1041,8 +1058,6 @@
     document.querySelectorAll('input[name="lang"]').forEach((r) => {
       r.checked = r.value === lang();
     });
-    if ($("p1-name")) $("p1-name").value = settings.p1 || "";
-    if ($("p2-name")) $("p2-name").value = settings.p2 || "";
     if ($("p2p-name")) $("p2p-name").value = settings.name || "";
     if ($("settings-display-name") && window.ArenaScore) {
       const store = window.ArenaScore.load();
@@ -1067,8 +1082,6 @@
     session = null;
     destroyP2P();
     updateCpuWaitUi(false);
-    $("twop-secret-step").classList.add("hidden");
-    $("btn-2p-start").classList.remove("hidden");
     showScreen("home");
   }
 
@@ -1094,11 +1107,6 @@
     $("btn-scores-back").addEventListener("click", () => showScreen("home"));
   }
   $("btn-solo-setup-back").addEventListener("click", () => showScreen("play"));
-  $("btn-2p-setup-back").addEventListener("click", () => {
-    $("twop-secret-step").classList.add("hidden");
-    $("btn-2p-start").classList.remove("hidden");
-    showScreen("play");
-  });
   $("btn-p2p-back").addEventListener("click", () => showScreen("play"));
   $("btn-settings-back").addEventListener("click", () => showScreen("home"));
   $("btn-help-back").addEventListener("click", () => showScreen("home"));
@@ -1114,12 +1122,6 @@
     pads.soloSecret.clear();
     showScreen("soloSetup");
   });
-  $("btn-mode-2p").addEventListener("click", () => {
-    fillSettingsForm();
-    $("twop-secret-step").classList.add("hidden");
-    $("btn-2p-start").classList.remove("hidden");
-    showScreen("twoPSetup");
-  });
   $("btn-mode-p2p").addEventListener("click", () => {
     fillSettingsForm();
     showScreen("p2p");
@@ -1133,10 +1135,6 @@
     saveSettings({ aiDifficulty: AI_DIFFICULTY });
     startSolo();
   });
-
-  $("btn-2p-start").addEventListener("click", () => beginTwoPSecrets());
-  $("btn-twop-secret-clear").addEventListener("click", () => pads.twopSecret.backspace());
-  $("btn-twop-secret-ok").addEventListener("click", () => confirmTwoPSecret());
 
   $("btn-p2p-create").addEventListener("click", () => hostP2P());
   $("btn-p2p-join").addEventListener("click", () => joinP2P());
@@ -1203,13 +1201,6 @@
     if (!canAct()) return;
     pads.guess.backspace();
   });
-  if ($("btn-guess-random")) {
-    $("btn-guess-random").addEventListener("click", () => {
-      if (!canAct()) return;
-      pads.guess.set(randomSecret());
-      playSfx("select");
-    });
-  }
   $("btn-guess-submit").addEventListener("click", () => {
     if (!canAct()) return;
     const g = pads.guess.value();
@@ -1274,11 +1265,6 @@
       showScreen("soloSetup");
       return;
     }
-    if (session.mode === "twop") {
-      beginTwoPSecrets();
-      showScreen("twoPSetup");
-      return;
-    }
     if (session.mode === "p2p" && p2p && p2pLobby) {
       p2pLobby.ready = { a: false, b: false };
       p2pLobby.secrets = { a: null, b: null };
@@ -1305,9 +1291,18 @@
   if ($("btn-end-close")) {
     $("btn-end-close").addEventListener("click", () => dismissEndPanel());
   }
+  if ($("btn-guess-random")) {
+    $("btn-guess-random").addEventListener("click", () => {
+      if (!canAct()) return;
+      pads.guess.set(randomSecret());
+      playSfx("select");
+    });
+  }
+
   if ($("btn-show-result")) {
     $("btn-show-result").addEventListener("click", () => openEndPanel());
   }
+  bindEndCardDrag();
 
   // Boot
   if (Sfx && Sfx.bindFirstGesture) Sfx.bindFirstGesture(document);
