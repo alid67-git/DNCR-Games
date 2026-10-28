@@ -7,6 +7,7 @@ public class MainActivity extends BridgeActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     registerPlugin(NearbyLinkPlugin.class);
+    registerPlugin(HubApkPlugin.class);
     super.onCreate(savedInstanceState);
   }
 }

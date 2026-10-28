@@ -1,6 +1,7 @@
 /**
  * Hub APK — GitHub Releases üzerinden otomatik güncelleme.
  * Yalnızca hub-v* etiketli / DNCR-Games-hub*.apk asset’lerini dikkate alır.
+ * Android’de HubApk eklentisi ile indir + kur (WebView tek başına APK yüklemez).
  */
 (function () {
   "use strict";
@@ -12,6 +13,7 @@
   const APK_RE = CFG.apkNamePattern || /DNCR-Games-hub.*\.apk$/i;
 
   let pending = null;
+  let installing = false;
 
   function $(id) {
     return document.getElementById(id);
@@ -43,25 +45,76 @@
     clearTimeout(toast._t);
     toast._t = setTimeout(() => {
       el.hidden = true;
-    }, 2800);
+    }, 3200);
   }
 
-  function openExternal(url) {
+  function getHubApkPlugin() {
+    try {
+      const C = window.Capacitor;
+      if (!C || typeof C.isNativePlatform !== "function" || !C.isNativePlatform()) {
+        return null;
+      }
+      if (C.Plugins && C.Plugins.HubApk) return C.Plugins.HubApk;
+      if (typeof C.registerPlugin === "function") return C.registerPlugin("HubApk");
+    } catch (_) {}
+    return null;
+  }
+
+  async function openExternal(url) {
     if (!url) return;
+    const plugin = getHubApkPlugin();
+    if (plugin && typeof plugin.openExternal === "function") {
+      await plugin.openExternal({ url });
+      return;
+    }
     try {
       if (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Browser) {
         Capacitor.Plugins.Browser.open({ url });
         return;
       }
     } catch (_) {}
-    // Capacitor WebView: harici https → sistem tarayıcısı / indirme (Intent)
     try {
-      if (window.Capacitor && typeof Capacitor.isNativePlatform === "function" && Capacitor.isNativePlatform()) {
-        window.location.href = url;
+      if (
+        window.Capacitor &&
+        typeof Capacitor.isNativePlatform === "function" &&
+        Capacitor.isNativePlatform()
+      ) {
+        // WebView içinde kalmasın — görünür <a download> ile dene
+        const a = document.createElement("a");
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
         return;
       }
     } catch (_) {}
     window.open(url, "_blank", "noopener");
+  }
+
+  async function downloadAndInstall(url) {
+    const plugin = getHubApkPlugin();
+    if (!plugin || typeof plugin.downloadAndInstall !== "function") {
+      await openExternal(url);
+      return { mode: "browser" };
+    }
+    try {
+      if (typeof plugin.addListener === "function" && !downloadAndInstall._bound) {
+        downloadAndInstall._bound = true;
+        plugin.addListener("installReady", () => {
+          toast("Kurulum ekranı açıldı");
+          installing = false;
+        });
+        plugin.addListener("installError", (ev) => {
+          toast("Kurulum açılamadı — tarayıcıdan dene");
+          installing = false;
+          if (pending && pending.apkUrl) openExternal(pending.apkUrl);
+        });
+      }
+    } catch (_) {}
+    const result = await plugin.downloadAndInstall({ url });
+    return { mode: "native", result };
   }
 
   function shouldSkip(force) {
@@ -156,16 +209,36 @@
     }
   }
 
-  function applyUpdate() {
-    if (!pending) return;
+  async function applyUpdate() {
+    if (!pending || installing) return;
     const url = pending.apkUrl || pending.htmlUrl;
     if (!url) {
       toast("APK linki yok");
       return;
     }
-    toast("İndirme açılıyor…");
-    openExternal(url);
+    installing = true;
+    const btn = $("btn-hub-update-now");
+    if (btn) btn.disabled = true;
+    toast("İndiriliyor… bildirimde izle, bitince kur");
     hideModal();
+    try {
+      await downloadAndInstall(url);
+    } catch (err) {
+      console.warn("Hub update apply failed", err);
+      toast("İndirme başarısız — tarayıcı açılıyor");
+      try {
+        await openExternal(url);
+      } catch (_) {
+        toast("APK açılamadı");
+      }
+      installing = false;
+    } finally {
+      if (btn) btn.disabled = false;
+      // native indirme arka planda; ~2 sn sonra kilidi aç
+      setTimeout(() => {
+        installing = false;
+      }, 2000);
+    }
   }
 
   function init() {
@@ -177,7 +250,7 @@
       btnCheck.addEventListener("click", () => check({ force: true, silent: false }));
     }
     const btnNow = $("btn-hub-update-now");
-    if (btnNow) btnNow.addEventListener("click", applyUpdate);
+    if (btnNow) btnNow.addEventListener("click", () => applyUpdate());
     const btnLater = $("btn-hub-update-later");
     if (btnLater) btnLater.addEventListener("click", hideModal);
     const modal = $("hub-update-modal");
@@ -187,7 +260,6 @@
       });
     }
 
-    // Açılışta sessiz kontrol (diğer oyunlar gibi)
     setTimeout(() => check({ force: false, silent: true }), 1100);
   }
 

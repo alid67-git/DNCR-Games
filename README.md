@@ -25,9 +25,9 @@ Beş oyun · ortak menü · iPhone kısayol · Android APK.
 
 **Android APK (hub):** `hub/` tek paket — tüm oyunları içerir.
 
-- **İndir:** https://github.com/alid67-git/DNCR-Games/releases/download/hub-v1.0.6/DNCR-Games-hub-1.0.6.apk
-- Release: https://github.com/alid67-git/DNCR-Games/releases/tag/hub-v1.0.6
-- Açılışta otomatik güncelleme kontrolü (hub APK)
+- **İndir:** https://github.com/alid67-git/DNCR-Games/releases/download/hub-v1.0.7/DNCR-Games-hub-1.0.7.apk
+- Release: https://github.com/alid67-git/DNCR-Games/releases/tag/hub-v1.0.7
+- Açılışta otomatik güncelleme kontrolü (hub APK) — indir + kur
 - **Bluetooth / yakında:** iki telefonda internet yokken ~5 m P2P (Android hub)
 
 ```bash
