@@ -14,9 +14,9 @@
   <rect x="10" y="10" width="108" height="108" rx="22" fill="none" stroke="#9dff57" stroke-opacity="0.22" stroke-width="2"/>
   <g font-family="Sora, Manrope, sans-serif" font-weight="700" font-size="18" text-anchor="middle">
     <rect x="20" y="34" width="20" height="28" rx="5" fill="url(#tile)" stroke="#9dff57" stroke-opacity="0.55"/>
-    <text x="30" y="54" fill="#e8fff4">0</text>
+    <text x="30" y="54" fill="#e8fff4">4</text>
     <rect x="44" y="34" width="20" height="28" rx="5" fill="url(#tile)" stroke="#9dff57" stroke-opacity="0.55"/>
-    <text x="54" y="54" fill="#e8fff4">4</text>
+    <text x="54" y="54" fill="#e8fff4">0</text>
     <rect x="68" y="34" width="20" height="28" rx="5" fill="url(#tile)" stroke="#9dff57" stroke-opacity="0.55"/>
     <text x="78" y="54" fill="#e8fff4">7</text>
     <rect x="92" y="34" width="20" height="28" rx="5" fill="url(#tile)" stroke="#9dff57" stroke-opacity="0.55"/>
