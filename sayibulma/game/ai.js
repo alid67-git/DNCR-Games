@@ -146,9 +146,8 @@
     }
 
     if (diff === "veryhard") {
-      // Full-pool entropy search is expensive; sample first, then optimize.
-      // P(10,4)=5040; allow entropy search on the full 4-digit pool.
-      if (pool.length > 5500) return pickRandom(pool, rng);
+      // Mobilde büyük havuzda entropy araması UI'yi dondurmasın.
+      if (pool.length > 900) return pickRandom(pool, rng);
       return pickOptimal(pool, rng);
     }
 

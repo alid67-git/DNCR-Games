@@ -1,9 +1,41 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.2",
-  build: 3,
+  version: "1.0.4",
+  build: 5,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.4",
+      build: 5,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Bilgisayar turu takılma (timer yarışı) düzeltildi",
+          "Düşünürken pad gizlenir, bekleyiş paneli gösterilir",
+          "Oyun içinde Geri / Yeniden için onay",
+        ],
+        en: [
+          "Fixed AI turn stall (timer race)",
+          "While thinking: hide pad, show wait panel",
+          "Confirm before Back / Restart during a match",
+        ],
+      },
+    },
+    {
+      version: "1.0.3",
+      build: 4,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Bilgisayar düşünürken rakam girişi ve Tahmin et kilitli",
+          "AI turu takılırsa güvenli yeniden deneme",
+        ],
+        en: [
+          "Digit pad and Try locked while the computer thinks",
+          "Safer AI retry if a turn stalls",
+        ],
+      },
+    },
     {
       version: "1.0.2",
       build: 3,

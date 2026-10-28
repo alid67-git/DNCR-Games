@@ -324,13 +324,19 @@
         </span>
       </div>
 
-      <div class="guess-stage">
-        <p class="wheel-hint" data-i18n="wheelHint">Her tekerde farklı rakam seç</p>
-        <div class="digit-slots guess-slots" id="guess-slots" aria-live="polite"></div>
-        <div class="digit-pad" id="guess-pad"></div>
-        <div class="guess-actions">
-          <button type="button" class="btn btn-ghost" id="btn-guess-clear" data-i18n="clearBtn">Sil</button>
-          <button type="button" class="btn btn-try" id="btn-guess-submit" data-i18n="tryCode">Tahmin et</button>
+      <div class="guess-stage" id="guess-stage">
+        <div id="guess-input-panel">
+          <p class="wheel-hint" data-i18n="wheelHint">Her tekerde farklı rakam seç</p>
+          <div class="digit-slots guess-slots" id="guess-slots" aria-live="polite"></div>
+          <div class="digit-pad" id="guess-pad"></div>
+          <div class="guess-actions">
+            <button type="button" class="btn btn-ghost" id="btn-guess-clear" data-i18n="clearBtn">Sil</button>
+            <button type="button" class="btn btn-try" id="btn-guess-submit" data-i18n="tryCode">Tahmin et</button>
+          </div>
+        </div>
+        <div id="cpu-wait-panel" class="cpu-wait-panel hidden" aria-live="polite">
+          <div class="cpu-wait-spinner" aria-hidden="true"></div>
+          <p class="cpu-wait-text" data-i18n="statusCpu">Bilgisayar düşünüyor…</p>
         </div>
       </div>
 

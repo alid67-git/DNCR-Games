@@ -116,7 +116,12 @@
   }
 
   function makeDigitPad(slotsId, padId, opts) {
-    const state = { digits: [], mask: !!(opts && opts.mask), onChange: null };
+    const state = {
+      digits: [],
+      mask: !!(opts && opts.mask),
+      locked: false,
+      onChange: null,
+    };
     const slotsEl = $(slotsId);
     const padEl = $(padId);
     if (!slotsEl || !padEl) return state;
@@ -128,7 +133,8 @@
         slot.className =
           "digit-slot" +
           (state.digits[i] != null ? " is-filled" : "") +
-          (i === state.digits.length ? " is-active" : "");
+          (!state.locked && i === state.digits.length ? " is-active" : "") +
+          (state.locked ? " is-locked" : "");
         const v = state.digits[i];
         slot.textContent = v == null ? "" : state.mask ? "•" : v;
         slotsEl.appendChild(slot);
@@ -138,7 +144,7 @@
         const used = state.digits.includes(d);
         const full = state.digits.length >= DIGIT_COUNT;
         const lead0 = state.digits.length === 0 && d === "0";
-        btn.disabled = used || full || lead0;
+        btn.disabled = state.locked || used || full || lead0;
         btn.classList.toggle("is-used", used);
         btn.classList.toggle("is-lead-block", lead0);
       });
@@ -153,6 +159,7 @@
       btn.dataset.digit = String(d);
       btn.textContent = String(d);
       btn.addEventListener("click", () => {
+        if (state.locked) return;
         if (state.digits.length >= DIGIT_COUNT) return;
         if (state.digits.includes(String(d))) return;
         if (state.digits.length === 0 && String(d) === "0") return;
@@ -165,10 +172,12 @@
 
     state.value = () => state.digits.join("");
     state.clear = () => {
+      if (state.locked) return;
       state.digits = [];
       render();
     };
     state.set = (str) => {
+      if (state.locked) return;
       const s = String(str || "").replace(/\D/g, "").slice(0, DIGIT_COUNT);
       const seen = Object.create(null);
       state.digits = [];
@@ -184,8 +193,26 @@
       state.mask = !!m;
       render();
     };
+    state.setLocked = (locked) => {
+      state.locked = !!locked;
+      render();
+    };
     render();
     return state;
+  }
+
+  function setGuessInputLocked(locked) {
+    const on = !!locked;
+    pads.guess.setLocked(on);
+    const stage = $("guess-stage");
+    if (stage) {
+      stage.classList.toggle("is-locked", on);
+      stage.setAttribute("aria-disabled", on ? "true" : "false");
+    }
+    ["btn-guess-clear", "btn-guess-submit"].forEach((id) => {
+      const el = $(id);
+      if (el) el.disabled = on;
+    });
   }
 
   function applyI18n() {
@@ -410,12 +437,15 @@
     renderHistoryList($("hist-b"), s.histories.b);
 
     const locked = !canAct();
-    $("guess-stage").classList.toggle("is-locked", locked);
+    setGuessInputLocked(locked);
+    const cpuWait =
+      session.mode === "solo" && !s.winner && (session.aiThinking || s.turn === PLAYERS.b);
+    updateCpuWaitUi(cpuWait);
 
     let phase = "";
     if (s.winner) {
       phase = t("gameOver");
-    } else if (session.mode === "solo" && session.aiThinking) {
+    } else if (cpuWait) {
       phase = t("statusCpu");
     } else if (session.mode === "twop") {
       phase = `${t("turnPass")} ${session.names[s.turn]}`;
@@ -429,7 +459,7 @@
       ? ""
       : canAct()
         ? t("statusGuess")
-        : session.aiThinking
+        : session.mode === "solo" && s.turn === PLAYERS.b
           ? t("statusCpu")
           : "";
 
@@ -508,20 +538,76 @@
     clearTimeout(aiTimer);
     if (!session || session.mode !== "solo" || session.state.winner) return;
     if (session.state.turn !== PLAYERS.b) return;
+    // Önemli: aiThinking true iken early-return YOK.
+    // clearTimeout + return yarışı AI'yi sonsuza dek "düşünüyor"da bırakıyordu.
+    const gen = (session.aiGen = (session.aiGen || 0) + 1);
     session.aiThinking = true;
-    renderGame();
-    aiTimer = setTimeout(() => {
-      if (!session || session.state.turn !== PLAYERS.b || session.state.winner) return;
-      const guess = Ai.pickGuess(session.state.histories.b, session.difficulty || "hard");
+    setGuessInputLocked(true);
+    updateCpuWaitUi(true);
+    aiTimer = setTimeout(() => runAiTurn(gen), Math.max(180, delay | 0));
+  }
+
+  function updateCpuWaitUi(waiting) {
+    const input = $("guess-input-panel");
+    const wait = $("cpu-wait-panel");
+    if (input) input.classList.toggle("hidden", !!waiting);
+    if (wait) wait.classList.toggle("hidden", !waiting);
+  }
+
+  function runAiTurn(gen) {
+    if (!session || session.aiGen !== gen) return;
+    if (session.mode !== "solo" || session.state.winner || session.state.turn !== PLAYERS.b) {
       session.aiThinking = false;
-      const r = applyGuess(session.state, PLAYERS.b, guess);
-      if (r.ok) {
-        session.state = r.state;
-        playSfx(r.score.plus === DIGIT_COUNT ? "mill" : "place");
-        showLastFeedback(guess, r.score);
-      }
+      updateCpuWaitUi(false);
       renderGame();
-    }, delay);
+      return;
+    }
+
+    let moved = false;
+    try {
+      const tried = Object.create(null);
+      (session.state.histories.b || []).forEach((h) => {
+        if (h && h.guess) tried[h.guess] = true;
+      });
+      let guess = null;
+      try {
+        guess = Ai.pickGuess(session.state.histories.b, session.difficulty || "hard");
+      } catch (err) {
+        console.warn("Sayı Bulma AI:", err);
+      }
+      for (let attempt = 0; attempt < 8 && !moved; attempt++) {
+        if (!isValidSecret(guess) || tried[guess]) {
+          guess = randomSecret();
+        }
+        const r = applyGuess(session.state, PLAYERS.b, guess);
+        if (r.ok) {
+          session.state = r.state;
+          playSfx(r.score.plus === DIGIT_COUNT ? "mill" : "place");
+          showLastFeedback(guess, r.score);
+          moved = true;
+        } else {
+          tried[guess] = true;
+          guess = null;
+        }
+      }
+    } catch (err) {
+      console.warn("Sayı Bulma AI turn:", err);
+    }
+
+    if (session && session.aiGen === gen) {
+      session.aiThinking = false;
+      updateCpuWaitUi(false);
+      renderGame();
+      // Hâlâ bilgisayar sırasıysa (nadir) yeniden dene
+      if (
+        session &&
+        !session.state.winner &&
+        session.state.turn === PLAYERS.b &&
+        session.mode === "solo"
+      ) {
+        aiTimer = setTimeout(() => scheduleAi(250), 200);
+      }
+    }
   }
 
   function startSolo() {
@@ -825,10 +911,22 @@
     }
   }
 
+  function gameInProgress() {
+    return !!(session && session.state && !session.state.winner);
+  }
+
+  function confirmLeaveOrRestart(kind) {
+    if (!gameInProgress()) return true;
+    const key = kind === "restart" ? "confirmRestart" : "confirmLeave";
+    return window.confirm(t(key));
+  }
+
   function goHome() {
     clearTimeout(aiTimer);
+    if (session) session.aiThinking = false;
     session = null;
     destroyP2P();
+    updateCpuWaitUi(false);
     $("twop-secret-step").classList.add("hidden");
     $("btn-2p-start").classList.remove("hidden");
     showScreen("home");
@@ -963,8 +1061,12 @@
 
   $("btn-room-home").addEventListener("click", () => goHome());
 
-  $("btn-guess-clear").addEventListener("click", () => pads.guess.clear());
+  $("btn-guess-clear").addEventListener("click", () => {
+    if (!canAct()) return;
+    pads.guess.clear();
+  });
   $("btn-guess-submit").addEventListener("click", () => {
+    if (!canAct()) return;
     const g = pads.guess.value();
     if (!isValidSecret(g)) {
       toast(t("secretInvalid"));
@@ -1004,8 +1106,11 @@
   });
 
   $("btn-game-back").addEventListener("click", () => {
+    if (!confirmLeaveOrRestart("leave")) return;
+    clearTimeout(aiTimer);
     if (session && session.mode === "p2p" && p2pLobby) {
       session = null;
+      updateCpuWaitUi(false);
       showScreen("room");
       renderRoom();
       return;
@@ -1013,12 +1118,20 @@
     goHome();
   });
 
-  $("btn-game-home").addEventListener("click", () => goHome());
+  $("btn-game-home").addEventListener("click", () => {
+    if (!confirmLeaveOrRestart("leave")) return;
+    goHome();
+  });
 
-  $("btn-game-restart").addEventListener("click", () => {
+  function restartCurrentMode() {
     if (!session) return;
+    clearTimeout(aiTimer);
+    session.aiThinking = false;
+    updateCpuWaitUi(false);
     if (session.mode === "solo") {
+      pads.soloSecret.setLocked(false);
       pads.soloSecret.set(session.state.secrets.a);
+      session = null;
       showScreen("soloSetup");
       return;
     }
@@ -1037,10 +1150,17 @@
       showScreen("room");
       renderRoom();
     }
+  }
+
+  $("btn-game-restart").addEventListener("click", () => {
+    if (!session) return;
+    if (!confirmLeaveOrRestart("restart")) return;
+    restartCurrentMode();
   });
 
   $("btn-rematch").addEventListener("click", () => {
-    $("btn-game-restart").click();
+    // Bitiş panelinden — onay yok
+    restartCurrentMode();
   });
 
   // Boot
