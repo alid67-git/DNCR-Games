@@ -325,10 +325,12 @@
 
       <p id="status-msg" class="status-msg" aria-live="polite"></p>
 
-      <div id="end-panel" class="end-panel hidden">
-        <p id="end-text"></p>
-        <button type="button" id="btn-rematch" class="btn btn-primary" data-i18n="rematch">Yeniden oyna</button>
-        <button type="button" id="btn-game-home" class="btn btn-ghost" data-i18n="toHome">Ana menü</button>
+      <div id="end-panel" class="end-panel hidden" role="dialog" aria-modal="true" aria-labelledby="end-text">
+        <div class="end-card">
+          <p id="end-text"></p>
+          <button type="button" id="btn-rematch" class="btn btn-primary" data-i18n="rematch">Yeniden oyna</button>
+          <button type="button" id="btn-game-home" class="btn btn-ghost" data-i18n="toHome">Ana menü</button>
+        </div>
       </div>
     </section>
   </main>
