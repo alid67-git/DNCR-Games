@@ -1,10 +1,25 @@
 window.SiegeConfig = {
   appName: "Kuşatma",
-  version: "1.5.0",
-  build: 9,
+  version: "1.5.1",
+  build: 10,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kusatma/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
+    {
+      version: "1.5.1",
+      build: 10,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Rakip/AI hamle vurgusu: 1 sn parlama + renk",
+          "Çizgi/taş %50 büyüyüp eski boyutuna döner",
+        ],
+        en: [
+          "Opponent/AI move highlight: 1s flash + color",
+          "Line/stone scales +50% then returns",
+        ],
+      },
+    },
     {
       version: "1.5.0",
       build: 9,

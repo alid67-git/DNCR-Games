@@ -1,12 +1,27 @@
 window.KatiConfig = {
   appName: "Kati",
-  version: "1.5.1",
-  build: 19,
+  version: "1.5.2",
+  build: 20,
   /** tomato = red, gourd = green (engine keys) */
   teams: { tomato: "red", gourd: "green" },
   /** Public web URL used in invite links (works from APK too). */
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kati/",
   changelog: [
+    {
+      version: "1.5.2",
+      build: 20,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Rakip/AI hamle vurgusu: 1 sn parlama + renk",
+          "Taş %50 büyüyüp eski boyutuna döner",
+        ],
+        en: [
+          "Opponent/AI move highlight: 1s flash + color",
+          "Piece scales +50% then returns",
+        ],
+      },
+    },
     {
       version: "1.5.1",
       build: 19,

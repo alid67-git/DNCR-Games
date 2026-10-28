@@ -1,5 +1,5 @@
 /* Kuşatma SW — soft update */
-const CACHE = "kusatma-v1.5.0";
+const CACHE = "kusatma-v1.5.1";
 self.addEventListener("install", (e) => {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["./", "./index.html"])));

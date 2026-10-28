@@ -1,9 +1,24 @@
 window.DokuztasConfig = {
   appName: "Dokuztaş",
-  version: "1.0.4",
-  build: 5,
+  version: "1.0.5",
+  build: 6,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/dokuztas/",
   changelog: [
+    {
+      version: "1.0.5",
+      build: 6,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Rakip/AI hamle vurgusu: 1 sn parlama + renk",
+          "Taş %50 büyüyüp eski boyutuna döner",
+        ],
+        en: [
+          "Opponent/AI move highlight: 1s flash + color",
+          "Piece scales +50% then returns",
+        ],
+      },
+    },
     {
       version: "1.0.4",
       build: 5,

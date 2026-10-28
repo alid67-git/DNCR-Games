@@ -379,12 +379,14 @@ body.is-learning #phase-pill {
   filter: url(#siege-glow-strong);
 }
 .cell-flash {
-  animation: cellFlash 0.5s ease;
+  animation: cellFlash 1s ease;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 @keyframes cellFlash {
-  0% { opacity: 0.2; }
-  40% { opacity: 0.7; }
-  100% { opacity: 0.3; }
+  0% { opacity: 0.2; transform: scale(1); }
+  40% { opacity: 0.75; transform: scale(1.5); }
+  100% { opacity: 0.3; transform: scale(1); }
 }
 #board.is-fx-busy {
   pointer-events: none;

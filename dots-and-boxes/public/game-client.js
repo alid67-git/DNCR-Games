@@ -449,7 +449,7 @@
     svg.addEventListener("pointerleave", onBoardHoverLeave);
   }
 
-  /** Çizilen kenarı 0.5s parlat + renk değiştir + uçlardan ~%10 uzat. */
+  /** Çizilen kenarı 1s parlat + renk + uçlardan %50 uzat → eski geometri. */
   function flashClaimedEdge(edgeId, boxed) {
     const line = document.querySelector(`#edge-layer line[data-edge="${edgeId}"]`);
     if (!line) return;
@@ -465,7 +465,7 @@
     const y2 = Number(line.dataset.y2 != null ? line.dataset.y2 : line.getAttribute("y2"));
     const mx = (x1 + x2) / 2;
     const my = (y1 + y2) / 2;
-    const grow = 1.1;
+    const grow = 1.5;
     line.setAttribute("x1", mx + (x1 - mx) * grow);
     line.setAttribute("y1", my + (y1 - my) * grow);
     line.setAttribute("x2", mx + (x2 - mx) * grow);
@@ -477,7 +477,7 @@
       restoreEdgeGeometry(line);
       line.classList.remove("edge-claim-flash");
       claimFlashTimer = null;
-    }, 500);
+    }, 1000);
   }
 
   function restoreEdgeGeometry(line) {
@@ -732,7 +732,7 @@
         : 0;
     // Kutu sonrası çift tetikleme (pointer+click/ghost) ekstra turu çalıyordu
     if (!fromNet) {
-      inputLockUntil = Date.now() + (boxed > 0 ? 520 : 360);
+      inputLockUntil = Date.now() + (boxed > 0 ? 1100 : 1000);
     }
     session.state = r.state;
     renderAll();
