@@ -83,6 +83,13 @@ textarea {
 #screen-game {
   position: relative;
 }
+#screen-game.active {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 2.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100dvh - 1.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow: hidden;
+}
 
 @keyframes rise {
   from {
@@ -793,6 +800,15 @@ input[type="text"]:focus {
   background: var(--panel);
   border: 1px solid rgba(46, 196, 182, 0.18);
   margin-bottom: 0.85rem;
+  flex: 0 0 auto;
+}
+#screen-game .game-top,
+#screen-game .score-row,
+#screen-game .attempts-label,
+#screen-game .phase-label,
+#screen-game .last-feedback,
+#screen-game .status-msg {
+  flex: 0 0 auto;
 }
 .guess-stage.is-locked #guess-input-panel {
   pointer-events: none;
@@ -862,7 +878,17 @@ input[type="text"]:focus {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.55rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.35rem;
+  flex: 1 1 auto;
+  min-height: 8.5rem;
+  max-height: 100%;
+  align-items: stretch;
+}
+.history-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
 }
 .history-col h3 {
   margin: 0 0 0.4rem;
@@ -871,16 +897,41 @@ input[type="text"]:focus {
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 600;
+  flex: 0 0 auto;
 }
 .guess-history {
   list-style: none;
   margin: 0;
-  padding: 0;
-  max-height: 11rem;
+  padding: 0.15rem 0.2rem 0.5rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-x: hidden;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  border-radius: 12px;
+  border: 1px solid rgba(46, 196, 182, 0.16);
+  background:
+    linear-gradient(rgba(2, 20, 26, 0.35), rgba(2, 20, 26, 0.35)),
+    rgba(2, 20, 26, 0.28);
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(157, 255, 87, 0.45) transparent;
+}
+.guess-history::-webkit-scrollbar {
+  width: 6px;
+}
+.guess-history::-webkit-scrollbar-thumb {
+  background: rgba(157, 255, 87, 0.4);
+  border-radius: 999px;
+}
+.guess-history.is-scrollable {
+  box-shadow: inset 0 -14px 16px -12px rgba(0, 0, 0, 0.45);
 }
 .guess-row {
   display: flex;
@@ -1030,6 +1081,7 @@ input[type="text"]:focus {
 @media (max-width: 380px) {
   .history-wrap {
     grid-template-columns: 1fr;
+    min-height: 10rem;
   }
   .digit-pad {
     grid-template-columns: repeat(5, 1fr);
