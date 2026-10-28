@@ -308,7 +308,7 @@ window.SayibulmaI18n = (function () {
       statusOpp: "Opponent is guessing…",
       statusWaitSecret: "Waiting for secrets…",
       guessBtn: "Guess",
-      clearBtn: "Clear",
+      clearBtn: "Del",
       historyYou: "Your guesses",
       historyOpp: "Opponent guesses",
       historyP1: "Player 1",

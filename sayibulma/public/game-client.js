@@ -176,6 +176,14 @@
       state.digits = [];
       render();
     };
+    /** Sil: yalnızca son basamağı sil (backspace) */
+    state.backspace = () => {
+      if (state.locked) return;
+      if (!state.digits.length) return;
+      state.digits.pop();
+      playSfx("select");
+      render();
+    };
     state.set = (str) => {
       if (state.locked) return;
       const s = String(str || "").replace(/\D/g, "").slice(0, DIGIT_COUNT);
@@ -1051,7 +1059,7 @@
     showScreen("p2p");
   });
 
-  $("btn-solo-secret-clear").addEventListener("click", () => pads.soloSecret.clear());
+  $("btn-solo-secret-clear").addEventListener("click", () => pads.soloSecret.backspace());
   $("btn-solo-secret-random").addEventListener("click", () => {
     pads.soloSecret.set(randomSecret());
   });
@@ -1061,7 +1069,7 @@
   });
 
   $("btn-2p-start").addEventListener("click", () => beginTwoPSecrets());
-  $("btn-twop-secret-clear").addEventListener("click", () => pads.twopSecret.clear());
+  $("btn-twop-secret-clear").addEventListener("click", () => pads.twopSecret.backspace());
   $("btn-twop-secret-ok").addEventListener("click", () => confirmTwoPSecret());
 
   $("btn-p2p-create").addEventListener("click", () => hostP2P());
@@ -1078,7 +1086,7 @@
     }
     renderRoom();
   };
-  $("btn-room-secret-clear").addEventListener("click", () => pads.roomSecret.clear());
+  $("btn-room-secret-clear").addEventListener("click", () => pads.roomSecret.backspace());
   $("btn-room-secret-random").addEventListener("click", () => {
     pads.roomSecret.set(randomSecret());
   });
@@ -1127,7 +1135,7 @@
 
   $("btn-guess-clear").addEventListener("click", () => {
     if (!canAct()) return;
-    pads.guess.clear();
+    pads.guess.backspace();
   });
   $("btn-guess-submit").addEventListener("click", () => {
     if (!canAct()) return;

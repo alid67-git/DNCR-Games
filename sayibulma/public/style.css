@@ -682,21 +682,27 @@ input[type="text"]:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.35rem;
+  gap: 0.35rem;
 }
 .game-title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.15rem;
+  font-size: 1rem;
   color: var(--lime);
+}
+#screen-game .btn-icon {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.95rem;
 }
 
 .note-digits {
   display: grid;
   grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 0.22rem;
-  margin: 0 0 0.45rem;
+  gap: 0.16rem;
+  margin: 0 0 0.3rem;
 }
 .note-digit {
   appearance: none;
@@ -705,10 +711,10 @@ input[type="text"]:focus {
   color: var(--ink);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 0.78rem;
   line-height: 1;
-  padding: 0.45rem 0;
-  border-radius: 8px;
+  padding: 0.28rem 0;
+  border-radius: 6px;
   cursor: pointer;
   position: relative;
   transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
@@ -737,16 +743,16 @@ input[type="text"]:focus {
 .score-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
-  margin-bottom: 0.4rem;
+  gap: 0.3rem;
+  margin-bottom: 0.25rem;
 }
 .score-chip {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.35rem;
-  padding: 0.45rem 0.6rem;
-  border-radius: 10px;
+  gap: 0.25rem;
+  padding: 0.28rem 0.45rem;
+  border-radius: 8px;
   background: var(--panel);
   border: 1px solid rgba(46, 196, 182, 0.18);
 }
@@ -759,21 +765,21 @@ input[type="text"]:focus {
 }
 .chip-info strong {
   display: block;
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .chip-status {
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   color: var(--lime);
   line-height: 1;
-  min-height: 0.7rem;
+  min-height: 0;
 }
 .chip-score {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   color: var(--lime);
 }
 .chip-b .chip-score {
@@ -784,14 +790,14 @@ input[type="text"]:focus {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.65rem;
-  margin: 0 0 0.4rem;
+  gap: 0.5rem;
+  margin: 0 0 0.25rem;
 }
 .attempts-label {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   color: var(--lime);
   flex: 0 0 auto;
 }
@@ -800,7 +806,7 @@ input[type="text"]:focus {
   text-align: right;
   font-weight: 600;
   color: var(--teal-glow);
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -809,15 +815,15 @@ input[type="text"]:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
-  margin: 0 0 0.45rem;
-  padding: 0.45rem 0.75rem;
-  border-radius: 12px;
+  gap: 0.45rem;
+  margin: 0 0 0.3rem;
+  padding: 0.28rem 0.5rem;
+  border-radius: 8px;
   background:
     linear-gradient(135deg, rgba(157, 255, 87, 0.12), transparent 55%),
     rgba(6, 37, 46, 0.85);
   border: 1px solid rgba(157, 255, 87, 0.28);
-  min-height: 2.4rem;
+  min-height: 1.7rem;
 }
 .last-feedback.hidden {
   display: none;
@@ -838,29 +844,72 @@ input[type="text"]:focus {
 .lf-guess {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: 0.14em;
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
   color: var(--ink);
 }
 .lf-scores {
   display: flex;
-  gap: 0.35rem;
+  gap: 0.28rem;
 }
 .lf-scores .chip-plus,
 .lf-scores .chip-minus {
-  min-width: 2.6rem;
-  min-height: 1.9rem;
-  font-size: 1.1rem;
-  border-radius: 8px;
+  min-width: 2rem;
+  min-height: 1.45rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
 }
 
 .guess-stage {
-  padding: 0.55rem 0.65rem 0.65rem;
-  border-radius: var(--radius);
+  padding: 0.35rem 0.4rem 0.4rem;
+  border-radius: 12px;
   background: var(--panel);
   border: 1px solid rgba(46, 196, 182, 0.18);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.2rem;
   flex: 0 0 auto;
+}
+
+/* Oyun ekranı: kompakt giriş — geçmişe yer aç */
+#screen-game .guess-slots {
+  gap: 0.28rem;
+  margin: 0 0 0.3rem;
+}
+#screen-game .guess-slots .digit-slot {
+  aspect-ratio: auto;
+  min-height: 1.85rem;
+  max-height: 2.1rem;
+  border-radius: 8px;
+  border-width: 1.5px;
+  font-size: 1.05rem;
+  box-shadow: none;
+}
+#screen-game .guess-slots .digit-slot::before,
+#screen-game .guess-slots .digit-slot::after {
+  display: none;
+}
+#screen-game .digit-pad {
+  gap: 0.22rem;
+}
+#screen-game .digit-key {
+  padding: 0.28rem 0;
+  font-size: 0.9rem;
+  border-radius: 7px;
+}
+#screen-game .guess-actions {
+  margin-top: 0.3rem;
+  gap: 0.35rem;
+}
+#screen-game .guess-actions .btn-ghost {
+  flex: 0 0 22%;
+  padding: 0.4rem 0.35rem;
+  font-size: 0.82rem;
+}
+#screen-game .guess-actions .btn-try {
+  padding: 0.45rem 0.7rem;
+  font-size: 0.9rem;
+  box-shadow:
+    0 3px 0 #3d7a12,
+    0 6px 12px rgba(157, 255, 87, 0.2);
 }
 #screen-game .game-top,
 #screen-game .note-digits,
@@ -881,9 +930,9 @@ input[type="text"]:focus {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
-  min-height: 7.5rem;
-  padding: 0.85rem 0.65rem;
+  gap: 0.4rem;
+  min-height: 5.25rem;
+  padding: 0.55rem 0.45rem;
   text-align: center;
 }
 .cpu-wait-panel.hidden {
@@ -936,12 +985,12 @@ input[type="text"]:focus {
 }
 
 .history-wrap {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
-  margin-bottom: 0.45rem;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.3rem;
+  margin-bottom: 0.3rem;
   flex: 1 1 auto;
-  min-height: 5.5rem;
+  min-height: 9rem;
   max-height: 100%;
   align-items: stretch;
 }
@@ -952,9 +1001,9 @@ input[type="text"]:focus {
   min-width: 0;
 }
 .history-col h3 {
-  margin: 0 0 0.28rem;
-  font-size: 0.68rem;
-  letter-spacing: 0.03em;
+  margin: 0 0 0.2rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 600;
@@ -966,7 +1015,7 @@ input[type="text"]:focus {
 .guess-history {
   list-style: none;
   margin: 0;
-  padding: 0.12rem 0.15rem 0.35rem;
+  padding: 0.1rem 0.12rem 0.25rem;
   flex: 1 1 auto;
   min-height: 0;
   max-height: none;
@@ -977,8 +1026,8 @@ input[type="text"]:focus {
   touch-action: pan-y;
   display: flex;
   flex-direction: column;
-  gap: 0.28rem;
-  border-radius: 10px;
+  gap: 0.18rem;
+  border-radius: 8px;
   border: 1px solid rgba(46, 196, 182, 0.16);
   background:
     linear-gradient(rgba(2, 20, 26, 0.35), rgba(2, 20, 26, 0.35)),
@@ -1001,14 +1050,14 @@ input[type="text"]:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.35rem;
-  padding: 0.38rem 0.45rem;
-  border-radius: 8px;
+  gap: 0.22rem;
+  padding: 0.22rem 0.3rem;
+  border-radius: 6px;
   background: rgba(2, 20, 26, 0.45);
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 0.88rem;
-  letter-spacing: 0.04em;
+  font-size: 0.76rem;
+  letter-spacing: 0.03em;
   animation: guessSlide 0.35s ease both;
 }
 .guess-row.is-latest {
@@ -1039,15 +1088,15 @@ input[type="text"]:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2rem;
-  min-height: 1.55rem;
-  padding: 0.12rem 0.3rem;
-  border-radius: 6px;
-  font-size: 0.92rem;
+  min-width: 1.55rem;
+  min-height: 1.2rem;
+  padding: 0.08rem 0.22rem;
+  border-radius: 5px;
+  font-size: 0.78rem;
   font-weight: 800;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   line-height: 1;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 }
 .guess-row.is-latest .chip-plus,
 .guess-row.is-latest .chip-minus {
@@ -1191,51 +1240,60 @@ input[type="text"]:focus {
   display: none;
 }
 
-/* Dar telefonlarda da geçmiş her zaman yan yana kalsın */
+/* Dar / kısa telefon: geçmiş yan yana + daha fazla satır */
 @media (max-width: 400px) {
   .history-wrap {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.32rem;
-    min-height: 4.75rem;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.25rem;
+    min-height: 10rem;
   }
   .digit-pad {
     grid-template-columns: repeat(5, 1fr);
   }
-  .digit-key {
-    padding: 0.4rem 0;
-    font-size: 0.98rem;
+  #screen-game .digit-key {
+    padding: 0.24rem 0;
+    font-size: 0.85rem;
   }
   .guess-row {
-    font-size: 0.8rem;
-    padding: 0.32rem 0.35rem;
+    font-size: 0.72rem;
+    padding: 0.18rem 0.25rem;
   }
   .chip-plus,
   .chip-minus {
-    min-width: 1.75rem;
-    min-height: 1.4rem;
-    font-size: 0.82rem;
-  }
-  .note-digit {
-    font-size: 0.82rem;
-    padding: 0.36rem 0;
+    min-width: 1.4rem;
+    min-height: 1.1rem;
+    font-size: 0.72rem;
   }
 }
 
-@media (max-height: 720px) {
-  .digit-slot {
-    min-height: 2.2rem;
-    max-height: 2.85rem;
+@media (max-height: 760px) {
+  #screen-game .guess-slots .digit-slot {
+    min-height: 1.65rem;
+    max-height: 1.85rem;
+    font-size: 0.95rem;
   }
-  .digit-key {
-    padding: 0.36rem 0;
+  #screen-game .digit-key {
+    padding: 0.22rem 0;
   }
-  .guess-stage {
-    padding: 0.4rem 0.5rem 0.5rem;
+  #screen-game .guess-actions .btn-try {
+    padding: 0.38rem 0.6rem;
   }
   .cpu-wait-panel {
-    min-height: 5.5rem;
+    min-height: 4.25rem;
   }
   .history-wrap {
-    min-height: 4.25rem;
+    min-height: 11rem;
+  }
+}
+
+@media (max-height: 640px) {
+  .history-wrap {
+    min-height: 8.5rem;
+  }
+  #screen-game .note-digits {
+    margin-bottom: 0.2rem;
+  }
+  .game-meta-row {
+    margin-bottom: 0.15rem;
   }
 }

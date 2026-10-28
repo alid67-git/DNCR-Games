@@ -1,9 +1,24 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.7",
-  build: 8,
+  version: "1.0.8",
+  build: 9,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.8",
+      build: 9,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Sil yalnızca son basamağı siler",
+          "Oyun ekranı küçültüldü; geçmiş yan yana ve daha fazla tahmin görünür",
+        ],
+        en: [
+          "Delete removes only the last digit",
+          "Game screen compacted; side-by-side history shows more guesses",
+        ],
+      },
+    },
     {
       version: "1.0.7",
       build: 8,
