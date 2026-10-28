@@ -1,7 +1,7 @@
 /**
  * Hub APK — GitHub Releases üzerinden otomatik güncelleme.
- * Yalnızca hub-v* etiketli / DNCR-Games-hub*.apk asset’lerini dikkate alır.
- * Android’de HubApk eklentisi ile indir + kur (WebView tek başına APK yüklemez).
+ * Yalnızca Android Capacitor hub APK’da çalışır (iPhone / web / PWA’da yok).
+ * hub-v* + DNCR-Games-hub*.apk; HubApk eklentisi ile indir + kur.
  */
 (function () {
   "use strict";
@@ -17,6 +17,40 @@
 
   function $(id) {
     return document.getElementById(id);
+  }
+
+  /** APK güncelleme yalnızca native Android hub’da. iPhone Safari / PWA / masaüstü web: hayır. */
+  function isAndroidHubApk() {
+    try {
+      const C = window.Capacitor;
+      if (!C || typeof C.isNativePlatform !== "function" || !C.isNativePlatform()) {
+        return false;
+      }
+      if (typeof C.getPlatform === "function" && C.getPlatform() === "android") {
+        return true;
+      }
+      // iOS native olsaydı Capacitor platform ios olur — yine APK yok
+      if (typeof C.getPlatform === "function" && C.getPlatform() === "ios") {
+        return false;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function hideApkUpdateUi() {
+    const btnCheck = $("btn-hub-check-update");
+    if (btnCheck) {
+      btnCheck.hidden = true;
+      btnCheck.style.display = "none";
+    }
+    const actions = document.querySelector(".hub-actions");
+    if (actions) {
+      actions.hidden = true;
+      actions.style.display = "none";
+    }
+    hideModal();
   }
 
   function parseVersion(raw) {
@@ -183,6 +217,10 @@
   }
 
   async function check({ force = false, silent = true } = {}) {
+    if (!isAndroidHubApk()) {
+      if (!silent) toast("APK güncelleme yalnızca Android hub’da");
+      return { status: "skipped-platform" };
+    }
     if (shouldSkip(force)) return { status: "skipped" };
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       if (!silent) toast("Çevrimdışı — güncelleme kontrol edilemedi");
@@ -210,6 +248,11 @@
   }
 
   async function applyUpdate() {
+    if (!isAndroidHubApk()) {
+      hideModal();
+      toast("iPhone’da APK yok — Safari’den sayfayı yenilemen yeterli");
+      return;
+    }
     if (!pending || installing) return;
     const url = pending.apkUrl || pending.htmlUrl;
     if (!url) {
@@ -245,6 +288,12 @@
     const ver = $("hub-ver");
     if (ver) ver.textContent = "v" + CFG.version;
 
+    // iPhone / web: APK güncelleme UI ve otomatik kontrol yok
+    if (!isAndroidHubApk()) {
+      hideApkUpdateUi();
+      return;
+    }
+
     const btnCheck = $("btn-hub-check-update");
     if (btnCheck) {
       btnCheck.addEventListener("click", () => check({ force: true, silent: false }));
@@ -269,5 +318,5 @@
     init();
   }
 
-  window.HubUpdate = { check, compareVersions, parseVersion };
+  window.HubUpdate = { check, compareVersions, parseVersion, isAndroidHubApk };
 })();
