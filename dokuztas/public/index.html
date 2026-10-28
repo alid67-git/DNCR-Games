@@ -141,7 +141,13 @@
           <span data-i18n="yourName">Adın</span>
           <input id="p2p-name" type="text" maxlength="20" data-i18n-ph="namePh" autocomplete="nickname" />
         </label>
+        <fieldset id="p2p-transport" class="lang-field p2p-transport hidden" hidden>
+          <legend data-i18n="p2pTransport">Bağlantı</legend>
+          <label class="radio-row"><input type="radio" name="p2p-transport" value="peerjs" checked /> <span data-i18n="p2pViaNet">İnternet (uzaktan)</span></label>
+          <label class="radio-row"><input type="radio" name="p2p-transport" value="nearby" /> <span data-i18n="p2pViaBt">Bluetooth / yakında (~5 m)</span></label>
+        </fieldset>
         <p class="field-hint" data-i18n="p2pNeedNet"></p>
+        <p id="p2p-need-bt" class="field-hint hidden" data-i18n="p2pNeedBt"></p>
         <div class="lobby-actions">
           <button type="button" id="btn-p2p-create" class="btn btn-primary" data-i18n="createRoom">Oda kur</button>
           <div class="join-row">
@@ -342,6 +348,7 @@
   <script src="engine.js"></script>
   <script src="ai.js"></script>
   <script src="shared/register-sw.js"></script>
+  <script src="shared/nearby-session.js"></script>
   <script src="shared/p2p-session.js"></script>
   <script src="shared/hub-back.js"></script>
   <script src="shared/score.js"></script>

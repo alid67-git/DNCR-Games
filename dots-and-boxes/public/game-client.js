@@ -886,7 +886,10 @@
     const name = ($("p2p-name").value || "").trim() || t("player1Ph");
     toast(t("connecting"));
     try {
-      p2pSession = new ArenaP2P.P2PSession({ prefix: "noktalar" });
+      p2pSession = ArenaP2P.createSession({
+        prefix: "noktalar",
+        transport: ArenaP2P.getTransport(),
+      });
       bindDotsP2P(p2pSession);
       const code = await p2pSession.host();
       p2pLobby = {
@@ -918,7 +921,10 @@
     const name = ($("p2p-name").value || "").trim() || t("player2Ph");
     toast(t("connecting"));
     try {
-      p2pSession = new ArenaP2P.P2PSession({ prefix: "noktalar" });
+      p2pSession = ArenaP2P.createSession({
+        prefix: "noktalar",
+        transport: ArenaP2P.getTransport(),
+      });
       bindDotsP2P(p2pSession);
       await p2pSession.join(code);
       p2pLobby = {
@@ -1185,6 +1191,7 @@
       destroyDotsP2P();
       if ($("p2p-room")) $("p2p-room").classList.add("hidden");
       renderP2pBoardGrid();
+      if (window.ArenaP2P && ArenaP2P.initTransportUi) ArenaP2P.initTransportUi();
       showScreen("p2p");
     });
   }
@@ -1235,6 +1242,7 @@
     hubBackCtl = window.ArenaHubBack.bind({ getLang: lang });
   }
   applyI18n();
+  if (window.ArenaP2P && ArenaP2P.initTransportUi) ArenaP2P.initTransportUi();
   fillSettingsForm();
   showSafariTipIfNeeded();
   if (window.ArenaSW) window.ArenaSW.register("./sw.js");

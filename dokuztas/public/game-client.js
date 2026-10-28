@@ -919,7 +919,12 @@
     saveSettings({ name });
     toast(t("connecting"));
     try {
-      p2p = new P2P.P2PSession();
+      p2p = window.ArenaP2P
+        ? ArenaP2P.createSession({
+            prefix: "dokuztas",
+            transport: ArenaP2P.getTransport(),
+          })
+        : new P2P.P2PSession();
       bindP2PHandlers(p2p);
       const code = await p2p.host();
       p2pLobby = {
@@ -949,7 +954,12 @@
     saveSettings({ name });
     toast(t("connecting"));
     try {
-      p2p = new P2P.P2PSession();
+      p2p = window.ArenaP2P
+        ? ArenaP2P.createSession({
+            prefix: "dokuztas",
+            transport: ArenaP2P.getTransport(),
+          })
+        : new P2P.P2PSession();
       bindP2PHandlers(p2p);
       await p2p.join(code);
       p2pLobby = {
@@ -1145,6 +1155,7 @@
     hubBackCtl = window.ArenaHubBack.bind({ getLang: lang });
   }
   applyI18n();
+  if (window.ArenaP2P && ArenaP2P.initTransportUi) ArenaP2P.initTransportUi();
   fillSettingsForm();
   initBoardSvg();
   if (window.ArenaSW) window.ArenaSW.register("./sw.js");

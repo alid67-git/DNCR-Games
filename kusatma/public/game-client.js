@@ -1174,7 +1174,10 @@
     const name = ($("p2p-name").value || "").trim() || t("player1");
     toast(t("connecting"));
     try {
-      p2pSession = new ArenaP2P.P2PSession({ prefix: "kusatma" });
+      p2pSession = ArenaP2P.createSession({
+        prefix: "kusatma",
+        transport: ArenaP2P.getTransport(),
+      });
       bindP2P(p2pSession);
       const code = await p2pSession.host();
       p2pLobby = {
@@ -1205,7 +1208,10 @@
     const name = ($("p2p-name").value || "").trim() || t("player2");
     toast(t("connecting"));
     try {
-      p2pSession = new ArenaP2P.P2PSession({ prefix: "kusatma" });
+      p2pSession = ArenaP2P.createSession({
+        prefix: "kusatma",
+        transport: ArenaP2P.getTransport(),
+      });
       bindP2P(p2pSession);
       await p2pSession.join(code);
       p2pLobby = {
@@ -1654,5 +1660,6 @@
   }
 
   applyI18n();
+  if (window.ArenaP2P && ArenaP2P.initTransportUi) ArenaP2P.initTransportUi();
   showScreen("home");
 })();

@@ -39,10 +39,16 @@ window.KatiP2P = (function () {
     document.body.appendChild(el);
   }
 
-  function createSession(handlers) {
+  function createSession(handlers, opts) {
     const H = handlers || {};
+    const transport =
+      (opts && opts.transport) ||
+      (window.ArenaP2P && typeof ArenaP2P.getTransport === "function"
+        ? ArenaP2P.getTransport()
+        : "peerjs");
     let peer = null;
     let conn = null;
+    let nearby = null;
     let role = null; // "host" | "guest"
     let code = null;
     let myName = "Oyuncu";
@@ -100,6 +106,12 @@ window.KatiP2P = (function () {
     }
 
     function send(msg) {
+      if (nearby) {
+        try {
+          nearby.send(msg);
+        } catch (_) {}
+        return;
+      }
       if (conn && conn.open) {
         try {
           conn.send(msg);
@@ -218,12 +230,82 @@ window.KatiP2P = (function () {
       try {
         if (peer) peer.destroy();
       } catch (_) {}
+      try {
+        if (nearby) nearby.destroy();
+      } catch (_) {}
       conn = null;
       peer = null;
+      nearby = null;
       room = null;
     }
 
+    function bindNearbyHandlers() {
+      nearby.on("message", onMessage);
+      nearby.on("disconnected", () => {
+        if (closed) return;
+        if (role === "host" && room) {
+          room.guestName = null;
+          room.readyGuest = false;
+          room.status = "waiting";
+          emitState();
+        } else if (H.onClosed) {
+          H.onClosed("peer_left");
+        }
+      });
+      nearby.on("error", () => {
+        if (H.onError) H.onError("conn_error");
+      });
+    }
+
+    function hostNearby(name) {
+      return new Promise((resolve, reject) => {
+        if (!window.ArenaNearby || !ArenaNearby.NearbySession) {
+          reject(new Error("nearby_unavailable"));
+          return;
+        }
+        myName = (name || "").trim() || "Oyuncu 1";
+        role = "host";
+        code = makeCode(4);
+        nearby = new ArenaNearby.NearbySession({ prefix: "kati" });
+        bindNearbyHandlers();
+        nearby
+          .host(code)
+          .then(() => {
+            room = makeRoom(code, myName);
+            emitState();
+            resolve({ code });
+          })
+          .catch(reject);
+      });
+    }
+
+    function joinNearby(roomCode, name) {
+      return new Promise((resolve, reject) => {
+        if (!window.ArenaNearby || !ArenaNearby.NearbySession) {
+          reject(new Error("nearby_unavailable"));
+          return;
+        }
+        myName = (name || "").trim() || "Oyuncu 2";
+        role = "guest";
+        code = String(roomCode || "").trim().toUpperCase();
+        if (!code) {
+          reject(new Error("need_code"));
+          return;
+        }
+        nearby = new ArenaNearby.NearbySession({ prefix: "kati" });
+        bindNearbyHandlers();
+        nearby
+          .join(code)
+          .then(() => {
+            send({ type: "join", name: myName });
+            resolve({ code });
+          })
+          .catch(reject);
+      });
+    }
+
     function host(name) {
+      if (transport === "nearby") return hostNearby(name);
       return new Promise((resolve, reject) => {
         loadPeerJs((err) => {
           if (err) return reject(err);
@@ -288,6 +370,7 @@ window.KatiP2P = (function () {
     }
 
     function join(roomCode, name) {
+      if (transport === "nearby") return joinNearby(roomCode, name);
       return new Promise((resolve, reject) => {
         loadPeerJs((err) => {
           if (err) return reject(err);
