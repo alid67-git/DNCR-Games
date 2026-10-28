@@ -1102,6 +1102,7 @@
     $("btn-2p-start").addEventListener("click", () => startLocalHotseat());
   }
   $("btn-mode-online").addEventListener("click", () => {
+    if (window.ArenaP2P && ArenaP2P.initTransportUi) ArenaP2P.initTransportUi();
     fillSettingsForm();
     showScreen("online");
   });
@@ -1242,6 +1243,7 @@
     hubBackCtl = window.ArenaHubBack.bind({ getLang: lang });
   }
   applyI18n();
+  if (window.ArenaP2P && ArenaP2P.initTransportUi) ArenaP2P.initTransportUi();
   fillSettingsForm();
   initBoardSvg();
   if (window.ArenaSW) window.ArenaSW.register("./sw.js");

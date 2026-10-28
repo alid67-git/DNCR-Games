@@ -1,5 +1,31 @@
 /* Arena shell — menü ikonları, mod görselleri, skor, ayar sürümü */
 
+.p2p-transport {
+  margin: 0.75rem 0 0.35rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(232, 200, 120, 0.22);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.18);
+}
+.p2p-transport legend {
+  padding: 0 0.35rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  opacity: 0.9;
+}
+.p2p-transport .radio-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0.35rem 0;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+.p2p-transport.hidden,
+#p2p-need-bt.hidden {
+  display: none !important;
+}
+
 .btn-menu {
   display: inline-flex !important;
   align-items: center;

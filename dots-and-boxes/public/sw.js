@@ -11,6 +11,7 @@ const ASSETS = [
   "./ai.js",
   "./game-client.js",
   "./manifest.webmanifest",
+  "./shared/nearby-session.js",
   "./shared/p2p-session.js",
   "./shared/update-check.js",
   "./shared/register-sw.js",

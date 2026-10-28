@@ -10,6 +10,7 @@ const ASSETS = [
   "./game-client.js",
   "./p2p-online.js",
   "./update-check.js",
+  "./shared/nearby-session.js",
   "./shared/p2p-session.js",
   "./shared/update-check.js",
   "./shared/register-sw.js",

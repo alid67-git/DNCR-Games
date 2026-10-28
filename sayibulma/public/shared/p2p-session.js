@@ -1,6 +1,6 @@
 /**
- * Arena shared — sunucusuz P2P oda (PeerJS).
- * window.ArenaP2P.P2PSession
+ * Arena shared — sunucusuz P2P oda (PeerJS) + Android Nearby.
+ * window.ArenaP2P.P2PSession / createSession / getTransport
  */
 (function (root) {
   "use strict";
@@ -146,5 +146,64 @@
     }
   }
 
-  root.ArenaP2P = { P2PSession, makeCode, peerIdFromCode, loadPeerScript };
+  function nearbyReadySync() {
+    return !!(root.ArenaNearby && root.ArenaNearby.nearbyAvailableSync());
+  }
+
+  /**
+   * @param {{ prefix?: string, transport?: "peerjs"|"nearby" }} opts
+   */
+  function createSession(opts) {
+    const transport = (opts && opts.transport) || "peerjs";
+    const prefix = (opts && opts.prefix) || "arena";
+    if (transport === "nearby") {
+      if (!root.ArenaNearby || !root.ArenaNearby.NearbySession) {
+        throw new Error("nearby_unavailable");
+      }
+      return new root.ArenaNearby.NearbySession({ prefix });
+    }
+    return new P2PSession({ prefix });
+  }
+
+  function getTransport(formRoot) {
+    const rootEl = formRoot || document;
+    const el = rootEl.querySelector('input[name="p2p-transport"]:checked');
+    if (el && el.value === "nearby") return "nearby";
+    return "peerjs";
+  }
+
+  /**
+   * Android APK’da Bluetooth / yakında seçeneğini gösterir; web’de gizler.
+   * @param {{ hintNet?: HTMLElement|null, hintBt?: HTMLElement|null }} [opts]
+   */
+  function initTransportUi(opts) {
+    const box = document.getElementById("p2p-transport");
+    if (!box) return;
+    const show = nearbyReadySync();
+    box.classList.toggle("hidden", !show);
+    box.hidden = !show;
+    const hintNet = (opts && opts.hintNet) || document.getElementById("p2p-need-net") ||
+      document.querySelector('[data-i18n="p2pNeedNet"]');
+    const hintBt = (opts && opts.hintBt) || document.getElementById("p2p-need-bt");
+    function syncHints() {
+      const t = getTransport();
+      if (hintNet) hintNet.classList.toggle("hidden", show && t === "nearby");
+      if (hintBt) hintBt.classList.toggle("hidden", !(show && t === "nearby"));
+    }
+    box.querySelectorAll('input[name="p2p-transport"]').forEach((r) => {
+      r.addEventListener("change", syncHints);
+    });
+    syncHints();
+  }
+
+  root.ArenaP2P = {
+    P2PSession,
+    makeCode,
+    peerIdFromCode,
+    loadPeerScript,
+    createSession,
+    getTransport,
+    initTransportUi,
+    nearbyReadySync,
+  };
 })(typeof self !== "undefined" ? self : this);

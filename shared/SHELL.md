@@ -20,7 +20,7 @@ Sürüm numarası ana menü altında ve ayarların dibinde görünür.
 |----|----|-----|
 | `solo` | Bilgisayara karşı | Gerekmez |
 | `local2p` | Aynı cihazda iki kişi | Gerekmez |
-| `remote` | İki telefonda / uzaktan (P2P) | Eş bulmak için kısa internet; **oyun sunucusu yok** |
+| `remote` | İki telefonda / uzaktan (P2P) | İnternet P2P: eş bulmak için kısa net. **Android hub:** Bluetooth / yakında (~5 m) internetsiz. **Oyun sunucusu yok** |
 
 ## Zorunlu ayarlar
 
@@ -40,7 +40,8 @@ Sürüm numarası ana menü altında ve ayarların dibinde görünür.
 
 | Dosya | Görev |
 |-------|--------|
-| `p2p-session.js` | PeerJS oda kur / katıl |
+| `p2p-session.js` | PeerJS oda kur / katıl (+ transport UI) |
+| `nearby-session.js` | Android Nearby (Bluetooth / Wi‑Fi Direct) oda |
 | `update-check.js` | GitHub Releases sürüm kontrolü |
 | `register-sw.js` | Service worker kaydı |
 | `mode-i18n.js` | Ortak mod / menü çeviri anahtarları |
