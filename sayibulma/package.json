@@ -1,6 +1,6 @@
 {
   "name": "sayibulma",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Sayı Bulma — 4 haneli artı/eksi düello; solo AI, local 2P, serverless P2P",
   "scripts": {
     "test": "node game/engine.test.js && node game/ai.test.js",

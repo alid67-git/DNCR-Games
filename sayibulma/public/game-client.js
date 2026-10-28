@@ -411,16 +411,11 @@
     }
     $("chip-a").classList.toggle("is-turn", s.turn === PLAYERS.a && !s.winner);
     $("chip-b").classList.toggle("is-turn", s.turn === PLAYERS.b && !s.winner);
+    // Chip altında kısa durum — uzun cümleler phase-label'da
     $("meta-a").textContent =
-      s.winner === PLAYERS.a ? t("winYou") : s.turn === PLAYERS.a ? t("turnYou") : "";
+      s.winner === PLAYERS.a ? "✓" : s.turn === PLAYERS.a && !s.winner ? "●" : "";
     $("meta-b").textContent =
-      s.winner === PLAYERS.b
-        ? "✓"
-        : s.turn === PLAYERS.b
-          ? session.mode === "solo"
-            ? t("statusCpu")
-            : t("statusOpp")
-          : "";
+      s.winner === PLAYERS.b ? "✓" : s.turn === PLAYERS.b && !s.winner ? "●" : "";
 
     if (session.mode === "solo") {
       $("hist-title-a").textContent = t("historyYou");
@@ -458,13 +453,11 @@
       phase = t("statusOpp");
     }
     $("phase-label").textContent = phase;
-    $("status-msg").textContent = s.winner
-      ? ""
-      : canAct()
-        ? t("statusGuess")
-        : session.mode === "solo" && s.turn === PLAYERS.b
-          ? t("statusCpu")
-          : "";
+    // Pad altında tekrar etmeyelim; ipucu yalnızca henüz tahmin yokken
+    const anyGuess =
+      (s.histories.a && s.histories.a.length) || (s.histories.b && s.histories.b.length);
+    $("status-msg").textContent =
+      !s.winner && canAct() && !anyGuess ? t("statusGuess") : "";
 
     const end = $("end-panel");
     const showResultBtn = $("btn-show-result");

@@ -1,9 +1,24 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.6",
-  build: 7,
+  version: "1.0.7",
+  build: 8,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.7",
+      build: 8,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Android dar ekranda tahmin geçmişleri yan yana kalır (artık alt alta düşmez)",
+          "Geçmiş, tahmin padinin üstünde; pad ve skorlar daha kompakt",
+        ],
+        en: [
+          "Guess histories stay side-by-side on narrow Android screens",
+          "History sits above the pad; pad and scores are more compact",
+        ],
+      },
+    },
     {
       version: "1.0.6",
       build: 7,

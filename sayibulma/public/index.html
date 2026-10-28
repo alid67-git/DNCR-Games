@@ -318,14 +318,27 @@
         </div>
       </div>
 
-      <p id="attempts-label" class="attempts-label"></p>
-      <p id="phase-label" class="phase-label"></p>
+      <div class="game-meta-row">
+        <p id="attempts-label" class="attempts-label"></p>
+        <p id="phase-label" class="phase-label"></p>
+      </div>
       <div id="last-feedback" class="last-feedback hidden" aria-live="assertive">
         <span class="lf-guess" id="lf-guess"></span>
         <span class="lf-scores">
           <span class="chip-plus" id="lf-plus">+0</span>
           <span class="chip-minus" id="lf-minus">−0</span>
         </span>
+      </div>
+
+      <div class="history-wrap">
+        <div class="history-col">
+          <h3 id="hist-title-a" data-i18n="historyYou">Senin tahminlerin</h3>
+          <ul id="hist-a" class="guess-history"></ul>
+        </div>
+        <div class="history-col">
+          <h3 id="hist-title-b" data-i18n="historyOpp">Rakibin tahminleri</h3>
+          <ul id="hist-b" class="guess-history"></ul>
+        </div>
       </div>
 
       <div class="guess-stage" id="guess-stage">
@@ -341,17 +354,6 @@
         <div id="cpu-wait-panel" class="cpu-wait-panel hidden" aria-live="polite">
           <div class="cpu-wait-spinner" aria-hidden="true"></div>
           <p class="cpu-wait-text" data-i18n="statusCpu">Bilgisayar düşünüyor…</p>
-        </div>
-      </div>
-
-      <div class="history-wrap">
-        <div class="history-col">
-          <h3 id="hist-title-a" data-i18n="historyYou">Senin tahminlerin</h3>
-          <ul id="hist-a" class="guess-history"></ul>
-        </div>
-        <div class="history-col">
-          <h3 id="hist-title-b" data-i18n="historyOpp">Rakibin tahminleri</h3>
-          <ul id="hist-b" class="guess-history"></ul>
         </div>
       </div>
 
