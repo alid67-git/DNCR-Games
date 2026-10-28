@@ -80,7 +80,7 @@ window.DotsI18n = (function () {
       helpRule5: "Rakibe uzun zincir bırakmamaya dikkat et; zor seviyeler bunu cezalandırır.",
       helpBoardsTitle: "Oyun alanları",
       helpBoards:
-        "10 farklı oyun alanı var: 6 tanesi klasik 8–10 noktalı ızgara, 4 tanesi yıldız ve hayvan şekilli özel tahtalar.",
+        "7 oyun alanı: klasik 6×6, 6×8, 8×10, 10×10 ızgaralar; altında Yıldız, Elmas ve Artı şekilli tahtalar.",
       helpDifficultyTitle: "Zorluk seviyeleri",
       helpDifficulty:
         "Kolay: yapay zeka sık hata yapar. Orta: dengeli ve hatasız oynar. Zor: kutuları akıllıca bırakıp kontrolü elinde tutar (double-cross). Çok Zor: aynı zamanda olası hamleleri simüle ederek en iyisini seçer.",
@@ -211,7 +211,7 @@ window.DotsI18n = (function () {
       helpRule5: "Avoid leaving long chains for your opponent — hard AI punishes that.",
       helpBoardsTitle: "Boards",
       helpBoards:
-        "There are 10 boards: 6 classic 8–10 dot grids, plus 4 special star and animal-shaped boards.",
+        "7 boards: classic 6×6, 6×8, 8×10, 10×10 grids; plus Star, Diamond, and Plus shaped boards.",
       helpDifficultyTitle: "Difficulty levels",
       helpDifficulty:
         "Easy: the computer makes frequent mistakes. Medium: balanced, mistake-free play. Hard: sacrifices boxes smartly to keep control (double-cross). Very Hard: also simulates likely outcomes to pick the best move.",

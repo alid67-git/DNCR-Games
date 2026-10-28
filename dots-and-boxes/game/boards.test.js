@@ -1,25 +1,36 @@
 const assert = require("assert");
 const Boards = require("../public/boards.js");
 
-function testTenBoards() {
-  assert.strictEqual(Boards.BOARD_DEFS.length, 10, "tam olarak 10 oyun alanı olmalı");
+function testSevenBoards() {
+  assert.strictEqual(Boards.BOARD_DEFS.length, 7, "tam olarak 7 oyun alanı olmalı");
   const ids = new Set(Boards.BOARD_DEFS.map((b) => b.id));
-  assert.strictEqual(ids.size, 10, "board id'leri benzersiz olmalı");
+  assert.strictEqual(ids.size, 7, "board id'leri benzersiz olmalı");
 }
 
-function testSixGridsInRange() {
+function testFourClassicGrids() {
   const grids = Boards.BOARD_DEFS.filter((b) => b.category === "grid");
-  assert.strictEqual(grids.length, 6, "6 klasik ızgara tahtası olmalı");
+  assert.strictEqual(grids.length, 4, "4 klasik ızgara tahtası olmalı");
+  const expected = {
+    "grid-6x6": [6, 6],
+    "grid-6x8": [6, 8],
+    "grid-8x10": [8, 10],
+    "grid-10x10": [10, 10],
+  };
   for (const def of grids) {
     const g = Boards.getGraph(def.id);
-    assert.ok(g.dotRows >= 8 && g.dotRows <= 10, `${def.id} dot satırı 8-10 aralığında olmalı`);
-    assert.ok(g.dotCols >= 8 && g.dotCols <= 10, `${def.id} dot sütunu 8-10 aralığında olmalı`);
+    const want = expected[def.id];
+    assert.ok(want, `beklenmeyen grid id: ${def.id}`);
+    assert.strictEqual(g.dotRows, want[0], `${def.id} dot satırı`);
+    assert.strictEqual(g.dotCols, want[1], `${def.id} dot sütunu`);
+    assert.ok(g.totalBoxes > 0, `${def.id} en az bir kutu olmalı`);
   }
 }
 
-function testFourShapes() {
+function testThreeShapes() {
   const shapes = Boards.BOARD_DEFS.filter((b) => b.category === "shape");
-  assert.strictEqual(shapes.length, 4, "4 şekilli (yıldız/hayvan) tahta olmalı");
+  assert.strictEqual(shapes.length, 3, "3 şekilli tahta olmalı");
+  const shapeIds = shapes.map((b) => b.id).sort();
+  assert.deepStrictEqual(shapeIds, ["shape-diamond", "shape-plus", "shape-star"]);
   for (const def of shapes) {
     const g = Boards.getGraph(def.id);
     assert.ok(g.totalBoxes > 10, `${def.id} yeterince kutuya sahip olmalı`);
@@ -57,8 +68,8 @@ function testGraphIntegrity() {
   }
 }
 
-testTenBoards();
-testSixGridsInRange();
-testFourShapes();
+testSevenBoards();
+testFourClassicGrids();
+testThreeShapes();
 testGraphIntegrity();
 console.log("boards.test.js — tüm testler geçti");

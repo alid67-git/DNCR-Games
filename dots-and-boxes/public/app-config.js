@@ -1,9 +1,24 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.1.3",
-  build: 6,
+  version: "1.2.0",
+  build: 7,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/noktalar/",
   changelog: [
+    {
+      version: "1.2.0",
+      build: 7,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Tahtalar yenilendi: klasik 6×6, 6×8, 8×10, 10×10",
+          "Şekiller: Yıldız, Elmas, Artı (zincir stratejisine uygun)",
+        ],
+        en: [
+          "Boards refreshed: classic 6×6, 6×8, 8×10, 10×10",
+          "Shapes: Star, Diamond, Plus (chain-friendly layouts)",
+        ],
+      },
+    },
     {
       version: "1.1.3",
       build: 6,

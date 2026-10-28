@@ -41,7 +41,7 @@ function testHarderDifficultyWinsMoreOftenOnAverage() {
   let veryHardMarginTotal = 0;
   for (let i = 0; i < N; i++) {
     const starter = i % 2 === 0 ? PLAYERS.A : PLAYERS.B;
-    const graph = Boards.getGraph("grid-8x8");
+    const graph = Boards.getGraph("grid-6x6");
     let state = createGameState(graph, starter);
     let guard = 0;
     while (!state.winner && guard < graph.totalEdges + 5) {

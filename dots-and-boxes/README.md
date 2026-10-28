@@ -4,7 +4,7 @@ Klasik **Noktalar ve Kutular** (Dots and Boxes) oyunu.
 
 - **Tek kişilik** — yapay zekaya karşı (Kolay / Orta / Zor / Çok Zor)
 - **İki kişilik** — aynı cihazda sırayla
-- **10 oyun alanı** — 6 klasik 8–10 noktalı ızgara + yıldız, kedi, balık, tavşan şekilleri
+- **7 oyun alanı** — klasik 6×6, 6×8, 8×10, 10×10 + Yıldız, Elmas, Artı şekilleri
 - **TR / EN**, ayarlar, yardım, sürüm geçmişi
 - **Android APK** (Capacitor) + **iPhone Safari** (web)
 - **İnternet gerekmez** — tek kişilik ve iki kişilik tamamen çevrimdışı (APK veya yerel sunucu)
@@ -33,10 +33,10 @@ Ana menü: **Oyna · Ayarlar · Yardım · Güncellemeler**
 
 | Zorluk | Önerilen tahtalar |
 |--------|-------------------|
-| Kolay | 8×8, 8×9, Yıldız |
-| Orta | 9×9, 8×10, Kedi, Yıldız |
-| Zor | 9×10, Balık, Tavşan |
-| Çok Zor | 10×10, Tavşan, Balık |
+| Kolay | 6×6, 6×8, Yıldız |
+| Orta | 8×10, Yıldız, Elmas |
+| Zor | 8×10, Elmas, Artı |
+| Çok Zor | 10×10, Artı, Elmas |
 
 ## Android
 
