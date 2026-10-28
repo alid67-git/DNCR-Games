@@ -1,8 +1,8 @@
 {
   "name": "dncr-games-hub",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
-  "description": "DNCR Games hub — launcher for Kati, Noktalar, Dokuztaş, Kuşatma",
+  "description": "DNCR Games hub — launcher for Kati, Noktalar, Dokuztaş, Kuşatma, Sayı Bulma",
   "scripts": {
     "build:www": "node ../scripts/build-pages.mjs && rm -rf www && cp -a ../_site www",
     "android:sync": "npm run build:www && npx cap sync android",
