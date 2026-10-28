@@ -133,6 +133,96 @@
       animation: rise 0.8s ease both;
       animation-delay: 0.22s;
     }
+    .hub-actions {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+    }
+    .btn-update-check {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(28, 18, 10, 0.55);
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.55rem 0.95rem;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .btn-update-check:active { transform: scale(0.98); }
+    .hub-toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(1.25rem, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      z-index: 60;
+      max-width: min(360px, calc(100% - 2rem));
+      padding: 0.7rem 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(20, 12, 6, 0.92);
+      color: var(--ink);
+      font-size: 0.88rem;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+    .hub-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      background: rgba(8, 5, 2, 0.72);
+      backdrop-filter: blur(3px);
+    }
+    .hub-modal[hidden] { display: none !important; }
+    .hub-modal-card {
+      width: min(400px, 100%);
+      padding: 1.35rem 1.25rem 1.2rem;
+      border-radius: 16px;
+      border: 1px solid rgba(240, 199, 90, 0.32);
+      background: linear-gradient(165deg, #2a1a0e, #140e08);
+      text-align: left;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+    }
+    .hub-modal-card h2 {
+      margin: 0 0 0.55rem;
+      font-family: var(--display);
+      font-size: 1.25rem;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+    .hub-modal-card p {
+      margin: 0 0 1.1rem;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.45;
+    }
+    .hub-modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+    .hub-modal-actions button {
+      appearance: none;
+      border: 1px solid var(--line);
+      font: inherit;
+      font-weight: 700;
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      cursor: pointer;
+    }
+    .hub-btn-primary {
+      background: linear-gradient(135deg, #e8c878, #f0c75a);
+      border-color: transparent;
+      color: #1a1208;
+    }
+    .hub-btn-ghost {
+      background: rgba(28, 18, 10, 0.65);
+      color: var(--ink);
+    }
     @keyframes rise {
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: none; }
@@ -178,8 +268,28 @@
       </a>
     </nav>
 
-    <footer>Tek uygulama · iPhone / iPad / Android · Yardım her oyunun içinde<br /><span id="hub-ver">v1.0.2</span></footer>
+    <div class="hub-actions">
+      <button type="button" class="btn-update-check" id="btn-hub-check-update">Güncellemeyi kontrol et</button>
+    </div>
+
+    <footer>Tek uygulama · iPhone / iPad / Android · Yardım her oyunun içinde<br /><span id="hub-ver">v1.0.3</span></footer>
   </main>
+
+  <div id="hub-toast" class="hub-toast" hidden role="status"></div>
+
+  <div id="hub-update-modal" class="hub-modal" hidden role="dialog" aria-modal="true" aria-labelledby="hub-update-title">
+    <div class="hub-modal-card">
+      <h2 id="hub-update-title">Yeni sürüm hazır</h2>
+      <p id="hub-update-body"></p>
+      <div class="hub-modal-actions">
+        <button type="button" class="hub-btn-primary" id="btn-hub-update-now">Şimdi güncelle</button>
+        <button type="button" class="hub-btn-ghost" id="btn-hub-update-later">Daha sonra</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app-config.js"></script>
+  <script src="hub-update.js"></script>
   <script>
     (function () {
       // Capacitor: klasör URL’leri (kati/) html5mode ile hub’a düşer — her zaman …/index.html
@@ -196,5 +306,6 @@
   </script>
 </body>
 </html>
+
 
 
