@@ -8,7 +8,20 @@
     return;
   }
 
-  const { PLAYERS, PHASE, createGameState, applyAction, opponent, legalMovesFrom, ALL_EDGES, edgeEndpoints, cellCorners, SHIELD_BREAK_COST } = Engine;
+  const {
+    PLAYERS,
+    PHASE,
+    createGameState,
+    applyAction,
+    opponent,
+    legalMovesFrom,
+    ALL_EDGES,
+    edgeEndpoints,
+    cellCorners,
+    SHIELD_BREAK_COST,
+    listAlmostCompleteCells,
+    listSiegeThreats,
+  } = Engine;
 
   const SETTINGS_KEY = "kusatma_settings_v1";
   const $ = (id) => document.getElementById(id);
@@ -154,6 +167,9 @@
       p2: "",
       music: true,
       sfx: true,
+      learningMode: true,
+      learningSeenClean: false,
+      learningSeenSiege: false,
     };
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
@@ -163,6 +179,11 @@
       return defaults;
     }
   }
+
+  function isLearningEnabled() {
+    return settings.learningMode !== false;
+  }
+
 
   function bootAudio() {
     if (!Audio) return;
@@ -190,7 +211,7 @@
           ? ev.target.closest("button, .mode-card, .btn")
           : null;
       if (!el || el.disabled) return;
-      if (el.id === "set-music" || el.id === "set-sfx") return;
+      if (el.id === "set-music" || el.id === "set-sfx" || el.id === "set-learning" || el.id === "solo-learning") return;
       const id = el.id || "";
       if (/back|exit|cancel|skip|to-menu/i.test(id) || el.classList.contains("btn-back")) {
         uiSound("back");
@@ -252,6 +273,8 @@
     if ($("set-diff")) $("set-diff").value = settings.aiDifficulty || "medium";
     if ($("set-music")) $("set-music").checked = settings.music !== false;
     if ($("set-sfx")) $("set-sfx").checked = settings.sfx !== false;
+    if ($("set-learning")) $("set-learning").checked = isLearningEnabled();
+    if ($("solo-learning")) $("solo-learning").checked = isLearningEnabled();
     renderDiffGrid();
     if (hubBackCtl && hubBackCtl.refresh) hubBackCtl.refresh();
   }
@@ -599,6 +622,7 @@
       !skipFx && expected && next.lastMove && next.lastMove.type === expected;
 
     const finish = () => {
+      noteLearningProgress(session.state, next, player);
       session.state = next;
       renderAll();
       if (!fromNet && session.mode !== "demo") maybeAiTurn();
@@ -616,10 +640,16 @@
     selectedStone = null;
     await ensureAudio();
     if (Audio && settings.music !== false) Audio.startMusic();
-    const state = createGameState(PLAYERS.P1);
+    // Öğrenme: solo’da ayar açıksa; 2P/P2P’te kapalı (tam kurallar)
+    const learning = mode === "solo" && isLearningEnabled();
+    const state = createGameState(
+      PLAYERS.P1,
+      learning ? { insurance: false, combo: false } : { insurance: true, combo: true }
+    );
     session = {
       mode,
-      difficulty: setup.difficulty,
+      difficulty: learning ? "learn" : setup.difficulty,
+      learning,
       humanPlayer: PLAYERS.P1,
       names: {
         human: ($("solo-name") && $("solo-name").value.trim()) || setup.p1,
@@ -628,15 +658,41 @@
       },
       state,
       scoreRecorded: false,
+      learningToastShown: false,
     };
     saveSettings({
       p1: session.names.p1 || session.names.human || "",
       p2: session.names.p2 || "",
     });
+    document.body.classList.toggle("is-learning", !!learning);
     $("game-over").classList.add("hidden");
     showScreen("game");
     renderAll();
     maybeAiTurn();
+  }
+
+  function noteLearningProgress(prevState, nextState, actingPlayer) {
+    if (!session || !session.learning) return;
+    if (actingPlayer !== session.humanPlayer) return;
+    const lm = nextState.lastMove;
+    if (!lm || lm.type !== "DRAW_LINE" || !lm.captureDetails) return;
+    let seenClean = !!settings.learningSeenClean;
+    let seenSiege = !!settings.learningSeenSiege;
+    for (const d of lm.captureDetails) {
+      if (d.siege) seenSiege = true;
+      else seenClean = true;
+    }
+    if (
+      seenClean === settings.learningSeenClean &&
+      seenSiege === settings.learningSeenSiege
+    ) {
+      return;
+    }
+    saveSettings({ learningSeenClean: seenClean, learningSeenSiege: seenSiege });
+    if (seenClean && seenSiege && !session.learningToastShown) {
+      session.learningToastShown = true;
+      toast(t("toastLearningDone"));
+    }
   }
 
   function renderAll() {
@@ -663,23 +719,60 @@
       </div>`;
     };
     hud.innerHTML = mk(1) + mk(2);
-    const phase =
+    let phase =
       s.phase === PHASE.DEPLOY
         ? t("phaseDeploy")
         : s.phase === PHASE.BATTLE
           ? t("phaseBattle")
           : t("gameOver");
+    if (session.learning && s.phase !== PHASE.GAME_OVER) {
+      phase = `${t("learningBadge")} · ${phase}`;
+    }
     $("phase-pill").textContent = phase;
   }
 
   function renderHint() {
-    const s = session.state;
-    if (s.phase === PHASE.GAME_OVER) {
-      $("game-hint").textContent = "";
+    const el = $("game-hint");
+    if (!el) return;
+    if (session.mode === "demo") {
+      el.textContent = "";
       return;
     }
-    if (s.phase === PHASE.DEPLOY) $("game-hint").textContent = t("actionHintDeploy");
-    else $("game-hint").textContent = t("actionHintBattle");
+    const s = session.state;
+    if (s.phase === PHASE.GAME_OVER) {
+      el.textContent = "";
+      return;
+    }
+    if (!isHumanTurn()) {
+      el.textContent = t("hintWait");
+      return;
+    }
+    if (s.phase === PHASE.DEPLOY) {
+      el.textContent = s.pendingDeploy ? t("hintDeployConfirm") : t("actionHintDeploy");
+      return;
+    }
+    // Battle — öncelik: esir > neredeyse kare > sigorta > taş seçili > genel
+    if (listSiegeThreats && listSiegeThreats(s, s.turn).length) {
+      el.textContent = t("hintSiegeChance");
+      return;
+    }
+    if (listAlmostCompleteCells && listAlmostCompleteCells(s).length) {
+      el.textContent = t("hintAlmostBox");
+      return;
+    }
+    if (
+      s.rules &&
+      s.rules.insurance !== false &&
+      (s.insuranceActive[1] || s.insuranceActive[2])
+    ) {
+      el.textContent = t("hintInsurance");
+      return;
+    }
+    if (selectedStone) {
+      el.textContent = t("hintBattleMove");
+      return;
+    }
+    el.textContent = session.learning ? t("hintLearning") + " — " + t("hintBattleSelect") : t("hintBattleSelect");
   }
 
   function renderDeployActions() {
@@ -739,6 +832,35 @@
     const NS = "http://www.w3.org/2000/svg";
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     ensureBoardDefs(svg);
+
+    const almost =
+      s.phase === PHASE.BATTLE && listAlmostCompleteCells
+        ? listAlmostCompleteCells(s)
+        : [];
+    const siegeThreats =
+      s.phase === PHASE.BATTLE && listSiegeThreats
+        ? listSiegeThreats(s, s.turn)
+        : [];
+    const siegeCellSet = new Set(siegeThreats.map((c) => `${c.i},${c.j}`));
+    const siegeNodeSet = new Set(siegeThreats.map((c) => `${c.r},${c.c}`));
+
+    // Tehdit / fırsat hücre glow (sahipsiz 3 kenar)
+    for (const { i, j } of almost) {
+      const a = xy(i, j);
+      const b = xy(i + 1, j + 1);
+      const rect = document.createElementNS(NS, "rect");
+      rect.setAttribute("x", a.x);
+      rect.setAttribute("y", a.y);
+      rect.setAttribute("width", b.x - a.x);
+      rect.setAttribute("height", b.y - a.y);
+      const isSiege = siegeCellSet.has(`${i},${j}`);
+      rect.setAttribute(
+        "class",
+        isSiege ? "cell-glow is-siege" : `cell-glow turn-p${s.turn}`
+      );
+      rect.style.pointerEvents = "none";
+      svg.appendChild(rect);
+    }
 
     // Cells
     for (let i = 0; i < Engine.C; i++) {
@@ -854,6 +976,16 @@
           mark.style.pointerEvents = "none";
           mark.textContent = owner === 1 ? "○" : "△";
           svg.appendChild(mark);
+        }
+
+        if (siegeNodeSet.has(`${r},${c}`)) {
+          const ring = document.createElementNS(NS, "circle");
+          ring.setAttribute("cx", p.x);
+          ring.setAttribute("cy", p.y);
+          ring.setAttribute("r", "4.1");
+          ring.setAttribute("class", "siege-ring");
+          ring.style.pointerEvents = "none";
+          svg.appendChild(ring);
         }
       }
     }
@@ -1360,6 +1492,15 @@
     commitAction(p, { type: "RESIGN" });
   });
 
+  function leaveMatchTo(screen) {
+    clearTimeout(aiTimer);
+    if (session && session.mode === "p2p") destroyP2P();
+    session = null;
+    document.body.classList.remove("is-learning");
+    if (Audio) Audio.stopMusic();
+    showScreen(screen || "home");
+  }
+
   $("btn-game-back").addEventListener("click", () => {
     if (session && session.mode === "demo") {
       exitDemo();
@@ -1368,11 +1509,7 @@
     if (session && session.state.phase !== PHASE.GAME_OVER) {
       if (!confirm(lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?")) return;
     }
-    clearTimeout(aiTimer);
-    if (session && session.mode === "p2p") destroyP2P();
-    session = null;
-    if (Audio) Audio.stopMusic();
-    showScreen("home");
+    leaveMatchTo("home");
   });
 
   $("btn-again").addEventListener("click", () => {
@@ -1380,16 +1517,14 @@
     if (session.mode === "p2p") {
       destroyP2P();
       session = null;
+      document.body.classList.remove("is-learning");
       showScreen("p2p");
       return;
     }
     startGame(session.mode);
   });
   $("btn-to-menu").addEventListener("click", () => {
-    if (session && session.mode === "p2p") destroyP2P();
-    session = null;
-    if (Audio) Audio.stopMusic();
-    showScreen("home");
+    leaveMatchTo("home");
   });
 
   $("set-lang").addEventListener("change", (e) => {
@@ -1420,6 +1555,22 @@
         Audio.setSfx(on);
         if (on) uiSound("toggle");
       }
+    });
+  }
+  function syncLearningToggle(on) {
+    saveSettings({ learningMode: on });
+    if ($("set-learning")) $("set-learning").checked = on;
+    if ($("solo-learning")) $("solo-learning").checked = on;
+    uiSound("toggle");
+  }
+  if ($("set-learning")) {
+    $("set-learning").addEventListener("change", (e) => {
+      syncLearningToggle(!!e.target.checked);
+    });
+  }
+  if ($("solo-learning")) {
+    $("solo-learning").addEventListener("change", (e) => {
+      syncLearningToggle(!!e.target.checked);
     });
   }
 

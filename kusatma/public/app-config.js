@@ -1,10 +1,25 @@
 window.SiegeConfig = {
   appName: "Kuşatma",
-  version: "1.4.2",
-  build: 8,
+  version: "1.5.0",
+  build: 9,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kusatma/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
+    {
+      version: "1.5.0",
+      build: 9,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Öğrenme modu: sigorta/kombo kapalı, yumuşak AI (solo)",
+          "Canlı tur ipuçları + 3 kenar / esir tahta vurgusu",
+        ],
+        en: [
+          "Learning mode: insurance/combo off, softer AI (solo)",
+          "Live turn hints + almost-box / siege board highlights",
+        ],
+      },
+    },
     {
       version: "1.4.2",
       build: 8,

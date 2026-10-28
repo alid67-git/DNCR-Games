@@ -1,6 +1,6 @@
 {
   "name": "kusatma-the-siege",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Kuşatma — DNCR Games: solo + local 2P + P2P, Ruleset v1",
   "main": "server.js",
   "scripts": {
