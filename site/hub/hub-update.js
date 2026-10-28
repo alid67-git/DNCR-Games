@@ -1,16 +1,23 @@
 /**
- * Hub APK — GitHub Releases üzerinden otomatik güncelleme.
- * Yalnızca hub-v* etiketli / DNCR-Games-hub*.apk asset’lerini dikkate alır.
- * Android’de HubApk eklentisi ile indir + kur (WebView tek başına APK yüklemez).
+ * Hub APK güncelleme — RideAtlas / Uğur tarzı:
+ * Tek sabit etiket: android-latest (rolling release).
+ * Alt banner: Yeni sürüm hazır → Güncelle.
+ * Android’de HubApk eklentisi ile indir + kur.
  */
 (function () {
   "use strict";
 
-  const CFG = window.HubConfig || { version: "0", githubOwner: "alid67-git", githubRepo: "DNCR-Games" };
+  const CFG = window.HubConfig || {
+    version: "0",
+    githubOwner: "alid67-git",
+    githubRepo: "DNCR-Games",
+  };
   const LAST_CHECK_KEY = "dncr_hub_update_last_check";
   const MIN_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000;
-  const TAG_PREFIX = (CFG.releaseTagPrefix || "hub-v").toLowerCase();
-  const APK_RE = CFG.apkNamePattern || /DNCR-Games-hub.*\.apk$/i;
+  const LATEST_TAG = CFG.androidLatestTag || "android-latest";
+  const APK_NAME = CFG.apkAssetName || "DNCR-Games-hub.apk";
+  /** Release adından sürüm: "... - v1.0.9" veya "v1.0.9" */
+  const VERSION_IN_NAME = /v[\d.]+(?:\s+\w+)?$/i;
 
   let pending = null;
   let installing = false;
@@ -23,7 +30,8 @@
     return String(raw || "")
       .trim()
       .replace(/^hub-v/i, "")
-      .replace(/^v/i, "");
+      .replace(/^v/i, "")
+      .replace(/\s+\w+$/, "");
   }
 
   function compareVersions(a, b) {
@@ -73,23 +81,6 @@
         return;
       }
     } catch (_) {}
-    try {
-      if (
-        window.Capacitor &&
-        typeof Capacitor.isNativePlatform === "function" &&
-        Capacitor.isNativePlatform()
-      ) {
-        // WebView içinde kalmasın — görünür <a download> ile dene
-        const a = document.createElement("a");
-        a.href = url;
-        a.target = "_blank";
-        a.rel = "noopener";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        return;
-      }
-    } catch (_) {}
     window.open(url, "_blank", "noopener");
   }
 
@@ -105,10 +96,12 @@
         plugin.addListener("installReady", () => {
           toast("Kurulum ekranı açıldı");
           installing = false;
+          setBannerInstalling(false);
         });
-        plugin.addListener("installError", (ev) => {
+        plugin.addListener("installError", () => {
           toast("Kurulum açılamadı — tarayıcıdan dene");
           installing = false;
+          setBannerInstalling(false);
           if (pending && pending.apkUrl) openExternal(pending.apkUrl);
         });
       }
@@ -133,53 +126,90 @@
     } catch (_) {}
   }
 
-  function findHubRelease(releases) {
-    const list = Array.isArray(releases) ? releases : [];
-    for (const rel of list) {
-      if (rel.draft || rel.prerelease) continue;
-      const tag = String(rel.tag_name || "").toLowerCase();
-      const assets = Array.isArray(rel.assets) ? rel.assets : [];
-      const apk = assets.find((a) => APK_RE.test(a.name || ""));
-      if (!apk && !tag.startsWith(TAG_PREFIX)) continue;
-      if (!apk) continue;
-      return {
-        version: parseVersion(rel.tag_name || rel.name),
-        tag: rel.tag_name,
-        name: rel.name || rel.tag_name,
-        notes: rel.body || "",
-        htmlUrl: rel.html_url,
-        apkUrl: apk.browser_download_url || null,
-      };
-    }
-    return null;
-  }
-
-  async function fetchHubLatest() {
+  /**
+   * RideAtlas: GET /releases/tags/android-latest
+   * Sürüm release name içinden; APK sabit adla.
+   */
+  async function fetchAndroidLatest() {
     const owner = CFG.githubOwner || "alid67-git";
     const repo = CFG.githubRepo || "DNCR-Games";
-    const url = `https://api.github.com/repos/${owner}/${repo}/releases?per_page=30`;
+    const url = `https://api.github.com/repos/${owner}/${repo}/releases/tags/${encodeURIComponent(LATEST_TAG)}`;
     const res = await fetch(url, {
       headers: { Accept: "application/vnd.github+json" },
     });
     if (!res.ok) throw new Error("release-fetch " + res.status);
-    return findHubRelease(await res.json());
+    const json = await res.json();
+    const name = String(json.name || json.tag_name || "");
+    const match = VERSION_IN_NAME.exec(name.trim());
+    let version = match ? parseVersion(match[0]) : parseVersion(json.tag_name);
+    if (!version || version === LATEST_TAG) {
+      // body / tag yedek
+      version = parseVersion(json.tag_name);
+    }
+    const assets = Array.isArray(json.assets) ? json.assets : [];
+    let apk = assets.find((a) => String(a.name || "") === APK_NAME);
+    if (!apk) {
+      apk = assets.find((a) => /\.apk$/i.test(a.name || ""));
+    }
+    if (!apk || !apk.browser_download_url) {
+      throw new Error("apk-missing");
+    }
+    return {
+      version: version || "0",
+      tag: json.tag_name || LATEST_TAG,
+      name: name,
+      notes: json.body || "",
+      htmlUrl: json.html_url,
+      apkUrl: apk.browser_download_url,
+      sizeBytes: typeof apk.size === "number" ? apk.size : 0,
+    };
   }
 
-  function showModal(info) {
+  function setBannerInstalling(on) {
+    const banner = $("update-banner");
+    const btn = $("update-btn");
+    const text = $("update-banner-text");
+    if (!banner) return;
+    if (on) {
+      banner.classList.add("show", "is-installing");
+      if (text) text.textContent = "İndiriliyor…";
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "…";
+      }
+    } else {
+      banner.classList.remove("is-installing");
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Güncelle";
+      }
+    }
+  }
+
+  function showBanner(info) {
     pending = info;
-    const modal = $("hub-update-modal");
-    const body = $("hub-update-body");
-    if (!modal || !body) return;
-    body.textContent =
-      "v" +
-      (info.version || "?") +
-      " hazır. İndirip kurunca hub güncellenir (eski sürümün üzerine).";
-    modal.hidden = false;
-  }
-
-  function hideModal() {
+    const banner = $("update-banner");
+    const text = $("update-banner-text");
+    const btn = $("update-btn");
+    if (!banner || !text) return;
+    text.textContent = "Yeni sürüm hazır · v" + (info.version || "?");
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Güncelle";
+    }
+    banner.classList.add("show");
+    banner.hidden = false;
+    // Eski modal varsa gizle
     const modal = $("hub-update-modal");
     if (modal) modal.hidden = true;
+  }
+
+  function hideBanner() {
+    const banner = $("update-banner");
+    if (banner) {
+      banner.classList.remove("show", "is-installing");
+      banner.hidden = true;
+    }
   }
 
   async function check({ force = false, silent = true } = {}) {
@@ -191,16 +221,17 @@
     if (!silent) toast("Güncelleme kontrol ediliyor…");
     markChecked();
     try {
-      const info = await fetchHubLatest();
+      const info = await fetchAndroidLatest();
       if (!info || !info.version) {
         if (!silent) toast("Sürüm bilgisi alınamadı");
         return { status: "error" };
       }
       if (compareVersions(info.version, CFG.version) <= 0) {
         if (!silent) toast("Güncelsin (v" + CFG.version + ")");
+        hideBanner();
         return { status: "up-to-date", version: info.version };
       }
-      showModal(info);
+      showBanner(info);
       return { status: "available", ...info };
     } catch (err) {
       console.warn("Hub update check failed", err);
@@ -217,15 +248,14 @@
       return;
     }
     installing = true;
-    const btn = $("btn-hub-update-now");
-    if (btn) btn.disabled = true;
-    toast("İndiriliyor… bildirimde izle, bitince kur");
-    hideModal();
+    setBannerInstalling(true);
+    toast("İndiriliyor… bitince kurulum açılır");
     try {
       await downloadAndInstall(url);
     } catch (err) {
       console.warn("Hub update apply failed", err);
       toast("İndirme başarısız — tarayıcı açılıyor");
+      setBannerInstalling(false);
       try {
         await openExternal(url);
       } catch (_) {
@@ -233,8 +263,6 @@
       }
       installing = false;
     } finally {
-      if (btn) btn.disabled = false;
-      // native indirme arka planda; ~2 sn sonra kilidi aç
       setTimeout(() => {
         installing = false;
       }, 2000);
@@ -249,14 +277,20 @@
     if (btnCheck) {
       btnCheck.addEventListener("click", () => check({ force: true, silent: false }));
     }
+    const updateBtn = $("update-btn");
+    if (updateBtn) updateBtn.addEventListener("click", () => applyUpdate());
+    const dismiss = $("update-dismiss");
+    if (dismiss) dismiss.addEventListener("click", hideBanner);
+
+    // Eski modal düğmeleri (varsa)
     const btnNow = $("btn-hub-update-now");
     if (btnNow) btnNow.addEventListener("click", () => applyUpdate());
     const btnLater = $("btn-hub-update-later");
-    if (btnLater) btnLater.addEventListener("click", hideModal);
-    const modal = $("hub-update-modal");
-    if (modal) {
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) hideModal();
+    if (btnLater) {
+      btnLater.addEventListener("click", () => {
+        const modal = $("hub-update-modal");
+        if (modal) modal.hidden = true;
+        hideBanner();
       });
     }
 

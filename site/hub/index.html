@@ -152,6 +152,73 @@
       cursor: pointer;
     }
     .btn-update-check:active { transform: scale(0.98); }
+
+    /* RideAtlas tarzı alt güncelleme bandı */
+    #update-banner {
+      position: fixed;
+      left: 50%;
+      bottom: max(1rem, env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(120%);
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      width: min(420px, calc(100% - 1.5rem));
+      padding: 0.65rem 0.75rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 196, 92, 0.45);
+      background: rgba(28, 18, 10, 0.96);
+      color: var(--ink);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+    #update-banner.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+      animation: update-banner-in 0.25s ease-out;
+    }
+    @keyframes update-banner-in {
+      from { opacity: 0; transform: translateX(-50%) translateY(18px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    #update-banner-text {
+      flex: 1;
+      font-size: 0.86rem;
+      font-weight: 600;
+      min-width: 0;
+    }
+    #update-btn {
+      appearance: none;
+      border: none;
+      border-radius: 10px;
+      padding: 0.45rem 0.8rem;
+      font: inherit;
+      font-size: 0.84rem;
+      font-weight: 700;
+      background: linear-gradient(180deg, #ffd27a, #f0a84a);
+      color: #1c120a;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+    #update-btn:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+    #update-dismiss {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0.25rem 0.35rem;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
     .hub-toast {
       position: fixed;
       left: 50%;
@@ -285,15 +352,11 @@
 
   <div id="hub-toast" class="hub-toast" hidden role="status"></div>
 
-  <div id="hub-update-modal" class="hub-modal" hidden role="dialog" aria-modal="true" aria-labelledby="hub-update-title">
-    <div class="hub-modal-card">
-      <h2 id="hub-update-title">Yeni sürüm hazır</h2>
-      <p id="hub-update-body"></p>
-      <div class="hub-modal-actions">
-        <button type="button" class="hub-btn-primary" id="btn-hub-update-now">Şimdi güncelle</button>
-        <button type="button" class="hub-btn-ghost" id="btn-hub-update-later">Daha sonra</button>
-      </div>
-    </div>
+  <!-- RideAtlas tarzı güncelleme bandı -->
+  <div id="update-banner" hidden role="status">
+    <span id="update-banner-text">Yeni sürüm hazır</span>
+    <button id="update-btn" type="button">Güncelle</button>
+    <button id="update-dismiss" type="button" aria-label="Kapat">✕</button>
   </div>
 
   <script src="app-config.js"></script>

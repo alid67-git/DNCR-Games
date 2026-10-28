@@ -4,8 +4,11 @@ window.HubConfig = {
   build: 10,
   githubOwner: "alid67-git",
   githubRepo: "DNCR-Games",
-  /** Release tag öneki — yalnızca hub APK sürümleri */
-  releaseTagPrefix: "hub-v",
-  /** İndirilecek asset adı deseni */
-  apkNamePattern: /DNCR-Games-hub.*\.apk$/i,
+  /**
+   * RideAtlas tarzı rolling release — tek sabit etiket.
+   * CI her build’de android-latest’i üzerine yazar.
+   */
+  androidLatestTag: "android-latest",
+  /** Sabit APK adı (RideAtlas.apk gibi) */
+  apkAssetName: "DNCR-Games-hub.apk",
 };
