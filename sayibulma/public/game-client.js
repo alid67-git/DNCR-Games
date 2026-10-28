@@ -385,7 +385,10 @@
         `</span>`;
       el.appendChild(li);
     });
-    if (list.length) el.scrollTop = el.scrollHeight;
+    requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+      el.classList.toggle("is-scrollable", el.scrollHeight > el.clientHeight + 4);
+    });
   }
 
   function renderGame() {

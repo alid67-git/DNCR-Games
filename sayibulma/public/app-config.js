@@ -1,9 +1,22 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.4",
-  build: 5,
+  version: "1.0.5",
+  build: 6,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.5",
+      build: 6,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Tahmin listeleri ekran dolunca yukarı/aşağı kaydırılabilir",
+        ],
+        en: [
+          "Guess history scrolls when the screen fills up",
+        ],
+      },
+    },
     {
       version: "1.0.4",
       build: 5,
