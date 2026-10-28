@@ -22,10 +22,10 @@
 
   /** Zorluk → önerilen tahta id'leri (önceden tanımlanmış eşleme). */
   const DIFF_BOARDS = {
-    easy: ["grid-8x8", "grid-8x9", "shape-star"],
-    medium: ["grid-9x9", "grid-8x10", "shape-cat", "shape-star"],
-    hard: ["grid-9x10", "shape-fish", "shape-rabbit", "grid-8x10"],
-    veryhard: ["grid-10x10", "shape-rabbit", "grid-9x10", "shape-fish"],
+    easy: ["grid-6x6", "grid-6x8", "shape-star"],
+    medium: ["grid-8x10", "shape-star", "shape-diamond"],
+    hard: ["grid-8x10", "shape-diamond", "shape-plus"],
+    veryhard: ["grid-10x10", "shape-plus", "shape-diamond"],
   };
 
   const $ = (id) => document.getElementById(id);
@@ -1083,7 +1083,7 @@
     setup.mode = "twop";
     if ($("p1-name")) $("p1-name").value = settings.p1 || "";
     if ($("p2-name")) $("p2-name").value = settings.p2 || "";
-    if (!setup.boardId) setup.boardId = "grid-8x8";
+    if (!setup.boardId) setup.boardId = "grid-6x6";
     renderBoardGrids();
     showScreen("twoPSetup");
   });

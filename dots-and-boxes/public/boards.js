@@ -152,91 +152,58 @@
 
   // ——— şekil üreticileri ———
 
+  /** Beş köşeli yıldız — düzensiz kenar, kısa/uzun zincir karışımı. */
   function starMask() {
     const size = 13;
-    const pts = starPoints(size / 2, size / 2, size * 0.47, size * 0.19, -90);
+    const pts = starPoints(size / 2, size / 2, size * 0.48, size * 0.2, -90);
     const m = rasterize(size, size, (x, y) => pointInPolygon(x, y, pts));
     return cropToBoundingBox(keepLargestComponent(m));
   }
 
-  function catMask() {
-    const cols = 11;
-    const rows = 10;
-    return cropToBoundingBox(keepLargestComponent(
-      rasterize(rows, cols, (x, y) => {
-        // Kafa (daire)
-        const head = pointInEllipse(x, y, cols / 2, rows / 2 + 1.1, cols * 0.42, rows * 0.4);
-        // Kulaklar (iki üçgen)
-        const leftEar = pointInTriangle(
-          x,
-          y,
-          cols * 0.18,
-          rows * 0.08,
-          cols * 0.1,
-          rows * 0.46,
-          cols * 0.46,
-          rows * 0.34
-        );
-        const rightEar = pointInTriangle(
-          x,
-          y,
-          cols * 0.82,
-          rows * 0.08,
-          cols * 0.9,
-          rows * 0.46,
-          cols * 0.54,
-          rows * 0.34
-        );
-        return head || leftEar || rightEar;
-      })
-    ));
+  /** Elmas (Manhattan) — uzun çapraz koridorlar, double-cross için net. */
+  function diamondMask() {
+    const size = 11;
+    const cx = size / 2;
+    const cy = size / 2;
+    const r = size * 0.48;
+    return cropToBoundingBox(
+      keepLargestComponent(
+        rasterize(size, size, (x, y) => Math.abs(x - cx) + Math.abs(y - cy) <= r)
+      )
+    );
   }
 
-  function fishMask() {
-    const cols = 14;
-    const rows = 8;
-    return cropToBoundingBox(keepLargestComponent(
-      rasterize(rows, cols, (x, y) => {
-        const body = pointInEllipse(x, y, cols * 0.42, rows * 0.5, cols * 0.34, rows * 0.4);
-        const tail = pointInTriangle(
-          x,
-          y,
-          cols * 0.72,
-          rows * 0.18,
-          cols * 0.72,
-          rows * 0.82,
-          cols * 0.98,
-          rows * 0.5
-        );
-        return body || tail;
-      })
-    ));
+  /** Artı — dört kol; bağımsız zincir savaşları, orta/zor için etkili. */
+  function plusMask() {
+    const size = 11;
+    const cx = size / 2;
+    const cy = size / 2;
+    const arm = 1.85;
+    const reach = size * 0.46;
+    return cropToBoundingBox(
+      keepLargestComponent(
+        rasterize(size, size, (x, y) => {
+          const horiz = Math.abs(y - cy) <= arm && Math.abs(x - cx) <= reach;
+          const vert = Math.abs(x - cx) <= arm && Math.abs(y - cy) <= reach;
+          return horiz || vert;
+        })
+      )
+    );
   }
 
-  function rabbitMask() {
-    const cols = 11;
-    const rows = 13;
-    return cropToBoundingBox(keepLargestComponent(
-      rasterize(rows, cols, (x, y) => {
-        const head = pointInEllipse(x, y, cols * 0.5, rows * 0.72, cols * 0.4, rows * 0.32);
-        const leftEar = pointInEllipse(x, y, cols * 0.34, rows * 0.28, cols * 0.15, rows * 0.32);
-        const rightEar = pointInEllipse(x, y, cols * 0.66, rows * 0.28, cols * 0.15, rows * 0.32);
-        return head || leftEar || rightEar;
-      })
-    ));
-  }
-
+  /** Kalp — test/debug; oyun listesinde yok. */
   function heartMask() {
     const size = 12;
-    return cropToBoundingBox(keepLargestComponent(
-      rasterize(size, size, (px, py) => {
-        // normalize -1.3..1.3 aralığına
-        const x = (px / size) * 2.6 - 1.3;
-        const y = 1.2 - (py / size) * 2.5;
-        const v = Math.pow(x * x + y * y - 1, 3) - x * x * y * y * y;
-        return v <= 0;
-      })
-    ));
+    return cropToBoundingBox(
+      keepLargestComponent(
+        rasterize(size, size, (px, py) => {
+          const x = (px / size) * 2.6 - 1.3;
+          const y = 1.2 - (py / size) * 2.5;
+          const v = Math.pow(x * x + y * y - 1, 3) - x * x * y * y * y;
+          return v <= 0;
+        })
+      )
+    );
   }
 
   // ——— mask -> oyun grafiği (dots/edges/boxes) ———
@@ -339,30 +306,23 @@
     };
   }
 
-  // ——— 10 oyun alanı tanımı ———
-  // 6 tanesi 8-10 nokta aralığında klasik ızgara, 4 tanesi yıldız/hayvan şekli.
+  // ——— 7 oyun alanı ———
+  // 4 klasik: 6×6, 6×8, 8×10, 10×10 (nokta sayısı) + 3 şekil: yıldız, elmas, artı.
 
   const BOARD_DEFS = [
     {
-      id: "grid-8x8",
+      id: "grid-6x6",
       category: "grid",
-      names: { tr: "Klasik 8×8", en: "Classic 8×8" },
-      mask: fullMask(7, 7),
+      names: { tr: "Klasik 6×6", en: "Classic 6×6" },
+      mask: fullMask(5, 5),
       difficulty: "easy",
     },
     {
-      id: "grid-8x9",
+      id: "grid-6x8",
       category: "grid",
-      names: { tr: "Klasik 8×9", en: "Classic 8×9" },
-      mask: fullMask(7, 8),
+      names: { tr: "Klasik 6×8", en: "Classic 6×8" },
+      mask: fullMask(5, 7),
       difficulty: "easy",
-    },
-    {
-      id: "grid-9x9",
-      category: "grid",
-      names: { tr: "Klasik 9×9", en: "Classic 9×9" },
-      mask: fullMask(8, 8),
-      difficulty: "medium",
     },
     {
       id: "grid-8x10",
@@ -370,13 +330,6 @@
       names: { tr: "Klasik 8×10", en: "Classic 8×10" },
       mask: fullMask(7, 9),
       difficulty: "medium",
-    },
-    {
-      id: "grid-9x10",
-      category: "grid",
-      names: { tr: "Klasik 9×10", en: "Classic 9×10" },
-      mask: fullMask(8, 9),
-      difficulty: "hard",
     },
     {
       id: "grid-10x10",
@@ -393,24 +346,17 @@
       difficulty: "medium",
     },
     {
-      id: "shape-cat",
+      id: "shape-diamond",
       category: "shape",
-      names: { tr: "Kedi", en: "Cat" },
-      mask: catMask(),
-      difficulty: "medium",
-    },
-    {
-      id: "shape-fish",
-      category: "shape",
-      names: { tr: "Balık", en: "Fish" },
-      mask: fishMask(),
+      names: { tr: "Elmas", en: "Diamond" },
+      mask: diamondMask(),
       difficulty: "hard",
     },
     {
-      id: "shape-rabbit",
+      id: "shape-plus",
       category: "shape",
-      names: { tr: "Tavşan", en: "Rabbit" },
-      mask: rabbitMask(),
+      names: { tr: "Artı", en: "Plus" },
+      mask: plusMask(),
       difficulty: "hard",
     },
   ];
