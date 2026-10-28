@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Sayı Bulma" />
-  <meta name="description" content="Sayı Bulma — 4 haneli artı/eksi düello; bilgisayara karşı, aynı cihaz, sunucusuz P2P." />
+  <meta name="description" content="Sayı Bulma — 4 haneli artı/eksi düello; bilgisayara karşı veya iki telefonda sunucusuz P2P." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
@@ -66,17 +66,7 @@
           </div>
           <div class="mode-copy">
             <strong data-i18n="playSolo">Bilgisayara karşı</strong>
-            <span data-i18n="playSoloHint">Kolay · Zor · Çok Zor — internet gerekmez</span>
-          </div>
-        </button>
-        <button type="button" class="mode-card" id="btn-mode-2p">
-          <div class="mode-visual local" aria-hidden="true">
-            <span class="mv-person is-left"></span>
-            <span class="mv-person is-right"></span>
-          </div>
-          <div class="mode-copy">
-            <strong data-i18n="play2p">Aynı cihazda iki kişi</strong>
-            <span data-i18n="play2pHint">Telefon veya tablet elden ele — ağ gerekmez</span>
+            <span data-i18n="playSoloHint">Tek kişi — internet gerekmez</span>
           </div>
         </button>
         <button type="button" class="mode-card" id="btn-mode-p2p">
@@ -119,33 +109,6 @@
         </div>
       </div>
       <button type="button" class="btn btn-primary btn-start" id="btn-solo-start" data-i18n="startGame">Başla</button>
-    </section>
-
-    <section id="screen-2p-setup" class="screen">
-      <button type="button" class="btn-back" id="btn-2p-setup-back" data-i18n="back">Geri</button>
-      <header class="brand sm-head">
-        <h1 data-i18n="twoPSetupTitle">Aynı cihazda iki kişi</h1>
-      </header>
-      <form class="lobby-form" onsubmit="return false;">
-        <label>
-          <span data-i18n="player1Label">1. oyuncu</span>
-          <input id="p1-name" type="text" maxlength="16" data-i18n-ph="player1Ph" autocomplete="off" />
-        </label>
-        <label>
-          <span data-i18n="player2Label">2. oyuncu</span>
-          <input id="p2-name" type="text" maxlength="16" data-i18n-ph="player2Ph" autocomplete="off" />
-        </label>
-      </form>
-      <div id="twop-secret-step" class="secret-step hidden">
-        <p class="lede" id="twop-secret-lead"></p>
-        <div class="digit-slots" id="twop-secret-slots" aria-live="polite"></div>
-        <div class="digit-pad" id="twop-secret-pad"></div>
-        <div class="secret-actions">
-          <button type="button" class="btn btn-ghost" id="btn-twop-secret-clear" data-i18n="clearBtn">Sil</button>
-          <button type="button" class="btn btn-primary" id="btn-twop-secret-ok" data-i18n="secretConfirm">Sayımı kaydet</button>
-        </div>
-      </div>
-      <button type="button" class="btn btn-primary btn-start" id="btn-2p-start" data-i18n="startGame">Başla</button>
     </section>
 
     <section id="screen-p2p" class="screen">
@@ -360,11 +323,12 @@
       <button type="button" id="btn-show-result" class="btn-show-result hidden" data-i18n="showResult">Sonuç</button>
 
       <div id="end-panel" class="end-panel hidden" role="dialog" aria-modal="true" aria-labelledby="end-text">
-        <div class="end-card">
+        <div class="end-card" id="end-card">
+          <span class="end-drag-handle" aria-hidden="true"></span>
           <button type="button" class="btn-end-close" id="btn-end-close" aria-label="Kapat">×</button>
           <p id="end-text"></p>
           <p id="end-reveal" class="end-reveal"></p>
-          <p class="end-hint" data-i18n="endCloseHint">Detayları görmek için kapat</p>
+          <p class="end-hint" data-i18n="endCloseHint">Sürükle veya kapat (×)</p>
           <button type="button" id="btn-rematch" class="btn btn-primary" data-i18n="rematch">Yeniden oyna</button>
           <button type="button" id="btn-game-home" class="btn btn-ghost" data-i18n="toHome">Ana menü</button>
         </div>
