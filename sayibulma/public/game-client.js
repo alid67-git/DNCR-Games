@@ -438,11 +438,14 @@
 
     const locked = !canAct();
     setGuessInputLocked(locked);
+    const cpuWait =
+      session.mode === "solo" && !s.winner && (session.aiThinking || s.turn === PLAYERS.b);
+    updateCpuWaitUi(cpuWait);
 
     let phase = "";
     if (s.winner) {
       phase = t("gameOver");
-    } else if (session.mode === "solo" && (session.aiThinking || s.turn === PLAYERS.b)) {
+    } else if (cpuWait) {
       phase = t("statusCpu");
     } else if (session.mode === "twop") {
       phase = `${t("turnPass")} ${session.names[s.turn]}`;
@@ -535,41 +538,76 @@
     clearTimeout(aiTimer);
     if (!session || session.mode !== "solo" || session.state.winner) return;
     if (session.state.turn !== PLAYERS.b) return;
-    if (session.aiThinking) return;
+    // Önemli: aiThinking true iken early-return YOK.
+    // clearTimeout + return yarışı AI'yi sonsuza dek "düşünüyor"da bırakıyordu.
+    const gen = (session.aiGen = (session.aiGen || 0) + 1);
     session.aiThinking = true;
     setGuessInputLocked(true);
-    renderGame();
-    aiTimer = setTimeout(() => {
-      if (!session || session.state.turn !== PLAYERS.b || session.state.winner) {
-        if (session) session.aiThinking = false;
-        return;
-      }
+    updateCpuWaitUi(true);
+    aiTimer = setTimeout(() => runAiTurn(gen), Math.max(180, delay | 0));
+  }
+
+  function updateCpuWaitUi(waiting) {
+    const input = $("guess-input-panel");
+    const wait = $("cpu-wait-panel");
+    if (input) input.classList.toggle("hidden", !!waiting);
+    if (wait) wait.classList.toggle("hidden", !waiting);
+  }
+
+  function runAiTurn(gen) {
+    if (!session || session.aiGen !== gen) return;
+    if (session.mode !== "solo" || session.state.winner || session.state.turn !== PLAYERS.b) {
+      session.aiThinking = false;
+      updateCpuWaitUi(false);
+      renderGame();
+      return;
+    }
+
+    let moved = false;
+    try {
+      const tried = Object.create(null);
+      (session.state.histories.b || []).forEach((h) => {
+        if (h && h.guess) tried[h.guess] = true;
+      });
       let guess = null;
       try {
         guess = Ai.pickGuess(session.state.histories.b, session.difficulty || "hard");
       } catch (err) {
         console.warn("Sayı Bulma AI:", err);
-        guess = randomSecret();
       }
-      if (!isValidSecret(guess)) guess = randomSecret();
+      for (let attempt = 0; attempt < 8 && !moved; attempt++) {
+        if (!isValidSecret(guess) || tried[guess]) {
+          guess = randomSecret();
+        }
+        const r = applyGuess(session.state, PLAYERS.b, guess);
+        if (r.ok) {
+          session.state = r.state;
+          playSfx(r.score.plus === DIGIT_COUNT ? "mill" : "place");
+          showLastFeedback(guess, r.score);
+          moved = true;
+        } else {
+          tried[guess] = true;
+          guess = null;
+        }
+      }
+    } catch (err) {
+      console.warn("Sayı Bulma AI turn:", err);
+    }
 
-      let r = applyGuess(session.state, PLAYERS.b, guess);
-      // Aynı tahmini tekrar ederse veya havuz bozulursa bir kez daha dene
-      if (!r.ok) {
-        guess = randomSecret();
-        r = applyGuess(session.state, PLAYERS.b, guess);
-      }
+    if (session && session.aiGen === gen) {
       session.aiThinking = false;
-      if (r.ok) {
-        session.state = r.state;
-        playSfx(r.score.plus === DIGIT_COUNT ? "mill" : "place");
-        showLastFeedback(guess, r.score);
-      } else {
-        // Hâlâ başarısızsa turu boş bırakma — kısa süre sonra yeniden dene
-        aiTimer = setTimeout(() => scheduleAi(200), 400);
-      }
+      updateCpuWaitUi(false);
       renderGame();
-    }, delay);
+      // Hâlâ bilgisayar sırasıysa (nadir) yeniden dene
+      if (
+        session &&
+        !session.state.winner &&
+        session.state.turn === PLAYERS.b &&
+        session.mode === "solo"
+      ) {
+        aiTimer = setTimeout(() => scheduleAi(250), 200);
+      }
+    }
   }
 
   function startSolo() {
@@ -873,10 +911,22 @@
     }
   }
 
+  function gameInProgress() {
+    return !!(session && session.state && !session.state.winner);
+  }
+
+  function confirmLeaveOrRestart(kind) {
+    if (!gameInProgress()) return true;
+    const key = kind === "restart" ? "confirmRestart" : "confirmLeave";
+    return window.confirm(t(key));
+  }
+
   function goHome() {
     clearTimeout(aiTimer);
+    if (session) session.aiThinking = false;
     session = null;
     destroyP2P();
+    updateCpuWaitUi(false);
     $("twop-secret-step").classList.add("hidden");
     $("btn-2p-start").classList.remove("hidden");
     showScreen("home");
@@ -1056,8 +1106,11 @@
   });
 
   $("btn-game-back").addEventListener("click", () => {
+    if (!confirmLeaveOrRestart("leave")) return;
+    clearTimeout(aiTimer);
     if (session && session.mode === "p2p" && p2pLobby) {
       session = null;
+      updateCpuWaitUi(false);
       showScreen("room");
       renderRoom();
       return;
@@ -1065,12 +1118,20 @@
     goHome();
   });
 
-  $("btn-game-home").addEventListener("click", () => goHome());
+  $("btn-game-home").addEventListener("click", () => {
+    if (!confirmLeaveOrRestart("leave")) return;
+    goHome();
+  });
 
-  $("btn-game-restart").addEventListener("click", () => {
+  function restartCurrentMode() {
     if (!session) return;
+    clearTimeout(aiTimer);
+    session.aiThinking = false;
+    updateCpuWaitUi(false);
     if (session.mode === "solo") {
+      pads.soloSecret.setLocked(false);
       pads.soloSecret.set(session.state.secrets.a);
+      session = null;
       showScreen("soloSetup");
       return;
     }
@@ -1089,10 +1150,17 @@
       showScreen("room");
       renderRoom();
     }
+  }
+
+  $("btn-game-restart").addEventListener("click", () => {
+    if (!session) return;
+    if (!confirmLeaveOrRestart("restart")) return;
+    restartCurrentMode();
   });
 
   $("btn-rematch").addEventListener("click", () => {
-    $("btn-game-restart").click();
+    // Bitiş panelinden — onay yok
+    restartCurrentMode();
   });
 
   // Boot
