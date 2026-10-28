@@ -883,7 +883,7 @@ body.is-native .native-only.hidden {
 
 .last-move-from,
 .last-move-to {
-  animation: flash 0.5s ease;
+  animation: flash 1s ease;
 }
 @keyframes flash {
   from {
@@ -892,9 +892,9 @@ body.is-native .native-only.hidden {
   }
 }
 
-/* Genel hamle vurgusu: 0.5 sn parlama + renk değişimi */
+/* Genel hamle vurgusu: 1 sn parlama + renk + %50 büyüme → eski boyut */
 .node-ring.move-flash {
-  animation: nodeMoveFlash 0.5s ease both;
+  animation: nodeMoveFlash 1s ease both;
 }
 .node-ring.move-flash-from {
   stroke: #ffe082;
@@ -907,7 +907,7 @@ body.is-native .native-only.hidden {
   fill: rgba(255, 248, 225, 0.35);
 }
 .piece.move-flash {
-  animation: pieceMoveFlash 0.5s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+  animation: pieceMoveFlash 1s cubic-bezier(0.22, 1.15, 0.36, 1) both;
   pointer-events: none;
 }
 .piece.move-flash-tomato .skin {
@@ -932,7 +932,7 @@ body.is-native .native-only.hidden {
   }
   40% {
     opacity: 1;
-    stroke-width: 2.1;
+    stroke-width: 2.45;
   }
   100% {
     opacity: 0.85;
@@ -943,11 +943,11 @@ body.is-native .native-only.hidden {
   0% {
     transform: scale(1);
   }
-  35% {
-    transform: scale(1.32);
+  40% {
+    transform: scale(1.5);
   }
   100% {
-    transform: scale(1.06);
+    transform: scale(1);
   }
 }
 

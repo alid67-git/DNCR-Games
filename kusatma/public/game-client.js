@@ -386,7 +386,7 @@
     svg.insertBefore(defs, svg.firstChild);
   }
 
-  /** Hamle sonrası 0.5 sn parlama + renk vurgusu (çizgi veya taş). */
+  /** Hamle sonrası 1 sn parlama + renk + %50 büyüme → eski boyut (çizgi veya taş). */
   async function flashClaimEmphasis(kind, payload, player) {
     const svg = $("board");
     if (!svg) return;
@@ -403,20 +403,20 @@
       const b = xy(p1[0], p1[1]);
       const mx = (a.x + b.x) / 2;
       const my = (a.y + b.y) / 2;
-      const grow = 1.12;
       const line = document.createElementNS(NS, "line");
-      line.setAttribute("x1", mx + (a.x - mx) * grow);
-      line.setAttribute("y1", my + (a.y - my) * grow);
-      line.setAttribute("x2", mx + (b.x - mx) * grow);
-      line.setAttribute("y2", my + (b.y - my) * grow);
       line.setAttribute("stroke-linecap", "round");
       line.setAttribute("class", "edge-line is-claim-flash");
       svg.appendChild(line);
       els.push(line);
-      await runAnim(500, (e) => {
+      await runAnim(1000, (e) => {
         const pulse = Math.sin(e * Math.PI);
+        const grow = 1 + 0.5 * pulse;
+        line.setAttribute("x1", mx + (a.x - mx) * grow);
+        line.setAttribute("y1", my + (a.y - my) * grow);
+        line.setAttribute("x2", mx + (b.x - mx) * grow);
+        line.setAttribute("y2", my + (b.y - my) * grow);
         line.setAttribute("stroke", lerpColor(hi, base, e * 0.65));
-        line.setAttribute("stroke-width", String(lerp(3.2, 1.7, e)));
+        line.setAttribute("stroke-width", String(lerp(1.7, 3.2, pulse)));
         line.setAttribute("opacity", String(0.75 + 0.25 * pulse));
       });
     } else if (kind === "stone" && payload) {
@@ -427,9 +427,10 @@
       glow.setAttribute("class", "stone-claim-flash");
       svg.appendChild(glow);
       els.push(glow);
-      await runAnim(500, (e) => {
+      const baseR = 3.2;
+      await runAnim(1000, (e) => {
         const pulse = Math.sin(e * Math.PI);
-        glow.setAttribute("r", String(lerp(5.2, 3.2, e)));
+        glow.setAttribute("r", String(baseR * (1 + 0.5 * pulse)));
         glow.setAttribute("fill", lerpColor(hi, base, e * 0.55));
         glow.setAttribute("opacity", String(0.35 + 0.45 * pulse));
       });
@@ -462,19 +463,19 @@
     const base = colorFor(player);
     const hi = player === 1 ? "#B8F4FF" : "#FFB3B8";
     if (Audio) Audio.playSfx("draw");
-    // Çizim + 0.5 sn parlama/renk vurgusu (aynı pencerede)
+    // Çizim + 1 sn parlama/renk + %50 büyüme → eski (aynı pencerede)
     const mx = (a.x + b.x) / 2;
     const my = (a.y + b.y) / 2;
-    await runAnim(500, (e) => {
-      line.setAttribute("stroke-dashoffset", String(len * (1 - e)));
+    await runAnim(1000, (e) => {
+      line.setAttribute("stroke-dashoffset", String(len * (1 - Math.min(1, e * 1.35))));
       const flash = Math.sin(e * Math.PI);
-      const grow = 1 + 0.12 * flash;
+      const grow = 1 + 0.5 * flash;
       line.setAttribute("x1", mx + (a.x - mx) * grow);
       line.setAttribute("y1", my + (a.y - my) * grow);
       line.setAttribute("x2", mx + (b.x - mx) * grow);
       line.setAttribute("y2", my + (b.y - my) * grow);
       line.setAttribute("stroke", lerpColor(hi, base, e * 0.55));
-      line.setAttribute("stroke-width", String(lerp(3.35, 1.65, e) + flash * 0.45));
+      line.setAttribute("stroke-width", String(lerp(1.65, 3.35, flash)));
       line.setAttribute("opacity", String(lerp(0.55, 1, Math.min(1, e * 1.2))));
     });
     line.remove();
@@ -507,21 +508,24 @@
     const base = colorFor(player);
     const hi = player === 1 ? "#B8F4FF" : "#FFB3B8";
     if (Audio) Audio.playSfx("move");
-    await runAnim(500, (e) => {
+    await runAnim(1000, (e) => {
       const x = lerp(a.x, b.x, e);
       const y = lerp(a.y, b.y, e);
       const pulse = Math.sin(e * Math.PI);
       const col = lerpColor(base, hi, pulse);
+      const r = 2.7 * (1 + 0.5 * pulse);
       glow.setAttribute("cx", x);
       glow.setAttribute("cy", y);
-      glow.setAttribute("r", String(4.4 + pulse * 1.8));
+      glow.setAttribute("r", String(r * 1.7));
       glow.setAttribute("fill", col);
       glow.setAttribute("opacity", String(0.3 + 0.55 * pulse));
       dot.setAttribute("cx", x);
       dot.setAttribute("cy", y);
+      dot.setAttribute("r", String(r));
       dot.setAttribute("fill", col);
       mark.setAttribute("x", x);
       mark.setAttribute("y", y + 1.05);
+      mark.setAttribute("font-size", String(2.6 * (1 + 0.5 * pulse)));
     });
     g.remove();
   }
@@ -548,7 +552,7 @@
       if (d.siege && Audio) Audio.playSfx("siege");
       else if (Audio) Audio.playSfx("capture");
     }
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 1000));
     els.forEach((el) => el.remove());
   }
 

@@ -360,7 +360,7 @@
     }
   }
 
-  /** Genel hamle vurgusu: 0.5 sn parlama + renk değişimi. */
+  /** Genel hamle vurgusu: 1 sn parlama + renk + %50 büyüme → eski boyut. */
   function flashMoveNode(nodeId, owner) {
     if (!nodeId) return;
     clearTimeout(moveFlashTimer);
@@ -394,7 +394,7 @@
       });
       if (session) renderPieces(session.state.board);
       moveFlashTimer = null;
-    }, 500);
+    }, 1000);
   }
 
   /** Değirmen üçlüsünü altın tona çekip halka ile vurgula. */

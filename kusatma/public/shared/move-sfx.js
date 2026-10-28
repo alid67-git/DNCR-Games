@@ -80,10 +80,11 @@
         break;
       case "claim":
       case "move":
-        // Kısa parlak vurgu tonu (~0.5s görsel ile birlikte)
-        tone(360, 0.12, "triangle", 0.12, t, 520);
-        tone(620, 0.16, "sine", 0.09, t + 0.05);
-        tone(880, 0.1, "triangle", 0.05, t + 0.12);
+        // Parlak vurgu tonu (~1s görsel ile birlikte)
+        tone(360, 0.14, "triangle", 0.12, t, 520);
+        tone(620, 0.2, "sine", 0.09, t + 0.08);
+        tone(880, 0.14, "triangle", 0.05, t + 0.18);
+        tone(520, 0.12, "sine", 0.04, t + 0.42);
         break;
       case "box":
         tone(480, 0.1, "triangle", 0.12, t);

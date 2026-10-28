@@ -1,9 +1,24 @@
 window.DotsConfig = {
   appName: "Noktalar ve Kutular",
-  version: "1.2.0",
-  build: 7,
+  version: "1.2.1",
+  build: 8,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/noktalar/",
   changelog: [
+    {
+      version: "1.2.1",
+      build: 8,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Rakip/AI çizgi vurgusu: 1 sn parlama + renk",
+          "Çizgi %50 uzayıp eski uzunluğuna döner",
+        ],
+        en: [
+          "Opponent/AI edge highlight: 1s flash + color",
+          "Line grows +50% then returns",
+        ],
+      },
+    },
     {
       version: "1.2.0",
       build: 7,

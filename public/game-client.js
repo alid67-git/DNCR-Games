@@ -549,7 +549,7 @@
     showEatBanner._t = setTimeout(() => el.classList.add("hidden"), 900);
   }
 
-  /** Hamle sonrası 0.5 sn parlama + renk vurgusu (kalkış/iniş halkası + taş). */
+  /** Hamle sonrası 1 sn parlama + renk + %50 büyüme (kalkış/iniş halkası + taş). */
   function flashMoveEmphasis(move, attacker) {
     clearTimeout(moveFlashTimer);
     document.querySelectorAll(".node-ring.move-flash, .piece.move-flash").forEach((el) => {
@@ -574,7 +574,7 @@
         el.classList.remove("move-flash", "move-flash-from", "move-flash-to", "move-flash-tomato", "move-flash-gourd");
       });
       moveFlashTimer = null;
-    }, 500);
+    }, 1000);
   }
 
   async function animateMove(prevBoard, move, attacker) {
@@ -611,8 +611,8 @@
     flyer.setAttribute("transform", "translate(0 0)");
     fx.appendChild(flyer);
 
-    // Normal hamle de en az ~0.5 sn hissedilsin (vurgu süresiyle hizalı)
-    const duration = move.capture ? 560 : 500;
+    // Normal hamle de vurgu süresiyle hizalı (~1 sn); uçuşta da %50 peake yaklaş
+    const duration = move.capture ? 1060 : 1000;
     const start = performance.now();
     await new Promise((resolve) => {
       function frame(now) {
@@ -621,7 +621,7 @@
         const x = from.x + (to.x - from.x) * ease;
         const y = from.y + (to.y - from.y) * ease;
         const lift = (move.capture ? 5 : 2.4) * Math.sin(Math.PI * ease);
-        const pulse = 1 + 0.12 * Math.sin(Math.PI * ease);
+        const pulse = 1 + 0.5 * Math.sin(Math.PI * ease);
         flyer.setAttribute(
           "transform",
           `translate(${x - from.x} ${y - from.y - lift}) scale(${pulse})`
