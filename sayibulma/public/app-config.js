@@ -12,12 +12,12 @@ window.SayibulmaConfig = {
         tr: [
           "0–9 not: 1. dokunuş × (yok), 2. dokunuş sarı halka (var)",
           "Zorluk seçenekleri kaldırıldı — bilgisayar düşük performansta",
-          "Tahmin kutuları 2×2 yan yana; bitişte pad gizlenir, geçmiş büyür",
+          "Geçmiş panelleri yan yana 2 kutu; bitişte pad gizlenir, geçmiş büyür",
         ],
         en: [
           "0–9 notes: 1st tap × (absent), 2nd tap yellow ring (present)",
           "Difficulty options removed — computer plays at low performance",
-          "Guess slots in a 2×2 grid; pad hides at game over for more history",
+          "History as two side-by-side panels; pad hides at game over",
         ],
       },
     },

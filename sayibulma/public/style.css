@@ -877,23 +877,21 @@ input[type="text"]:focus {
   flex: 0 0 auto;
 }
 
-/* Oyun ekranı: tahmin kutuları 2×2 yan yana */
+/* Oyun ekranı: kompakt 4’lü sıra; geçmiş panelleri yan yana 2 kutu */
 #screen-game .guess-slots {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.35rem;
-  margin: 0 0 0.35rem;
-  max-width: 11.5rem;
-  margin-left: auto;
-  margin-right: auto;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.28rem;
+  margin: 0 auto 0.3rem;
+  max-width: 14rem;
 }
 #screen-game .guess-slots .digit-slot {
-  aspect-ratio: 1.35;
-  min-height: 2.1rem;
-  max-height: 2.55rem;
-  border-radius: 10px;
+  aspect-ratio: auto;
+  min-height: 1.75rem;
+  max-height: 2rem;
+  border-radius: 8px;
   border-width: 1.5px;
-  font-size: 1.15rem;
+  font-size: 1rem;
   box-shadow: none;
 }
 #screen-game .guess-slots .digit-slot::before,
@@ -902,6 +900,23 @@ input[type="text"]:focus {
 }
 #screen-game .guess-stage.hidden {
   display: none;
+}
+#screen-game .history-wrap {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.35rem;
+}
+#screen-game .history-col {
+  border: 1px solid rgba(46, 196, 182, 0.2);
+  border-radius: 10px;
+  padding: 0.3rem 0.28rem 0.28rem;
+  background: rgba(2, 20, 26, 0.35);
+  min-height: 0;
+}
+#screen-game .history-col .guess-history {
+  border: none;
+  background: transparent;
+  padding: 0;
 }
 #screen-game .digit-pad {
   gap: 0.22rem;
