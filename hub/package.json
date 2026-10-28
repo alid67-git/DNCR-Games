@@ -1,6 +1,6 @@
 {
   "name": "dncr-games-hub",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "description": "DNCR Games hub — launcher for Kati, Noktalar, Dokuztaş, Kuşatma",
   "scripts": {
