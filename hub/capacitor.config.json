@@ -3,7 +3,8 @@
   "appName": "DNCR Games",
   "webDir": "www",
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "html5mode": false
   },
   "android": {
     "allowMixedContent": true
