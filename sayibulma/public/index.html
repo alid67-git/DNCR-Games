@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Sayı Bulma" />
-  <meta name="description" content="Sayı Bulma — 5 haneli artı/eksi düello; bilgisayara karşı, aynı cihaz, sunucusuz P2P." />
+  <meta name="description" content="Sayı Bulma — 4 haneli artı/eksi düello; bilgisayara karşı, aynı cihaz, sunucusuz P2P." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
@@ -26,7 +26,7 @@
         <header class="brand home-brand">
           <img class="app-logo" src="assets/logo.svg" width="112" height="112" alt="Sayı Bulma" />
           <p class="brand-mark" data-i18n="appName">Sayı Bulma</p>
-          <p class="lede" data-i18n="tagline">5 haneli gizli sayı — artı doğru yer, eksi yanlış yer</p>
+          <p class="lede" data-i18n="tagline">4 haneli gizli sayı — + doğru yer, − yanlış yer</p>
         </header>
         <nav class="home-menu" aria-label="Main">
           <button type="button" class="btn btn-primary btn-menu" id="btn-home-play">
@@ -315,6 +315,13 @@
       </div>
 
       <p id="phase-label" class="phase-label"></p>
+      <div id="last-feedback" class="last-feedback hidden" aria-live="assertive">
+        <span class="lf-guess" id="lf-guess"></span>
+        <span class="lf-scores">
+          <span class="chip-plus" id="lf-plus">+0</span>
+          <span class="chip-minus" id="lf-minus">−0</span>
+        </span>
+      </div>
 
       <div class="guess-stage">
         <div class="digit-slots guess-slots" id="guess-slots" aria-live="polite"></div>

@@ -524,7 +524,7 @@ input[type="text"]:focus {
 /* —— Digit UI —— */
 .digit-slots {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.45rem;
   margin: 0.6rem 0 0.85rem;
 }
@@ -665,6 +665,55 @@ input[type="text"]:focus {
   font-size: 0.95rem;
 }
 
+.last-feedback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin: 0 0 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(157, 255, 87, 0.12), transparent 55%),
+    rgba(6, 37, 46, 0.85);
+  border: 1px solid rgba(157, 255, 87, 0.28);
+  min-height: 3.1rem;
+}
+.last-feedback.hidden {
+  display: none;
+}
+.last-feedback.is-pop {
+  animation: feedbackFlash 0.55s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+@keyframes feedbackFlash {
+  0% {
+    transform: scale(0.92);
+    filter: brightness(1.35);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+.lf-guess {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: 0.18em;
+  color: var(--ink);
+}
+.lf-scores {
+  display: flex;
+  gap: 0.4rem;
+}
+.lf-scores .chip-plus,
+.lf-scores .chip-minus {
+  min-width: 3.1rem;
+  min-height: 2.35rem;
+  font-size: 1.35rem;
+  border-radius: 10px;
+}
+
 .guess-stage {
   padding: 0.85rem;
   border-radius: var(--radius);
@@ -705,14 +754,23 @@ input[type="text"]:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.35rem;
-  padding: 0.4rem 0.5rem;
-  border-radius: 8px;
+  gap: 0.5rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 10px;
   background: rgba(2, 20, 26, 0.45);
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
   animation: guessSlide 0.35s ease both;
+}
+.guess-row.is-latest {
+  border: 1px solid rgba(157, 255, 87, 0.35);
+  background: rgba(14, 69, 80, 0.55);
+}
+.guess-row .guess-digits {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
 @keyframes guessSlide {
   from {
@@ -726,26 +784,38 @@ input[type="text"]:focus {
 }
 .score-chips {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.35rem;
+  flex-shrink: 0;
 }
 .chip-plus,
 .chip-minus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.85rem;
-  padding: 0.12rem 0.3rem;
-  border-radius: 6px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  animation: scorePop 0.4s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+  min-width: 2.6rem;
+  min-height: 2rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 8px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+.guess-row.is-latest .chip-plus,
+.guess-row.is-latest .chip-minus {
+  animation: scorePop 0.5s cubic-bezier(0.22, 1.4, 0.36, 1) both;
 }
 @keyframes scorePop {
-  from {
-    transform: scale(0.6);
+  0% {
+    transform: scale(0.45);
     opacity: 0;
   }
-  to {
+  65% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  100% {
     transform: scale(1);
     opacity: 1;
   }

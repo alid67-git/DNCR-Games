@@ -1,5 +1,5 @@
 /**
- * Sayı Bulma — 5 haneli artı/eksi düello motoru (Node ve tarayıcı).
+ * Sayı Bulma — 4 haneli artı/eksi düello motoru (Node ve tarayıcı).
  */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) {
@@ -10,7 +10,7 @@
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
 
-  const DIGIT_COUNT = 5;
+  const DIGIT_COUNT = 4;
   const PLAYERS = { a: "a", b: "b" };
 
   function opponent(player) {

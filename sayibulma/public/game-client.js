@@ -315,15 +315,44 @@
     return false;
   }
 
+  function spacedDigits(s) {
+    return String(s || "")
+      .split("")
+      .join(" ");
+  }
+
+  function showLastFeedback(guess, score) {
+    const box = $("last-feedback");
+    if (!box || !score) return;
+    $("lf-guess").textContent = spacedDigits(guess);
+    $("lf-plus").textContent = `+${score.plus}`;
+    $("lf-minus").textContent = `−${score.minus}`;
+    box.classList.remove("hidden", "is-pop");
+    void box.offsetWidth;
+    box.classList.add("is-pop");
+    clearTimeout(showLastFeedback._t);
+    showLastFeedback._t = setTimeout(() => {
+      box.classList.remove("is-pop");
+    }, 900);
+  }
+
   function renderHistoryList(el, rows) {
     if (!el) return;
     el.innerHTML = "";
-    (rows || []).forEach((h) => {
+    const list = rows || [];
+    list.forEach((h, idx) => {
       const li = document.createElement("li");
-      li.className = "guess-row";
-      li.innerHTML = `<span>${h.guess}</span><span class="score-chips"><span class="chip-plus">+${h.plus}</span><span class="chip-minus">−${h.minus}</span></span>`;
+      const latest = idx === list.length - 1;
+      li.className = "guess-row" + (latest ? " is-latest" : "");
+      li.innerHTML =
+        `<span class="guess-digits">${spacedDigits(h.guess)}</span>` +
+        `<span class="score-chips" aria-label="+${h.plus} −${h.minus}">` +
+        `<span class="chip-plus">+${h.plus}</span>` +
+        `<span class="chip-minus">−${h.minus}</span>` +
+        `</span>`;
       el.appendChild(li);
     });
+    if (list.length) el.scrollTop = el.scrollHeight;
   }
 
   function renderGame() {
@@ -443,6 +472,7 @@
     }
     session.state = r.state;
     playSfx(r.score.plus === DIGIT_COUNT ? "mill" : "place");
+    showLastFeedback(guess, r.score);
     pads.guess.clear();
     renderGame();
 
@@ -471,6 +501,7 @@
       if (r.ok) {
         session.state = r.state;
         playSfx(r.score.plus === DIGIT_COUNT ? "mill" : "place");
+        showLastFeedback(guess, r.score);
       }
       renderGame();
     }, delay);
