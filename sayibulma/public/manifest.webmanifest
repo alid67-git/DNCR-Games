@@ -1,7 +1,7 @@
 {
   "name": "Sayı Bulma",
   "short_name": "Sayı Bulma",
-  "description": "5 haneli artı/eksi düello — bilgisayara karşı, aynı cihaz, sunucusuz P2P",
+  "description": "4 haneli artı/eksi düello — bilgisayara karşı, aynı cihaz, sunucusuz P2P",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#02141a",
