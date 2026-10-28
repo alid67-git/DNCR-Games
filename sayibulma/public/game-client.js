@@ -452,6 +452,10 @@
       maybeRecordScore();
       if (stage) stage.classList.add("hidden");
       if (!session.endDismissed) {
+        if (!session.endCardShown) {
+          resetEndCardPosition();
+          session.endCardShown = true;
+        }
         end.classList.remove("hidden");
         if (showResultBtn) showResultBtn.classList.add("hidden");
       } else {
@@ -463,6 +467,8 @@
       if (showResultBtn) showResultBtn.classList.add("hidden");
       if (stage) stage.classList.remove("hidden");
       session.endDismissed = false;
+      session.endCardShown = false;
+      resetEndCardPosition();
     }
     renderNoteDigits();
   }
@@ -493,6 +499,15 @@
     $("end-reveal").textContent = revealBits.join(" · ");
   }
 
+  function resetEndCardPosition() {
+    const card = $("end-card");
+    if (!card) return;
+    card.style.transform = "";
+    card.dataset.dragX = "0";
+    card.dataset.dragY = "0";
+    card.classList.remove("is-dragging");
+  }
+
   function dismissEndPanel() {
     if (!session || !session.state || !session.state.winner) return;
     session.endDismissed = true;
@@ -504,10 +519,81 @@
   function openEndPanel() {
     if (!session || !session.state || !session.state.winner) return;
     session.endDismissed = false;
+    session.endCardShown = true;
     fillEndPanelText();
+    resetEndCardPosition();
     const end = $("end-panel");
     if (end) end.classList.remove("hidden");
     if ($("btn-show-result")) $("btn-show-result").classList.add("hidden");
+  }
+
+  function bindEndCardDrag() {
+    const card = $("end-card");
+    if (!card || card.dataset.dragBound) return;
+    card.dataset.dragBound = "1";
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let baseX = 0;
+    let baseY = 0;
+    let moved = false;
+
+    function apply(x, y) {
+      card.dataset.dragX = String(x);
+      card.dataset.dragY = String(y);
+      card.style.transform = "translate(" + x + "px," + y + "px)";
+    }
+
+    function onPointerDown(e) {
+      if (e.button != null && e.button !== 0) return;
+      const t = e.target;
+      if (t && t.closest && t.closest("button, a, input")) return;
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startY = e.clientY;
+      baseX = parseFloat(card.dataset.dragX || "0") || 0;
+      baseY = parseFloat(card.dataset.dragY || "0") || 0;
+      card.classList.add("is-dragging");
+      try {
+        card.setPointerCapture(e.pointerId);
+      } catch (_) {}
+      e.preventDefault();
+    }
+
+    function onPointerMove(e) {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+      apply(baseX + dx, baseY + dy);
+    }
+
+    function onPointerUp(e) {
+      if (!dragging) return;
+      dragging = false;
+      card.classList.remove("is-dragging");
+      try {
+        card.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+    }
+
+    card.addEventListener("pointerdown", onPointerDown);
+    card.addEventListener("pointermove", onPointerMove);
+    card.addEventListener("pointerup", onPointerUp);
+    card.addEventListener("pointercancel", onPointerUp);
+    // Sürüklerken altındaki tıklamaları tetiklemesin
+    card.addEventListener(
+      "click",
+      (e) => {
+        if (moved) {
+          e.preventDefault();
+          e.stopPropagation();
+          moved = false;
+        }
+      },
+      true
+    );
   }
 
   function noteMarks() {
@@ -1245,6 +1331,7 @@
   if ($("btn-show-result")) {
     $("btn-show-result").addEventListener("click", () => openEndPanel());
   }
+  bindEndCardDrag();
 
   // Boot
   if (Sfx && Sfx.bindFirstGesture) Sfx.bindFirstGesture(document);

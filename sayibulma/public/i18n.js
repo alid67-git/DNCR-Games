@@ -32,7 +32,7 @@ window.SayibulmaI18n = (function () {
       noteMarkOut: "yok",
       noteMarkIn: "var",
       showResult: "Sonuç",
-      endCloseHint: "Detayları görmek için kapat (×)",
+      endCloseHint: "Sürükle veya kapat (×) — altındaki tahtayı gör",
       noteDigitsHint: "1. dokunuş: yok (×) · 2. dokunuş: var (sarı halka)",
       helpDiffOnlySolo:
         "Bilgisayar her zaman düşük performansta oynar. İki telefonda / aynı cihazda rakip insandır.",
@@ -193,7 +193,7 @@ window.SayibulmaI18n = (function () {
       noteMarkOut: "absent",
       noteMarkIn: "present",
       showResult: "Result",
-      endCloseHint: "Close (×) to inspect details",
+      endCloseHint: "Drag or close (×) to see the board",
       noteDigitsHint: "1st tap: absent (×) · 2nd tap: present (yellow ring)",
       helpDiffOnlySolo:
         "The computer always plays at low performance. In two-phone / same-device modes your opponent is human.",

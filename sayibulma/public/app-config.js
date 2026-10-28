@@ -1,9 +1,22 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.9",
-  build: 10,
+  version: "1.0.11",
+  build: 12,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.11",
+      build: 12,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Sonuç penceresi parmakla sürüklenebilir — altındaki tahta görünür",
+        ],
+        en: [
+          "Result window is draggable so you can see the board underneath",
+        ],
+      },
+    },
     {
       version: "1.0.9",
       build: 10,
