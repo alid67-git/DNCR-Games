@@ -1,9 +1,24 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.9",
-  build: 10,
+  version: "1.0.10",
+  build: 11,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.10",
+      build: 11,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Aynı cihazda iki kişi modu kapatıldı — gizli sayı tek ekranda saklanamaz",
+          "Modlar: bilgisayara karşı ve iki telefonda / uzaktan (P2P)",
+        ],
+        en: [
+          "Same-device two-player mode removed — a secret cannot stay hidden on one screen",
+          "Modes: vs computer and two phones / remote (P2P)",
+        ],
+      },
+    },
     {
       version: "1.0.9",
       build: 10,

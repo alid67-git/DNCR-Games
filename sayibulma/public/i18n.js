@@ -21,7 +21,7 @@ window.SayibulmaI18n = (function () {
 
       playTitle: "Oyun modu",
       playSolo: "Bilgisayara karşı",
-      playSoloHint: "Kolay · Normal · Zor · Çok Zor — internet gerekmez",
+      playSoloHint: "Tek kişi — internet gerekmez",
       play2p: "Aynı cihazda iki kişi",
       play2pHint: "Telefon elden ele — ağ gerekmez",
       playP2p: "İki telefonda / uzaktan",
@@ -35,7 +35,7 @@ window.SayibulmaI18n = (function () {
       endCloseHint: "Detayları görmek için kapat (×)",
       noteDigitsHint: "1. dokunuş: yok (×) · 2. dokunuş: var (sarı halka)",
       helpDiffOnlySolo:
-        "Bilgisayar her zaman düşük performansta oynar. İki telefonda / aynı cihazda rakip insandır.",
+        "Bilgisayar her zaman düşük performansta oynar. İki telefonda rakip insandır (aynı cihaz modu yok).",
       startGame: "Başla",
       yourSecret: "Gizli sayın",
       yourSecretHint: "4 farklı rakam; ilk hane 0 olamaz. Rakibin görmemeli.",
@@ -105,13 +105,13 @@ window.SayibulmaI18n = (function () {
       helpRule5: "Geçmişte her tahminin yanında büyük yeşil + ve mercan − chip’leri görünür.",
       helpModesTitle: "Oyun modları",
       helpModes:
-        "Bilgisayara karşı · Aynı cihazda iki kişi · İki telefonda / uzaktan (oda kodu, P2P). İlk ikisi tamamen çevrimdışı.",
+        "Bilgisayara karşı · İki telefonda / uzaktan (oda kodu, P2P). Aynı cihaz modu yok — gizli sayı tek ekranda saklanamaz.",
       helpOfflineTitle: "İnternet",
       helpOffline:
-        "Solo ve aynı cihaz internet istemez. Uzaktan yalnızca eşleşme anında internet gerekir; oyun sunucusu yoktur.",
+        "Solo internet istemez. Uzaktan yalnızca eşleşme anında internet gerekir; oyun sunucusu yoktur.",
       helpDifficultyTitle: "Zorluk",
       helpDifficulty:
-        "Yalnızca bilgisayara karşı: Kolay / Normal / Zor / Çok Zor. İki telefonda veya aynı cihazda zorluk yok — rakip insandır. Kolay sık rastgele; Normal ara sıra hata; Zor aday havuzunu daraltır; Çok Zor daha akıllı seçer.",
+        "Bilgisayar her zaman düşük performansta oynar. İki telefonda zorluk yok — rakip insandır.",
       helpP2pTitle: "Ülkeler arası (sunucusuz)",
       helpP2p1: "Oyna → İki telefonda / uzaktan → Oda kur.",
       helpP2p2: "4 haneli kodu WhatsApp vb. ile gönder.",
@@ -182,7 +182,7 @@ window.SayibulmaI18n = (function () {
 
       playTitle: "Game mode",
       playSolo: "Vs computer",
-      playSoloHint: "Easy · Normal · Hard · Very Hard — no internet needed",
+      playSoloHint: "Solo — no internet needed",
       play2p: "Two players, same device",
       play2pHint: "Pass the phone — no network needed",
       playP2p: "Two phones / remote",
@@ -196,7 +196,7 @@ window.SayibulmaI18n = (function () {
       endCloseHint: "Close (×) to inspect details",
       noteDigitsHint: "1st tap: absent (×) · 2nd tap: present (yellow ring)",
       helpDiffOnlySolo:
-        "The computer always plays at low performance. In two-phone / same-device modes your opponent is human.",
+        "The computer always plays at low performance. On two phones your opponent is human (no same-device mode).",
       startGame: "Start",
       yourSecret: "Your secret number",
       yourSecretHint: "4 distinct digits; cannot start with 0. Keep it hidden.",
@@ -266,13 +266,13 @@ window.SayibulmaI18n = (function () {
       helpRule5: "History rows show large green + and coral − chips.",
       helpModesTitle: "Modes",
       helpModes:
-        "Vs computer · Same-device two-player · Two phones / remote (room code, P2P). The first two work fully offline.",
+        "Vs computer · Two phones / remote (room code, P2P). No same-device mode — a secret cannot stay hidden on one screen.",
       helpOfflineTitle: "Internet",
       helpOffline:
-        "Solo and same-device need no internet. Remote only needs internet to match; there is no game server.",
+        "Solo needs no internet. Remote only needs internet to match; there is no game server.",
       helpDifficultyTitle: "Difficulty",
       helpDifficulty:
-        "Vs computer only: Easy / Normal / Hard / Very Hard. Two-phone or same-device has no difficulty — opponent is human. Easy often random; Normal occasional mistakes; Hard filters candidates; Very Hard picks smarter.",
+        "The computer always plays at low performance. Two-phone mode has no difficulty — opponent is human.",
       helpP2pTitle: "Cross-country (serverless)",
       helpP2p1: "Play → Two phones / remote → Create room.",
       helpP2p2: "Send the 4-character code via chat.",
