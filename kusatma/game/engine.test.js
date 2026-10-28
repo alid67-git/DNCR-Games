@@ -142,4 +142,35 @@ function fillDeploy(s) {
   console.log("ok combo floor math");
 }
 
+{
+  // Öğrenme: sigorta kapalı, kombo düz puan
+  let s = E.createGameState(1, { insurance: false, combo: false });
+  assert.strictEqual(s.rules.insurance, false);
+  assert.strictEqual(s.rules.combo, false);
+  s.phase = E.PHASE.BATTLE;
+  s.turn = 1;
+  s.nodes[0][0] = 1;
+  s.nodes[0][1] = 1;
+  s.nodes[1][0] = 1;
+  s.nodes[1][1] = 1;
+  s.nodes[5][5] = 2;
+  s.nodes[5][4] = 2;
+  // 2 taş kalsa bile sigorta tetiklenmemeli
+  s.nodes[5][3] = 0;
+  s.nodes[5][2] = 0;
+  s.nodes[5][1] = 0;
+  // P2 only 2 stones → would trigger insurance in full rules
+  s = ok(E.applyDrawLine(s, 1, "H_0_0"));
+  s.turn = 1;
+  s = ok(E.applyDrawLine(s, 1, "H_1_0"));
+  s.turn = 1;
+  s = ok(E.applyDrawLine(s, 1, "V_0_0"));
+  s.turn = 1;
+  const before = s.scores[1];
+  s = ok(E.applyDrawLine(s, 1, "V_0_1"));
+  assert.strictEqual(s.scores[1], before + 10, "flat +10 no combo");
+  assert.ok(!Object.values(s.edgeInsured).some(Boolean), "no insurance edges");
+  console.log("ok learning rules flat + no insurance");
+}
+
 console.log("\nAll engine tests passed.");

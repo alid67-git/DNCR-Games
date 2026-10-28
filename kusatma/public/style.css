@@ -324,6 +324,39 @@ body.is-demo #game-hint { display: none; }
 .edge-line { pointer-events: none; }
 .node-hit { pointer-events: none; }
 .cell-fill, .cell-mark { pointer-events: none; }
+.cell-glow {
+  fill: rgba(0, 180, 216, 0.14);
+  stroke: rgba(0, 180, 216, 0.55);
+  stroke-width: 0.55;
+  animation: cellGlowPulse 1.6s ease-in-out infinite;
+}
+.cell-glow.turn-p2 {
+  fill: rgba(230, 57, 70, 0.14);
+  stroke: rgba(230, 57, 70, 0.55);
+}
+.cell-glow.is-siege {
+  fill: rgba(255, 183, 3, 0.16);
+  stroke: rgba(255, 183, 3, 0.7);
+}
+@keyframes cellGlowPulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+.siege-ring {
+  fill: none;
+  stroke: #FFB703;
+  stroke-width: 0.55;
+  opacity: 0.95;
+  animation: siegeRingPulse 1.25s ease-in-out infinite;
+}
+@keyframes siegeRingPulse {
+  0%, 100% { opacity: 0.55; stroke-width: 0.45; }
+  50% { opacity: 1; stroke-width: 0.7; }
+}
+body.is-learning #phase-pill {
+  border-color: rgba(255, 183, 3, 0.45);
+  color: #FFB703;
+}
 .edge-line.is-hover {
   stroke: #cfd3e8 !important;
   stroke-width: 1.35px !important;

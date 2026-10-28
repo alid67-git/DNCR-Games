@@ -24,7 +24,7 @@
     cloneState,
   } = Engine;
 
-  const DIFFICULTY_LEVELS = ["easy", "medium", "hard"];
+  const DIFFICULTY_LEVELS = ["easy", "medium", "hard", "learn"];
 
   function randPick(arr) {
     return arr[(Math.random() * arr.length) | 0];
@@ -115,6 +115,31 @@
 
     const draws = actions.filter((a) => a.type === "DRAW_LINE");
     if (draws.length) return randPick(draws);
+    return randPick(actions);
+  }
+
+  /** Öğrenme: serbest kareyi seyrek alır, 3. kenarı daha sık bırakır */
+  function pickLearn(state, player) {
+    const actions = listLegalActions(state, player);
+    if (!actions.length) return null;
+
+    const captures = actions.filter(
+      (a) => a.type === "DRAW_LINE" && wouldComplete(state, a.edgeId) > 0
+    );
+    if (captures.length && Math.random() < 0.28) return randPick(captures);
+
+    const gifts = actions.filter(
+      (a) => a.type === "DRAW_LINE" && wouldMakeThird(state, a.edgeId)
+    );
+    if (gifts.length && Math.random() < 0.55) return randPick(gifts);
+
+    const moves = actions.filter((a) => a.type === "MOVE_PIECE");
+    if (moves.length && Math.random() < 0.45) return randPick(moves);
+
+    const safe = actions.filter(
+      (a) => a.type === "DRAW_LINE" && !wouldComplete(state, a.edgeId)
+    );
+    if (safe.length) return randPick(safe);
     return randPick(actions);
   }
 
@@ -225,6 +250,7 @@
     }
 
     const diff = DIFFICULTY_LEVELS.includes(difficulty) ? difficulty : "medium";
+    if (diff === "learn") return pickLearn(state, player);
     if (diff === "easy") return pickEasy(state, player);
     if (diff === "hard") return pickHard(state, player);
     return pickMedium(state, player);

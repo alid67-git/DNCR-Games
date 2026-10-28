@@ -124,7 +124,15 @@
     return out.filter(([i, j]) => i >= 0 && i < C && j >= 0 && j < C);
   }
 
-  function createGameState(starter) {
+  function normalizeRules(rules) {
+    const r = rules || {};
+    return {
+      insurance: r.insurance !== false,
+      combo: r.combo !== false,
+    };
+  }
+
+  function createGameState(starter, rulesOpt) {
     const nodes = Array.from({ length: N }, () => Array(N).fill(0));
     const { drawn, insured, owner } = emptyEdgeMap();
     const owners = Array.from({ length: C }, () => Array(C).fill(0));
@@ -149,12 +157,14 @@
       lastMove: null,
       moveCount: 0,
       pendingDeploy: null, // {r,c,player} onay öncesi
+      rules: normalizeRules(rulesOpt),
     };
   }
 
   function cloneState(state) {
     return {
       ...state,
+      rules: normalizeRules(state.rules),
       nodes: state.nodes.map((row) => row.slice()),
       edgeDrawn: { ...state.edgeDrawn },
       edgeInsured: { ...state.edgeInsured },
@@ -168,6 +178,10 @@
       pendingDeploy: state.pendingDeploy ? { ...state.pendingDeploy } : null,
       lastMove: state.lastMove ? { ...state.lastMove } : null,
     };
+  }
+
+  function rulesOf(state) {
+    return normalizeRules(state && state.rules);
   }
 
   function countStones(state, player) {
@@ -254,6 +268,10 @@
   }
 
   function maybeTriggerInsurance(state) {
+    if (!rulesOf(state).insurance) {
+      for (const id of ALL_EDGES) state.edgeInsured[id] = false;
+      return;
+    }
     for (const p of [1, 2]) {
       const n = countStones(state, p);
       if (n === 2 && !state.insuranceActive[p]) {
@@ -293,7 +311,8 @@
     return n;
   }
 
-  function scoreForCapture(base, comboIndex) {
+  function scoreForCapture(base, comboIndex, state) {
+    if (state && !rulesOf(state).combo) return base;
     const mult = COMBO_MULT[Math.min(comboIndex, COMBO_MULT.length - 1)];
     return Math.floor(base * mult);
   }
@@ -310,11 +329,37 @@
       }
     }
     const base = siege ? SCORE_SIEGE : SCORE_CLEAN;
-    const gained = scoreForCapture(base, comboIndex);
+    const gained = scoreForCapture(base, comboIndex, state);
     state.scores[player] += gained;
-    // Nötr (temiz) kare → saldırgana +1 ShieldPoint
+    // Nötr (temiz) kare → saldırgana +1 ShieldPoint (öğrenme modunda da birikir; sigorta kapalı)
     if (!siege) state.shieldPoints[player] += 1;
     return { siege, gained, removed, base };
+  }
+
+  /** UI: 3 kenarı dolu, henüz sahibi olmayan hücreler */
+  function listAlmostCompleteCells(state) {
+    const out = [];
+    for (let i = 0; i < C; i++) {
+      for (let j = 0; j < C; j++) {
+        if (state.cellOwner[i][j]) continue;
+        if (drawnCountForCell(state, i, j) === 3) out.push({ i, j });
+      }
+    }
+    return out;
+  }
+
+  /** UI: 3 kenarlı hücrede rakip taşı olan köşeler (esir adayı) */
+  function listSiegeThreats(state, forPlayer) {
+    const enemy = opponent(forPlayer);
+    const out = [];
+    for (const { i, j } of listAlmostCompleteCells(state)) {
+      for (const [r, c] of cellCorners(i, j)) {
+        if (state.nodes[r][c] === enemy) {
+          out.push({ i, j, r, c });
+        }
+      }
+    }
+    return out;
   }
 
   /** Deployment: taş seç (onay öncesi). */
@@ -578,6 +623,8 @@
     opponent,
     createGameState,
     cloneState,
+    normalizeRules,
+    rulesOf,
     cellEdges,
     cellCorners,
     edgesAtNode,
@@ -600,5 +647,7 @@
     countStones,
     hasLegalBattleMove,
     isCriticalEdge,
+    listAlmostCompleteCells,
+    listSiegeThreats,
   };
 });
