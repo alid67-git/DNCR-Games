@@ -795,7 +795,29 @@ input[type="text"]:focus {
   margin-bottom: 0.85rem;
 }
 .guess-stage.is-locked {
-  opacity: 0.55;
+  opacity: 0.48;
+  filter: grayscale(0.25);
+  pointer-events: none;
+  user-select: none;
+  touch-action: none;
+}
+.guess-stage.is-locked .btn-try {
+  background: linear-gradient(180deg, #5a6b4a, #3d4a32);
+  box-shadow: none;
+  color: rgba(232, 255, 244, 0.45);
+  cursor: not-allowed;
+}
+.guess-stage.is-locked .digit-slot,
+.digit-slot.is-locked {
+  border-color: rgba(157, 255, 87, 0.18);
+  color: var(--muted);
+  box-shadow: none;
+}
+.guess-stage.is-locked .digit-key:disabled,
+#btn-guess-clear:disabled,
+#btn-guess-submit:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
   pointer-events: none;
 }
 

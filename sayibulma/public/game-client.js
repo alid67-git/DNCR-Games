@@ -116,7 +116,12 @@
   }
 
   function makeDigitPad(slotsId, padId, opts) {
-    const state = { digits: [], mask: !!(opts && opts.mask), onChange: null };
+    const state = {
+      digits: [],
+      mask: !!(opts && opts.mask),
+      locked: false,
+      onChange: null,
+    };
     const slotsEl = $(slotsId);
     const padEl = $(padId);
     if (!slotsEl || !padEl) return state;
@@ -128,7 +133,8 @@
         slot.className =
           "digit-slot" +
           (state.digits[i] != null ? " is-filled" : "") +
-          (i === state.digits.length ? " is-active" : "");
+          (!state.locked && i === state.digits.length ? " is-active" : "") +
+          (state.locked ? " is-locked" : "");
         const v = state.digits[i];
         slot.textContent = v == null ? "" : state.mask ? "•" : v;
         slotsEl.appendChild(slot);
@@ -138,7 +144,7 @@
         const used = state.digits.includes(d);
         const full = state.digits.length >= DIGIT_COUNT;
         const lead0 = state.digits.length === 0 && d === "0";
-        btn.disabled = used || full || lead0;
+        btn.disabled = state.locked || used || full || lead0;
         btn.classList.toggle("is-used", used);
         btn.classList.toggle("is-lead-block", lead0);
       });
@@ -153,6 +159,7 @@
       btn.dataset.digit = String(d);
       btn.textContent = String(d);
       btn.addEventListener("click", () => {
+        if (state.locked) return;
         if (state.digits.length >= DIGIT_COUNT) return;
         if (state.digits.includes(String(d))) return;
         if (state.digits.length === 0 && String(d) === "0") return;
@@ -165,10 +172,12 @@
 
     state.value = () => state.digits.join("");
     state.clear = () => {
+      if (state.locked) return;
       state.digits = [];
       render();
     };
     state.set = (str) => {
+      if (state.locked) return;
       const s = String(str || "").replace(/\D/g, "").slice(0, DIGIT_COUNT);
       const seen = Object.create(null);
       state.digits = [];
@@ -184,8 +193,26 @@
       state.mask = !!m;
       render();
     };
+    state.setLocked = (locked) => {
+      state.locked = !!locked;
+      render();
+    };
     render();
     return state;
+  }
+
+  function setGuessInputLocked(locked) {
+    const on = !!locked;
+    pads.guess.setLocked(on);
+    const stage = $("guess-stage");
+    if (stage) {
+      stage.classList.toggle("is-locked", on);
+      stage.setAttribute("aria-disabled", on ? "true" : "false");
+    }
+    ["btn-guess-clear", "btn-guess-submit"].forEach((id) => {
+      const el = $(id);
+      if (el) el.disabled = on;
+    });
   }
 
   function applyI18n() {
@@ -410,12 +437,12 @@
     renderHistoryList($("hist-b"), s.histories.b);
 
     const locked = !canAct();
-    $("guess-stage").classList.toggle("is-locked", locked);
+    setGuessInputLocked(locked);
 
     let phase = "";
     if (s.winner) {
       phase = t("gameOver");
-    } else if (session.mode === "solo" && session.aiThinking) {
+    } else if (session.mode === "solo" && (session.aiThinking || s.turn === PLAYERS.b)) {
       phase = t("statusCpu");
     } else if (session.mode === "twop") {
       phase = `${t("turnPass")} ${session.names[s.turn]}`;
@@ -429,7 +456,7 @@
       ? ""
       : canAct()
         ? t("statusGuess")
-        : session.aiThinking
+        : session.mode === "solo" && s.turn === PLAYERS.b
           ? t("statusCpu")
           : "";
 
@@ -508,17 +535,38 @@
     clearTimeout(aiTimer);
     if (!session || session.mode !== "solo" || session.state.winner) return;
     if (session.state.turn !== PLAYERS.b) return;
+    if (session.aiThinking) return;
     session.aiThinking = true;
+    setGuessInputLocked(true);
     renderGame();
     aiTimer = setTimeout(() => {
-      if (!session || session.state.turn !== PLAYERS.b || session.state.winner) return;
-      const guess = Ai.pickGuess(session.state.histories.b, session.difficulty || "hard");
+      if (!session || session.state.turn !== PLAYERS.b || session.state.winner) {
+        if (session) session.aiThinking = false;
+        return;
+      }
+      let guess = null;
+      try {
+        guess = Ai.pickGuess(session.state.histories.b, session.difficulty || "hard");
+      } catch (err) {
+        console.warn("Sayı Bulma AI:", err);
+        guess = randomSecret();
+      }
+      if (!isValidSecret(guess)) guess = randomSecret();
+
+      let r = applyGuess(session.state, PLAYERS.b, guess);
+      // Aynı tahmini tekrar ederse veya havuz bozulursa bir kez daha dene
+      if (!r.ok) {
+        guess = randomSecret();
+        r = applyGuess(session.state, PLAYERS.b, guess);
+      }
       session.aiThinking = false;
-      const r = applyGuess(session.state, PLAYERS.b, guess);
       if (r.ok) {
         session.state = r.state;
         playSfx(r.score.plus === DIGIT_COUNT ? "mill" : "place");
         showLastFeedback(guess, r.score);
+      } else {
+        // Hâlâ başarısızsa turu boş bırakma — kısa süre sonra yeniden dene
+        aiTimer = setTimeout(() => scheduleAi(200), 400);
       }
       renderGame();
     }, delay);
@@ -963,8 +1011,12 @@
 
   $("btn-room-home").addEventListener("click", () => goHome());
 
-  $("btn-guess-clear").addEventListener("click", () => pads.guess.clear());
+  $("btn-guess-clear").addEventListener("click", () => {
+    if (!canAct()) return;
+    pads.guess.clear();
+  });
   $("btn-guess-submit").addEventListener("click", () => {
+    if (!canAct()) return;
     const g = pads.guess.value();
     if (!isValidSecret(g)) {
       toast(t("secretInvalid"));

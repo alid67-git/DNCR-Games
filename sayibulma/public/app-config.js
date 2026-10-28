@@ -1,9 +1,24 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.2",
-  build: 3,
+  version: "1.0.3",
+  build: 4,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.3",
+      build: 4,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Bilgisayar düşünürken rakam girişi ve Tahmin et kilitli",
+          "AI turu takılırsa güvenli yeniden deneme",
+        ],
+        en: [
+          "Digit pad and Try locked while the computer thinks",
+          "Safer AI retry if a turn stalls",
+        ],
+      },
+    },
     {
       version: "1.0.2",
       build: 3,
