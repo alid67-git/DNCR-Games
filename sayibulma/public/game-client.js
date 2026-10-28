@@ -26,10 +26,10 @@
 
   const DIFFS = [
     { id: "easy", i18n: "diffEasy", hint: "diffEasyHint" },
+    { id: "normal", i18n: "diffNormal", hint: "diffNormalHint" },
     { id: "hard", i18n: "diffHard", hint: "diffHardHint" },
     { id: "veryhard", i18n: "diffVeryHard", hint: "diffVeryHardHint" },
   ];
-
   const $ = (id) => document.getElementById(id);
   const screens = {
     home: $("screen-home"),
@@ -467,32 +467,94 @@
           : "";
 
     const end = $("end-panel");
+    const showResultBtn = $("btn-show-result");
     if (s.winner) {
-      end.classList.remove("hidden");
-      let msg = t("winOther");
-      if (session.mode === "solo") {
-        msg = s.winner === PLAYERS.a ? t("winYou") : t("winCpu");
-      } else if (session.mode === "p2p") {
-        msg = s.winner === session.you ? t("winYou") : `${session.names[s.winner]} ${t("winOther")}`;
-      } else {
-        msg = `${session.names[s.winner]} ${t("winOther")}`;
-      }
-      $("end-text").textContent = msg;
-      const revealBits = [];
-      if (session.mode === "solo") {
-        revealBits.push(`${t("revealSecret")}: ${s.secrets.b}`);
-        revealBits.push(`${t("yourSecretWas")}: ${s.secrets.a}`);
-      } else if (session.mode === "p2p") {
-        const opp = opponent(session.you);
-        revealBits.push(`${t("revealSecret")}: ${s.secrets[opp]}`);
-      } else {
-        revealBits.push(`${session.names.a}: ${s.secrets.a}`);
-        revealBits.push(`${session.names.b}: ${s.secrets.b}`);
-      }
-      $("end-reveal").textContent = revealBits.join(" · ");
+      fillEndPanelText();
       maybeRecordScore();
+      if (!session.endDismissed) {
+        end.classList.remove("hidden");
+        if (showResultBtn) showResultBtn.classList.add("hidden");
+      } else {
+        end.classList.add("hidden");
+        if (showResultBtn) showResultBtn.classList.remove("hidden");
+      }
     } else {
       end.classList.add("hidden");
+      if (showResultBtn) showResultBtn.classList.add("hidden");
+      session.endDismissed = false;
+    }
+    renderNoteDigits();
+  }
+
+  function fillEndPanelText() {
+    if (!session || !session.state || !session.state.winner) return;
+    const s = session.state;
+    let msg = t("winOther");
+    if (session.mode === "solo") {
+      msg = s.winner === PLAYERS.a ? t("winYou") : t("winCpu");
+    } else if (session.mode === "p2p") {
+      msg = s.winner === session.you ? t("winYou") : `${session.names[s.winner]} ${t("winOther")}`;
+    } else {
+      msg = `${session.names[s.winner]} ${t("winOther")}`;
+    }
+    $("end-text").textContent = msg;
+    const revealBits = [];
+    if (session.mode === "solo") {
+      revealBits.push(`${t("revealSecret")}: ${s.secrets.b}`);
+      revealBits.push(`${t("yourSecretWas")}: ${s.secrets.a}`);
+    } else if (session.mode === "p2p") {
+      const opp = opponent(session.you);
+      revealBits.push(`${t("revealSecret")}: ${s.secrets[opp]}`);
+    } else {
+      revealBits.push(`${session.names.a}: ${s.secrets.a}`);
+      revealBits.push(`${session.names.b}: ${s.secrets.b}`);
+    }
+    $("end-reveal").textContent = revealBits.join(" · ");
+  }
+
+  function dismissEndPanel() {
+    if (!session || !session.state || !session.state.winner) return;
+    session.endDismissed = true;
+    const end = $("end-panel");
+    if (end) end.classList.add("hidden");
+    if ($("btn-show-result")) $("btn-show-result").classList.remove("hidden");
+  }
+
+  function openEndPanel() {
+    if (!session || !session.state || !session.state.winner) return;
+    session.endDismissed = false;
+    fillEndPanelText();
+    const end = $("end-panel");
+    if (end) end.classList.remove("hidden");
+    if ($("btn-show-result")) $("btn-show-result").classList.add("hidden");
+  }
+
+  function noteStruck() {
+    if (!session) return Object.create(null);
+    if (!session.noteStruck) session.noteStruck = Object.create(null);
+    return session.noteStruck;
+  }
+
+  function renderNoteDigits() {
+    const wrap = $("note-digits");
+    if (!wrap) return;
+    const struck = noteStruck();
+    wrap.innerHTML = "";
+    for (let d = 0; d <= 9; d++) {
+      const dig = String(d);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "note-digit" + (struck[dig] ? " is-struck" : "");
+      btn.textContent = dig;
+      btn.setAttribute("aria-pressed", struck[dig] ? "true" : "false");
+      btn.title = t("noteDigitsHint");
+      btn.addEventListener("click", () => {
+        const map = noteStruck();
+        if (map[dig]) delete map[dig];
+        else map[dig] = true;
+        renderNoteDigits();
+      });
+      wrap.appendChild(btn);
     }
   }
 
@@ -630,6 +692,8 @@
       names: { a: t("you"), b: t("computer") },
       state: createMatch({ secretA, secretB, starter }),
       aiThinking: false,
+      endDismissed: false,
+      noteStruck: Object.create(null),
     };
     pads.guess.clear();
     showScreen("game");
@@ -674,6 +738,8 @@
         secretB: twopDraft.secretB,
         starter,
       }),
+      endDismissed: false,
+      noteStruck: Object.create(null),
     };
     $("twop-secret-step").classList.add("hidden");
     $("btn-2p-start").classList.remove("hidden");
@@ -745,6 +811,8 @@
       you: p2pLobby.you,
       names: names || p2pLobby.names,
       state,
+      endDismissed: false,
+      noteStruck: Object.create(null),
     };
     pads.guess.clear();
     showScreen("game");
@@ -1165,6 +1233,13 @@
     // Bitiş panelinden — onay yok
     restartCurrentMode();
   });
+
+  if ($("btn-end-close")) {
+    $("btn-end-close").addEventListener("click", () => dismissEndPanel());
+  }
+  if ($("btn-show-result")) {
+    $("btn-show-result").addEventListener("click", () => openEndPanel());
+  }
 
   // Boot
   if (Sfx && Sfx.bindFirstGesture) Sfx.bindFirstGesture(document);

@@ -117,7 +117,7 @@
 
   /**
    * @param {Array<{guess:string,plus:number,minus:number}>} history
-   * @param {string} difficulty easy|hard|veryhard
+   * @param {string} difficulty easy|normal|medium|hard|veryhard
    * @param {{rng?: function}|string} [opts]
    */
   function pickGuess(history, difficulty, opts) {
@@ -126,10 +126,11 @@
     const diff = String(difficulty || "hard").toLowerCase();
     const pool = filterPool(history);
 
-    if (diff === "easy") {
-      // Sometimes ignore constraints and guess a random valid code.
+    if (diff === "easy" || diff === "normal" || diff === "medium") {
+      // easy: more noise; normal/medium: lighter noise
+      const noiseChance = diff === "easy" ? 0.42 : 0.18;
       const noise = typeof rng === "function" ? rng() : Math.random();
-      if (noise < 0.38 || !pool.length) {
+      if (noise < noiseChance || !pool.length) {
         let g = randomSecret(rng);
         const hist = history || [];
         const seen = Object.create(null);
