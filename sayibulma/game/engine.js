@@ -24,6 +24,7 @@
   function isValidSecret(value) {
     const s = normalizeDigits(value);
     if (s.length !== DIGIT_COUNT) return false;
+    if (s[0] === "0") return false; // cannot start with zero (classic Bulls and Cows)
     const seen = Object.create(null);
     for (let i = 0; i < s.length; i++) {
       const ch = s[i];
@@ -35,14 +36,19 @@
 
   function randomSecret(rng) {
     const rand = typeof rng === "function" ? rng : Math.random;
-    const digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-    for (let i = digits.length - 1; i > 0; i--) {
-      const j = Math.floor(rand() * (i + 1));
-      const tmp = digits[i];
-      digits[i] = digits[j];
-      digits[j] = tmp;
+    for (let attempt = 0; attempt < 40; attempt++) {
+      const digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+      for (let i = digits.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        const tmp = digits[i];
+        digits[i] = digits[j];
+        digits[j] = tmp;
+      }
+      const s = digits.slice(0, DIGIT_COUNT).join("");
+      if (isValidSecret(s)) return s;
     }
-    return digits.slice(0, DIGIT_COUNT).join("");
+    // Deterministic fallback
+    return "1234";
   }
 
   /**

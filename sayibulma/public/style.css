@@ -521,33 +521,80 @@ input[type="text"]:focus {
   font-size: 0.9rem;
 }
 
-/* —— Digit UI —— */
+/* —— Digit UI (wheel-like slots) —— */
+.attempts-label {
+  margin: 0 0 0.35rem;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--lime);
+  letter-spacing: 0.02em;
+}
+.wheel-hint {
+  margin: 0 0 0.55rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
 .digit-slots {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.45rem;
-  margin: 0.6rem 0 0.85rem;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0.9rem;
 }
 .digit-slot {
-  aspect-ratio: 0.78;
+  aspect-ratio: 0.72;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  border: 1px solid rgba(157, 255, 87, 0.35);
-  background: rgba(2, 20, 26, 0.55);
+  border-radius: 16px;
+  border: 2px solid rgba(157, 255, 87, 0.4);
+  background:
+    linear-gradient(180deg, rgba(46, 196, 182, 0.18), transparent 40%),
+    rgba(2, 20, 26, 0.72);
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 5vw, 1.75rem);
+  font-size: clamp(1.55rem, 6vw, 2rem);
   font-weight: 700;
-  color: var(--ink);
-  min-height: 3.1rem;
+  color: var(--lime);
+  min-height: 3.6rem;
+  box-shadow:
+    inset 0 1px 0 rgba(232, 255, 244, 0.12),
+    0 8px 18px rgba(0, 0, 0, 0.28);
+  position: relative;
+}
+.digit-slot::before,
+.digit-slot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  opacity: 0.35;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.digit-slot::before {
+  top: 6px;
+  border-bottom: 6px solid var(--lime);
+}
+.digit-slot::after {
+  bottom: 6px;
+  border-top: 6px solid var(--lime);
 }
 .digit-slot.is-active {
   border-color: var(--lime);
-  box-shadow: 0 0 0 2px rgba(157, 255, 87, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(232, 255, 244, 0.16),
+    0 0 0 3px rgba(157, 255, 87, 0.22),
+    0 10px 22px rgba(0, 0, 0, 0.32);
 }
 .digit-slot.is-filled {
-  background: linear-gradient(180deg, #1a6b78, #0e4550);
+  background:
+    linear-gradient(180deg, #2a8f9c, #0e4550 70%);
+  color: #fff;
 }
 
 .digit-pad {
@@ -583,11 +630,37 @@ input[type="text"]:focus {
 .guess-actions {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.75rem;
+  margin-top: 0.85rem;
+  align-items: stretch;
 }
-.secret-actions .btn,
-.guess-actions .btn {
+.secret-actions .btn {
   flex: 1;
+}
+.guess-actions .btn-ghost {
+  flex: 0 0 28%;
+}
+.guess-actions .btn-try {
+  flex: 1;
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  padding: 0.95rem 1.1rem;
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #06252e;
+  background: linear-gradient(180deg, #b8ff6e, #9dff57 45%, #6bc22a);
+  box-shadow:
+    0 6px 0 #3d7a12,
+    0 12px 24px rgba(157, 255, 87, 0.28);
+  cursor: pointer;
+}
+.guess-actions .btn-try:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 3px 0 #3d7a12,
+    0 8px 16px rgba(157, 255, 87, 0.22);
 }
 
 .secret-step {

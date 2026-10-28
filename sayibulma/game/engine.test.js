@@ -19,31 +19,33 @@ function testConstants() {
 }
 
 function testScoreExact() {
-  const sc = scoreGuess("0123", "0123");
+  const sc = scoreGuess("1234", "1234");
   assert.deepStrictEqual(sc, { plus: 4, minus: 0 });
   assert.strictEqual(formatScore(sc), "+4−0");
 }
 
 function testScoreNone() {
-  const sc = scoreGuess("0123", "5678");
+  const sc = scoreGuess("1234", "5678");
   assert.deepStrictEqual(sc, { plus: 0, minus: 0 });
 }
 
 function testScoreAllWrongPlace() {
-  // secret 0123 guess 3210 → all digits present, none in place → +0−4
-  const sc = scoreGuess("0123", "3210");
+  // secret 1234 guess 4321 → all present, none in place → +0−4
+  const sc = scoreGuess("1234", "4321");
   assert.deepStrictEqual(sc, { plus: 0, minus: 4 });
 }
 
 function testScoreMixed() {
-  // secret 0123 guess 0132 → +2 (0,1) −2 (2,3 swapped)
-  const sc = scoreGuess("0123", "0132");
+  // secret 1234 guess 1243 → +2 (1,2) −2 (3,4 swapped)
+  const sc = scoreGuess("1234", "1243");
   assert.deepStrictEqual(sc, { plus: 2, minus: 2 });
 }
 
 function testInvalidSecret() {
   assert.strictEqual(isValidSecret("1122"), false);
-  assert.strictEqual(isValidSecret("0123"), true);
+  assert.strictEqual(isValidSecret("0123"), false, "no leading zero");
+  assert.strictEqual(isValidSecret("1023"), true);
+  assert.strictEqual(isValidSecret("1234"), true);
   assert.strictEqual(isValidSecret("012"), false);
   assert.strictEqual(isValidSecret("01234"), false);
   assert.strictEqual(isValidSecret("01a3"), false);
@@ -53,12 +55,13 @@ function testRandomSecretValid() {
   for (let i = 0; i < 40; i++) {
     const s = randomSecret();
     assert.ok(isValidSecret(s), s);
+    assert.notStrictEqual(s[0], "0");
   }
 }
 
 function testMatchFlow() {
   const state = createMatch({
-    secretA: "0123",
+    secretA: "1234",
     secretB: "5678",
     starter: PLAYERS.a,
   });
@@ -73,7 +76,7 @@ function testMatchFlow() {
   const badTurn = applyGuess(miss.state, PLAYERS.a, "5678");
   assert.ok(!badTurn.ok);
 
-  const win = applyGuess(miss.state, PLAYERS.b, "0123");
+  const win = applyGuess(miss.state, PLAYERS.b, "1234");
   assert.ok(win.ok);
   assert.strictEqual(win.score.plus, 4);
   assert.strictEqual(win.state.winner, PLAYERS.b);
@@ -81,10 +84,13 @@ function testMatchFlow() {
 }
 
 function testRejectInvalidGuess() {
-  const state = createMatch({ secretA: "0123", secretB: "5678" });
+  const state = createMatch({ secretA: "1234", secretB: "5678" });
   const r = applyGuess(state, PLAYERS.a, "1122");
   assert.ok(!r.ok);
   assert.strictEqual(r.error, "invalid_guess");
+  const lead0 = applyGuess(state, PLAYERS.a, "0123");
+  assert.ok(!lead0.ok);
+  assert.strictEqual(lead0.error, "invalid_guess");
 }
 
 function run() {

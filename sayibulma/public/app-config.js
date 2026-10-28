@@ -1,9 +1,26 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.1",
-  build: 2,
+  version: "1.0.2",
+  build: 3,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.2",
+      build: 3,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "İlk hane 0 olamaz (klasik Bulls and Cows)",
+          "Tekerlek benzeri rakam yuvaları + büyük «Tahmin et»",
+          "Deneme sayacı ve belirgin +/− geri bildirim bandı",
+        ],
+        en: [
+          "No leading zero (classic Bulls and Cows)",
+          "Wheel-like digit slots + large Try button",
+          "Attempts counter and strong +/− feedback banner",
+        ],
+      },
+    },
     {
       version: "1.0.1",
       build: 2,

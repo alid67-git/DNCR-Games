@@ -314,6 +314,7 @@
         </div>
       </div>
 
+      <p id="attempts-label" class="attempts-label"></p>
       <p id="phase-label" class="phase-label"></p>
       <div id="last-feedback" class="last-feedback hidden" aria-live="assertive">
         <span class="lf-guess" id="lf-guess"></span>
@@ -324,11 +325,12 @@
       </div>
 
       <div class="guess-stage">
+        <p class="wheel-hint" data-i18n="wheelHint">Her tekerde farklı rakam seç</p>
         <div class="digit-slots guess-slots" id="guess-slots" aria-live="polite"></div>
         <div class="digit-pad" id="guess-pad"></div>
         <div class="guess-actions">
           <button type="button" class="btn btn-ghost" id="btn-guess-clear" data-i18n="clearBtn">Sil</button>
-          <button type="button" class="btn btn-primary" id="btn-guess-submit" data-i18n="guessBtn">Tahmin et</button>
+          <button type="button" class="btn btn-try" id="btn-guess-submit" data-i18n="tryCode">Tahmin et</button>
         </div>
       </div>
 

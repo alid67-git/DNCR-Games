@@ -21,7 +21,7 @@
     const digits = "0123456789";
     function walk(prefix, used) {
       if (prefix.length === DIGIT_COUNT) {
-        out.push(prefix);
+        if (isValidSecret(prefix)) out.push(prefix);
         return;
       }
       for (let i = 0; i < 10; i++) {

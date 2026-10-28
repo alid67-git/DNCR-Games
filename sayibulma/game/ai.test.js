@@ -4,25 +4,26 @@ const { pickGuess, filterPool, allSecrets } = require("./ai");
 
 function testPoolSize() {
   const all = allSecrets();
-  assert.strictEqual(all.length, 5040); // P(10,4)
+  // 9 choices for first digit (1-9) × P(9,3) for the rest = 9*9*8*7 = 4536
+  assert.strictEqual(all.length, 4536);
   assert.ok(all.every(isValidSecret));
+  assert.ok(all.every((s) => s[0] !== "0"));
 }
 
 function testFilterAfterExactHint() {
-  const hist = [{ guess: "0123", plus: 4, minus: 0 }];
+  const hist = [{ guess: "1234", plus: 4, minus: 0 }];
   const pool = filterPool(hist);
-  assert.deepStrictEqual(pool, ["0123"]);
+  assert.deepStrictEqual(pool, ["1234"]);
 }
 
 function testFilterConsistency() {
-  const secret = "0123";
+  const secret = "1234";
   const hist = [
     { guess: "5678", plus: 0, minus: 0 },
-    { guess: "3210", plus: 0, minus: 4 },
+    { guess: "4321", plus: 0, minus: 4 },
   ];
-  // verify scores match engine
   assert.deepStrictEqual(scoreGuess(secret, "5678"), { plus: 0, minus: 0 });
-  assert.deepStrictEqual(scoreGuess(secret, "3210"), { plus: 0, minus: 4 });
+  assert.deepStrictEqual(scoreGuess(secret, "4321"), { plus: 0, minus: 4 });
   const pool = filterPool(hist);
   assert.ok(pool.includes(secret));
   for (const cand of pool) {
@@ -35,15 +36,10 @@ function testFilterConsistency() {
 }
 
 function testPickGuessHardFromPool() {
-  const hist = [{ guess: "0123", plus: 0, minus: 0 }];
+  const hist = [{ guess: "1234", plus: 0, minus: 0 }];
   const g = pickGuess(hist, "hard", { rng: () => 0.1 });
   assert.ok(isValidSecret(g));
   const pool = filterPool(hist);
-  assert.ok(pool.includes(g));
-  assert.ok(!g.split("").some((d) => "0123".includes(d)) || true);
-  // must not reuse digits from a zero-overlap guess against any consistent secret
-  const sc = scoreGuess(g, "0123");
-  // g is a candidate secret; scoreGuess(cand, previousGuess) filtered already
   assert.ok(pool.includes(g));
 }
 
@@ -54,7 +50,7 @@ function testPickGuessVeryHard() {
 }
 
 function testPickGuessEasyReturnsValid() {
-  const hist = [{ guess: "0123", plus: 1, minus: 2 }];
+  const hist = [{ guess: "1234", plus: 1, minus: 2 }];
   for (let i = 0; i < 12; i++) {
     const g = pickGuess(hist, "easy");
     assert.ok(isValidSecret(g), g);

@@ -135,8 +135,12 @@
       }
       padEl.querySelectorAll(".digit-key").forEach((btn) => {
         const d = btn.dataset.digit;
-        btn.disabled = state.digits.includes(d) || state.digits.length >= DIGIT_COUNT;
-        btn.classList.toggle("is-used", state.digits.includes(d));
+        const used = state.digits.includes(d);
+        const full = state.digits.length >= DIGIT_COUNT;
+        const lead0 = state.digits.length === 0 && d === "0";
+        btn.disabled = used || full || lead0;
+        btn.classList.toggle("is-used", used);
+        btn.classList.toggle("is-lead-block", lead0);
       });
       if (typeof state.onChange === "function") state.onChange(state.value());
     }
@@ -151,6 +155,7 @@
       btn.addEventListener("click", () => {
         if (state.digits.length >= DIGIT_COUNT) return;
         if (state.digits.includes(String(d))) return;
+        if (state.digits.length === 0 && String(d) === "0") return;
         state.digits.push(String(d));
         playSfx("select");
         render();
@@ -169,6 +174,7 @@
       state.digits = [];
       for (const ch of s) {
         if (seen[ch]) continue;
+        if (!state.digits.length && ch === "0") continue;
         seen[ch] = true;
         state.digits.push(ch);
       }
@@ -360,8 +366,19 @@
     const s = session.state;
     $("name-chip-a").textContent = session.names.a;
     $("name-chip-b").textContent = session.names.b;
-    $("score-a").textContent = String((s.histories.a || []).length);
-    $("score-b").textContent = String((s.histories.b || []).length);
+    const attemptsA = (s.histories.a || []).length;
+    const attemptsB = (s.histories.b || []).length;
+    $("score-a").textContent = String(attemptsA);
+    $("score-b").textContent = String(attemptsB);
+    if ($("attempts-label")) {
+      const mine =
+        session.mode === "solo"
+          ? attemptsA
+          : session.mode === "p2p"
+            ? (s.histories[session.you] || []).length
+            : attemptsA + attemptsB;
+      $("attempts-label").textContent = `${t("attemptsLabel")}: ${mine}`;
+    }
     $("chip-a").classList.toggle("is-turn", s.turn === PLAYERS.a && !s.winner);
     $("chip-b").classList.toggle("is-turn", s.turn === PLAYERS.b && !s.winner);
     $("meta-a").textContent =
