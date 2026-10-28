@@ -547,6 +547,7 @@ input[type="text"]:focus {
   margin: 0.2rem 0 0.55rem;
 }
 .digit-slot {
+  appearance: none;
   aspect-ratio: 1.05;
   display: flex;
   align-items: center;
@@ -566,6 +567,11 @@ input[type="text"]:focus {
     inset 0 1px 0 rgba(232, 255, 244, 0.12),
     0 4px 12px rgba(0, 0, 0, 0.22);
   position: relative;
+  cursor: pointer;
+  padding: 0;
+}
+.digit-slot:disabled {
+  cursor: not-allowed;
 }
 .digit-slot::before,
 .digit-slot::after {
@@ -641,7 +647,8 @@ input[type="text"]:focus {
   flex: 1;
 }
 .guess-actions .btn-ghost {
-  flex: 0 0 26%;
+  flex: 0 0 auto;
+  min-width: 4.2rem;
   padding: 0.55rem 0.5rem;
   font-size: 0.9rem;
 }
@@ -931,9 +938,10 @@ input[type="text"]:focus {
   gap: 0.35rem;
 }
 #screen-game .guess-actions .btn-ghost {
-  flex: 0 0 22%;
+  flex: 0 0 auto;
+  min-width: 3.6rem;
   padding: 0.4rem 0.35rem;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
 }
 #screen-game .guess-actions .btn-try {
   padding: 0.45rem 0.7rem;
