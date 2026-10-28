@@ -112,7 +112,9 @@
 
   function makeDigitPad(slotsId, padId, opts) {
     const state = {
-      digits: [],
+      /** @type {(string|null)[]} */
+      slots: Array(DIGIT_COUNT).fill(null),
+      active: 0,
       mask: !!(opts && opts.mask),
       locked: false,
       onChange: null,
@@ -121,26 +123,56 @@
     const padEl = $(padId);
     if (!slotsEl || !padEl) return state;
 
+    function firstEmpty(from) {
+      const start = typeof from === "number" ? from : 0;
+      for (let i = start; i < DIGIT_COUNT; i++) {
+        if (state.slots[i] == null) return i;
+      }
+      for (let i = 0; i < start; i++) {
+        if (state.slots[i] == null) return i;
+      }
+      return -1;
+    }
+
+    function filledCount() {
+      let n = 0;
+      for (let i = 0; i < DIGIT_COUNT; i++) if (state.slots[i] != null) n++;
+      return n;
+    }
+
     function render() {
+      if (state.active < 0 || state.active >= DIGIT_COUNT) {
+        state.active = Math.max(0, firstEmpty(0));
+        if (state.active < 0) state.active = 0;
+      }
       slotsEl.innerHTML = "";
       for (let i = 0; i < DIGIT_COUNT; i++) {
-        const slot = document.createElement("div");
+        const slot = document.createElement("button");
+        slot.type = "button";
         slot.className =
           "digit-slot" +
-          (state.digits[i] != null ? " is-filled" : "") +
-          (!state.locked && i === state.digits.length ? " is-active" : "") +
+          (state.slots[i] != null ? " is-filled" : "") +
+          (!state.locked && i === state.active ? " is-active" : "") +
           (state.locked ? " is-locked" : "");
-        const v = state.digits[i];
+        const v = state.slots[i];
         slot.textContent = v == null ? "" : state.mask ? "•" : v;
+        slot.disabled = state.locked;
+        slot.setAttribute("aria-label", "Basamak " + (i + 1));
+        slot.addEventListener("click", () => {
+          if (state.locked) return;
+          state.active = i;
+          playSfx("select");
+          render();
+        });
         slotsEl.appendChild(slot);
       }
       padEl.querySelectorAll(".digit-key").forEach((btn) => {
         const d = btn.dataset.digit;
-        const used = state.digits.includes(d);
-        const full = state.digits.length >= DIGIT_COUNT;
-        const lead0 = state.digits.length === 0 && d === "0";
-        btn.disabled = state.locked || used || full || lead0;
-        btn.classList.toggle("is-used", used);
+        const usedElsewhere =
+          state.slots.some((x, idx) => x === d && idx !== state.active);
+        const lead0 = state.active === 0 && d === "0";
+        btn.disabled = state.locked || usedElsewhere || lead0;
+        btn.classList.toggle("is-used", usedElsewhere);
         btn.classList.toggle("is-lead-block", lead0);
       });
       if (typeof state.onChange === "function") state.onChange(state.value());
@@ -155,27 +187,45 @@
       btn.textContent = String(d);
       btn.addEventListener("click", () => {
         if (state.locked) return;
-        if (state.digits.length >= DIGIT_COUNT) return;
-        if (state.digits.includes(String(d))) return;
-        if (state.digits.length === 0 && String(d) === "0") return;
-        state.digits.push(String(d));
+        const dig = String(d);
+        if (state.active === 0 && dig === "0") return;
+        // Aynı rakam başka kutudaysa taşıma / yer değiştirme yok — engelle
+        for (let i = 0; i < DIGIT_COUNT; i++) {
+          if (i !== state.active && state.slots[i] === dig) return;
+        }
+        state.slots[state.active] = dig;
         playSfx("select");
+        const next = firstEmpty(state.active + 1);
+        state.active = next >= 0 ? next : state.active;
         render();
       });
       padEl.appendChild(btn);
     }
 
-    state.value = () => state.digits.join("");
+    state.value = () => {
+      if (filledCount() < DIGIT_COUNT) return "";
+      return state.slots.join("");
+    };
     state.clear = () => {
       if (state.locked) return;
-      state.digits = [];
+      state.slots = Array(DIGIT_COUNT).fill(null);
+      state.active = 0;
       render();
     };
-    /** Sil: yalnızca son basamağı sil (backspace) */
+    /** Sil: seçili kutuyu temizle; boşsa önceki dolu basamağı sil */
     state.backspace = () => {
       if (state.locked) return;
-      if (!state.digits.length) return;
-      state.digits.pop();
+      if (state.slots[state.active] != null) {
+        state.slots[state.active] = null;
+      } else {
+        for (let i = state.active - 1; i >= 0; i--) {
+          if (state.slots[i] != null) {
+            state.slots[i] = null;
+            state.active = i;
+            break;
+          }
+        }
+      }
       playSfx("select");
       render();
     };
@@ -183,13 +233,19 @@
       if (state.locked) return;
       const s = String(str || "").replace(/\D/g, "").slice(0, DIGIT_COUNT);
       const seen = Object.create(null);
-      state.digits = [];
+      const next = Array(DIGIT_COUNT).fill(null);
+      let i = 0;
       for (const ch of s) {
+        if (i >= DIGIT_COUNT) break;
         if (seen[ch]) continue;
-        if (!state.digits.length && ch === "0") continue;
+        if (i === 0 && ch === "0") continue;
         seen[ch] = true;
-        state.digits.push(ch);
+        next[i] = ch;
+        i++;
       }
+      state.slots = next;
+      state.active = firstEmpty(0);
+      if (state.active < 0) state.active = 0;
       render();
     };
     state.setMask = (m) => {
@@ -212,7 +268,7 @@
       stage.classList.toggle("is-locked", on);
       stage.setAttribute("aria-disabled", on ? "true" : "false");
     }
-    ["btn-guess-clear", "btn-guess-submit"].forEach((id) => {
+    ["btn-guess-clear", "btn-guess-random", "btn-guess-submit"].forEach((id) => {
       const el = $(id);
       if (el) el.disabled = on;
     });
@@ -1147,6 +1203,13 @@
     if (!canAct()) return;
     pads.guess.backspace();
   });
+  if ($("btn-guess-random")) {
+    $("btn-guess-random").addEventListener("click", () => {
+      if (!canAct()) return;
+      pads.guess.set(randomSecret());
+      playSfx("select");
+    });
+  }
   $("btn-guess-submit").addEventListener("click", () => {
     if (!canAct()) return;
     const g = pads.guess.value();

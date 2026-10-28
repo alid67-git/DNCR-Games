@@ -1,9 +1,24 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.9",
-  build: 10,
+  version: "1.0.10",
+  build: 11,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.10",
+      build: 11,
+      date: "2026-10-28",
+      items: {
+        tr: [
+          "Kutulara istediğin sırada rakam yazılabilir (kutuya dokun)",
+          "Karışık düğmesi ile rastgele sayı kutulara yüklenir",
+        ],
+        en: [
+          "Fill digit boxes in any order (tap a box)",
+          "Shuffle button loads a random number into the boxes",
+        ],
+      },
+    },
     {
       version: "1.0.9",
       build: 10,
