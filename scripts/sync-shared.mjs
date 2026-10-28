@@ -15,6 +15,7 @@ const targets = [
   path.join(root, "dots-and-boxes", "public", "shared"),
   path.join(root, "dokuztas", "public", "shared"),
   path.join(root, "kusatma", "public", "shared"),
+  path.join(root, "sayibulma", "public", "shared"),
 ];
 
 function copyDir(src, dest) {

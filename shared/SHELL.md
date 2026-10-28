@@ -56,6 +56,7 @@ Sürüm numarası ana menü altında ve ayarların dibinde görünür.
 - Noktalar: …/noktalar/
 - Dokuztaş: …/dokuztas/
 - Kuşatma: …/kusatma/
+- Sayı Bulma: …/sayi/
 
 Hub sade kalır (ikon + oyun listesi). Kurallar / internet / Safari / P2P her oyunun **Yardım** sayfasındadır.
 Ana menüdeki **DNCR Games** düğmesi onay sonrası hub’a döner.
@@ -63,8 +64,8 @@ Ana menüdeki **DNCR Games** düğmesi onay sonrası hub’a döner.
 ## Sync
 
 ```bash
-npm run sync-shared   # shared/js → public/shared, dots…, dokuztas…, kusatma…
-npm run build:pages   # _site hub + 4 oyun
+npm run sync-shared   # shared/js → public/shared, dots…, dokuztas…, kusatma…, sayibulma…
+npm run build:pages   # _site hub + 5 oyun
 ```
 
 **Tek dağıtım yüzeyi:** GitHub Pages hub + hub Capacitor APK. Oyunlar ayrı platformlara bölünmez; hepsi aynı kabukta (solo / local2p / P2P).

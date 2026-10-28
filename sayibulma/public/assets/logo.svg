@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Sayı Bulma">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b3d4a"/>
+      <stop offset="55%" stop-color="#06252e"/>
+      <stop offset="100%" stop-color="#02141a"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a6b78"/>
+      <stop offset="100%" stop-color="#0e4550"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <rect x="10" y="10" width="108" height="108" rx="22" fill="none" stroke="#9dff57" stroke-opacity="0.22" stroke-width="2"/>
+  <g font-family="Sora, Manrope, sans-serif" font-weight="700" font-size="18" text-anchor="middle">
+    <rect x="20" y="34" width="20" height="28" rx="5" fill="url(#tile)" stroke="#9dff57" stroke-opacity="0.55"/>
+    <text x="30" y="54" fill="#e8fff4">4</text>
+    <rect x="44" y="34" width="20" height="28" rx="5" fill="url(#tile)" stroke="#9dff57" stroke-opacity="0.55"/>
+    <text x="54" y="54" fill="#e8fff4">0</text>
+    <rect x="68" y="34" width="20" height="28" rx="5" fill="url(#tile)" stroke="#9dff57" stroke-opacity="0.55"/>
+    <text x="78" y="54" fill="#e8fff4">7</text>
+    <rect x="92" y="34" width="20" height="28" rx="5" fill="url(#tile)" stroke="#9dff57" stroke-opacity="0.55"/>
+    <text x="102" y="54" fill="#e8fff4">1</text>
+  </g>
+  <g font-family="Sora, Manrope, sans-serif" font-weight="800" font-size="22">
+    <rect x="22" y="76" width="40" height="30" rx="9" fill="#9dff57"/>
+    <text x="42" y="97" text-anchor="middle" fill="#06252e">+2</text>
+    <rect x="66" y="76" width="40" height="30" rx="9" fill="#ff6b6b"/>
+    <text x="86" y="97" text-anchor="middle" fill="#1a0a0a">-1</text>
+  </g>
+</svg>

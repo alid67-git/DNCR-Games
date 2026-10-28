@@ -1,0 +1,27 @@
+{
+  "name": "Sayı Bulma",
+  "short_name": "Sayı Bulma",
+  "description": "4 haneli artı/eksi düello — bilgisayara karşı, aynı cihaz, sunucusuz P2P",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#02141a",
+  "theme_color": "#0b3d4a",
+  "icons": [
+    {
+      "src": "assets/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

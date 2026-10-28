@@ -1,6 +1,6 @@
 # DNCR Games
 
-Dört oyun · ortak menü · iPhone kısayol · Android APK.
+Beş oyun · ortak menü · iPhone kısayol · Android APK.
 
 ## Hub (çıkış noktası)
 
@@ -11,6 +11,7 @@ Dört oyun · ortak menü · iPhone kısayol · Android APK.
 | **Noktalar ve Kutular** | …/noktalar/ |
 | **Dokuztaş** | …/dokuztas/ |
 | **Kuşatma** | …/kusatma/ |
+| **Sayı Bulma** | …/sayi/ |
 
 **iPhone kısayol:** Safari’de hub’ı aç → **Paylaş → Ana Ekrana Ekle** (DNCR ikonu).
 
@@ -22,7 +23,7 @@ Dört oyun · ortak menü · iPhone kısayol · Android APK.
 | **Android** | Hub APK (aşağıda) veya Chrome → hub → Ana ekrana ekle |
 | **Web** | https://alid67-git.github.io/DNCR-Games/ |
 
-**Android APK (hub):** `hub/` tek paket — dört oyunu da içerir.
+**Android APK (hub):** `hub/` tek paket — tüm oyunları içerir.
 
 - **İndir:** https://github.com/alid67-git/DNCR-Games/releases/download/hub-v1.0.4/DNCR-Games-hub-1.0.4.apk
 - Release: https://github.com/alid67-git/DNCR-Games/releases/tag/hub-v1.0.4

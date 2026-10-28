@@ -11,8 +11,22 @@
   const DIFF_MULT = { easy: 1, medium: 1.25, hard: 1.5, veryhard: 2, normal: 1.25 };
   const MODE_MULT = { solo: 1, twop: 0.55, local2p: 0.55, p2p: 1.2, remote: 1.2 };
   const GAME_LABELS = {
-    tr: { kati: "Kati", noktalar: "Noktalar ve Kutular", dokuztas: "Dokuztaş", kusatma: "Kuşatma", dncr: "DNCR toplam" },
-    en: { kati: "Kati", noktalar: "Noktalar ve Kutular", dokuztas: "Dokuztaş", kusatma: "Kuşatma", dncr: "DNCR total" },
+    tr: {
+      kati: "Kati",
+      noktalar: "Noktalar ve Kutular",
+      dokuztas: "Dokuztaş",
+      kusatma: "Kuşatma",
+      sayi: "Sayı Bulma",
+      dncr: "DNCR toplam",
+    },
+    en: {
+      kati: "Kati",
+      noktalar: "Noktalar ve Kutular",
+      dokuztas: "Dokuztaş",
+      kusatma: "Kuşatma",
+      sayi: "Number Hunt",
+      dncr: "DNCR total",
+    },
   };
 
   function emptyGame() {
@@ -35,6 +49,7 @@
         noktalar: emptyGame(),
         dokuztas: emptyGame(),
         kusatma: emptyGame(),
+        sayi: emptyGame(),
       },
     };
   }
@@ -52,6 +67,7 @@
           noktalar: { ...base.games.noktalar, ...(parsed.games && parsed.games.noktalar) },
           dokuztas: { ...base.games.dokuztas, ...(parsed.games && parsed.games.dokuztas) },
           kusatma: { ...base.games.kusatma, ...(parsed.games && parsed.games.kusatma) },
+          sayi: { ...base.games.sayi, ...(parsed.games && parsed.games.sayi) },
         },
       };
     } catch (_) {
@@ -72,7 +88,7 @@
 
   /**
    * @param {object} opts
-   * @param {'kati'|'noktalar'|'dokuztas'|'kusatma'} opts.gameId
+   * @param {'kati'|'noktalar'|'dokuztas'|'kusatma'|'sayi'} opts.gameId
    * @param {'win'|'loss'|'draw'} opts.result
    * @param {string} [opts.difficulty]
    * @param {string} [opts.mode] solo|twop|p2p
@@ -100,6 +116,11 @@
     bonus += clampBonus(st.boxes, 40) * 2;
     bonus += clampBonus(st.boxLead, 20) * 3;
     bonus += clampBonus(st.chains, 8) * 6;
+    // Sayı Bulma: az tahminle bitirmek bonus (guesses düşükse daha çok)
+    if (st.guesses != null) {
+      const g = Number(st.guesses) || 0;
+      bonus += clampBonus(Math.max(0, 12 - g), 10) * 5;
+    }
 
     const gained = Math.round((base + bonus) * dm * mm);
     g.points += gained;
@@ -139,7 +160,8 @@
       (s.games.kati.points || 0) +
       (s.games.noktalar.points || 0) +
       (s.games.dokuztas.points || 0) +
-      ((s.games.kusatma && s.games.kusatma.points) || 0)
+      ((s.games.kusatma && s.games.kusatma.points) || 0) +
+      ((s.games.sayi && s.games.sayi.points) || 0)
     );
   }
 
@@ -147,7 +169,7 @@
     const store = load();
     const L = lang === "en" ? "en" : "tr";
     const labels = GAME_LABELS[L];
-    const rows = ["kusatma", "dokuztas", "noktalar", "kati"].map((id) => {
+    const rows = ["sayi", "kusatma", "dokuztas", "noktalar", "kati"].map((id) => {
       const g = store.games[id];
       return {
         id,

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Sayı Bulma</title>
+  <meta name="theme-color" content="#0b3d4a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sayı Bulma" />
+  <meta name="description" content="Sayı Bulma — 4 haneli artı/eksi düello; bilgisayara karşı, aynı cihaz, sunucusuz P2P." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="stylesheet" href="fonts/fonts.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="shared/shell-ui.css" />
+</head>
+<body>
+  <div class="bg-fx" aria-hidden="true"></div>
+
+  <main id="app">
+    <section id="screen-home" class="screen active">
+      <div class="home-center">
+        <header class="brand home-brand">
+          <img class="app-logo" src="assets/logo.svg" width="112" height="112" alt="Sayı Bulma" />
+          <p class="brand-mark" data-i18n="appName">Sayı Bulma</p>
+          <p class="lede" data-i18n="tagline">4 haneli gizli sayı — + doğru yer, − yanlış yer</p>
+        </header>
+        <nav class="home-menu" aria-label="Main">
+          <button type="button" class="btn btn-primary btn-menu" id="btn-home-play">
+            <svg class="menu-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+            <span class="menu-label" data-i18n="homePlay">Oyna</span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-scores">
+            <svg class="menu-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 19h4v-8H4v8zm6 0h4V5h-4v14zm6 0h4v-5h-4v5z"/></svg>
+            <span class="menu-label" data-i18n="homeScores">Skorlar</span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-settings">
+            <svg class="menu-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.1 7.1 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.62.94l-2.4-.96a.5.5 0 0 0-.6.22L2.77 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.07.63-.07.94s.03.63.07.94L2.89 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.04.72 1.63.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.58-.22 1.13-.54 1.63-.94l2.39.96c.24.1.51 0 .64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5z"/></svg>
+            <span class="menu-label" data-i18n="homeSettings">Ayarlar</span>
+            <span id="updates-dot" class="updates-dot hidden"></span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-menu" id="btn-home-help">
+            <svg class="menu-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm1 15h-2v-2h2v2zm1.07-7.75-.9.92A1.8 1.8 0 0 0 12.5 12H11v-.5c0-.83.34-1.58.88-2.12l1.24-1.26A1.5 1.5 0 0 0 12 6.5 1.5 1.5 0 0 0 10.5 8H8.5A3.5 3.5 0 0 1 12 4.5a3.5 3.5 0 0 1 2.07 6.25z"/></svg>
+            <span class="menu-label" data-i18n="homeHelp">Yardım</span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-menu btn-hub-back" id="btn-hub-back" data-i18n="hubBack">DNCR Games</button>
+        </nav>
+        <p class="home-footer-ver" id="home-version">v1.0.0</p>
+      </div>
+    </section>
+
+    <section id="screen-play" class="screen">
+      <button type="button" class="btn-back" id="btn-play-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="playTitle">Oyun modu</h1>
+      </header>
+      <div class="mode-list">
+        <button type="button" class="mode-card" id="btn-mode-solo">
+          <div class="mode-visual solo" aria-hidden="true">
+            <span class="mv-person"></span>
+            <span class="mv-vs">VS</span>
+            <span class="mv-cpu"></span>
+          </div>
+          <div class="mode-copy">
+            <strong data-i18n="playSolo">Bilgisayara karşı</strong>
+            <span data-i18n="playSoloHint">Kolay · Zor · Çok Zor — internet gerekmez</span>
+          </div>
+        </button>
+        <button type="button" class="mode-card" id="btn-mode-2p">
+          <div class="mode-visual local" aria-hidden="true">
+            <span class="mv-person is-left"></span>
+            <span class="mv-person is-right"></span>
+          </div>
+          <div class="mode-copy">
+            <strong data-i18n="play2p">Aynı cihazda iki kişi</strong>
+            <span data-i18n="play2pHint">Telefon veya tablet elden ele — ağ gerekmez</span>
+          </div>
+        </button>
+        <button type="button" class="mode-card" id="btn-mode-p2p">
+          <div class="mode-visual remote" aria-hidden="true">
+            <span class="mv-person is-left"></span>
+            <span class="mv-phone"></span>
+            <span class="mv-phone"></span>
+            <span class="mv-person is-dark"></span>
+          </div>
+          <div class="mode-copy">
+            <strong data-i18n="playP2p">İki telefonda / uzaktan</strong>
+            <span data-i18n="playP2pHint">Oda kodu ile — sunucu gerekmez (P2P)</span>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section id="screen-scores" class="screen">
+      <button type="button" class="btn-back" id="btn-scores-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="scoresTitle">Skorlar</h1>
+      </header>
+      <div id="scores-panel" class="scores-panel"></div>
+    </section>
+
+    <section id="screen-solo-setup" class="screen">
+      <button type="button" class="btn-back" id="btn-solo-setup-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="soloSetupTitle">Bilgisayara karşı</h1>
+      </header>
+      <h2 class="section-title" data-i18n="chooseDifficulty">Zorluk seç</h2>
+      <div class="diff-grid" id="diff-grid" role="radiogroup"></div>
+      <h2 class="section-title" data-i18n="yourSecret">Gizli sayın</h2>
+      <p class="lede setup-hint" data-i18n="yourSecretHint"></p>
+      <div class="secret-entry" id="solo-secret-entry">
+        <div class="digit-slots" id="solo-secret-slots" aria-live="polite"></div>
+        <div class="digit-pad" id="solo-secret-pad"></div>
+        <div class="secret-actions">
+          <button type="button" class="btn btn-ghost" id="btn-solo-secret-random" data-i18n="randomSecret">Rastgele üret</button>
+          <button type="button" class="btn btn-ghost" id="btn-solo-secret-clear" data-i18n="clearBtn">Sil</button>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary btn-start" id="btn-solo-start" data-i18n="startGame">Başla</button>
+    </section>
+
+    <section id="screen-2p-setup" class="screen">
+      <button type="button" class="btn-back" id="btn-2p-setup-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="twoPSetupTitle">Aynı cihazda iki kişi</h1>
+      </header>
+      <form class="lobby-form" onsubmit="return false;">
+        <label>
+          <span data-i18n="player1Label">1. oyuncu</span>
+          <input id="p1-name" type="text" maxlength="16" data-i18n-ph="player1Ph" autocomplete="off" />
+        </label>
+        <label>
+          <span data-i18n="player2Label">2. oyuncu</span>
+          <input id="p2-name" type="text" maxlength="16" data-i18n-ph="player2Ph" autocomplete="off" />
+        </label>
+      </form>
+      <div id="twop-secret-step" class="secret-step hidden">
+        <p class="lede" id="twop-secret-lead"></p>
+        <div class="digit-slots" id="twop-secret-slots" aria-live="polite"></div>
+        <div class="digit-pad" id="twop-secret-pad"></div>
+        <div class="secret-actions">
+          <button type="button" class="btn btn-ghost" id="btn-twop-secret-clear" data-i18n="clearBtn">Sil</button>
+          <button type="button" class="btn btn-primary" id="btn-twop-secret-ok" data-i18n="secretConfirm">Sayımı kaydet</button>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary btn-start" id="btn-2p-start" data-i18n="startGame">Başla</button>
+    </section>
+
+    <section id="screen-p2p" class="screen">
+      <button type="button" class="btn-back" id="btn-p2p-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="p2pTitle">İki telefonda oyna</h1>
+        <p class="lede" data-i18n="p2pLead"></p>
+      </header>
+      <form class="lobby-form" onsubmit="return false;">
+        <label>
+          <span data-i18n="yourName">Adın</span>
+          <input id="p2p-name" type="text" maxlength="20" data-i18n-ph="namePh" autocomplete="nickname" />
+        </label>
+        <p class="field-hint" data-i18n="p2pNeedNet"></p>
+        <div class="lobby-actions">
+          <button type="button" id="btn-p2p-create" class="btn btn-primary" data-i18n="createRoom">Oda kur</button>
+          <div class="join-row">
+            <input id="p2p-code" type="text" maxlength="6" data-i18n-ph="roomCode" autocomplete="off" spellcheck="false" />
+            <button type="button" id="btn-p2p-join" class="btn btn-secondary" data-i18n="joinRoom">Katıl</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <section id="screen-room" class="screen">
+      <header class="room-head">
+        <p class="brand-mark sm" data-i18n="appName">Sayı Bulma</p>
+        <h1><span data-i18n="room">Oda</span> <span id="room-code-display">----</span></h1>
+        <p id="share-hint" class="lede"></p>
+      </header>
+      <div class="roster">
+        <div class="seat seat-a" id="seat-a">
+          <span class="seat-piece" aria-hidden="true"></span>
+          <div>
+            <strong id="name-a">—</strong>
+            <span id="ready-a" class="pill">…</span>
+          </div>
+        </div>
+        <div class="seat seat-b" id="seat-b">
+          <span class="seat-piece" aria-hidden="true"></span>
+          <div>
+            <strong id="name-b">—</strong>
+            <span id="ready-b" class="pill">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="room-secret">
+        <h2 class="section-title" data-i18n="yourSecret">Gizli sayın</h2>
+        <div class="digit-slots" id="room-secret-slots" aria-live="polite"></div>
+        <div class="digit-pad" id="room-secret-pad"></div>
+        <div class="secret-actions">
+          <button type="button" class="btn btn-ghost" id="btn-room-secret-clear" data-i18n="clearBtn">Sil</button>
+          <button type="button" class="btn btn-ghost" id="btn-room-secret-random" data-i18n="randomSecret">Rastgele</button>
+        </div>
+      </div>
+      <div class="room-actions">
+        <button type="button" id="btn-ready" class="btn btn-primary" disabled data-i18n="ready">Hazırım</button>
+        <button type="button" id="btn-copy-code" class="btn btn-ghost" data-i18n="copyCode">Kodu kopyala</button>
+        <button type="button" id="btn-room-home" class="btn btn-ghost" data-i18n="toHome">Ana menü</button>
+      </div>
+    </section>
+
+    <section id="screen-settings" class="screen">
+      <button type="button" class="btn-back" id="btn-settings-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="settingsTitle">Ayarlar</h1>
+      </header>
+      <form id="settings-form" class="lobby-form" onsubmit="return false;">
+        <label>
+          <span data-i18n="displayName">Görünen ad</span>
+          <input id="settings-display-name" type="text" maxlength="20" data-i18n-ph="displayNamePh" autocomplete="nickname" />
+        </label>
+        <fieldset class="lang-field">
+          <legend data-i18n="language">Dil</legend>
+          <label class="radio-row"><input type="radio" name="lang" value="tr" /> <span data-i18n="langTr">Türkçe</span></label>
+          <label class="radio-row"><input type="radio" name="lang" value="en" /> <span data-i18n="langEn">English</span></label>
+        </fieldset>
+        <fieldset class="lang-field">
+          <legend data-i18n="defaultDifficulty">Varsayılan bilgisayar zorluğu</legend>
+          <label class="radio-row"><input type="radio" name="defDiff" value="easy" /> <span data-i18n="diffEasy">Kolay</span></label>
+          <label class="radio-row"><input type="radio" name="defDiff" value="hard" /> <span data-i18n="diffHard">Zor</span></label>
+          <label class="radio-row"><input type="radio" name="defDiff" value="veryhard" /> <span data-i18n="diffVeryHard">Çok Zor</span></label>
+        </fieldset>
+        <button type="button" id="btn-settings-save" class="btn btn-primary" data-i18n="save">Kaydet</button>
+      </form>
+      <div class="settings-block">
+        <h2 data-i18n="updatesTitle">Güncellemeler</h2>
+        <p class="lede"><span data-i18n="updatesCurrent">Yüklü sürüm</span>: <strong id="updates-current">1.0.0</strong></p>
+        <div class="settings-actions">
+          <button type="button" id="btn-open-updates" class="btn btn-ghost" data-i18n="updatesInSettings">Sürüm notları</button>
+        </div>
+      </div>
+      <p class="settings-ver" id="settings-version">v1.0.0</p>
+    </section>
+
+    <section id="screen-help" class="screen">
+      <button type="button" class="btn-back" id="btn-help-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="helpTitle">Yardım</h1>
+      </header>
+      <article class="help-block">
+        <h2 data-i18n="helpRulesTitle">Kurallar</h2>
+        <ol>
+          <li data-i18n="helpRule1"></li>
+          <li data-i18n="helpRule2"></li>
+          <li data-i18n="helpRule3"></li>
+          <li data-i18n="helpRule4"></li>
+          <li data-i18n="helpRule5"></li>
+        </ol>
+        <h2 data-i18n="helpModesTitle">Oyun modları</h2>
+        <p data-i18n="helpModes"></p>
+        <h2 data-i18n="helpOfflineTitle">İnternet</h2>
+        <p data-i18n="helpOffline"></p>
+        <h2 data-i18n="helpDifficultyTitle">Zorluk</h2>
+        <p data-i18n="helpDifficulty"></p>
+        <h2 data-i18n="helpP2pTitle">Ülkeler arası (sunucusuz)</h2>
+        <ol>
+          <li data-i18n="helpP2p1"></li>
+          <li data-i18n="helpP2p2"></li>
+          <li data-i18n="helpP2p3"></li>
+          <li data-i18n="helpP2p4"></li>
+        </ol>
+        <h2 data-i18n="helpSafariTitle">iPhone Safari / kısayol</h2>
+        <ol>
+          <li data-i18n="helpSafari1"></li>
+          <li data-i18n="helpSafari2"></li>
+          <li data-i18n="helpSafari3"></li>
+        </ol>
+        <h2 data-i18n="helpHubTitle">DNCR Games (çıkış)</h2>
+        <p data-i18n="helpHub"></p>
+      </article>
+    </section>
+
+    <section id="screen-updates" class="screen">
+      <button type="button" class="btn-back" id="btn-updates-back" data-i18n="back">Geri</button>
+      <header class="brand sm-head">
+        <h1 data-i18n="updatesTitle">Güncellemeler</h1>
+        <p class="lede"><span data-i18n="updatesCurrent">Yüklü sürüm</span>: <strong id="updates-current-game">1.0.0</strong></p>
+      </header>
+      <div id="changelog-list" class="changelog"></div>
+      <button type="button" id="btn-updates-seen" class="btn btn-primary" data-i18n="updatesSeen">Gördüm</button>
+    </section>
+
+    <section id="screen-game" class="screen">
+      <header class="game-top">
+        <button type="button" class="btn-icon" id="btn-game-back" aria-label="Geri">←</button>
+        <p class="game-title" data-i18n="appName">Sayı Bulma</p>
+        <button type="button" class="btn-icon" id="btn-game-restart" aria-label="Yeniden">↻</button>
+      </header>
+
+      <div class="score-row">
+        <div class="score-chip chip-a" id="chip-a">
+          <div class="chip-info">
+            <strong id="name-chip-a">—</strong>
+            <span id="meta-a" class="chip-status"></span>
+          </div>
+          <span class="chip-score" id="score-a">0</span>
+        </div>
+        <div class="score-chip chip-b" id="chip-b">
+          <div class="chip-info">
+            <strong id="name-chip-b">—</strong>
+            <span id="meta-b" class="chip-status"></span>
+          </div>
+          <span class="chip-score" id="score-b">0</span>
+        </div>
+      </div>
+
+      <p id="attempts-label" class="attempts-label"></p>
+      <p id="phase-label" class="phase-label"></p>
+      <div id="last-feedback" class="last-feedback hidden" aria-live="assertive">
+        <span class="lf-guess" id="lf-guess"></span>
+        <span class="lf-scores">
+          <span class="chip-plus" id="lf-plus">+0</span>
+          <span class="chip-minus" id="lf-minus">−0</span>
+        </span>
+      </div>
+
+      <div class="guess-stage">
+        <p class="wheel-hint" data-i18n="wheelHint">Her tekerde farklı rakam seç</p>
+        <div class="digit-slots guess-slots" id="guess-slots" aria-live="polite"></div>
+        <div class="digit-pad" id="guess-pad"></div>
+        <div class="guess-actions">
+          <button type="button" class="btn btn-ghost" id="btn-guess-clear" data-i18n="clearBtn">Sil</button>
+          <button type="button" class="btn btn-try" id="btn-guess-submit" data-i18n="tryCode">Tahmin et</button>
+        </div>
+      </div>
+
+      <div class="history-wrap">
+        <div class="history-col">
+          <h3 id="hist-title-a" data-i18n="historyYou">Senin tahminlerin</h3>
+          <ul id="hist-a" class="guess-history"></ul>
+        </div>
+        <div class="history-col">
+          <h3 id="hist-title-b" data-i18n="historyOpp">Rakibin tahminleri</h3>
+          <ul id="hist-b" class="guess-history"></ul>
+        </div>
+      </div>
+
+      <p id="status-msg" class="status-msg" aria-live="polite"></p>
+
+      <div id="end-panel" class="end-panel hidden" role="dialog" aria-modal="true" aria-labelledby="end-text">
+        <div class="end-card">
+          <p id="end-text"></p>
+          <p id="end-reveal" class="end-reveal"></p>
+          <button type="button" id="btn-rematch" class="btn btn-primary" data-i18n="rematch">Yeniden oyna</button>
+          <button type="button" id="btn-game-home" class="btn btn-ghost" data-i18n="toHome">Ana menü</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <script src="app-config.js"></script>
+  <script src="i18n.js"></script>
+  <script src="engine.js"></script>
+  <script src="ai.js"></script>
+  <script src="shared/register-sw.js"></script>
+  <script src="shared/p2p-session.js"></script>
+  <script src="shared/hub-back.js"></script>
+  <script src="shared/score.js"></script>
+  <script src="shared/move-sfx.js"></script>
+  <script src="p2p.js"></script>
+  <script src="game-client.js" defer></script>
+</body>
+</html>

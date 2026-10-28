@@ -1,0 +1,18 @@
+{
+  "name": "sayibulma",
+  "version": "1.0.2",
+  "description": "Sayı Bulma — 4 haneli artı/eksi düello; solo AI, local 2P, serverless P2P",
+  "scripts": {
+    "test": "node game/engine.test.js && node game/ai.test.js",
+    "start": "npx --yes serve public -l 4177"
+  },
+  "keywords": [
+    "sayi-bulma",
+    "bulls-and-cows",
+    "arti-eksi",
+    "dncr-games",
+    "p2p"
+  ],
+  "author": "",
+  "license": "MIT"
+}
