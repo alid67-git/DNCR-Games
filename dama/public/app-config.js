@@ -1,12 +1,12 @@
 window.DamaConfig = {
   appName: "Dama",
-  version: "1.0.2",
-  build: 3,
+  version: "1.0.3",
+  build: 4,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/dama/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
     {
-      version: "1.0.2",
+      version: "1.0.3",
       build: 2,
       date: "2026-10-29",
       items: {
