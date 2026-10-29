@@ -318,18 +318,28 @@
   let diceAnimTimer = null;
   let diceBusy = false;
 
+  function makeDieFace(faceValue) {
+    const face = document.createElement("span");
+    face.className = "die-face";
+    face.dataset.face = String(faceValue);
+    face.setAttribute("aria-hidden", "true");
+    for (let i = 0; i < 9; i++) {
+      face.appendChild(document.createElement("span")).className = "pip";
+    }
+    return face;
+  }
+
   function makeDieEl(value, extraClass) {
     const die = document.createElement("span");
     die.className = "die" + (extraClass ? " " + extraClass : "");
     die.dataset.value = String(value);
     die.setAttribute("aria-label", String(value));
-    const pips = document.createElement("span");
-    pips.className = "pips";
-    pips.setAttribute("aria-hidden", "true");
-    for (let i = 0; i < 9; i++) {
-      pips.appendChild(document.createElement("span")).className = "pip";
+    const cube = document.createElement("span");
+    cube.className = "die-cube";
+    for (let face = 1; face <= 6; face++) {
+      cube.appendChild(makeDieFace(face));
     }
-    die.appendChild(pips);
+    die.appendChild(cube);
     return die;
   }
 
@@ -351,7 +361,14 @@
         if (idx >= 0) remaining.splice(idx, 1);
         else die.classList.add("used");
       }
-      if (rolling) die.style.animationDelay = `${i * 0.07}s`;
+      if (rolling) {
+        const side = i % 2 === 0 ? -1 : 1;
+        const tx = side * (22 + Math.random() * 36 + i * 8);
+        const tr = side * (28 + Math.random() * 40);
+        die.style.setProperty("--throw-x", `${tx}px`);
+        die.style.setProperty("--throw-r", `${tr}deg`);
+        die.style.animationDelay = `${i * 0.08}s`;
+      }
       row.appendChild(die);
     });
   }
@@ -379,28 +396,20 @@
     } else {
       playMoveSfx("place");
     }
-    let tick = 0;
-    const flicker = () => {
-      const a = 1 + ((Math.random() * 6) | 0);
-      const b = 1 + ((Math.random() * 6) | 0);
-      paintDice([a, b], { rolling: true });
-      tick += 1;
-      if (tick < 7) {
-        diceAnimTimer = setTimeout(flicker, 90);
-      } else {
-        const isDouble = finalPair[0] === finalPair[1];
-        const slots = isDouble
-          ? [finalPair[0], finalPair[0], finalPair[0], finalPair[0]]
-          : [finalPair[0], finalPair[1]];
-        paintDice(slots, { settle: true });
-        diceAnimTimer = setTimeout(() => {
-          diceBusy = false;
-          if (btn) btn.classList.remove("is-rolling");
-          if (typeof done === "function") done();
-        }, 420);
-      }
-    };
-    flicker();
+    // Tek atış animasyonu: 3D zarlar havadan düşüp dönerek gelir
+    paintDice([finalPair[0], finalPair[1]], { rolling: true });
+    diceAnimTimer = setTimeout(() => {
+      const isDouble = finalPair[0] === finalPair[1];
+      const slots = isDouble
+        ? [finalPair[0], finalPair[0], finalPair[0], finalPair[0]]
+        : [finalPair[0], finalPair[1]];
+      paintDice(slots, { settle: true });
+      diceAnimTimer = setTimeout(() => {
+        diceBusy = false;
+        if (btn) btn.classList.remove("is-rolling");
+        if (typeof done === "function") done();
+      }, 400);
+    }, 1050);
   }
 
   function currentMoves() {
