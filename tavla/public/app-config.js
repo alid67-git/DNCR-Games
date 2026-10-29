@@ -1,9 +1,24 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.4",
-  build: 5,
+  version: "1.0.5",
+  build: 6,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.5",
+      build: 6,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Klasik ahşap tavla tahtası (bej / kahve / siyah-beyaz taşlar)",
+          "Gerçekçi 3D zar küpleri ve havadan atılma animasyonu",
+        ],
+        en: [
+          "Classic wooden board (tan / brown / black-white checkers)",
+          "Realistic 3D dice cubes with a throw-in animation",
+        ],
+      },
+    },
     {
       version: "1.0.4",
       build: 5,
