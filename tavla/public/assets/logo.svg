@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Tavla">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d4a3c"/>
+      <stop offset="100%" stop-color="#062820"/>
+    </linearGradient>
+    <linearGradient id="board" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#168a55"/>
+      <stop offset="100%" stop-color="#0a5240"/>
+    </linearGradient>
+    <radialGradient id="w" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#c8d4dc"/>
+    </radialGradient>
+    <radialGradient id="b" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#8ec2ff"/>
+      <stop offset="55%" stop-color="#2a7ad4"/>
+      <stop offset="100%" stop-color="#1458a8"/>
+    </radialGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <rect x="16" y="22" width="96" height="84" rx="10" fill="url(#board)"/>
+  <rect x="60" y="26" width="8" height="76" fill="#042820"/>
+  <polygon points="22,28 34,28 28,58" fill="#e8f7f0"/>
+  <polygon points="36,28 48,28 42,58" fill="#2bb673"/>
+  <polygon points="50,28 58,28 54,52" fill="#e8f7f0"/>
+  <polygon points="70,28 82,28 76,58" fill="#2bb673"/>
+  <polygon points="84,28 96,28 90,58" fill="#e8f7f0"/>
+  <polygon points="98,28 110,28 104,58" fill="#2bb673"/>
+  <polygon points="22,100 34,100 28,70" fill="#2bb673"/>
+  <polygon points="36,100 48,100 42,70" fill="#e8f7f0"/>
+  <polygon points="50,100 58,100 54,76" fill="#2bb673"/>
+  <polygon points="70,100 82,100 76,70" fill="#e8f7f0"/>
+  <polygon points="84,100 96,100 90,70" fill="#2bb673"/>
+  <polygon points="98,100 110,100 104,70" fill="#e8f7f0"/>
+  <circle cx="28" cy="34" r="6" fill="url(#w)"/>
+  <circle cx="28" cy="46" r="6" fill="url(#w)"/>
+  <circle cx="90" cy="88" r="6" fill="url(#b)"/>
+  <circle cx="90" cy="76" r="6" fill="url(#b)"/>
+  <rect x="42" y="58" width="14" height="14" rx="3" fill="#f5fafc"/>
+  <rect x="60" y="58" width="14" height="14" rx="3" fill="#f5fafc"/>
+  <circle cx="49" cy="65" r="1.6" fill="#0a3d32"/>
+  <circle cx="67" cy="62" r="1.6" fill="#0a3d32"/>
+  <circle cx="67" cy="68" r="1.6" fill="#0a3d32"/>
+</svg>

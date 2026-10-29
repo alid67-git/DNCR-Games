@@ -1,0 +1,296 @@
+/* Arena shell — menü ikonları, mod görselleri, skor, ayar sürümü */
+
+.p2p-transport {
+  margin: 0.75rem 0 0.35rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(232, 200, 120, 0.22);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.18);
+}
+.p2p-transport legend {
+  padding: 0 0.35rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  opacity: 0.9;
+}
+.p2p-transport .radio-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0.35rem 0;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+.p2p-transport.hidden,
+#p2p-need-bt.hidden {
+  display: none !important;
+}
+
+.btn-menu {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  text-align: left;
+}
+.btn-menu .menu-ico {
+  width: 1.55rem;
+  height: 1.55rem;
+  flex: 0 0 auto;
+  opacity: 0.92;
+}
+.btn-menu .menu-label {
+  flex: 1 1 auto;
+}
+.btn-menu .updates-dot {
+  margin-left: 0;
+}
+
+.home-footer-ver {
+  margin-top: 1.35rem;
+  font-size: 0.78rem;
+  color: rgba(243, 230, 200, 0.42);
+  letter-spacing: 0.04em;
+}
+
+/* —— Mode cards with people icons —— */
+.mode-card {
+  display: grid !important;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem 1rem;
+  align-items: center;
+}
+.mode-card .mode-visual {
+  width: 4.4rem;
+  height: 3.1rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(232, 200, 120, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  flex-shrink: 0;
+}
+.mode-card .mode-copy {
+  min-width: 0;
+}
+.mode-card .mode-copy strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+.mode-card .mode-copy span {
+  display: block;
+}
+
+.mv-person,
+.mv-cpu {
+  width: 1.15rem;
+  height: 1.55rem;
+  position: relative;
+  display: inline-block;
+}
+.mv-person::before,
+.mv-cpu::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0.08rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: #f0c75a;
+}
+.mv-person::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0.72rem;
+  width: 0.85rem;
+  height: 0.72rem;
+  border-radius: 0.35rem 0.35rem 0.2rem 0.2rem;
+  transform: translateX(-50%);
+  background: #e8c878;
+}
+.mv-person.is-left::before,
+.mv-person.is-left::after {
+  background: #ef5350;
+}
+.mv-person.is-right::before,
+.mv-person.is-right::after {
+  background: #66bb6a;
+}
+.mv-person.is-dark::before,
+.mv-person.is-dark::after {
+  background: #90a4ae;
+}
+.mv-cpu::before {
+  background: #90caf9;
+  border-radius: 0.12rem;
+  width: 0.62rem;
+  height: 0.42rem;
+  top: 0.2rem;
+}
+.mv-cpu::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0.72rem;
+  width: 0.95rem;
+  height: 0.7rem;
+  border-radius: 0.18rem;
+  transform: translateX(-50%);
+  background: #64b5f6;
+  box-shadow: inset 0 -0.15rem 0 rgba(0, 0, 0, 0.2);
+}
+.mv-vs {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: rgba(243, 230, 200, 0.55);
+  letter-spacing: 0.04em;
+}
+.mv-phone {
+  width: 0.72rem;
+  height: 1.15rem;
+  border-radius: 0.18rem;
+  border: 1.5px solid #e8c878;
+  background: rgba(232, 200, 120, 0.15);
+  position: relative;
+}
+.mv-phone::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0.12rem;
+  width: 0.22rem;
+  height: 0.22rem;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: #e8c878;
+}
+.mode-visual.solo .mv-person::before,
+.mode-visual.solo .mv-person::after {
+  background: #ef5350;
+}
+
+/* —— Scores —— */
+.score-hero {
+  padding: 1rem 1.05rem;
+  border-radius: 16px;
+  border: 1px solid rgba(232, 200, 120, 0.28);
+  background: rgba(20, 12, 6, 0.45);
+  margin-bottom: 1rem;
+}
+.score-name {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(243, 230, 200, 0.65);
+}
+.score-dncr {
+  margin: 0.35rem 0 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: rgba(243, 230, 200, 0.75);
+}
+.score-dncr strong {
+  font-size: 1.55rem;
+  color: #f0c75a;
+  letter-spacing: -0.02em;
+}
+.score-current h3,
+.score-table-title {
+  margin: 0.85rem 0 0.55rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(243, 230, 200, 0.5);
+}
+.score-stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+.score-stats li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 12px;
+  background: rgba(20, 12, 6, 0.35);
+  border: 1px solid rgba(232, 200, 120, 0.14);
+  font-size: 0.88rem;
+}
+.score-stats span {
+  color: rgba(243, 230, 200, 0.55);
+}
+.score-table {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.score-table li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 0.1rem 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgba(232, 200, 120, 0.16);
+  background: rgba(20, 12, 6, 0.32);
+}
+.score-table li.is-current {
+  border-color: rgba(232, 200, 120, 0.45);
+}
+.score-game {
+  font-weight: 650;
+  color: #e8c878;
+}
+.score-pts {
+  font-weight: 750;
+  font-size: 1.05rem;
+}
+.score-wl {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  color: rgba(243, 230, 200, 0.48);
+}
+.score-note {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: rgba(243, 230, 200, 0.45);
+}
+
+/* —— Settings blocks —— */
+.settings-block {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(232, 200, 120, 0.16);
+}
+.settings-block h2 {
+  margin: 0 0 0.55rem;
+  font-size: 0.95rem;
+  color: #e8c878;
+}
+.settings-ver {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(243, 230, 200, 0.42);
+}
+.settings-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}

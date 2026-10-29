@@ -1,0 +1,18 @@
+{
+  "name": "tavla",
+  "version": "1.0.0",
+  "description": "Tavla — klasik backgammon; solo AI, local 2P, serverless P2P / Bluetooth",
+  "scripts": {
+    "test": "node game/engine.test.js && node game/ai.test.js",
+    "start": "npx --yes serve public -l 4178"
+  },
+  "keywords": [
+    "tavla",
+    "backgammon",
+    "dncr-games",
+    "p2p",
+    "bluetooth"
+  ],
+  "author": "",
+  "license": "MIT"
+}

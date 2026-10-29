@@ -1,0 +1,21 @@
+{
+  "name": "Tavla",
+  "short_name": "Tavla",
+  "description": "Klasik tavla — bilgisayara karşı, aynı cihaz, sunucusuz P2P / Bluetooth",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#062820",
+  "theme_color": "#0a3d32",
+  "icons": [
+    {
+      "src": "assets/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
