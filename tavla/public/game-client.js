@@ -720,7 +720,6 @@
     selected = null;
     showScreen("game");
     renderGame();
-    toast(starter === PLAYERS.blue ? t("oppTurn") : t("yourTurn"));
     if (starter === PLAYERS.blue) scheduleAi(650);
   }
 
