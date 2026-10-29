@@ -7,6 +7,7 @@
  *   /dokuztas/  Dokuztaş
  *   /kusatma/   Kuşatma
  *   /sayi/      Sayı Bulma
+ *   /dama/      Dama
  */
 import fs from "fs";
 import path from "path";
@@ -48,6 +49,7 @@ cpDir(path.join(root, "dots-and-boxes", "public"), path.join(out, "noktalar"));
 cpDir(path.join(root, "dokuztas", "public"), path.join(out, "dokuztas"));
 cpDir(path.join(root, "kusatma", "public"), path.join(out, "kusatma"));
 cpDir(path.join(root, "sayibulma", "public"), path.join(out, "sayi"));
+cpDir(path.join(root, "dama", "public"), path.join(out, "dama"));
 
 // robots
 fs.writeFileSync(
@@ -62,3 +64,4 @@ console.log("  /noktalar/  Noktalar ve Kutular");
 console.log("  /dokuztas/  Dokuztaş");
 console.log("  /kusatma/   Kuşatma");
 console.log("  /sayi/      Sayı Bulma");
+console.log("  /dama/      Dama");

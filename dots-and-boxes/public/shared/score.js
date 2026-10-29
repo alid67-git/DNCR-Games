@@ -17,6 +17,7 @@
       dokuztas: "Dokuztaş",
       kusatma: "Kuşatma",
       sayi: "Sayı Bulma",
+      dama: "Dama",
       dncr: "DNCR toplam",
     },
     en: {
@@ -25,6 +26,7 @@
       dokuztas: "Dokuztaş",
       kusatma: "Kuşatma",
       sayi: "Number Hunt",
+      dama: "Dama",
       dncr: "DNCR total",
     },
   };
@@ -50,6 +52,7 @@
         dokuztas: emptyGame(),
         kusatma: emptyGame(),
         sayi: emptyGame(),
+        dama: emptyGame(),
       },
     };
   }
@@ -68,6 +71,7 @@
           dokuztas: { ...base.games.dokuztas, ...(parsed.games && parsed.games.dokuztas) },
           kusatma: { ...base.games.kusatma, ...(parsed.games && parsed.games.kusatma) },
           sayi: { ...base.games.sayi, ...(parsed.games && parsed.games.sayi) },
+          dama: { ...base.games.dama, ...(parsed.games && parsed.games.dama) },
         },
       };
     } catch (_) {
@@ -88,7 +92,7 @@
 
   /**
    * @param {object} opts
-   * @param {'kati'|'noktalar'|'dokuztas'|'kusatma'|'sayi'} opts.gameId
+   * @param {'kati'|'noktalar'|'dokuztas'|'kusatma'|'sayi'|'dama'} opts.gameId
    * @param {'win'|'loss'|'draw'} opts.result
    * @param {string} [opts.difficulty]
    * @param {string} [opts.mode] solo|twop|p2p
@@ -161,7 +165,8 @@
       (s.games.noktalar.points || 0) +
       (s.games.dokuztas.points || 0) +
       ((s.games.kusatma && s.games.kusatma.points) || 0) +
-      ((s.games.sayi && s.games.sayi.points) || 0)
+      ((s.games.sayi && s.games.sayi.points) || 0) +
+      ((s.games.dama && s.games.dama.points) || 0)
     );
   }
 
@@ -169,7 +174,7 @@
     const store = load();
     const L = lang === "en" ? "en" : "tr";
     const labels = GAME_LABELS[L];
-    const rows = ["sayi", "kusatma", "dokuztas", "noktalar", "kati"].map((id) => {
+    const rows = ["dama", "sayi", "kusatma", "dokuztas", "noktalar", "kati"].map((id) => {
       const g = store.games[id];
       return {
         id,

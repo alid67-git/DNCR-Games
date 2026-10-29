@@ -44,7 +44,7 @@
     try {
       if (isNativeShell()) {
         const path = root.location && root.location.pathname;
-        if (path && /\/(kati|noktalar|dokuztas|kusatma|sayi)(\/|$)/i.test(path)) {
+        if (path && /\/(kati|noktalar|dokuztas|kusatma|sayi|dama)(\/|$)/i.test(path)) {
           return new URL("../index.html", root.location.href).href;
         }
         return new URL("./index.html", root.location.href).href;
@@ -53,6 +53,7 @@
 
     try {
       const cfg =
+        root.DamaConfig ||
         root.SayibulmaConfig ||
         root.SiegeConfig ||
         root.DokuztasConfig ||
@@ -63,8 +64,8 @@
         null;
       const share = cfg && (cfg.hubUrl || cfg.shareBaseUrl);
       if (typeof share === "string" && share) {
-        if (/\/(kati|noktalar|dokuztas|kusatma|sayi)\/?$/i.test(share)) {
-          return share.replace(/\/(kati|noktalar|dokuztas|kusatma|sayi)\/?$/i, "/");
+        if (/\/(kati|noktalar|dokuztas|kusatma|sayi|dama)\/?$/i.test(share)) {
+          return share.replace(/\/(kati|noktalar|dokuztas|kusatma|sayi|dama)\/?$/i, "/");
         }
         if (/DNCR-Games/i.test(share)) {
           const m = share.match(/^(https?:\/\/[^/]+\/DNCR-Games\/?)/i);
@@ -75,7 +76,7 @@
 
     try {
       const path = root.location && root.location.pathname;
-      if (path && /\/(kati|noktalar|dokuztas|kusatma|sayi)\/?/i.test(path)) {
+      if (path && /\/(kati|noktalar|dokuztas|kusatma|sayi|dama)\/?/i.test(path)) {
         return new URL("../", root.location.href).href;
       }
       if (path && /\/DNCR-Games\/?$/i.test(path.replace(/\/+$/, "") + "/")) {

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 112" role="img" aria-label="Dama">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8d2a4"/>
+      <stop offset="100%" stop-color="#7a4e28"/>
+    </linearGradient>
+  </defs>
+  <rect width="112" height="112" rx="28" fill="#1a1208"/>
+  <rect x="16" y="16" width="80" height="80" rx="8" fill="url(#g)"/>
+  <g>
+    <rect x="16" y="16" width="20" height="20" fill="#3a2414"/>
+    <rect x="56" y="16" width="20" height="20" fill="#3a2414"/>
+    <rect x="36" y="36" width="20" height="20" fill="#3a2414"/>
+    <rect x="76" y="36" width="20" height="20" fill="#3a2414"/>
+    <rect x="16" y="56" width="20" height="20" fill="#3a2414"/>
+    <rect x="56" y="56" width="20" height="20" fill="#3a2414"/>
+    <rect x="36" y="76" width="20" height="20" fill="#3a2414"/>
+    <rect x="76" y="76" width="20" height="20" fill="#3a2414"/>
+  </g>
+  <circle cx="46" cy="66" r="9" fill="#f3e2c0"/>
+  <circle cx="66" cy="46" r="9" fill="#2a1810"/>
+  <circle cx="46" cy="66" r="3.2" fill="rgba(90,50,20,0.45)"/>
+</svg>
