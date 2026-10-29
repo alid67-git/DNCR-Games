@@ -1,10 +1,25 @@
 window.DamaConfig = {
   appName: "Dama",
-  version: "1.0.0",
-  build: 1,
+  version: "1.0.1",
+  build: 2,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/dama/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
+    {
+      version: "1.0.1",
+      build: 2,
+      date: "2026-10-29",
+      items: {
+        tr: [
+          "Tahta büyütüldü: ekranı dolduran kare düzen",
+          "Modern slate / teal renk paleti",
+        ],
+        en: [
+          "Larger board that fills the viewport",
+          "Modern slate / teal color palette",
+        ],
+      },
+    },
     {
       version: "1.0.0",
       build: 1,

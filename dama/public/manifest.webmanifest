@@ -4,8 +4,8 @@
   "description": "Türk daması — bilgisayara karşı, aynı cihaz, sunucusuz P2P",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#1c1108",
-  "theme_color": "#2b1a0c",
+  "background_color": "#0c1117",
+  "theme_color": "#0c1117",
   "icons": [
     {
       "src": "assets/logo-192.png",
