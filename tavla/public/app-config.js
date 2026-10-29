@@ -1,9 +1,24 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.0",
-  build: 1,
+  version: "1.0.1",
+  build: 2,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.1",
+      build: 2,
+      date: "2026-10-29",
+      items: {
+        tr: [
+          "Oyun tahtası ekranı büyütüldü — dikeyde daha fazla yer kaplar",
+          "Taşlar ve noktalar daha büyük; yatayda yan panel düzeni",
+        ],
+        en: [
+          "Larger in-game board — fills more of the portrait screen",
+          "Bigger checkers and points; landscape side-panel layout",
+        ],
+      },
+    },
     {
       version: "1.0.0",
       build: 1,
