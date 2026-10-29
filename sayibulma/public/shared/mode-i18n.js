@@ -50,7 +50,7 @@
     helpSafari3: "Oyunlardan birini açıp Ana Ekrana Ekle de yapabilirsin; solo ve aynı-cihaz çevrimdışı çalışır.",
     helpHubTitle: "DNCR Games (çıkış)",
     helpHub:
-      "Ana menüdeki DNCR Games düğmesi ortak çıkış noktasıdır. Onaylarsan üç oyunun listelendiği hub’a dönersin. Kurallar ve ipuçları bu Yardım sayfasındadır; hub sade tutulur.",
+      "Ana menüdeki DNCR Games düğmesi ortak çıkış noktasıdır. Onaylarsan oyunların listelendiği hub’a dönersin. Kurallar ve ipuçları bu Yardım sayfasındadır; hub sade tutulur.",
     helpOfflineTitle: "İnternet",
     helpOffline:
       "Bilgisayara karşı ve aynı cihazda iki kişi tamamen çevrimdışıdır. Uzaktan / iki telefonda internet P2P için eşleşme anında net gerekir; Android hub’da Bluetooth / yakında tamamen çevrimdışıdır.",
@@ -103,7 +103,7 @@
     helpSafari3: "You can also Add to Home Screen from a game; solo and same-device work offline after first open.",
     helpHubTitle: "DNCR Games (exit)",
     helpHub:
-      "The DNCR Games button on the home menu is the shared exit. Confirm to return to the hub listing all three games. Rules live in each game’s Help; the hub stays simple.",
+      "The DNCR Games button on the home menu is the shared exit. Confirm to return to the hub listing all games. Rules live in each game’s Help; the hub stays simple.",
     helpOfflineTitle: "Internet",
     helpOffline:
       "Vs computer and same-device two-player are fully offline. Remote / two phones need internet briefly for PeerJS matchmaking; Bluetooth / nearby on the Android hub needs no internet.",

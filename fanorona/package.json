@@ -1,0 +1,21 @@
+{
+  "name": "fanorona",
+  "version": "1.0.1",
+  "description": "Fanorona — Madagascar strategy; solo AI, local 2P, serverless P2P",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node game/engine.test.js && node game/ai.test.js"
+  },
+  "keywords": [
+    "fanorona",
+    "board-game",
+    "p2p",
+    "dncr-games"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

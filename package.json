@@ -1,7 +1,7 @@
 {
   "name": "dncr-games",
   "version": "1.5.0",
-  "description": "DNCR Games \u2014 Kati, Noktalar, Dokuzta\u015f, Ku\u015fatma, Say\u0131 Bulma, Dama: solo, local 2P, serverless P2P",
+  "description": "DNCR Games — Kati, Noktalar, Dokuztaş, Kuşatma, Sayı Bulma, Fanorona, Dama: solo, local 2P, serverless P2P",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

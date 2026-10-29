@@ -7,6 +7,7 @@
  *   /dokuztas/  Dokuztaş
  *   /kusatma/   Kuşatma
  *   /sayi/      Sayı Bulma
+ *   /fanorona/  Fanorona
  *   /dama/      Dama
  */
 import fs from "fs";
@@ -49,6 +50,7 @@ cpDir(path.join(root, "dots-and-boxes", "public"), path.join(out, "noktalar"));
 cpDir(path.join(root, "dokuztas", "public"), path.join(out, "dokuztas"));
 cpDir(path.join(root, "kusatma", "public"), path.join(out, "kusatma"));
 cpDir(path.join(root, "sayibulma", "public"), path.join(out, "sayi"));
+cpDir(path.join(root, "fanorona", "public"), path.join(out, "fanorona"));
 cpDir(path.join(root, "dama", "public"), path.join(out, "dama"));
 
 // robots
@@ -64,4 +66,5 @@ console.log("  /noktalar/  Noktalar ve Kutular");
 console.log("  /dokuztas/  Dokuztaş");
 console.log("  /kusatma/   Kuşatma");
 console.log("  /sayi/      Sayı Bulma");
+console.log("  /fanorona/  Fanorona");
 console.log("  /dama/      Dama");

@@ -58,18 +58,25 @@ Sürüm numarası ana menü altında ve ayarların dibinde görünür.
 - Dokuztaş: …/dokuztas/
 - Kuşatma: …/kusatma/
 - Sayı Bulma: …/sayi/
+- Fanorona: …/fanorona/
 - Dama: …/dama/
 
-Hub sade kalır (ikon + oyun listesi). Kurallar / internet / Safari / P2P her oyunun **Yardım** sayfasındadır.
+Hub sade kalır (ikon + ikişer grid oyun listesi). Kurallar / internet / Safari / P2P her oyunun **Yardım** sayfasındadır.
 Ana menüdeki **DNCR Games** düğmesi onay sonrası hub’a döner.
 
 ## Sync
 
 ```bash
-npm run sync-shared   # shared/js → public/shared, dots…, dokuztas…, kusatma…, sayibulma…, dama…
-npm run build:pages   # _site hub + oyunlar
+npm run sync-shared   # shared/js → public/shared, dots…, dokuztas…, kusatma…, sayibulma…, fanorona…, dama…
+npm run build:pages   # _site hub + 7 oyun
 ```
 
 **Tek dağıtım yüzeyi:** GitHub Pages hub + hub Capacitor APK. Oyunlar ayrı platformlara bölünmez; hepsi aynı kabukta (solo / local2p / P2P).
 
 Yeni yapısal özellik: **önce `shared/`**, sonra sync, sonra gerekirse oyuna özel kanca.
+
+## Vurgu & puan (ortak kurgu)
+
+- **Hamle SFX:** `shared/js/move-sfx.js` — `select` / `place` / `move` / `capture` / `mill` / `box`
+- **Görsel vurgu:** oyuna özel; tipik olarak 0.5–1 sn parlama, alınan taş uçuşu, zincir/değirmen bandı
+- **Skor:** `shared/js/score.js` — win/draw/loss tabanı × zorluk × mod; bonuslar `captures`, `chains`, `mills`, `boxes`, `guesses` vb.

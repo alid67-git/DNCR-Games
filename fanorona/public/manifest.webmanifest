@@ -1,0 +1,21 @@
+{
+  "name": "Fanorona",
+  "short_name": "Fanorona",
+  "description": "Klasik dokuz taş — bilgisayara karşı, aynı cihaz, sunucusuz P2P",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1c1108",
+  "theme_color": "#2b1a0c",
+  "icons": [
+    {
+      "src": "assets/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
