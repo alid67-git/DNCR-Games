@@ -1,5 +1,5 @@
 /**
- * Kuşatma AI — easy / medium / hard
+ * Kuşatma AI — easy / normal / hard / veryhard (medium → normal)
  * Ruleset v1: Easy rastgele+yarı kör, Medium fırsatçı, Hard heuristic (+ sınırlı bakış).
  */
 (function (root, factory) {
@@ -24,7 +24,7 @@
     cloneState,
   } = Engine;
 
-  const DIFFICULTY_LEVELS = ["easy", "medium", "hard", "learn"];
+  const DIFFICULTY_LEVELS = ["easy", "normal", "hard", "veryhard", "learn"];
 
   function randPick(arr) {
     return arr[(Math.random() * arr.length) | 0];
@@ -249,10 +249,12 @@
       return { type: "PLACE_SELECT", r: spot.r, c: spot.c };
     }
 
-    const diff = DIFFICULTY_LEVELS.includes(difficulty) ? difficulty : "medium";
+    let diff = String(difficulty || "normal").toLowerCase();
+    if (diff === "medium") diff = "normal";
+    if (!DIFFICULTY_LEVELS.includes(diff)) diff = "normal";
     if (diff === "learn") return pickLearn(state, player);
     if (diff === "easy") return pickEasy(state, player);
-    if (diff === "hard") return pickHard(state, player);
+    if (diff === "hard" || diff === "veryhard") return pickHard(state, player);
     return pickMedium(state, player);
   }
 

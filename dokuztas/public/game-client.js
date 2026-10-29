@@ -29,6 +29,7 @@
 
   const DIFFS = [
     { id: "easy", i18n: "diffEasy", hint: "diffEasyHint" },
+    { id: "normal", i18n: "diffNormal", hint: "diffNormalHint" },
     { id: "hard", i18n: "diffHard", hint: "diffHardHint" },
     { id: "veryhard", i18n: "diffVeryHard", hint: "diffVeryHardHint" },
   ];
@@ -49,7 +50,7 @@
   };
 
   let settings = loadSettings();
-  let setupDiff = settings.aiDifficulty || "hard";
+  let setupDiff = settings.aiDifficulty || "normal";
   /** @type {null | object} */
   let session = null;
   let selected = null;
@@ -71,7 +72,7 @@
   function loadSettings() {
     const defaults = {
       lang: "tr",
-      aiDifficulty: "hard",
+      aiDifficulty: "normal",
       name: "",
       p1: "",
       p2: "",
@@ -160,7 +161,7 @@
     window.ArenaScore.record({
       gameId: "dokuztas",
       result: session.mode === "twop" ? "win" : result,
-      difficulty: session.difficulty || settings.aiDifficulty || "hard",
+      difficulty: session.difficulty || settings.aiDifficulty || "normal",
       mode: session.mode === "twop" ? "twop" : session.mode,
       stats: {
         removes: session.mode === "solo" || session.mode === "p2p"
@@ -731,7 +732,7 @@
     aiTimer = setTimeout(() => {
       if (!session || session.state.turn !== PLAYERS.black) return;
       const pick = Ai.chooseMove(session.state, PLAYERS.black, {
-        difficulty: session.difficulty || "hard",
+        difficulty: session.difficulty || "normal",
       });
       session.aiThinking = false;
       if (pick) applyAction(pick);
@@ -982,7 +983,7 @@
     document.querySelectorAll('input[name="lang"]').forEach((r) => {
       r.checked = r.value === lang();
     });
-    const diff = settings.aiDifficulty || "hard";
+    const diff = settings.aiDifficulty || "normal";
     document.querySelectorAll('input[name="defDiff"]').forEach((r) => {
       r.checked = r.value === diff;
     });
@@ -1039,7 +1040,7 @@
   }
 
   $("btn-mode-solo").addEventListener("click", () => {
-    setupDiff = settings.aiDifficulty || "hard";
+    setupDiff = settings.aiDifficulty || "normal";
     renderDiffGrid();
     showScreen("soloSetup");
   });
@@ -1096,13 +1097,13 @@
       (document.querySelector('input[name="lang"]:checked') || {}).value || "tr";
     const selectedDiff =
       (document.querySelector('input[name="defDiff"]:checked') || {}).value ||
-      "hard";
+      "normal";
     const displayName = ($("settings-display-name") && $("settings-display-name").value) || "";
     saveSettings({
       lang: selectedLang,
-      aiDifficulty: ["easy", "hard", "veryhard"].includes(selectedDiff)
+      aiDifficulty: ["easy", "normal", "hard", "veryhard"].includes(selectedDiff)
         ? selectedDiff
-        : "hard",
+        : "normal",
       name: displayName.trim() || settings.name,
     });
     if (window.ArenaScore) window.ArenaScore.setDisplayName(displayName);

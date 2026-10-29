@@ -123,7 +123,7 @@
   function pickGuess(history, difficulty, opts) {
     const options = typeof opts === "function" ? { rng: opts } : opts || {};
     const rng = options.rng;
-    const diff = String(difficulty || "hard").toLowerCase();
+    const diff = String(difficulty || "normal").toLowerCase();
     const pool = filterPool(history);
 
     if (diff === "easy" || diff === "normal" || diff === "medium") {

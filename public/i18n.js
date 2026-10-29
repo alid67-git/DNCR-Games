@@ -48,6 +48,7 @@ window.KatiI18n = (function () {
       aiEasy: "Kolay — daha çeşitli, hata yapar",
       aiNormal: "Normal — dengeli",
       aiHard: "Zor — güçlü, az çeşitlilik",
+      aiVeryHard: "Çok Zor — derin arama",
       aiHint:
         "Eski sürüm aynı partiyi tekrarlıyordu. Artık yakın hamleler arasından seçer; zorluk Ayarlar’dan değişir.",
       advancedServer: "Gelişmiş: kendi sunucun (isteğe bağlı)",
@@ -86,7 +87,7 @@ window.KatiI18n = (function () {
         "Solo ve aynı cihaz internet istemez. Uzaktan yalnızca eşleşme için kısa internet gerekir.",
       helpAiTitle: "Bilgisayara karşı",
       helpAi:
-        "Ayarlar → Bilgisayar zorluğu: Kolay (çeşitli, hata yapar), Normal, Zor. Aynı açılışı ezberlemesin diye yakın hamleler arasından seçer.",
+        "Ayarlar → Bilgisayar zorluğu: Kolay (çeşitli, hata yapar), Normal, Zor, Çok Zor. Aynı açılışı ezberlemesin diye yakın hamleler arasından seçer.",
       helpSafariTitle: "iPhone Safari / kısayol",
       helpSafari1: "DNCR Games hub: https://alid67-git.github.io/DNCR-Games/",
       helpSafari2: "Safari → Paylaş → Ana Ekrana Ekle (DNCR ikonu).",
@@ -199,6 +200,7 @@ window.KatiI18n = (function () {
       aiEasy: "Easy — more variety, makes mistakes",
       aiNormal: "Normal — balanced",
       aiHard: "Hard — strong, less variety",
+      aiVeryHard: "Very Hard — deeper search",
       aiHint:
         "Older builds replayed the same lines. Now it picks among near-best moves; change difficulty here.",
       advancedServer: "Advanced: your own server (optional)",
@@ -244,7 +246,7 @@ window.KatiI18n = (function () {
       helpTeams: "Red team starts on the left, green on the right. Who opens alternates each match.",
       helpAiTitle: "Vs computer",
       helpAi:
-        "Settings → Computer difficulty: Easy (varied, mistakes), Normal, Hard. It picks among near-best moves so games don’t repeat the same script.",
+        "Settings → Computer difficulty: Easy (varied, mistakes), Normal, Hard, Very Hard. It picks among near-best moves so games don’t repeat the same script.",
       updatesTitle: "Updates",
       updatesCurrent: "Installed version",
       updatesNew: "New",

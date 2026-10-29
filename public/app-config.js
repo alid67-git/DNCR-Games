@@ -90,11 +90,11 @@ window.KatiConfig = {
       date: "2026-10-26",
       items: {
         tr: [
-          "Bilgisayar zorluğu: Kolay / Normal / Zor (Ayarlar)",
+          "Bilgisayar zorluğu: Kolay / Normal / Zor / Çok Zor (Ayarlar)",
           "Aynı partiyi ezberleyen AI düzeltildi — yakın hamle çeşitliliği",
         ],
         en: [
-          "Computer difficulty: Easy / Normal / Hard (Settings)",
+          "Computer difficulty: Easy / Normal / Hard / Very Hard (Settings)",
           "Fixed scripted AI — variety among near-best moves",
         ],
       },

@@ -1,9 +1,9 @@
 /**
  * Noktalar ve Kutular — bilgisayar (AI) zorluk seviyeleri.
  *
- * Dört seviye: easy / medium / hard / veryhard.
+ * Dört seviye: easy / normal / hard / veryhard (medium → normal).
  *  - easy:     Bazen serbest kutuyu kaçırır, bazen güvensiz oynar.
- *  - medium:   Serbest kutuları her zaman alır, güvensiz oynamaz, ama
+ *  - normal:   Serbest kutuları her zaman alır, güvensiz oynamaz, ama
  *              kurban verirken zincir uzunluğunu hesaba katmaz.
  *  - hard:     "Double-cross" (son iki kutuyu bırakıp kontrolü koruma) ve
  *              en küçük zinciri kurban verme stratejisi uygular.
@@ -30,7 +30,7 @@
     estimateSacrifice,
   } = Engine;
 
-  const DIFFICULTY_LEVELS = ["easy", "medium", "hard", "veryhard"];
+  const DIFFICULTY_LEVELS = ["easy", "normal", "hard", "veryhard"];
   const EASY_MISTAKE_RATE = 0.3;
   const EASY_RANDOM_SAFE_RATE = 0.4;
 
@@ -89,7 +89,7 @@
     }));
     scored.sort((a, b) => a.cost - b.cost);
 
-    if (difficulty === "medium") {
+    if (difficulty === "normal" || difficulty === "medium") {
       // Dengeli: en kötü yarıyı eler ama en küçüğü aramaz (hesapsız).
       const pool = scored.slice(0, Math.max(1, Math.ceil(scored.length / 2)));
       return randPick(pool).id;
@@ -154,7 +154,8 @@
    */
   function chooseMove(boardIdOrGraph, state, player, opts) {
     const graph = resolveGraph(boardIdOrGraph);
-    const difficulty = (opts && opts.difficulty) || "medium";
+    let difficulty = (opts && opts.difficulty) || "normal";
+    if (difficulty === "medium") difficulty = "normal";
     if (state.winner) return null;
 
     const blunder = difficulty === "easy" && Math.random() < EASY_MISTAKE_RATE;

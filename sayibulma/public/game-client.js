@@ -24,8 +24,13 @@
   const STARTER_KEY = "sayibulma_next_starter";
   const GAME_ID = "sayi";
 
-  /** Bilgisayar her zaman düşük performans (kolay) */
-  const AI_DIFFICULTY = "easy";
+  const DIFFS = [
+    { id: "easy", i18n: "diffEasy", hint: "diffEasyHint" },
+    { id: "normal", i18n: "diffNormal", hint: "diffNormalHint" },
+    { id: "hard", i18n: "diffHard", hint: "diffHardHint" },
+    { id: "veryhard", i18n: "diffVeryHard", hint: "diffVeryHardHint" },
+  ];
+
   const $ = (id) => document.getElementById(id);
   const screens = {
     home: $("screen-home"),
@@ -41,6 +46,14 @@
   };
 
   let settings = loadSettings();
+  if (settings.aiDifficulty === "medium") {
+    settings.aiDifficulty = "normal";
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch (_) {}
+  }
+  let setupDiff = settings.aiDifficulty || "normal";
+  if (setupDiff === "medium") setupDiff = "normal";
   /** @type {null | object} */
   let session = null;
   let aiTimer = null;
@@ -65,7 +78,7 @@
   function loadSettings() {
     const defaults = {
       lang: "tr",
-      aiDifficulty: AI_DIFFICULTY,
+      aiDifficulty: "normal",
       name: "",
     };
     try {
@@ -288,6 +301,25 @@
     renderChangelog();
     updateUpdatesDot();
     if (hubBackCtl && hubBackCtl.refresh) hubBackCtl.refresh();
+    renderDiffGrid();
+  }
+
+
+  function renderDiffGrid() {
+    const grid = $("diff-grid");
+    if (!grid) return;
+    grid.innerHTML = "";
+    for (const d of DIFFS) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "diff-card" + (setupDiff === d.id ? " selected" : "");
+      btn.innerHTML = `<strong>${t(d.i18n)}</strong><span>${t(d.hint)}</span>`;
+      btn.addEventListener("click", () => {
+        setupDiff = d.id;
+        renderDiffGrid();
+      });
+      grid.appendChild(btn);
+    }
   }
 
   function renderScores() {
@@ -316,7 +348,7 @@
     window.ArenaScore.record({
       gameId: GAME_ID,
       result,
-      difficulty: AI_DIFFICULTY,
+      difficulty: session.difficulty || settings.aiDifficulty || "normal",
       mode: session.mode,
       stats: { guesses },
     });
@@ -762,7 +794,10 @@
       });
       let guess = null;
       try {
-        guess = Ai.pickGuess(session.state.histories.b, AI_DIFFICULTY);
+        guess = Ai.pickGuess(
+          session.state.histories.b,
+          session.difficulty || settings.aiDifficulty || "normal"
+        );
       } catch (err) {
         console.warn("Sayı Bulma AI:", err);
       }
@@ -814,7 +849,7 @@
     writeNextStarter(starter);
     session = {
       mode: "solo",
-      difficulty: AI_DIFFICULTY,
+      difficulty: setupDiff,
       names: { a: t("you"), b: t("computer") },
       state: createMatch({ secretA, secretB, starter }),
       aiThinking: false,
@@ -1058,6 +1093,10 @@
     document.querySelectorAll('input[name="lang"]').forEach((r) => {
       r.checked = r.value === lang();
     });
+    const diff = settings.aiDifficulty || "normal";
+    document.querySelectorAll('input[name="defDiff"]').forEach((r) => {
+      r.checked = r.value === diff;
+    });
     if ($("p2p-name")) $("p2p-name").value = settings.name || "";
     if ($("settings-display-name") && window.ArenaScore) {
       const store = window.ArenaScore.load();
@@ -1120,6 +1159,9 @@
 
   $("btn-mode-solo").addEventListener("click", () => {
     pads.soloSecret.clear();
+    setupDiff = settings.aiDifficulty || "normal";
+    if (setupDiff === "medium") setupDiff = "normal";
+    renderDiffGrid();
     showScreen("soloSetup");
   });
   $("btn-mode-p2p").addEventListener("click", () => {
@@ -1132,7 +1174,7 @@
     pads.soloSecret.set(randomSecret());
   });
   $("btn-solo-start").addEventListener("click", () => {
-    saveSettings({ aiDifficulty: AI_DIFFICULTY });
+    saveSettings({ aiDifficulty: setupDiff });
     startSolo();
   });
 
@@ -1214,14 +1256,20 @@
   $("btn-settings-save").addEventListener("click", () => {
     const selectedLang =
       (document.querySelector('input[name="lang"]:checked') || {}).value || "tr";
+    const selectedDiff =
+      (document.querySelector('input[name="defDiff"]:checked') || {}).value ||
+      "normal";
     const displayName =
       ($("settings-display-name") && $("settings-display-name").value) || "";
     saveSettings({
       lang: selectedLang,
-      aiDifficulty: AI_DIFFICULTY,
+      aiDifficulty: ["easy", "normal", "hard", "veryhard"].includes(selectedDiff)
+        ? selectedDiff
+        : "normal",
       name: displayName.trim() || settings.name,
     });
     if (window.ArenaScore) window.ArenaScore.setDisplayName(displayName);
+    setupDiff = settings.aiDifficulty;
     applyI18n();
     toast(t("saved"));
   });

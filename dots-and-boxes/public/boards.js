@@ -329,7 +329,7 @@
       category: "grid",
       names: { tr: "Klasik 8×10", en: "Classic 8×10" },
       mask: fullMask(7, 9),
-      difficulty: "medium",
+      difficulty: "normal",
     },
     {
       id: "grid-10x10",
@@ -343,7 +343,7 @@
       category: "shape",
       names: { tr: "Yıldız", en: "Star" },
       mask: starMask(),
-      difficulty: "medium",
+      difficulty: "normal",
     },
     {
       id: "shape-diamond",

@@ -359,7 +359,7 @@
   }
 
   /**
-   * Zorluk: easy / normal / hard
+   * Zorluk: easy / normal / hard / veryhard
    * Aynı konumda hep aynı hamleyi seçmeyi kırar — en iyi skora yakın
    * hamleler arasından rastgele seçer.
    */
@@ -367,6 +367,7 @@
     easy: { depth: 1, variety: 10, blunderChance: 0.28 },
     normal: { depth: 2, variety: 3, blunderChance: 0.08 },
     hard: { depth: 3, variety: 1.2, blunderChance: 0 },
+    veryhard: { depth: 4, variety: 0.6, blunderChance: 0 },
   };
 
   function resolveAiOptions(depthOrOpts, maybeOpts) {
@@ -376,6 +377,7 @@
     let blunderChance;
     if (typeof depthOrOpts === "object" && depthOrOpts) {
       difficulty = depthOrOpts.difficulty || "normal";
+      if (difficulty === "medium") difficulty = "normal";
       const preset = DIFFICULTY[difficulty] || DIFFICULTY.normal;
       depth = depthOrOpts.depth != null ? depthOrOpts.depth : preset.depth;
       variety = depthOrOpts.variety != null ? depthOrOpts.variety : preset.variety;

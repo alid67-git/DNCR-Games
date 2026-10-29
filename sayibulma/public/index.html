@@ -97,7 +97,8 @@
       <header class="brand sm-head">
         <h1 data-i18n="soloSetupTitle">Bilgisayara karşı</h1>
       </header>
-      <p class="lede setup-hint" data-i18n="soloEasyLead">Bilgisayar düşük performansta oynar.</p>
+      <h2 class="section-title" data-i18n="chooseDifficulty">Zorluk seç</h2>
+      <div class="diff-grid" id="diff-grid" role="radiogroup"></div>
       <h2 class="section-title" data-i18n="yourSecret">Gizli sayın</h2>
       <p class="lede setup-hint" data-i18n="yourSecretHint"></p>
       <div class="secret-entry" id="solo-secret-entry">
@@ -191,6 +192,13 @@
           <legend data-i18n="language">Dil</legend>
           <label class="radio-row"><input type="radio" name="lang" value="tr" /> <span data-i18n="langTr">Türkçe</span></label>
           <label class="radio-row"><input type="radio" name="lang" value="en" /> <span data-i18n="langEn">English</span></label>
+        </fieldset>
+        <fieldset class="lang-field">
+          <legend data-i18n="defaultDifficulty">Varsayılan bilgisayar zorluğu</legend>
+          <label class="radio-row"><input type="radio" name="defDiff" value="easy" /> <span data-i18n="diffEasy">Kolay</span></label>
+          <label class="radio-row"><input type="radio" name="defDiff" value="normal" /> <span data-i18n="diffNormal">Normal</span></label>
+          <label class="radio-row"><input type="radio" name="defDiff" value="hard" /> <span data-i18n="diffHard">Zor</span></label>
+          <label class="radio-row"><input type="radio" name="defDiff" value="veryhard" /> <span data-i18n="diffVeryHard">Çok Zor</span></label>
         </fieldset>
         <button type="button" id="btn-settings-save" class="btn btn-primary" data-i18n="save">Kaydet</button>
       </form>

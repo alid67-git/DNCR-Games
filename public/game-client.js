@@ -1119,7 +1119,7 @@
       name,
       serverUrl: ($("settings-server").value || "").trim().replace(/\/$/, ""),
       notifications: !!$("settings-notif").checked,
-      aiDifficulty: ["easy", "normal", "hard"].includes(selectedDiff)
+      aiDifficulty: ["easy", "normal", "hard", "veryhard"].includes(selectedDiff)
         ? selectedDiff
         : "normal",
     });
