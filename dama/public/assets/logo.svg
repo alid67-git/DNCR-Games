@@ -17,8 +17,8 @@
     <rect x="36" y="76" width="20" height="20" fill="#3a4658"/>
     <rect x="76" y="76" width="20" height="20" fill="#3a4658"/>
   </g>
-  <circle cx="46" cy="66" r="9" fill="#f2f5f8"/>
+  <circle cx="46" cy="66" r="9" fill="#ff8f6b"/>
   <circle cx="66" cy="46" r="9" fill="#1a2330"/>
-  <circle cx="46" cy="66" r="3.2" fill="#3ecfbf" opacity="0.85"/>
+  <circle cx="46" cy="66" r="3.2" fill="#ffe2d6" opacity="0.9"/>
   <circle cx="66" cy="46" r="3.2" fill="#5ec8b8" opacity="0.7"/>
 </svg>
