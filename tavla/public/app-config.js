@@ -1,9 +1,22 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.2",
-  build: 3,
+  version: "1.0.3",
+  build: 4,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.3",
+      build: 4,
+      date: "2026-10-29",
+      items: {
+        tr: [
+          "Taşlar üçgenlerin kenarına oturuyor (havada asılı kalma düzeltildi)",
+        ],
+        en: [
+          "Checkers sit on the point bases (no more floating mid-triangle)",
+        ],
+      },
+    },
     {
       version: "1.0.2",
       build: 3,

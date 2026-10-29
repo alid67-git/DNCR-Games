@@ -545,23 +545,33 @@ input[type="text"]:focus {
   flex: 1 1 0;
   min-height: 0;
 }
+/* Üst üçgenler: taşlar tahta kenarından (üstten) alta doğru */
 .board-half.top .point {
-  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 0.12rem;
+  padding-bottom: 0;
 }
+/* Alt üçgenler: taşlar tahta kenarından (alttan) üste doğru */
 .board-half.bottom .point {
-  align-items: flex-end;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0.12rem;
 }
 
 .point {
   appearance: none;
   position: relative;
   border: none;
-  padding: 0.2rem 0;
+  padding: 0;
   min-height: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 0.12rem;
+  align-items: center;
+  gap: 0;
   cursor: pointer;
   background: transparent;
   color: inherit;
@@ -620,14 +630,22 @@ input[type="text"]:focus {
 .checker {
   position: relative;
   z-index: 2;
-  width: min(100%, 2.05rem);
+  width: min(92%, 1.85rem);
+  flex: 0 0 auto;
   aspect-ratio: 1;
-  margin: 0 auto;
+  margin: 0;
   border-radius: 50%;
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.35),
     inset 0 1px 2px rgba(255, 255, 255, 0.35);
   animation: checkerIn 0.28s ease both;
+}
+/* Hafif bindirme — yığın kenara oturur, ortada asılı kalmaz */
+.board-half.top .point .checker + .checker {
+  margin-top: -0.22rem;
+}
+.board-half.bottom .point .checker + .checker {
+  margin-bottom: -0.22rem;
 }
 @keyframes checkerIn {
   from {
@@ -647,14 +665,15 @@ input[type="text"]:focus {
 }
 .overflow {
   position: relative;
-  z-index: 2;
-  margin: 0 auto;
+  z-index: 3;
+  margin: 0.15rem auto;
   font-size: 0.65rem;
   font-weight: 700;
   color: var(--accent);
   background: rgba(3, 24, 18, 0.72);
   border-radius: 999px;
   padding: 0.05rem 0.35rem;
+  flex: 0 0 auto;
 }
 
 .board-mid {
