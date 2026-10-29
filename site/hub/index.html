@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="DNCR Games" />
-  <meta name="description" content="DNCR Games — Kati, Noktalar ve Kutular, Dokuztaş, Kuşatma, Sayı Bulma." />
+  <meta name="description" content="DNCR Games — Kati, Noktalar, Dokuztaş, Kuşatma, Sayı Bulma, Fanorona." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
@@ -39,7 +39,7 @@
       padding: max(1.4rem, env(safe-area-inset-top)) 1.15rem max(2rem, env(safe-area-inset-bottom));
     }
     main {
-      width: min(440px, 100%);
+      width: min(560px, 100%);
       margin: 0 auto;
       text-align: center;
     }
@@ -70,20 +70,20 @@
       font-size: 0.98rem;
     }
     .games {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 0.72rem;
       margin-top: 0.35rem;
     }
     .game {
-      display: grid;
-      grid-template-columns: 64px 1fr;
-      gap: 0.85rem;
-      align-items: center;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.55rem;
       text-align: left;
       text-decoration: none;
       color: inherit;
-      padding: 0.65rem 0.9rem 0.65rem 0.65rem;
+      padding: 0.7rem 0.7rem 0.75rem;
       border-radius: 18px;
       border: 1px solid var(--line);
       background: var(--card);
@@ -91,31 +91,33 @@
       transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
       animation: rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
       overflow: hidden;
+      min-height: 100%;
     }
     .game:nth-child(1) { animation-delay: 0.06s; }
-    .game:nth-child(2) { animation-delay: 0.12s; }
-    .game:nth-child(3) { animation-delay: 0.18s; }
-    .game:nth-child(4) { animation-delay: 0.24s; }
-    .game:nth-child(5) { animation-delay: 0.30s; }
+    .game:nth-child(2) { animation-delay: 0.1s; }
+    .game:nth-child(3) { animation-delay: 0.14s; }
+    .game:nth-child(4) { animation-delay: 0.18s; }
+    .game:nth-child(5) { animation-delay: 0.22s; }
+    .game:nth-child(6) { animation-delay: 0.26s; }
     .game:active { transform: scale(0.98); }
     .game:hover {
       border-color: rgba(240, 199, 90, 0.48);
       box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
     }
     .game-art {
-      width: 64px;
-      height: 64px;
+      width: 52px;
+      height: 52px;
       border-radius: 14px;
       object-fit: cover;
       display: block;
       background: #1a120c;
       box-shadow: inset 0 0 0 1px rgba(240, 199, 90, 0.18);
     }
-    .game-copy { min-width: 0; }
+    .game-copy { min-width: 0; width: 100%; }
     .game strong {
       display: block;
       font-family: var(--display);
-      font-size: 1.12rem;
+      font-size: 1.02rem;
       font-weight: 700;
       color: var(--accent);
       letter-spacing: -0.02em;
@@ -123,9 +125,16 @@
     .game span {
       display: block;
       margin-top: 0.18rem;
-      font-size: 0.84rem;
+      font-size: 0.78rem;
       color: var(--muted);
       line-height: 1.3;
+    }
+    @media (max-width: 360px) {
+      .games { gap: 0.55rem; }
+      .game { padding: 0.55rem; }
+      .game-art { width: 44px; height: 44px; border-radius: 12px; }
+      .game strong { font-size: 0.92rem; }
+      .game span { font-size: 0.72rem; }
     }
     footer {
       margin-top: 1.6rem;
@@ -225,8 +234,8 @@
       color: var(--ink);
     }
     @keyframes rise {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: none; }
+      from { transform: translateY(10px); filter: blur(0); }
+      to { transform: none; filter: none; }
     }
   </style>
 </head>
@@ -240,38 +249,45 @@
 
     <nav class="games" aria-label="Oyunlar">
       <a class="game" href="kati/index.html" data-game="kati">
-        <img class="game-art" src="assets/kati-icon.png" width="64" height="64" alt="" />
+        <img class="game-art" src="assets/kati-icon.png" width="52" height="52" alt="" />
         <span class="game-copy">
           <strong>Kati</strong>
           <span>Kırmızı vs yeşil</span>
         </span>
       </a>
       <a class="game" href="noktalar/index.html" data-game="noktalar">
-        <img class="game-art" src="assets/noktalar-icon.png" width="64" height="64" alt="" />
+        <img class="game-art" src="assets/noktalar-icon.png" width="52" height="52" alt="" />
         <span class="game-copy">
-          <strong>Noktalar ve Kutular</strong>
-          <span>Çizgi çek, kutuyu kapat</span>
+          <strong>Noktalar</strong>
+          <span>Çizgi çek, kutu kapat</span>
         </span>
       </a>
       <a class="game" href="dokuztas/index.html" data-game="dokuztas">
-        <img class="game-art" src="assets/dokuztas-icon.png" width="64" height="64" alt="" />
+        <img class="game-art" src="assets/dokuztas-icon.png" width="52" height="52" alt="" />
         <span class="game-copy">
           <strong>Dokuztaş</strong>
           <span>Değirmen kur</span>
         </span>
       </a>
       <a class="game" href="kusatma/index.html" data-game="kusatma">
-        <img class="game-art" src="assets/kusatma-icon.png" width="64" height="64" alt="" />
+        <img class="game-art" src="assets/kusatma-icon.png" width="52" height="52" alt="" />
         <span class="game-copy">
           <strong>Kuşatma</strong>
-          <span>Çizgi çek, kuşat, esir al</span>
+          <span>Kuşat, esir al</span>
         </span>
       </a>
       <a class="game" href="sayi/index.html" data-game="sayi">
-        <img class="game-art" src="assets/sayi-icon.svg" width="64" height="64" alt="" />
+        <img class="game-art" src="assets/sayi-icon.svg" width="52" height="52" alt="" />
         <span class="game-copy">
           <strong>Sayı Bulma</strong>
           <span>4 hane · artı / eksi</span>
+        </span>
+      </a>
+      <a class="game" href="fanorona/index.html" data-game="fanorona">
+        <img class="game-art" src="assets/fanorona-icon.png" width="52" height="52" alt="" />
+        <span class="game-copy">
+          <strong>Fanorona</strong>
+          <span>Yaklaş, uzaklaş, zincirle</span>
         </span>
       </a>
     </nav>
