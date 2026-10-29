@@ -1,5 +1,5 @@
 /* Dama — offline cache (solo + local 2P) */
-const CACHE = "dama-v1.0.0";
+const CACHE = "dama-v1.0.1";
 const ASSETS = [
   "./",
   "./index.html",
