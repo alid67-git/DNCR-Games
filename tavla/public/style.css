@@ -701,6 +701,30 @@ input[type="text"]:focus {
     inset 0 1px 2px rgba(255, 255, 255, 0.18),
     inset 0 -1px 2px rgba(0, 0, 0, 0.45);
 }
+
+/* Hamle sırasında uçan taş */
+.checker-fly {
+  position: fixed;
+  z-index: 90;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.45),
+    inset 0 1px 2px rgba(255, 255, 255, 0.45);
+}
+.checker-fly.white {
+  background: radial-gradient(circle at 32% 28%, #ffffff, #f2f0ea 55%, #cfc8bc);
+}
+.checker-fly.blue {
+  background: radial-gradient(circle at 32% 28%, #555, #2a2a2a 52%, #0e0e0e);
+}
+.checker-fly.is-hit {
+  filter: brightness(1.15);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.5),
+    0 0 0 2px rgba(232, 164, 92, 0.35);
+}
 .overflow {
   position: relative;
   z-index: 3;

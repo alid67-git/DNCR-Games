@@ -1,9 +1,24 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.5",
-  build: 6,
+  version: "1.0.6",
+  build: 7,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.6",
+      build: 7,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Hamlelerde taşlar yay çizerek hedefe uçuyor",
+          "Vurulan taş bara animasyonla gidiyor (oyuncu + bilgisayar)",
+        ],
+        en: [
+          "Checkers arc across the board on every move",
+          "Hit blots fly to the bar (player + computer)",
+        ],
+      },
+    },
     {
       version: "1.0.5",
       build: 6,
