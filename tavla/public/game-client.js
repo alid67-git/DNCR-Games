@@ -297,25 +297,87 @@
     }
   }
 
-  function renderDice(state) {
+  let diceAnimTimer = null;
+  let diceBusy = false;
+
+  function makeDieEl(value, extraClass) {
+    const die = document.createElement("span");
+    die.className = "die" + (extraClass ? " " + extraClass : "");
+    die.dataset.value = String(value);
+    die.setAttribute("aria-label", String(value));
+    const pips = document.createElement("span");
+    pips.className = "pips";
+    pips.setAttribute("aria-hidden", "true");
+    for (let i = 0; i < 9; i++) {
+      pips.appendChild(document.createElement("span")).className = "pip";
+    }
+    die.appendChild(pips);
+    return die;
+  }
+
+  function paintDice(values, opts) {
     const row = $("dice-row");
     if (!row) return;
+    const rolling = !!(opts && opts.rolling);
+    const settle = !!(opts && opts.settle);
+    const remaining = (opts && opts.remaining ? opts.remaining.slice() : null);
     row.innerHTML = "";
+    const list = values && values.length ? values : [];
+    list.forEach((v, i) => {
+      let cls = "";
+      if (rolling) cls = "rolling";
+      else if (settle) cls = "settle";
+      const die = makeDieEl(v, cls);
+      if (!rolling && remaining) {
+        const idx = remaining.indexOf(v);
+        if (idx >= 0) remaining.splice(idx, 1);
+        else die.classList.add("used");
+      }
+      if (rolling) die.style.animationDelay = `${i * 0.07}s`;
+      row.appendChild(die);
+    });
+  }
+
+  function renderDice(state) {
+    if (diceBusy) return;
     const raw = state.lastRoll || state.diceRaw;
-    if (!raw || !raw.length) return;
+    if (!raw || !raw.length) {
+      paintDice([]);
+      return;
+    }
     const isDouble = raw[0] === raw[1];
     const slots = isDouble ? [raw[0], raw[0], raw[0], raw[0]] : [raw[0], raw[1]];
-    const remaining = (state.dice || []).slice();
-    for (const v of slots) {
-      const die = document.createElement("span");
-      die.className = "die";
-      die.dataset.value = String(v);
-      die.textContent = String(v);
-      const idx = remaining.indexOf(v);
-      if (idx >= 0) remaining.splice(idx, 1);
-      else die.classList.add("used");
-      row.appendChild(die);
-    }
+    paintDice(slots, { remaining: (state.dice || []).slice() });
+  }
+
+  function playDiceRollAnim(finalPair, done) {
+    clearTimeout(diceAnimTimer);
+    diceBusy = true;
+    const btn = $("btn-roll");
+    if (btn) btn.classList.add("is-rolling");
+    let tick = 0;
+    const flicker = () => {
+      const a = 1 + ((Math.random() * 6) | 0);
+      const b = 1 + ((Math.random() * 6) | 0);
+      paintDice([a, b], { rolling: true });
+      tick += 1;
+      if (tick < 7) {
+        diceAnimTimer = setTimeout(flicker, 90);
+      } else {
+        const isDouble = finalPair[0] === finalPair[1];
+        const slots = isDouble
+          ? [finalPair[0], finalPair[0], finalPair[0], finalPair[0]]
+          : [finalPair[0], finalPair[1]];
+        paintDice(slots, { settle: true });
+        playMoveSfx("place");
+        diceAnimTimer = setTimeout(() => {
+          diceBusy = false;
+          if (btn) btn.classList.remove("is-rolling");
+          if (typeof done === "function") done();
+        }, 420);
+      }
+    };
+    flicker();
   }
 
   function currentMoves() {
@@ -389,23 +451,27 @@
     $("chip-white").classList.toggle("active", s.turn === PLAYERS.white && !s.winner);
     $("chip-blue").classList.toggle("active", s.turn === PLAYERS.blue && !s.winner);
 
+    const mine = isMyTurn();
     let phaseText = "";
     if (s.winner) phaseText = lang() === "en" ? "Game over" : "Oyun bitti";
-    else if (s.phase === "roll") phaseText = t("rollPhase");
+    else if (session.aiThinking || diceBusy) phaseText = t("statusCpu");
+    else if (!mine && session.mode !== "twop") phaseText = t("oppTurn");
     else if (s.phase === "move") phaseText = t("movePhase");
-    else phaseText = t("rollPhase");
+    else phaseText = "";
     if ($("phase-label")) $("phase-label").textContent = phaseText;
 
-    const mine = isMyTurn();
     const rollBtn = $("btn-roll");
     if (rollBtn) {
-      rollBtn.disabled = !(s.phase === "roll" && mine && !s.winner);
+      const canRoll = s.phase === "roll" && mine && !s.winner && !diceBusy;
+      rollBtn.disabled = !canRoll;
+      rollBtn.classList.toggle("hidden", !(s.phase === "roll" || diceBusy) || !!s.winner);
     }
 
     if (s.winner) $("status-msg").textContent = "";
+    else if (diceBusy) $("status-msg").textContent = "";
     else if (session.aiThinking) $("status-msg").textContent = t("statusCpu");
-    else if (!mine && session.mode !== "twop") $("status-msg").textContent = t("oppTurn");
-    else if (s.phase === "roll") $("status-msg").textContent = t("rollPhase");
+    else if (!mine && session.mode !== "twop") $("status-msg").textContent = "";
+    else if (s.phase === "roll") $("status-msg").textContent = "";
     else if (selected != null) $("status-msg").textContent = t("selectTarget");
     else $("status-msg").textContent = t("selectPoint");
 
@@ -433,8 +499,9 @@
   }
 
   function doRoll(opts) {
-    if (!session || session.state.winner) return;
+    if (!session || session.state.winner || diceBusy) return;
     const fromNet = opts && opts.fromNet;
+    const skipAnim = !!(opts && opts.skipAnim);
     if (!fromNet && !isMyTurn()) {
       toast(t("oppTurn"));
       return;
@@ -445,13 +512,26 @@
       if (!fromNet) toast(r.error || t("rollPhase"));
       return;
     }
-    session.state = r.state;
-    selected = null;
-    playMoveSfx("place");
-    if (r.skipped) toast(t("noMoves"));
-    renderGame();
-    if (!fromNet) sendSync();
-    maybeScheduleAi();
+    const finish = () => {
+      session.state = r.state;
+      selected = null;
+      if (r.skipped) toast(t("noMoves"));
+      renderGame();
+      if (!fromNet) sendSync();
+      maybeScheduleAi();
+    };
+    if (skipAnim || fromNet) {
+      playMoveSfx("place");
+      finish();
+      return;
+    }
+    const pair = (r.state.lastRoll || r.state.diceRaw || [1, 1]).slice(0, 2);
+    const rollBtn = $("btn-roll");
+    if (rollBtn) {
+      rollBtn.disabled = true;
+      rollBtn.classList.add("is-rolling");
+    }
+    playDiceRollAnim(pair, finish);
   }
 
   function doMove(move, opts) {
@@ -608,12 +688,16 @@
       }
       const result = Ai.playTurn(session.state, session.difficulty || "hard");
       session.aiThinking = false;
-      session.state = result.state;
       selected = null;
-      playMoveSfx(result.skipped ? "place" : "move");
-      if (result.skipped) toast(t("noMoves"));
-      else if (result.moves && result.moves.some((m) => m.hit)) playMoveSfx("capture");
-      renderGame();
+      const pair = (result.roll || (result.state && result.state.lastRoll) || [1, 1]).slice(0, 2);
+      playDiceRollAnim(pair, () => {
+        if (!session || session.mode !== "solo") return;
+        session.state = result.state;
+        if (result.skipped) toast(t("noMoves"));
+        else if (result.moves && result.moves.some((m) => m.hit)) playMoveSfx("capture");
+        else playMoveSfx("move");
+        renderGame();
+      });
     }, delay == null ? 520 : delay);
   }
 
