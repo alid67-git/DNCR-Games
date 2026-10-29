@@ -78,6 +78,12 @@ textarea {
   padding-top: max(1.25rem, env(safe-area-inset-top));
   padding-bottom: max(2.75rem, env(safe-area-inset-bottom));
 }
+#app:has(#screen-game.active) {
+  width: min(720px, 100%);
+  padding-left: 0.55rem;
+  padding-right: 0.55rem;
+  padding-bottom: max(0.65rem, env(safe-area-inset-bottom));
+}
 
 .screen {
   display: none;
@@ -88,6 +94,11 @@ textarea {
 }
 #screen-game {
   position: relative;
+}
+#screen-game.active {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 1.2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
 }
 
 @keyframes rise {
@@ -464,10 +475,37 @@ input[type="text"]:focus {
   color: var(--leaf);
 }
 
-/* —— Tavla board —— */
+/* —— Tavla board (büyük ekran) —— */
+#screen-game .game-top {
+  margin-bottom: 0.35rem;
+  flex: 0 0 auto;
+}
+#screen-game .score-row {
+  margin-bottom: 0.25rem;
+  flex: 0 0 auto;
+}
+#screen-game .score-chip {
+  padding: 0.4rem 0.5rem;
+}
+#screen-game .phase-label {
+  margin: 0.1rem 0 0.25rem;
+  font-size: 0.8rem;
+  flex: 0 0 auto;
+}
+#screen-game .status-msg {
+  margin-top: 0.35rem;
+  flex: 0 0 auto;
+  font-size: 0.86rem;
+}
+
 .board-wrap {
   position: relative;
-  margin: 0.2rem 0 0.55rem;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: stretch;
+  margin: 0.1rem 0;
+  min-height: 0;
+  width: 100%;
   animation: boardIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes boardIn {
@@ -484,9 +522,12 @@ input[type="text"]:focus {
 .tavla-board {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.4rem;
   padding: 0.55rem;
   border-radius: 14px;
+  width: 100%;
+  min-height: min(72dvh, 640px);
+  height: 100%;
   background:
     linear-gradient(160deg, #127a5c 0%, #0b5240 45%, #084435 100%);
   border: 1px solid rgba(123, 255, 195, 0.28);
@@ -498,8 +539,9 @@ input[type="text"]:focus {
 .board-half {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 0.12rem;
-  min-height: 118px;
+  gap: 0.14rem;
+  flex: 1 1 0;
+  min-height: 148px;
 }
 .board-half.top .point {
   align-items: flex-start;
@@ -512,11 +554,12 @@ input[type="text"]:focus {
   appearance: none;
   position: relative;
   border: none;
-  padding: 0.15rem 0;
-  min-height: 118px;
+  padding: 0.2rem 0;
+  min-height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.12rem;
   cursor: pointer;
   background: transparent;
   color: inherit;
@@ -575,7 +618,7 @@ input[type="text"]:focus {
 .checker {
   position: relative;
   z-index: 2;
-  width: min(100%, 1.55rem);
+  width: min(100%, 2.05rem);
   aspect-ratio: 1;
   margin: 0 auto;
   border-radius: 50%;
@@ -615,9 +658,10 @@ input[type="text"]:focus {
 .board-mid {
   display: grid;
   grid-template-columns: 1fr 1.35fr 1fr;
-  gap: 0.4rem;
+  gap: 0.45rem;
   align-items: stretch;
-  min-height: 4.6rem;
+  flex: 0 0 auto;
+  min-height: 5.1rem;
 }
 
 .bar-zone,
@@ -956,16 +1000,66 @@ input[type="text"]:focus {
 }
 
 @media (max-width: 380px) {
-  .board-half {
-    min-height: 100px;
+  .tavla-board {
+    min-height: min(68dvh, 560px);
+    padding: 0.4rem;
+    gap: 0.3rem;
   }
-  .point {
-    min-height: 100px;
+  .board-half {
+    min-height: 128px;
   }
   .checker {
-    width: min(100%, 1.25rem);
+    width: min(100%, 1.7rem);
   }
   .board-mid {
     grid-template-columns: 0.9fr 1.2fr 0.9fr;
+    min-height: 4.4rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  #app:has(#screen-game.active) {
+    width: min(960px, 100%);
+    padding-top: max(0.35rem, env(safe-area-inset-top));
+    padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
+  }
+  #screen-game.active {
+    display: grid;
+    grid-template-columns: minmax(140px, 22vw) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    column-gap: 0.55rem;
+    row-gap: 0.2rem;
+    min-height: calc(100dvh - 0.7rem);
+  }
+  #screen-game .game-top {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+  #screen-game .score-row {
+    grid-column: 1;
+    grid-row: 2 / 4;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+  }
+  #screen-game .phase-label {
+    grid-column: 1;
+  }
+  #screen-game .board-wrap {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    margin: 0;
+  }
+  #screen-game .status-msg {
+    grid-column: 1 / -1;
+    margin-top: 0.1rem;
+  }
+  .tavla-board {
+    min-height: 0;
+    height: 100%;
+  }
+  .board-half {
+    min-height: 0;
   }
 }
