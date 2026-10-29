@@ -297,44 +297,47 @@
       <p id="phase-label" class="phase-label"></p>
       <div id="capture-choice" class="capture-choice hidden" aria-live="polite"></div>
 
-      <div class="board-wrap board-wrap-wide">
-        <div id="mill-banner" class="mill-banner hidden" aria-live="assertive"></div>
-        <div id="board-fx-html" class="board-fx-html" aria-hidden="true"></div>
-        <svg id="board" viewBox="0 0 100 60" role="img" aria-label="Fanorona tahtası" overflow="visible">
-          <defs>
-            <linearGradient id="woodGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#e8d2a4" />
-              <stop offset="45%" stop-color="#c4a06a" />
-              <stop offset="100%" stop-color="#7a4e28" />
-            </linearGradient>
-            <filter id="pieceShadow" x="-40%" y="-40%" width="180%" height="180%">
-              <feDropShadow dx="0.25" dy="0.45" stdDeviation="0.4" flood-opacity="0.4" />
-            </filter>
-            <radialGradient id="whiteFill" cx="35%" cy="30%" r="70%">
-              <stop offset="0%" stop-color="#fff6e4" />
-              <stop offset="55%" stop-color="#e8c998" />
-              <stop offset="100%" stop-color="#b8894a" />
-            </radialGradient>
-            <radialGradient id="redFill" cx="35%" cy="30%" r="70%">
-              <stop offset="0%" stop-color="#fff6e4" />
-              <stop offset="55%" stop-color="#e8c998" />
-              <stop offset="100%" stop-color="#b8894a" />
-            </radialGradient>
-            <radialGradient id="blackFill" cx="35%" cy="30%" r="70%">
-              <stop offset="0%" stop-color="#6b3f28" />
-              <stop offset="50%" stop-color="#3a2214" />
-              <stop offset="100%" stop-color="#140a06" />
-            </radialGradient>
-          </defs>
-          <rect x="1.5" y="1.5" width="97" height="57" rx="2.5" fill="url(#woodGrad)" class="board-wood" />
-          <g id="board-lines" fill="none" stroke="#2a1808" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"></g>
-          <g id="board-nodes"></g>
-          <g id="board-pieces" filter="url(#pieceShadow)"></g>
-          <g id="board-hints"></g>
-          <g id="board-fx"></g>
-        </svg>
+      <div class="board-stage">
+        <div class="board-wrap board-wrap-wide">
+          <div id="mill-banner" class="mill-banner hidden" aria-live="assertive"></div>
+          <div id="board-fx-html" class="board-fx-html" aria-hidden="true"></div>
+          <svg id="board" viewBox="0 0 100 60" role="img" aria-label="Fanorona tahtası" overflow="visible">
+            <defs>
+              <linearGradient id="woodGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#e8d2a4" />
+                <stop offset="45%" stop-color="#c4a06a" />
+                <stop offset="100%" stop-color="#7a4e28" />
+              </linearGradient>
+              <filter id="pieceShadow" x="-40%" y="-40%" width="180%" height="180%">
+                <feDropShadow dx="0.25" dy="0.45" stdDeviation="0.4" flood-opacity="0.4" />
+              </filter>
+              <radialGradient id="whiteFill" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#fff6e4" />
+                <stop offset="55%" stop-color="#e8c998" />
+                <stop offset="100%" stop-color="#b8894a" />
+              </radialGradient>
+              <radialGradient id="redFill" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#fff6e4" />
+                <stop offset="55%" stop-color="#e8c998" />
+                <stop offset="100%" stop-color="#b8894a" />
+              </radialGradient>
+              <radialGradient id="blackFill" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#6b3f28" />
+                <stop offset="50%" stop-color="#3a2214" />
+                <stop offset="100%" stop-color="#140a06" />
+              </radialGradient>
+            </defs>
+            <rect x="1.5" y="1.5" width="97" height="57" rx="2.5" fill="url(#woodGrad)" class="board-wood" />
+            <g id="board-lines" fill="none" stroke="#2a1808" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"></g>
+            <g id="board-nodes"></g>
+            <g id="board-pieces" filter="url(#pieceShadow)"></g>
+            <g id="board-hints"></g>
+            <g id="board-fx"></g>
+          </svg>
+        </div>
       </div>
 
+      <p id="orient-hint" class="orient-hint" data-i18n="orientHint"></p>
       <p id="status-msg" class="status-msg" aria-live="polite"></p>
 
       <div id="end-panel" class="end-panel hidden" role="dialog" aria-modal="true" aria-labelledby="end-text">
