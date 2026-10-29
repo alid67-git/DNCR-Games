@@ -1,5 +1,5 @@
 /* Fanorona — offline cache (solo + local 2P) */
-const CACHE = "fanorona-v1.0.0";
+const CACHE = "fanorona-v1.0.1";
 const ASSETS = [
   "./",
   "./index.html",

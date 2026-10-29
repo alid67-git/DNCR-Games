@@ -1,9 +1,24 @@
 window.FanoronaConfig = {
   appName: "Fanorona",
-  version: "1.0.0",
-  build: 1,
+  version: "1.0.1",
+  build: 2,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/fanorona/",
   changelog: [
+    {
+      version: "1.0.1",
+      build: 2,
+      date: "2026-10-29",
+      items: {
+        tr: [
+          "Dikey ekranda tahta 90° çevrilip büyütüldü (uzun kenar yüksekliği kullanır)",
+          "Yatay (landscape) düzen: tahta daha büyük, skorlar yana",
+        ],
+        en: [
+          "Portrait: board rotates 90° to use screen height",
+          "Landscape layout: larger board, scores on the side",
+        ],
+      },
+    },
     {
       version: "1.0.0",
       build: 1,
