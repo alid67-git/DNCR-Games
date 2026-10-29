@@ -208,6 +208,11 @@
           <label class="radio-row"><input type="radio" name="defDiff" value="hard" /> <span data-i18n="diffHard">Zor</span></label>
           <label class="radio-row"><input type="radio" name="defDiff" value="veryhard" /> <span data-i18n="diffVeryHard">Çok Zor</span></label>
         </fieldset>
+        <fieldset class="lang-field">
+          <legend data-i18n="audioTitle">Ses</legend>
+          <label class="radio-row"><input id="set-music" type="checkbox" checked /> <span data-i18n="musicOn">Müzik</span></label>
+          <label class="radio-row"><input id="set-sfx" type="checkbox" checked /> <span data-i18n="sfxOn">Efektler (zar / hamle)</span></label>
+        </fieldset>
         <button type="button" id="btn-settings-save" class="btn btn-primary" data-i18n="save">Kaydet</button>
       </form>
       <div class="settings-block">
@@ -338,6 +343,7 @@
   <script src="i18n.js"></script>
   <script src="engine.js"></script>
   <script src="ai.js"></script>
+  <script src="audio.js"></script>
   <script src="shared/register-sw.js"></script>
   <script src="shared/nearby-session.js"></script>
   <script src="shared/p2p-session.js"></script>

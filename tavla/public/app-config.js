@@ -1,9 +1,26 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.3",
-  build: 4,
+  version: "1.0.4",
+  build: 5,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.4",
+      build: 5,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Zar atınca dönme / tıkırtı sesi",
+          "Arka plan müziği (sentez) — Ayarlar’dan aç/kapa",
+          "Hamle, vurma ve oyun sonu efektleri",
+        ],
+        en: [
+          "Dice tumble / clack sound on roll",
+          "Background music (synthesized) — toggle in Settings",
+          "Move, hit, and end-of-game sound effects",
+        ],
+      },
+    },
     {
       version: "1.0.3",
       build: 4,
