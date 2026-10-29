@@ -1,9 +1,24 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.7",
-  build: 8,
+  version: "1.0.8",
+  build: 9,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.8",
+      build: 9,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Ortadaki kapak / menteşe şeridi geri geldi (metal menteşeler)",
+          "Yarı tahta yıldız motifleri yeniden eklendi",
+        ],
+        en: [
+          "Center cover / hinge strip restored (metal hinges)",
+          "Half-board star motifs brought back",
+        ],
+      },
+    },
     {
       version: "1.0.7",
       build: 8,

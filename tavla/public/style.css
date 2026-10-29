@@ -566,14 +566,14 @@ input[type="text"]:focus {
     linear-gradient(180deg, #f0c996 0%, var(--wood-felt) 55%, var(--wood-felt-deep) 100%);
   box-shadow: inset 0 0 0 1px rgba(160, 110, 60, 0.12);
 }
-/* Hafif ahşap damar hissi */
+/* Hafif ahşap damar */
 .board-half::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.18;
+  opacity: 0.16;
   background:
     repeating-linear-gradient(
       95deg,
@@ -581,6 +581,21 @@ input[type="text"]:focus {
       rgba(160, 100, 50, 0.07) 10px 11px,
       transparent 11px 22px
     );
+}
+/* Ortadaki süs (yıldız) — yarım tahta kapağı motifi */
+.board-half::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(40%, 7rem);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.85;
+  background: center / contain no-repeat
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23965a32' fill-opacity='0.32' d='M50 8 L56 38 L86 32 L62 50 L86 68 L56 62 L50 92 L44 62 L14 68 L38 50 L14 32 L44 38 Z'/%3E%3Ccircle cx='50' cy='50' r='7' fill='%23965a32' fill-opacity='0.24'/%3E%3C/svg%3E");
 }
 /* Üst üçgenler: taşlar tahta kenarından (üstten) alta doğru */
 .board-half.top .point {
@@ -754,50 +769,97 @@ input[type="text"]:focus {
 }
 
 .board-mid {
+  position: relative;
+  flex: 0 0 auto;
+  min-height: 5.6rem;
+  margin: 0;
+  padding: 0;
+  /* Kapak omurgası — oynama alanından net ayrılır */
+  background:
+    linear-gradient(180deg, #c9965e 0%, #b07842 45%, #9a6434 100%);
+  box-shadow:
+    inset 0 3px 5px rgba(80, 40, 10, 0.28),
+    inset 0 -2px 4px rgba(255, 230, 190, 0.2),
+    0 1px 0 rgba(255, 240, 220, 0.25),
+    0 -1px 0 rgba(80, 40, 10, 0.2);
+  border-top: 1px solid rgba(80, 45, 15, 0.28);
+  border-bottom: 1px solid rgba(80, 45, 15, 0.28);
+  overflow: visible;
+}
+
+/* Katlanır kapak menteşe şeridi */
+.board-kapak {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.55rem;
+}
+.kapak-rail {
+  flex: 1 1 auto;
+  height: 0.42rem;
+  margin: 0 0.45rem;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, #8a5a30 0%, #6e4320 50%, #8a5a30 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.35),
+    0 1px 0 rgba(255, 220, 170, 0.25);
+}
+.kapak-hinge {
+  flex: 0 0 auto;
+  width: 0.72rem;
+  height: 1.15rem;
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, #d7dbe3 0%, #9aa3b2 42%, #eef1f5 58%, #b0b7c4 100%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+  position: relative;
+}
+.kapak-hinge::before,
+.kapak-hinge::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle at 35% 30%, #eee, #7a8290);
+  box-shadow: inset 0 0.5px 0.5px rgba(0, 0, 0, 0.35);
+}
+.kapak-hinge::before { top: 0.14rem; }
+.kapak-hinge::after { bottom: 0.14rem; }
+
+.board-mid-inner {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: 1fr 1.35fr 1fr;
   gap: 0.4rem;
   align-items: stretch;
-  flex: 0 0 auto;
-  min-height: 5.1rem;
-  margin: 0;
-  padding: 0.4rem 0.25rem;
-  background:
-    linear-gradient(180deg, #e0b07a 0%, #d09a60 50%, #c48a52 100%);
-  box-shadow:
-    inset 0 2px 3px rgba(255, 240, 220, 0.35),
-    inset 0 -2px 4px rgba(120, 70, 30, 0.18);
-  position: relative;
+  min-height: 5.6rem;
+  padding: 0.45rem 0.3rem;
 }
-/* Menteşe hissi */
-.board-mid::before,
-.board-mid::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  width: 0.55rem;
-  height: 0.9rem;
-  transform: translateX(-50%);
-  border-radius: 3px;
-  background: linear-gradient(90deg, #cfd3dc, #9aa3b5 45%, #e8ebf0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-  pointer-events: none;
-}
-.board-mid::before { top: 0.15rem; }
-.board-mid::after { bottom: 0.15rem; }
 
 .bar-zone,
 .off-zone {
   border-radius: 10px;
-  border: 1px solid rgba(120, 70, 30, 0.18);
-  background: rgba(255, 248, 238, 0.35);
+  border: 1px solid rgba(80, 45, 15, 0.22);
+  background: rgba(255, 245, 230, 0.42);
   padding: 0.35rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   position: relative;
   z-index: 2;
+  backdrop-filter: blur(0.5px);
 }
 .bar-zone {
   cursor: pointer;
