@@ -1,9 +1,24 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.6",
-  build: 7,
+  version: "1.0.7",
+  build: 8,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.7",
+      build: 8,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Açık ahşap + soft mavi arayüz paleti",
+          "Açık meşe tahta, kırmızımsı üçgenler, soft kartlar",
+        ],
+        en: [
+          "Light wood + soft blue UI palette",
+          "Pale oak board, reddish points, soft elevated cards",
+        ],
+      },
+    },
     {
       version: "1.0.6",
       build: 7,
