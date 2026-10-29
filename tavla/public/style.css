@@ -98,7 +98,9 @@ textarea {
 #screen-game.active {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 1.2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  height: calc(100svh - 1.1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  min-height: calc(100dvh - 1.1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  max-height: calc(100dvh - 1.1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
 }
 
 @keyframes rise {
@@ -522,12 +524,12 @@ input[type="text"]:focus {
 .tavla-board {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  padding: 0.55rem;
+  gap: 0.35rem;
+  padding: 0.45rem;
   border-radius: 14px;
   width: 100%;
-  min-height: min(72dvh, 640px);
   height: 100%;
+  min-height: calc(100svh - 11.5rem);
   background:
     linear-gradient(160deg, #127a5c 0%, #0b5240 45%, #084435 100%);
   border: 1px solid rgba(123, 255, 195, 0.28);
@@ -541,25 +543,35 @@ input[type="text"]:focus {
   grid-template-columns: repeat(12, 1fr);
   gap: 0.14rem;
   flex: 1 1 0;
-  min-height: 148px;
+  min-height: 0;
 }
+/* Üst üçgenler: taşlar tahta kenarından (üstten) alta doğru */
 .board-half.top .point {
-  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 0.12rem;
+  padding-bottom: 0;
 }
+/* Alt üçgenler: taşlar tahta kenarından (alttan) üste doğru */
 .board-half.bottom .point {
-  align-items: flex-end;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0.12rem;
 }
 
 .point {
   appearance: none;
   position: relative;
   border: none;
-  padding: 0.2rem 0;
+  padding: 0;
   min-height: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 0.12rem;
+  align-items: center;
+  gap: 0;
   cursor: pointer;
   background: transparent;
   color: inherit;
@@ -618,14 +630,22 @@ input[type="text"]:focus {
 .checker {
   position: relative;
   z-index: 2;
-  width: min(100%, 2.05rem);
+  width: min(92%, 1.85rem);
+  flex: 0 0 auto;
   aspect-ratio: 1;
-  margin: 0 auto;
+  margin: 0;
   border-radius: 50%;
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.35),
     inset 0 1px 2px rgba(255, 255, 255, 0.35);
   animation: checkerIn 0.28s ease both;
+}
+/* Hafif bindirme — yığın kenara oturur, ortada asılı kalmaz */
+.board-half.top .point .checker + .checker {
+  margin-top: -0.22rem;
+}
+.board-half.bottom .point .checker + .checker {
+  margin-bottom: -0.22rem;
 }
 @keyframes checkerIn {
   from {
@@ -645,14 +665,15 @@ input[type="text"]:focus {
 }
 .overflow {
   position: relative;
-  z-index: 2;
-  margin: 0 auto;
+  z-index: 3;
+  margin: 0.15rem auto;
   font-size: 0.65rem;
   font-weight: 700;
   color: var(--accent);
   background: rgba(3, 24, 18, 0.72);
   border-radius: 999px;
   padding: 0.05rem 0.35rem;
+  flex: 0 0 auto;
 }
 
 .board-mid {
@@ -713,46 +734,147 @@ input[type="text"]:focus {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
+  perspective: 420px;
 }
 .dice-row {
   display: flex;
-  gap: 0.35rem;
-  min-height: 1.7rem;
+  gap: 0.55rem;
+  min-height: 2.6rem;
   align-items: center;
   justify-content: center;
 }
 .die {
-  width: 1.7rem;
-  height: 1.7rem;
-  border-radius: 0.35rem;
-  background: linear-gradient(145deg, #ffffff, #dce8f0);
-  color: #0a3d32;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1rem;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-  animation: dieIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --die: #f7fcff;
+  --die-shade: #c5d5e0;
+  --pip: #0a3d32;
+  position: relative;
+  width: 2.55rem;
+  height: 2.55rem;
+  border-radius: 0.48rem;
+  background:
+    linear-gradient(145deg, #ffffff 0%, var(--die) 42%, var(--die-shade) 100%);
+  box-shadow:
+    0 3px 0 rgba(8, 40, 32, 0.22),
+    0 8px 16px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform-style: preserve-3d;
+  flex-shrink: 0;
 }
-@keyframes dieIn {
-  from {
-    transform: rotate(-18deg) scale(0.7);
-    opacity: 0;
+.die .pips {
+  position: absolute;
+  inset: 0.28rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 0.1rem;
+}
+.die .pip {
+  width: 0.42rem;
+  height: 0.42rem;
+  margin: auto;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #1a5c48, var(--pip));
+  box-shadow: 0 0.5px 0.5px rgba(255, 255, 255, 0.25);
+  opacity: 0;
+  transform: scale(0.6);
+}
+.die[data-value="1"] .pip:nth-child(5),
+.die[data-value="2"] .pip:nth-child(1),
+.die[data-value="2"] .pip:nth-child(9),
+.die[data-value="3"] .pip:nth-child(1),
+.die[data-value="3"] .pip:nth-child(5),
+.die[data-value="3"] .pip:nth-child(9),
+.die[data-value="4"] .pip:nth-child(1),
+.die[data-value="4"] .pip:nth-child(3),
+.die[data-value="4"] .pip:nth-child(7),
+.die[data-value="4"] .pip:nth-child(9),
+.die[data-value="5"] .pip:nth-child(1),
+.die[data-value="5"] .pip:nth-child(3),
+.die[data-value="5"] .pip:nth-child(5),
+.die[data-value="5"] .pip:nth-child(7),
+.die[data-value="5"] .pip:nth-child(9),
+.die[data-value="6"] .pip:nth-child(1),
+.die[data-value="6"] .pip:nth-child(3),
+.die[data-value="6"] .pip:nth-child(4),
+.die[data-value="6"] .pip:nth-child(6),
+.die[data-value="6"] .pip:nth-child(7),
+.die[data-value="6"] .pip:nth-child(9) {
+  opacity: 1;
+  transform: none;
+}
+.die.rolling {
+  animation: dieTumble 0.85s cubic-bezier(0.22, 0.7, 0.25, 1) both;
+  filter: blur(0.2px);
+}
+.die.rolling .pip {
+  animation: pipFlicker 0.12s steps(2) infinite;
+}
+.die.settle {
+  animation: dieSettle 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes dieTumble {
+  0% {
+    transform: translateY(-10px) rotateX(0deg) rotateY(0deg) rotateZ(-12deg) scale(0.85);
+    opacity: 0.55;
   }
-  to {
-    transform: none;
+  25% {
+    transform: translateY(-18px) rotateX(210deg) rotateY(-120deg) rotateZ(40deg) scale(1.08);
+  }
+  55% {
+    transform: translateY(2px) rotateX(420deg) rotateY(200deg) rotateZ(-30deg) scale(1.02);
+  }
+  78% {
+    transform: translateY(-4px) rotateX(540deg) rotateY(320deg) rotateZ(12deg) scale(1.06);
+  }
+  100% {
+    transform: translateY(0) rotateX(720deg) rotateY(360deg) rotateZ(0deg) scale(1);
     opacity: 1;
   }
 }
+@keyframes dieSettle {
+  0% {
+    transform: scale(1.18) rotate(-8deg);
+  }
+  55% {
+    transform: scale(0.94) rotate(3deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes pipFlicker {
+  50% {
+    opacity: 0.35;
+  }
+}
 .die.used {
-  opacity: 0.35;
-  filter: grayscale(0.4);
+  opacity: 0.38;
+  filter: grayscale(0.45);
+  box-shadow:
+    0 1px 0 rgba(8, 40, 32, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.die:nth-child(2).rolling {
+  animation-delay: 0.07s;
+}
+.die:nth-child(3).rolling {
+  animation-delay: 0.12s;
+}
+.die:nth-child(4).rolling {
+  animation-delay: 0.16s;
 }
 .btn-roll {
-  padding: 0.45rem 0.9rem;
-  font-size: 0.88rem;
+  padding: 0.5rem 1.05rem;
+  font-size: 0.9rem;
+  min-width: 6.5rem;
+}
+.btn-roll.is-rolling {
+  opacity: 0.7;
+  pointer-events: none;
+}
+.btn-roll.hidden {
+  display: none;
 }
 
 .off-stacks {
@@ -1001,19 +1123,20 @@ input[type="text"]:focus {
 
 @media (max-width: 380px) {
   .tavla-board {
-    min-height: min(68dvh, 560px);
-    padding: 0.4rem;
-    gap: 0.3rem;
-  }
-  .board-half {
-    min-height: 128px;
+    min-height: calc(100svh - 12.25rem);
+    padding: 0.35rem;
+    gap: 0.28rem;
   }
   .checker {
-    width: min(100%, 1.7rem);
+    width: min(100%, 1.75rem);
   }
   .board-mid {
     grid-template-columns: 0.9fr 1.2fr 0.9fr;
-    min-height: 4.4rem;
+    min-height: 4.8rem;
+  }
+  .die {
+    width: 2.25rem;
+    height: 2.25rem;
   }
 }
 
