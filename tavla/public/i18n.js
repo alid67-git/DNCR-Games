@@ -75,6 +75,9 @@ window.TavlaI18n = (function () {
       langTr: "Türkçe",
       langEn: "English",
       defaultDifficulty: "Varsayılan bilgisayar zorluğu",
+      audioTitle: "Ses",
+      musicOn: "Müzik",
+      sfxOn: "Efektler (zar / hamle)",
       save: "Kaydet",
       saved: "Ayarlar kaydedildi.",
 
@@ -216,6 +219,9 @@ window.TavlaI18n = (function () {
       langTr: "Türkçe",
       langEn: "English",
       defaultDifficulty: "Default computer difficulty",
+      audioTitle: "Audio",
+      musicOn: "Music",
+      sfxOn: "Effects (dice / moves)",
       save: "Save",
       saved: "Settings saved.",
 

@@ -50,13 +50,29 @@
   let p2pLobby = null;
   let hubBackCtl = null;
   const Sfx = window.DncrMoveSfx || null;
+  const Audio = window.TavlaAudio || null;
   /** @type {Map<number, HTMLButtonElement>} */
   const pointEls = new Map();
 
   function playMoveSfx(kind) {
+    if (Audio) {
+      Audio.unlock();
+      Audio.playSfx(kind || "move");
+      return;
+    }
     if (!Sfx) return;
     Sfx.unlock();
     Sfx.play(kind || "move");
+  }
+
+  function ensureMusic() {
+    if (!Audio) return;
+    Audio.unlock();
+    Audio.applyPrefs({
+      music: settings.music !== false,
+      sfx: settings.sfx !== false,
+    });
+    if (settings.music !== false) Audio.startMusic();
   }
 
   function loadSettings() {
@@ -66,6 +82,8 @@
       name: "",
       p1: "",
       p2: "",
+      music: true,
+      sfx: true,
     };
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
@@ -355,6 +373,12 @@
     diceBusy = true;
     const btn = $("btn-roll");
     if (btn) btn.classList.add("is-rolling");
+    if (Audio) {
+      Audio.unlock();
+      Audio.playDiceRoll();
+    } else {
+      playMoveSfx("place");
+    }
     let tick = 0;
     const flicker = () => {
       const a = 1 + ((Math.random() * 6) | 0);
@@ -369,7 +393,6 @@
           ? [finalPair[0], finalPair[0], finalPair[0], finalPair[0]]
           : [finalPair[0], finalPair[1]];
         paintDice(slots, { settle: true });
-        playMoveSfx("place");
         diceAnimTimer = setTimeout(() => {
           diceBusy = false;
           if (btn) btn.classList.remove("is-rolling");
@@ -478,6 +501,16 @@
     const end = $("end-panel");
     if (s.winner) {
       maybeRecordScore();
+      if (!session.endSfxPlayed) {
+        session.endSfxPlayed = true;
+        if (session.mode === "solo") {
+          playMoveSfx(s.winner === PLAYERS.white ? "win" : "lose");
+        } else if (session.mode === "p2p") {
+          playMoveSfx(s.winner === session.you ? "win" : "lose");
+        } else {
+          playMoveSfx("win");
+        }
+      }
       end.classList.remove("hidden");
       if (session.mode === "solo") {
         $("end-text").textContent =
@@ -704,6 +737,7 @@
   function startSolo() {
     clearTimeout(aiTimer);
     destroyP2P();
+    ensureMusic();
     const starter = readNextStarter();
     writeNextStarter(starter);
     session = {
@@ -716,6 +750,7 @@
       state: createState({ starter }),
       aiThinking: false,
       scoreRecorded: false,
+      endSfxPlayed: false,
     };
     selected = null;
     showScreen("game");
@@ -726,6 +761,7 @@
   function startTwoP() {
     clearTimeout(aiTimer);
     destroyP2P();
+    ensureMusic();
     const p1 = ($("p1-name").value || "").trim() || t("player1Ph");
     const p2 = ($("p2-name").value || "").trim() || t("player2Ph");
     saveSettings({ p1, p2 });
@@ -736,6 +772,7 @@
       names: { white: p1, blue: p2 },
       state: createState({ starter }),
       scoreRecorded: false,
+      endSfxPlayed: false,
     };
     selected = null;
     showScreen("game");
@@ -793,6 +830,7 @@
   }
 
   function beginP2PGame(state, names) {
+    ensureMusic();
     session = {
       mode: "p2p",
       status: "playing",
@@ -800,6 +838,7 @@
       names: names || p2pLobby.names,
       state,
       scoreRecorded: false,
+      endSfxPlayed: false,
     };
     selected = null;
     showScreen("game");
@@ -971,6 +1010,8 @@
     document.querySelectorAll('input[name="defDiff"]').forEach((r) => {
       r.checked = r.value === diff;
     });
+    if ($("set-music")) $("set-music").checked = settings.music !== false;
+    if ($("set-sfx")) $("set-sfx").checked = settings.sfx !== false;
     if ($("p1-name")) $("p1-name").value = settings.p1 || "";
     if ($("p2-name")) $("p2-name").value = settings.p2 || "";
     if ($("p2p-name")) $("p2p-name").value = settings.name || "";
@@ -1083,18 +1124,51 @@
       "hard";
     const displayName =
       ($("settings-display-name") && $("settings-display-name").value) || "";
+    const musicOn = $("set-music") ? !!$("set-music").checked : true;
+    const sfxOn = $("set-sfx") ? !!$("set-sfx").checked : true;
     saveSettings({
       lang: selectedLang,
       aiDifficulty: ["easy", "hard", "veryhard"].includes(selectedDiff)
         ? selectedDiff
         : "hard",
       name: displayName.trim() || settings.name,
+      music: musicOn,
+      sfx: sfxOn,
     });
     if (window.ArenaScore) window.ArenaScore.setDisplayName(displayName);
+    if (Audio) {
+      Audio.unlock();
+      Audio.setMusic(musicOn);
+      Audio.setSfx(sfxOn);
+      if (musicOn) Audio.startMusic();
+    }
     setupDiff = settings.aiDifficulty;
     applyI18n();
     toast(t("saved"));
   });
+
+  if ($("set-music")) {
+    $("set-music").addEventListener("change", async (e) => {
+      const on = !!e.target.checked;
+      saveSettings({ music: on });
+      if (Audio) {
+        await Audio.unlock();
+        Audio.setMusic(on);
+        if (on) Audio.startMusic();
+      }
+    });
+  }
+  if ($("set-sfx")) {
+    $("set-sfx").addEventListener("change", async (e) => {
+      const on = !!e.target.checked;
+      saveSettings({ sfx: on });
+      if (Audio) {
+        await Audio.unlock();
+        Audio.setSfx(on);
+        if (on) Audio.playSfx("select");
+      }
+    });
+  }
 
   $("btn-updates-seen").addEventListener("click", () => {
     try {
@@ -1142,6 +1216,19 @@
     $("off-blue").addEventListener("click", () => onOffClick(PLAYERS.blue));
 
   // Boot
+  if (Audio) {
+    Audio.applyPrefs({
+      music: settings.music !== false,
+      sfx: settings.sfx !== false,
+    });
+    const unlockOnce = () => {
+      Audio.unlock();
+      document.removeEventListener("pointerdown", unlockOnce, true);
+      document.removeEventListener("keydown", unlockOnce, true);
+    };
+    document.addEventListener("pointerdown", unlockOnce, true);
+    document.addEventListener("keydown", unlockOnce, true);
+  }
   if (Sfx && Sfx.bindFirstGesture) Sfx.bindFirstGesture(document);
   if (window.ArenaHubBack) {
     hubBackCtl = window.ArenaHubBack.bind({ getLang: lang });
