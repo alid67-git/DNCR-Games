@@ -59,6 +59,7 @@ Sürüm numarası ana menü altında ve ayarların dibinde görünür.
 - Kuşatma: …/kusatma/
 - Sayı Bulma: …/sayi/
 - Fanorona: …/fanorona/
+- Dama: …/dama/
 - Tavla: …/tavla/
 
 Hub sade kalır (ikon + ikişer grid oyun listesi). Kurallar / internet / Safari / P2P her oyunun **Yardım** sayfasındadır.
@@ -67,7 +68,7 @@ Ana menüdeki **DNCR Games** düğmesi onay sonrası hub’a döner.
 ## Sync
 
 ```bash
-npm run sync-shared   # shared/js → public/shared, dots…, dokuztas…, kusatma…, sayibulma…, fanorona…, tavla…
+npm run sync-shared   # shared/js → public/shared, dots…, dokuztas…, kusatma…, sayibulma…, fanorona…, dama…, tavla…
 npm run build:pages   # _site hub + oyunlar
 ```
 

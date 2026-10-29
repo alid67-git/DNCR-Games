@@ -86,6 +86,17 @@ textarea {
 #screen-game {
   position: relative;
 }
+#app:has(#screen-game.active) {
+  width: min(720px, 100%);
+  padding-left: 0.7rem;
+  padding-right: 0.7rem;
+  padding-bottom: max(0.85rem, env(safe-area-inset-bottom));
+}
+#screen-game.active {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 1.6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+}
 
 @keyframes rise {
   from {
@@ -605,6 +616,16 @@ input[type="text"]:focus {
   min-height: 1.2em;
 }
 
+.board-stage {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  margin: 0.15rem 0;
+}
 .board-wrap {
   position: relative;
   margin: 0 auto;
@@ -614,8 +635,121 @@ input[type="text"]:focus {
   animation: boardIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .board-wrap-wide {
-  width: min(100%, 520px);
+  width: min(100%, 560px);
   aspect-ratio: 100 / 60;
+}
+
+/* Dikey telefon: tahtayı 90° çevir — uzun kenar ekran yüksekliğini kullanır */
+@media (orientation: portrait) {
+  #screen-game .game-top {
+    margin-bottom: 0.4rem;
+  }
+  #screen-game .score-row {
+    margin-bottom: 0.25rem;
+  }
+  #screen-game .score-chip {
+    padding: 0.4rem 0.5rem;
+  }
+  #screen-game .phase-label {
+    margin: 0.15rem 0 0.25rem;
+    font-size: 0.82rem;
+  }
+  #screen-game .status-msg {
+    margin-top: 0.4rem;
+    font-size: 0.86rem;
+  }
+  #screen-game .board-wrap-wide {
+    /* Kısa kenar ≈ ekran genişliği; uzun kenar dikey */
+    width: min(96vw, calc((100dvh - 12.25rem) * 60 / 100));
+    aspect-ratio: 60 / 100;
+    max-height: calc(100dvh - 12.25rem);
+    overflow: visible;
+  }
+  #screen-game .board-wrap-wide #board {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* Yatay SVG: width=konteyner yüksekliği, height=konteyner genişliği; sonra 90° */
+    width: calc(100% * 100 / 60);
+    height: 60%;
+    max-width: none;
+    transform: translate(-50%, -50%) rotate(90deg);
+    transform-origin: center center;
+  }
+  #screen-game .orient-hint {
+    display: block;
+  }
+}
+
+@media (orientation: landscape) {
+  #screen-game .orient-hint {
+    display: none;
+  }
+  #screen-game .board-wrap-wide {
+    width: min(100%, calc((100dvh - 5.5rem) * 100 / 60), 920px);
+    max-height: calc(100dvh - 5rem);
+    aspect-ratio: 100 / 60;
+  }
+  #screen-game .board-wrap-wide #board {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    height: 100%;
+    transform: none;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 480px) {
+  #app:has(#screen-game.active) {
+    padding-top: max(0.35rem, env(safe-area-inset-top));
+    padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
+  }
+  #screen-game.active {
+    display: grid;
+    grid-template-columns: minmax(132px, 24vw) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    column-gap: 0.65rem;
+    row-gap: 0.25rem;
+    min-height: calc(100dvh - 0.7rem);
+  }
+  #screen-game .game-top {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+  #screen-game .score-row {
+    grid-column: 1;
+    grid-row: 2 / 4;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+  }
+  #screen-game .phase-label,
+  #screen-game .capture-choice {
+    grid-column: 1;
+  }
+  #screen-game .board-stage {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    margin: 0;
+  }
+  #screen-game .status-msg {
+    grid-column: 1 / -1;
+    margin-top: 0.15rem;
+  }
+  #screen-game .board-wrap-wide {
+    width: min(100%, calc((100dvh - 3.8rem) * 100 / 60));
+    max-height: calc(100dvh - 3.5rem);
+  }
+}
+
+.orient-hint {
+  display: none;
+  margin: 0.15rem 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(243, 230, 200, 0.45);
 }
 
 .capture-choice {

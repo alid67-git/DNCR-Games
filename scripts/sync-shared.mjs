@@ -17,6 +17,7 @@ const targets = [
   path.join(root, "kusatma", "public", "shared"),
   path.join(root, "sayibulma", "public", "shared"),
   path.join(root, "fanorona", "public", "shared"),
+  path.join(root, "dama", "public", "shared"),
   path.join(root, "tavla", "public", "shared"),
 ];
 

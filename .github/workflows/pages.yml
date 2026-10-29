@@ -1,6 +1,6 @@
 name: Deploy GitHub Pages
 
-# Hub + Kati + Noktalar + Dokuztaş + Kuşatma + Sayı Bulma → https://alid67-git.github.io/DNCR-Games/
+# Hub + Kati + Noktalar + Dokuztaş + Kuşatma + Sayı Bulma + Fanorona + Dama → https://alid67-git.github.io/DNCR-Games/
 on:
   push:
     branches: [main]
