@@ -18,6 +18,7 @@
       kusatma: "Kuşatma",
       sayi: "Sayı Bulma",
       fanorona: "Fanorona",
+      dama: "Dama",
       dncr: "DNCR toplam",
     },
     en: {
@@ -27,6 +28,7 @@
       kusatma: "Kuşatma",
       sayi: "Number Hunt",
       fanorona: "Fanorona",
+      dama: "Dama",
       dncr: "DNCR total",
     },
   };
@@ -53,6 +55,7 @@
         kusatma: emptyGame(),
         sayi: emptyGame(),
         fanorona: emptyGame(),
+        dama: emptyGame(),
       },
     };
   }
@@ -72,6 +75,7 @@
           kusatma: { ...base.games.kusatma, ...(parsed.games && parsed.games.kusatma) },
           sayi: { ...base.games.sayi, ...(parsed.games && parsed.games.sayi) },
           fanorona: { ...base.games.fanorona, ...(parsed.games && parsed.games.fanorona) },
+          dama: { ...base.games.dama, ...(parsed.games && parsed.games.dama) },
         },
       };
     } catch (_) {
@@ -92,7 +96,7 @@
 
   /**
    * @param {object} opts
-   * @param {'kati'|'noktalar'|'dokuztas'|'kusatma'|'sayi'|'fanorona'} opts.gameId
+   * @param {'kati'|'noktalar'|'dokuztas'|'kusatma'|'sayi'|'fanorona'|'dama'} opts.gameId
    * @param {'win'|'loss'|'draw'} opts.result
    * @param {string} [opts.difficulty]
    * @param {string} [opts.mode] solo|twop|p2p
@@ -166,7 +170,8 @@
       (s.games.dokuztas.points || 0) +
       ((s.games.kusatma && s.games.kusatma.points) || 0) +
       ((s.games.sayi && s.games.sayi.points) || 0) +
-      ((s.games.fanorona && s.games.fanorona.points) || 0)
+      ((s.games.fanorona && s.games.fanorona.points) || 0) +
+      ((s.games.dama && s.games.dama.points) || 0)
     );
   }
 
@@ -174,7 +179,7 @@
     const store = load();
     const L = lang === "en" ? "en" : "tr";
     const labels = GAME_LABELS[L];
-    const rows = ["fanorona", "sayi", "kusatma", "dokuztas", "noktalar", "kati"].map((id) => {
+    const rows = ["dama", "fanorona", "sayi", "kusatma", "dokuztas", "noktalar", "kati"].map((id) => {
       const g = store.games[id];
       return {
         id,
