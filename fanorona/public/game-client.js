@@ -467,6 +467,13 @@
     }
   }
 
+  /** Sıra geçişi zamanlaması — okunabilir tempo */
+  const TURN_INTRO_MS = 480;
+  const TURN_BANNER_MS = 3600;
+  const TURN_READ_MS = 2400;
+  const TURN_TWOP_MS = 3000;
+  const TURN_CHIP_MS = 4200;
+
   function showBanner(text, ms, kind) {
     const el = $("mill-banner");
     if (!el) return;
@@ -529,10 +536,13 @@
     const text = $("turn-wait-text");
     if (!el) return;
     const soft = !!(opts && opts.soft);
+    const mine = isMyTurn(player) && session.mode !== "twop";
     const copy = turnWaitCopy(player);
     if (title) title.textContent = copy.title;
     if (text) text.textContent = copy.sub;
     el.classList.toggle("is-soft", soft);
+    el.classList.toggle("is-yours", !!mine);
+    el.classList.toggle("is-theirs", !mine || session.mode === "twop");
     el.classList.remove("hidden");
     el.classList.add("is-on");
     el.setAttribute("aria-hidden", "false");
@@ -543,7 +553,7 @@
     const el = $("turn-wait");
     if (!el) return;
     el.classList.add("hidden");
-    el.classList.remove("is-on", "is-soft");
+    el.classList.remove("is-on", "is-soft", "is-yours", "is-theirs");
     el.setAttribute("aria-hidden", "true");
     setBoardWaiting(false);
   }
@@ -574,7 +584,11 @@
     }
   }
 
-  function announceTurnChange(player) {
+  /**
+   * Sıra değişimini duyurur ve okuma süresi kadar bekler.
+   * Rakip sırası: kilitli kart kalır. Senin sıran: soft kart + sonra açılır.
+   */
+  async function announceTurnChange(player) {
     if (!session || session.state.winner || player == null) return;
     const chipRed = $("chip-red");
     const chipBlack = $("chip-black");
@@ -587,26 +601,41 @@
       clearTimeout(announceTurnChange._t);
       announceTurnChange._t = setTimeout(() => {
         chip.classList.remove("turn-pulse");
-      }, 2800);
+      }, TURN_CHIP_MS);
     }
     const copy = turnWaitCopy(player);
-    showBanner(copy.title, 2400, "turn");
+    const bannerLine = `${copy.title} — ${copy.sub}`;
+    showBanner(bannerLine, TURN_BANNER_MS, "turn");
     const status = $("status-msg");
-    if (status) status.textContent = `${copy.title} — ${copy.sub}`;
+    if (status) status.textContent = bannerLine;
     const phase = $("phase-label");
     if (phase) phase.textContent = copy.title;
 
+    clearTimeout(announceTurnChange._tw);
+
     if (session.mode === "twop") {
-      // Kısa flaş: kimde sıra — tahtayı kilitleme
       showTurnWait(player, { soft: true });
-      clearTimeout(announceTurnChange._tw);
-      announceTurnChange._tw = setTimeout(() => {
-        if (session && session.mode === "twop") hideTurnWait();
-      }, 1600);
+      await waitMs(TURN_TWOP_MS);
+      if (session && session.mode === "twop" && !session.state.winner) {
+        hideTurnWait();
+      }
       return;
     }
-    if (!isMyTurn(player)) showTurnWait(player);
-    else hideTurnWait();
+
+    if (!isMyTurn(player)) {
+      // Rakip / CPU — kart kalır; AI hemen başlamasın diye okuma süresi
+      showTurnWait(player);
+      await waitMs(TURN_READ_MS);
+      return;
+    }
+
+    // Sıra sende — soft kart ile net göster, sonra tahtayı aç
+    showTurnWait(player, { soft: true });
+    await waitMs(TURN_READ_MS);
+    if (!session || session.state.winner) return;
+    // animBusy hâlâ true olabilir — canAct kullanma
+    if (isMyTurn(session.state.turn)) hideTurnWait();
+    else showTurnWait(session.state.turn);
   }
 
   function waitMs(ms) {
@@ -1075,8 +1104,9 @@
     if (stage) stage.classList.remove("is-animating");
 
     if (turnPassed) {
-      await waitMs(200);
-      announceTurnChange(r.state.turn);
+      // Hamle bitti → kısa nefes → sıra duyurusu (okuma süresi dahil)
+      await waitMs(TURN_INTRO_MS);
+      await announceTurnChange(r.state.turn);
     } else {
       updateTurnWaitUi();
     }
@@ -1093,7 +1123,8 @@
       !session.state.winner &&
       session.state.turn === PLAYERS.black
     ) {
-      scheduleAi(captured.length ? 420 : 560);
+      // Duyuru okuma süresi bittikten sonra ek düşünme payı
+      scheduleAi(turnPassed ? 700 : captured.length ? 480 : 600);
     }
   }
 
