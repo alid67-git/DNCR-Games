@@ -151,6 +151,11 @@ window.TavlaI18n = (function () {
       redoDone: "Hamle ileri alındı",
       dieUnused: "Bu zar şu an kullanılamıyor",
       dieWrongPiece: "Bu zar seçili taşla oynamıyor — başka taş seç veya Kapı’ya dokun",
+      startMatch: "Maç başlıyor",
+      youStart: "Sen başlıyorsun",
+      cpuStarts: "Bilgisayar başlıyor",
+      namedStarts: "{name} başlıyor",
+      startOk: "Tamam",
     },
     en: {
       appName: "Tavla",
@@ -303,6 +308,11 @@ window.TavlaI18n = (function () {
       redoDone: "Move redone",
       dieUnused: "That die can’t be used right now",
       dieWrongPiece: "That die doesn’t move the selected checker — pick another or tap Off",
+      startMatch: "Match starting",
+      youStart: "You start",
+      cpuStarts: "Computer starts",
+      namedStarts: "{name} starts",
+      startOk: "OK",
     },
   };
 

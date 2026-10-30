@@ -335,6 +335,16 @@
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  /** Ortak tempo — oyuncu ve bilgisayar aynı animasyon hızı */
+  const PACE = {
+    flyMs: 680,
+    flyHitMs: 560,
+    betweenMovesMs: 480,
+    afterDiceMs: 420,
+    aiThinkMs: 1400,
+    aiFirstMs: 900,
+  };
+
   function rectCenter(el) {
     if (!el) return null;
     const r = el.getBoundingClientRect();
@@ -430,7 +440,9 @@
       const dy = to.y - from.y;
       const dist = Math.hypot(dx, dy);
       const arc = Math.min(64, Math.max(18, dist * 0.24));
-      const dur = (opts && opts.duration) || (opts && opts.hit ? 360 : 440);
+      const dur =
+        (opts && opts.duration) ||
+        (opts && opts.hit ? PACE.flyHitMs : PACE.flyMs);
       const finish = () => {
         if (el.parentNode) el.parentNode.removeChild(el);
         resolve();
@@ -478,7 +490,7 @@
         if (blotEl) blotEl.remove();
       }
       const barPos = barLanding(opp);
-      await flyChecker(hitPos || toPos, barPos, opp, { hit: true, duration: 380 });
+      await flyChecker(hitPos || toPos, barPos, opp, { hit: true, duration: PACE.flyHitMs });
     }
   }
 
@@ -1068,7 +1080,7 @@
   function maybeScheduleAi() {
     if (!session || session.mode !== "solo" || session.state.winner) return;
     if (session.state.phase === "roll" && session.state.turn === PLAYERS.blue) {
-      scheduleAi(520);
+      scheduleAi(PACE.aiThinkMs);
     }
   }
 
@@ -1107,10 +1119,11 @@
           renderGame();
           return;
         }
-        for (const m of result.moves || []) {
+        await waitMs(PACE.afterDiceMs);
+        for (let i = 0; i < (result.moves || []).length; i++) {
           if (!session || session.mode !== "solo") return;
-          await doMove(m, { fromNet: true, skipAi: true });
-          await waitMs(70);
+          await doMove(result.moves[i], { fromNet: true, skipAi: true });
+          if (i < result.moves.length - 1) await waitMs(PACE.betweenMovesMs);
         }
         // Güvenli senkron — AI sonucuyla hizala
         if (session && session.mode === "solo" && result.state) {
@@ -1119,10 +1132,50 @@
         if (session) session.aiThinking = false;
         renderGame();
       });
-    }, delay == null ? 520 : delay);
+    }, delay == null ? PACE.aiThinkMs : delay);
   }
 
-  function startSolo() {
+  let startResolve = null;
+
+  function hideStartPanel() {
+    const panel = $("start-panel");
+    if (panel) panel.classList.add("hidden");
+  }
+
+  function showStartBanner(starter, names) {
+    return new Promise((resolve) => {
+      const panel = $("start-panel");
+      const text = $("start-text");
+      const brow = $("start-eyebrow");
+      if (!panel || !text) {
+        resolve();
+        return;
+      }
+      if (brow) brow.textContent = t("startMatch");
+      if (session && session.mode === "solo") {
+        text.textContent =
+          starter === PLAYERS.white ? t("youStart") : t("cpuStarts");
+      } else {
+        const name =
+          starter === PLAYERS.white
+            ? (names && names.white) || t("white")
+            : (names && names.blue) || t("blue");
+        text.textContent = t("namedStarts").replace("{name}", name);
+      }
+      hideStartPanel();
+      panel.classList.remove("hidden");
+      startResolve = resolve;
+    });
+  }
+
+  function dismissStartBanner() {
+    hideStartPanel();
+    const r = startResolve;
+    startResolve = null;
+    if (typeof r === "function") r();
+  }
+
+  async function startSolo() {
     clearTimeout(aiTimer);
     destroyP2P();
     ensureMusic();
@@ -1143,11 +1196,15 @@
     };
     selected = null;
     showScreen("game");
+    hideStartPanel();
+    if ($("end-panel")) $("end-panel").classList.add("hidden");
     renderGame();
-    if (starter === PLAYERS.blue) scheduleAi(650);
+    await showStartBanner(starter, session.names);
+    if (!session || session.mode !== "solo") return;
+    if (starter === PLAYERS.blue) scheduleAi(PACE.aiFirstMs);
   }
 
-  function startTwoP() {
+  async function startTwoP() {
     clearTimeout(aiTimer);
     destroyP2P();
     ensureMusic();
@@ -1166,7 +1223,10 @@
     };
     selected = null;
     showScreen("game");
+    hideStartPanel();
+    if ($("end-panel")) $("end-panel").classList.add("hidden");
     renderGame();
+    await showStartBanner(starter, session.names);
   }
 
   function destroyP2P() {
@@ -1219,8 +1279,9 @@
     beginP2PGame(state, p2pLobby.names);
   }
 
-  function beginP2PGame(state, names) {
+  async function beginP2PGame(state, names) {
     ensureMusic();
+    clearUndo();
     session = {
       mode: "p2p",
       status: "playing",
@@ -1232,7 +1293,10 @@
     };
     selected = null;
     showScreen("game");
+    hideStartPanel();
+    if ($("end-panel")) $("end-panel").classList.add("hidden");
     renderGame();
+    await showStartBanner(state.turn, session.names);
   }
 
   function createP2PSession() {
@@ -1417,6 +1481,8 @@
     selected = null;
     session = null;
     clearUndo();
+    startResolve = null;
+    hideStartPanel();
     destroyP2P();
     showScreen("home");
   }
@@ -1615,6 +1681,9 @@
     $("btn-game-redo").addEventListener("click", () => doRedo());
   }
 
+  if ($("btn-start-ok")) {
+    $("btn-start-ok").addEventListener("click", () => dismissStartBanner());
+  }
   if ($("btn-game-restart")) {
     $("btn-game-restart").addEventListener("click", () => doRematch());
   }
