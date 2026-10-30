@@ -1,5 +1,5 @@
 /* Dokuztaş — offline cache (solo + local 2P) */
-const CACHE = "dokuztas-v1.0.5";
+const CACHE = "dokuztas-v1.0.5-ur1";
 const ASSETS = [
   "./",
   "./index.html",

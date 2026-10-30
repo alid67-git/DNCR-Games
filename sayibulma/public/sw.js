@@ -1,5 +1,5 @@
 /* Sayı Bulma — offline cache (solo + P2P) */
-const CACHE = "sayibulma-v1.0.11";
+const CACHE = "sayibulma-v1.0.11-ur1";
 const ASSETS = [
   "./",
   "./index.html",

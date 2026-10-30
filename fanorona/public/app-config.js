@@ -1,9 +1,24 @@
 window.FanoronaConfig = {
   appName: "Fanorona",
-  version: "1.0.2",
-  build: 3,
+  version: "1.0.3",
+  build: 4,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/fanorona/",
   changelog: [
+    {
+      version: "1.0.3",
+      build: 4,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Soğuk palet: mavi / gri / beyaz / yeşil (kahverengi kalktı)",
+          "Oyun çubuğunda geri al · ileri al (undo / redo); yeniden başlat kaldı",
+        ],
+        en: [
+          "Cool palette: blue / gray / white / green (no brown)",
+          "Game bar undo · redo; restart kept",
+        ],
+      },
+    },
     {
       version: "1.0.2",
       build: 3,

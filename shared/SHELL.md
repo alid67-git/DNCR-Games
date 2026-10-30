@@ -48,6 +48,8 @@ Sürüm numarası ana ekranda markanın altında (`#home-version`) ve ayarların
 | `hub-back.js` | DNCR Games hub’a onaylı dönüş |
 | `score.js` | Yerel kariyer puanı / skor tablosu |
 | `move-sfx.js` | Ortak hamle vurgusu SFX (Web Audio) |
+| `history-stack.js` | Ortak undo/redo yığını (`DncrHistory`) |
+| `palette.css` | Ortak soğuk palet (mavi / gri / beyaz / yeşil) |
 | `shell-ui.css` | Menü ikonları, mod görselleri, skor UI |
 
 ## iPhone / web linkleri (GitHub Pages)

@@ -1615,6 +1615,9 @@
     $("btn-game-redo").addEventListener("click", () => doRedo());
   }
 
+  if ($("btn-game-restart")) {
+    $("btn-game-restart").addEventListener("click", () => doRematch());
+  }
   $("btn-rematch").addEventListener("click", () => doRematch());
 
   $("btn-roll").addEventListener("click", () => doRoll());
