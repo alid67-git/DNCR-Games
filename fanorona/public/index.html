@@ -372,10 +372,11 @@
       var v = "v" + c.version + " · build " + c.build;
       var h = document.getElementById("home-version");
       var s = document.getElementById("settings-version");
-      var u = document.getElementById("updates-current");
       if (h) h.textContent = v;
       if (s) s.textContent = v;
-      if (u) u.textContent = c.version + " (" + c.build + ")";
+      document.querySelectorAll("#updates-current").forEach(function (el) {
+        el.textContent = c.version + " (" + c.build + ")";
+      });
     })();
   </script>
   <script src="i18n.js"></script>
