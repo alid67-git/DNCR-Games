@@ -514,18 +514,34 @@
     const settle = !!(opts && opts.settle);
     const remaining = (opts && opts.remaining ? opts.remaining.slice() : null);
     const prev = !!(opts && opts.previous);
+    const playable = !!(opts && opts.playable);
     row.innerHTML = "";
     const list = values && values.length ? values : [];
+    const remCopy = remaining ? remaining.slice() : null;
     list.forEach((v, i) => {
       let cls = "";
       if (rolling) cls = "rolling";
       else if (settle) cls = "settle";
       const die = makeDieEl(v, cls);
       if (prev) die.classList.add("prev-roll");
-      if (!rolling && !prev && remaining) {
-        const idx = remaining.indexOf(v);
-        if (idx >= 0) remaining.splice(idx, 1);
-        else die.classList.add("used");
+      let isUsed = false;
+      if (!rolling && !prev && remCopy) {
+        const idx = remCopy.indexOf(v);
+        if (idx >= 0) remCopy.splice(idx, 1);
+        else {
+          die.classList.add("used");
+          isUsed = true;
+        }
+      }
+      if (playable && !rolling && !prev && !isUsed) {
+        die.classList.add("playable");
+        die.setAttribute("role", "button");
+        die.tabIndex = 0;
+        die.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDieClick(v);
+        });
       }
       if (rolling) {
         const side = i % 2 === 0 ? -1 : 1;
@@ -553,7 +569,76 @@
     }
     const isDouble = raw[0] === raw[1];
     const slots = isDouble ? [raw[0], raw[0], raw[0], raw[0]] : [raw[0], raw[1]];
-    paintDice(slots, { remaining: (state.dice || []).slice() });
+    const canPlay =
+      isMyTurn() &&
+      state.phase === "move" &&
+      !state.winner &&
+      !moveBusy;
+    paintDice(slots, {
+      remaining: (state.dice || []).slice(),
+      playable: canPlay,
+    });
+  }
+
+  /** Zar üzerine dokununca o zarı kullan (kapı / hamle) */
+  function onDieClick(dieValue) {
+    if (!session || session.state.winner || moveBusy || diceBusy) return;
+    if (!isMyTurn() || session.state.phase !== "move") return;
+    const die = Number(dieValue);
+    const moves = currentMoves().filter((m) => m.die === die);
+    if (!moves.length) {
+      toast(t("dieUnused"));
+      return;
+    }
+
+    const prefer = (list) => {
+      const off = list.find((m) => m.to === "off");
+      if (off) return off;
+      return list.slice().sort((a, b) => {
+        if (a.to === "off") return -1;
+        if (b.to === "off") return 1;
+        return b.die - a.die;
+      })[0];
+    };
+
+    if (selected != null) {
+      const fromMoves = moves.filter((m) => m.from === selected);
+      if (fromMoves.length) {
+        doMove(prefer(fromMoves));
+        return;
+      }
+      // Seçili taş bu zarı kullanamıyor — tek kapı alma varsa onu uygula
+      const offsOnly = moves.filter((m) => m.to === "off");
+      if (offsOnly.length === 1) {
+        doMove(offsOnly[0]);
+        return;
+      }
+      toast(t("dieWrongPiece"));
+      return;
+    }
+
+    if (moves.length === 1) {
+      doMove(moves[0]);
+      return;
+    }
+    const froms = [...new Set(moves.map((m) => m.from))];
+    if (froms.length === 1) {
+      const targets = [...new Set(moves.map((m) => m.to))];
+      if (targets.length === 1) {
+        doMove(moves[0]);
+        return;
+      }
+      selected = froms[0];
+      playMoveSfx("select");
+      renderGame();
+      return;
+    }
+    const offs = moves.filter((m) => m.to === "off");
+    if (offs.length === 1) {
+      doMove(offs[0]);
+      return;
+    }
+    toast(t("selectPoint"));
   }
 
   function playDiceRollAnim(finalPair, done) {

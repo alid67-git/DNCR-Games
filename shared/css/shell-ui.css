@@ -46,11 +46,18 @@
   margin-left: 0;
 }
 
+.home-brand-ver,
 .home-footer-ver {
-  margin-top: 1.35rem;
-  font-size: 0.78rem;
-  color: rgba(243, 230, 200, 0.42);
-  letter-spacing: 0.04em;
+  margin: 0.45rem 0 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--muted, rgba(243, 230, 200, 0.78));
+  text-align: center;
+}
+.home-brand-ver {
+  margin-top: 0.55rem;
+  margin-bottom: 0.15rem;
 }
 
 /* —— Mode cards with people icons —— */

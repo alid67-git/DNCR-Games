@@ -190,7 +190,15 @@ html, body {
 .diff-card.is-on { border-color: var(--p1); box-shadow: 0 0 0 1px rgba(0, 180, 216, 0.35); }
 .diff-card strong { display: block; font-family: var(--display); }
 .diff-card span { color: var(--muted); font-size: 0.82rem; }
-.home-footer-ver { margin-top: 1.4rem; color: rgba(232, 230, 239, 0.35); font-size: 0.78rem; text-align: center; }
+.home-brand-ver,
+.home-footer-ver {
+  margin-top: 0.55rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
 .help-block {
   margin-bottom: 1rem;
   padding: 0.9rem 1rem;
