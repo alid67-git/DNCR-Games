@@ -1,9 +1,24 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.14",
-  build: 15,
+  version: "1.0.15",
+  build: 16,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.15",
+      build: 16,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Bilgisayar daha yavaş; taş animasyonu oyuncuyla aynı tempo",
+          "Maç başında «Sen / Bilgisayar başlıyor» bilgi penceresi",
+        ],
+        en: [
+          "Slower computer pace; move animations match the player",
+          "Start dialog: You start / Computer starts",
+        ],
+      },
+    },
     {
       version: "1.0.14",
       build: 15,
