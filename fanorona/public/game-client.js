@@ -1410,6 +1410,13 @@
     }
   });
 
+  if ($("btn-game-undo")) {
+    $("btn-game-undo").addEventListener("click", () => doUndo());
+  }
+  if ($("btn-game-redo")) {
+    $("btn-game-redo").addEventListener("click", () => doRedo());
+  }
+
   $("btn-rematch").addEventListener("click", () => {
     $("btn-game-restart").click();
   });
