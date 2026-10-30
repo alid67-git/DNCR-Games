@@ -1,9 +1,26 @@
 window.FanoronaConfig = {
   appName: "Fanorona",
-  version: "1.0.2",
-  build: 3,
+  version: "1.0.3",
+  build: 4,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/fanorona/",
   changelog: [
+    {
+      version: "1.0.3",
+      build: 4,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Alınan taş uçuştan sonra yerine geri gelmiyor",
+          "Sıra sende değilken tahta üzerinde net “bekle” katmanı",
+          "Yenile yerine geri / ileri (undo · redo)",
+        ],
+        en: [
+          "Captured pieces no longer snap back after the fly-off",
+          "Clear on-board wait overlay when it isn’t your turn",
+          "Refresh replaced with undo · redo",
+        ],
+      },
+    },
     {
       version: "1.0.2",
       build: 3,
