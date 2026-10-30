@@ -407,10 +407,15 @@ input[type="text"]:focus {
 
 .game-top {
   display: grid;
-  grid-template-columns: 2.35rem 1fr 2.35rem;
+  grid-template-columns: 2.35rem 1fr auto;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.65rem;
+}
+.game-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
 }
 .game-title {
   margin: 0;
@@ -418,6 +423,9 @@ input[type="text"]:focus {
   font-family: var(--font-display);
   font-weight: 700;
   color: var(--accent);
+}
+#btn-game-undo:disabled {
+  opacity: 0.35;
 }
 
 .score-row {
@@ -665,31 +673,33 @@ input[type="text"]:focus {
   background: linear-gradient(0deg, var(--point-dark) 0%, var(--point-dark) 12%, transparent 88%);
   clip-path: polygon(50% 4%, 94% 100%, 6% 100%);
 }
-.point.legal-from {
-  filter: brightness(1.08);
+/* Oynanabilir / seçili — üçgenin kendisi mat renkle vurgulanır (nokta/outline yok) */
+.point.legal-from::before {
+  opacity: 1;
+  filter: saturate(0.85) brightness(1.04);
 }
-.point.legal::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  width: 0.42rem;
-  height: 0.42rem;
-  border-radius: 50%;
-  background: var(--blue);
-  box-shadow: 0 0 0 3px rgba(91, 108, 255, 0.22);
-  transform: translateX(-50%);
-  z-index: 3;
+.point.legal.tip-up.odd::before,
+.point.legal.tip-up.even::before {
+  background: linear-gradient(180deg, #6e8f72 0%, #5a7a5e 18%, transparent 90%) !important;
+  opacity: 0.92;
 }
-.board-quad.top .point.legal::after {
-  bottom: 0.35rem;
+.point.legal.tip-down.odd::before,
+.point.legal.tip-down.even::before {
+  background: linear-gradient(0deg, #6e8f72 0%, #5a7a5e 18%, transparent 90%) !important;
+  opacity: 0.92;
 }
-.board-quad.bottom .point.legal::after {
-  top: 0.35rem;
+.point.selected.tip-up.odd::before,
+.point.selected.tip-up.even::before {
+  background: linear-gradient(180deg, #4f74a8 0%, #3d5f8c 16%, transparent 90%) !important;
+  opacity: 0.95;
+}
+.point.selected.tip-down.odd::before,
+.point.selected.tip-down.even::before {
+  background: linear-gradient(0deg, #4f74a8 0%, #3d5f8c 16%, transparent 90%) !important;
+  opacity: 0.95;
 }
 .point.selected {
-  outline: 2px solid var(--blue);
-  outline-offset: -2px;
-  border-radius: 6px;
+  outline: none;
 }
 
 .checker {
@@ -875,7 +885,7 @@ input[type="text"]:focus {
   bottom: 0.55rem;
 }
 
-/* Zarlar — sağ yarı üzerinde (referans) */
+/* Zarlar — sağ yarı üzerinde (buton ayrı; zarların üstüne binmez) */
 .dice-on-board {
   position: absolute;
   left: 50%;
@@ -885,7 +895,21 @@ input[type="text"]:focus {
   pointer-events: none;
 }
 .dice-on-board .dice-panel {
-  pointer-events: auto;
+  pointer-events: none;
+}
+.dice-row .die {
+  pointer-events: none;
+}
+.roll-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 0 0 auto;
+  min-height: 0;
+  margin: 0.25rem 0 0.1rem;
+}
+.roll-bar:has(.btn-roll.hidden) {
+  display: none;
 }
 
 /* Bar / Kapı — tahta dışı tepsiler */
@@ -1107,13 +1131,17 @@ input[type="text"]:focus {
   opacity: 0.4;
   filter: grayscale(0.5) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
 }
+.die.prev-roll {
+  opacity: 0.88;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.28));
+}
 .die.used .die-cube {
   transform: scale(0.92);
 }
 .btn-roll {
-  padding: 0.4rem 0.85rem;
-  font-size: 0.75rem;
-  min-width: 0;
+  padding: 0.55rem 1.35rem;
+  font-size: 0.88rem;
+  min-width: 8.5rem;
   width: auto;
   line-height: 1.15;
   border-radius: 999px;
@@ -1412,7 +1440,7 @@ input[type="text"]:focus {
   #screen-game.active {
     display: grid;
     grid-template-columns: minmax(140px, 22vw) minmax(0, 1fr);
-    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
     column-gap: 0.55rem;
     row-gap: 0.2rem;
     min-height: calc(100dvh - 0.7rem);
@@ -1437,10 +1465,15 @@ input[type="text"]:focus {
     grid-row: 2 / 4;
     margin: 0;
   }
-  #screen-game .board-trays {
+  #screen-game .roll-bar {
     grid-column: 2;
     grid-row: 4;
-    margin-top: 0.2rem;
+    margin: 0.15rem 0;
+  }
+  #screen-game .board-trays {
+    grid-column: 2;
+    grid-row: 5;
+    margin-top: 0.15rem;
   }
   #screen-game .status-msg {
     grid-column: 1 / -1;
