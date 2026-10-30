@@ -545,7 +545,7 @@ input[type="text"]::placeholder {
   cursor: not-allowed;
 }
 .btn-primary {
-  background: linear-gradient(180deg, #ff6b6b, #e53935);
+  background: linear-gradient(180deg, #81d4fa, #0288d1);
   color: #fff8f0;
   box-shadow: 0 5px 0 #9a1c1a;
 }

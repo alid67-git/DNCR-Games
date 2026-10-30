@@ -1,5 +1,5 @@
 /* Noktalar ve Kutular — çevrimdışı cache (iPhone Ana Ekran) */
-const CACHE = "noktalar-v1.2.1";
+const CACHE = "noktalar-v1.2.1-ur1";
 const ASSETS = [
   "./",
   "./index.html",

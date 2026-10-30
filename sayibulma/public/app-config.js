@@ -1,9 +1,24 @@
 window.SayibulmaConfig = {
   appName: "Sayı Bulma",
-  version: "1.0.11",
-  build: 12,
+  version: "1.0.12",
+  build: 13,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/sayi/",
   changelog: [
+    {
+      version: "1.0.12",
+      build: 13,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Soğuk palet: mavi / gri / beyaz / yeşil (kahverengi kalktı)",
+          "Oyun çubuğunda geri al · ileri al (undo / redo); yeniden başlat kaldı",
+        ],
+        en: [
+          "Cool palette: blue / gray / white / green (no brown)",
+          "Game bar undo · redo; restart kept",
+        ],
+      },
+    },
     {
       version: "1.0.11",
       build: 12,

@@ -57,7 +57,7 @@ textarea {
     radial-gradient(ellipse 95% 55% at 50% -8%, #4a6b3a 0%, transparent 55%),
     radial-gradient(ellipse 70% 45% at 90% 100%, #1a1208 0%, transparent 50%),
     radial-gradient(circle at 12% 78%, rgba(180, 90, 40, 0.22), transparent 42%),
-    linear-gradient(165deg, #2a2212 0%, #14100a 48%, #0a0805 100%);
+    linear-gradient(165deg, #162231 0%, #0f1720 48%, #0a1018 100%);
 }
 .bg-fx::after {
   content: "";
@@ -170,8 +170,8 @@ textarea {
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #1c1108;
-  background: linear-gradient(90deg, #e8c878, #c9a05a);
+  color: #0f1720;
+  background: linear-gradient(90deg, #81d4fa, #5ec8a8);
 }
 
 .home-menu {

@@ -1,9 +1,24 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.14",
-  build: 15,
+  version: "1.0.15",
+  build: 16,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.15",
+      build: 16,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Soğuk palet: mavi / gri / beyaz / yeşil (kahverengi kalktı)",
+          "Oyun çubuğunda geri al · ileri al (undo / redo); yeniden başlat kaldı",
+        ],
+        en: [
+          "Cool palette: blue / gray / white / green (no brown)",
+          "Game bar undo · redo; restart kept",
+        ],
+      },
+    },
     {
       version: "1.0.14",
       build: 15,
