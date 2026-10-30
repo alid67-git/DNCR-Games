@@ -254,16 +254,21 @@
 
   function buildBoard() {
     if (boardReady) return;
-    const top = $("board-top");
-    const bottom = $("board-bottom");
-    if (!top || !bottom) return;
-    top.innerHTML = "";
-    bottom.innerHTML = "";
+    const leftTop = $("board-left-top");
+    const leftBot = $("board-left-bottom");
+    const rightTop = $("board-right-top");
+    const rightBot = $("board-right-bottom");
+    if (!leftTop || !leftBot || !rightTop || !rightBot) return;
+    leftTop.innerHTML = "";
+    leftBot.innerHTML = "";
+    rightTop.innerHTML = "";
+    rightBot.innerHTML = "";
     pointEls.clear();
-    for (let n = 13; n <= 18; n++) top.appendChild(makePoint(n, "tip-up"));
-    for (let n = 19; n <= 24; n++) top.appendChild(makePoint(n, "tip-up"));
-    for (let n = 12; n >= 7; n--) bottom.appendChild(makePoint(n, "tip-down"));
-    for (let n = 6; n >= 1; n--) bottom.appendChild(makePoint(n, "tip-down"));
+    // Klasik düzen: sol 13–18 / 12–7 · sağ 19–24 / 6–1
+    for (let n = 13; n <= 18; n++) leftTop.appendChild(makePoint(n, "tip-up"));
+    for (let n = 12; n >= 7; n--) leftBot.appendChild(makePoint(n, "tip-down"));
+    for (let n = 19; n <= 24; n++) rightTop.appendChild(makePoint(n, "tip-up"));
+    for (let n = 6; n >= 1; n--) rightBot.appendChild(makePoint(n, "tip-down"));
     boardReady = true;
   }
 
@@ -338,16 +343,15 @@
   function pointLanding(n) {
     const el = pointEls.get(n);
     if (!el) return null;
+    const isTop = !!el.closest(".board-quad.top");
     const checkers = el.querySelectorAll(".checker");
     if (checkers.length) {
       const last = checkers[checkers.length - 1];
       const pos = rectCenter(last);
       if (!pos) return null;
-      const isTop = !!el.closest(".board-half.top");
       return { x: pos.x, y: pos.y + (isTop ? 11 : -11), size: pos.size };
     }
     const r = el.getBoundingClientRect();
-    const isTop = !!el.closest(".board-half.top");
     return {
       x: r.left + r.width / 2,
       y: isTop ? r.top + Math.min(22, r.height * 0.18) : r.bottom - Math.min(22, r.height * 0.18),

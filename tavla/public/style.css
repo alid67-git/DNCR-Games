@@ -79,9 +79,9 @@ textarea {
   padding-bottom: max(2.75rem, env(safe-area-inset-bottom));
 }
 #app:has(#screen-game.active) {
-  width: min(720px, 100%);
-  padding-left: 0.55rem;
-  padding-right: 0.55rem;
+  width: min(920px, 100%);
+  padding-left: 0.45rem;
+  padding-right: 0.45rem;
   padding-bottom: max(0.65rem, env(safe-area-inset-bottom));
 }
 
@@ -537,10 +537,11 @@ input[type="text"]:focus {
   --wood-felt-deep: #e2b278;
   --point-dark: #b8734a;
   --point-light: #d9a56f;
-  display: flex;
-  flex-direction: column;
+  /* Klasik: sol | dikey kapak | sağ */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   gap: 0;
-  padding: 0.5rem;
+  padding: 0.45rem;
   border-radius: 18px;
   width: 100%;
   height: 100%;
@@ -554,33 +555,26 @@ input[type="text"]:focus {
     0 18px 40px rgba(120, 80, 40, 0.18);
 }
 
-.board-half {
+.board-side {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 0.12rem;
-  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   min-height: 0;
-  padding: 0.4rem 0.35rem;
   background:
     linear-gradient(180deg, #f0c996 0%, var(--wood-felt) 55%, var(--wood-felt-deep) 100%);
   box-shadow: inset 0 0 0 1px rgba(160, 110, 60, 0.12);
 }
-/* Kapak birleşim kenarı — katlanma dikişi */
-.board-half.top {
-  border-bottom: 2px solid #2a180c;
-  box-shadow:
-    inset 0 0 0 1px rgba(160, 110, 60, 0.12),
-    inset 0 -3px 5px rgba(80, 40, 10, 0.12);
+.board-side.left {
+  border-right: 2px solid #2a180c;
+  border-radius: 10px 0 0 10px;
 }
-.board-half.bottom {
-  border-top: 2px solid #2a180c;
-  box-shadow:
-    inset 0 0 0 1px rgba(160, 110, 60, 0.12),
-    inset 0 3px 5px rgba(80, 40, 10, 0.12);
+.board-side.right {
+  border-left: 2px solid #2a180c;
+  border-radius: 0 10px 10px 0;
 }
-/* Hafif ahşap damar */
-.board-half::before {
+/* Hafif ahşap damar + yıldız */
+.board-side::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -595,13 +589,12 @@ input[type="text"]:focus {
       transparent 11px 22px
     );
 }
-/* Ortadaki süs (yıldız) — yarım tahta kapağı motifi */
-.board-half::after {
+.board-side::after {
   content: "";
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(40%, 7rem);
+  width: min(48%, 6.5rem);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   z-index: 0;
@@ -610,21 +603,30 @@ input[type="text"]:focus {
   background: center / contain no-repeat
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23965a32' fill-opacity='0.32' d='M50 8 L56 38 L86 32 L62 50 L86 68 L56 62 L50 92 L44 62 L14 68 L38 50 L14 32 L44 38 Z'/%3E%3Ccircle cx='50' cy='50' r='7' fill='%23965a32' fill-opacity='0.24'/%3E%3C/svg%3E");
 }
-/* Üst üçgenler: taşlar tahta kenarından (üstten) alta doğru */
-.board-half.top .point {
+
+.board-quad {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.1rem;
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 0.28rem 0.28rem;
+}
+.board-quad.top .point {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  padding-top: 0.12rem;
+  padding-top: 0.1rem;
   padding-bottom: 0;
 }
-/* Alt üçgenler: taşlar tahta kenarından (alttan) üste doğru */
-.board-half.bottom .point {
+.board-quad.bottom .point {
   flex-direction: column-reverse;
   justify-content: flex-start;
   align-items: center;
   padding-top: 0;
-  padding-bottom: 0.12rem;
+  padding-bottom: 0.1rem;
 }
 
 .point {
@@ -680,10 +682,10 @@ input[type="text"]:focus {
   transform: translateX(-50%);
   z-index: 3;
 }
-.board-half.top .point.legal::after {
+.board-quad.top .point.legal::after {
   bottom: 0.35rem;
 }
-.board-half.bottom .point.legal::after {
+.board-quad.bottom .point.legal::after {
   top: 0.35rem;
 }
 .point.selected {
@@ -706,10 +708,10 @@ input[type="text"]:focus {
   animation: checkerIn 0.28s ease both;
 }
 /* Hafif bindirme — yığın kenara oturur, ortada asılı kalmaz */
-.board-half.top .point .checker + .checker {
+.board-quad.top .point .checker + .checker {
   margin-top: -0.22rem;
 }
-.board-half.bottom .point .checker + .checker {
+.board-quad.bottom .point .checker + .checker {
   margin-bottom: -0.22rem;
 }
 @keyframes checkerIn {
@@ -783,39 +785,38 @@ input[type="text"]:focus {
 
 .board-mid {
   position: relative;
-  flex: 0 0 auto;
-  min-height: 5.6rem;
+  width: 4.6rem;
+  min-width: 4.6rem;
   margin: 0;
   padding: 0;
-  /* Ortadaki kapak omurgası — koyu çerçeve (referans) */
+  align-self: stretch;
+  /* Dikey kapak omurgası */
   background:
-    linear-gradient(180deg, #6b4226 0%, #4e2e16 48%, #3d2412 100%);
+    linear-gradient(90deg, #6b4226 0%, #4e2e16 48%, #3d2412 100%);
   box-shadow:
-    inset 0 2px 3px rgba(255, 210, 160, 0.12),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.35);
-  /* Yarıların birleştiği kenar dikişleri */
-  border-top: 3px solid #2a180c;
-  border-bottom: 3px solid #2a180c;
+    inset 2px 0 3px rgba(255, 210, 160, 0.12),
+    inset -2px 0 4px rgba(0, 0, 0, 0.35);
+  border-left: 3px solid #2a180c;
+  border-right: 3px solid #2a180c;
   overflow: visible;
 }
 
 /*
- * Katlanma izi — omurganın tam ortasında ince oluk;
- * iki yarı buradan katlanır (referanstaki orta dikiş).
+ * Katlanma izi — DİKEY oluk (klasik tavla gibi).
  */
 .katlanma-izi {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
+  top: 0;
+  bottom: 0;
+  left: 50%;
   z-index: 3;
   pointer-events: none;
-  height: 0.28rem;
-  margin-top: -0.14rem;
+  width: 0.28rem;
+  margin-left: -0.14rem;
   border-radius: 1px;
   background:
     linear-gradient(
-      180deg,
+      90deg,
       rgba(20, 10, 4, 0.15) 0%,
       #1a0e08 35%,
       #0c0704 50%,
@@ -823,44 +824,43 @@ input[type="text"]:focus {
       rgba(255, 210, 160, 0.12) 100%
     );
   box-shadow:
-    0 1px 0 rgba(255, 220, 180, 0.18),
-    inset 0 1px 1px rgba(0, 0, 0, 0.65),
-    inset 0 -0.5px 0 rgba(255, 210, 160, 0.1);
+    1px 0 0 rgba(255, 220, 180, 0.18),
+    inset 1px 0 1px rgba(0, 0, 0, 0.65),
+    inset -0.5px 0 0 rgba(255, 210, 160, 0.1);
 }
 .katlanma-izi::before,
 .katlanma-izi::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
   pointer-events: none;
 }
 .katlanma-izi::before {
-  top: -1px;
+  left: -1px;
   background: rgba(255, 220, 180, 0.14);
 }
 .katlanma-izi::after {
-  bottom: -1px;
+  right: -1px;
   background: rgba(0, 0, 0, 0.35);
 }
 
 /*
- * Menteşeler — iStock referansı:
- * koyu omurga üzerinde yalnız İKİ gümüş dikdörtgen;
- * omurganın iki ucunda, katlanma izinin üstünden köprüler.
+ * Menteşeler — omurganın üst ve alt ucunda,
+ * dikey katlanma izini köprüleyen gümüş plakalar.
  */
 .kapak-hinge {
   position: absolute;
-  top: 50%;
+  left: 50%;
   z-index: 5;
   pointer-events: none;
-  width: 0.7rem;
-  height: 1.5rem;
-  transform: translateY(-50%);
+  width: 1.45rem;
+  height: 0.7rem;
+  margin-left: -0.725rem;
   border-radius: 2px;
   background: linear-gradient(
-    90deg,
+    180deg,
     #f4f5f7 0%,
     #d0d4db 28%,
     #9aa1ac 52%,
@@ -874,21 +874,23 @@ input[type="text"]:focus {
     inset 0 -1px 0 rgba(0, 0, 0, 0.18);
 }
 .kapak-hinge.hinge-start {
-  left: 0.38rem;
+  top: 0.38rem;
 }
 .kapak-hinge.hinge-end {
-  right: 0.38rem;
+  bottom: 0.38rem;
 }
 
 .board-mid-inner {
   position: relative;
   z-index: 2;
-  display: grid;
-  grid-template-columns: 1fr 1.35fr 1fr;
-  gap: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
   align-items: stretch;
-  min-height: 5.6rem;
-  padding: 0.45rem 1.15rem;
+  justify-content: space-between;
+  height: 100%;
+  min-height: 0;
+  padding: 1.35rem 0.28rem;
 }
 
 .bar-zone,
@@ -896,13 +898,14 @@ input[type="text"]:focus {
   border-radius: 10px;
   border: 1px solid rgba(80, 45, 15, 0.22);
   background: rgba(255, 245, 230, 0.42);
-  padding: 0.35rem;
+  padding: 0.3rem 0.22rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
   position: relative;
   z-index: 2;
-  backdrop-filter: blur(0.5px);
+  flex: 1 1 0;
+  min-height: 0;
 }
 .bar-zone {
   cursor: pointer;
@@ -943,16 +946,18 @@ input[type="text"]:focus {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   perspective: 640px;
   overflow: visible;
   position: relative;
   z-index: 2;
+  flex: 0 0 auto;
 }
 .dice-row {
   display: flex;
-  gap: 0.65rem;
-  min-height: 2.85rem;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 0;
   align-items: center;
   justify-content: center;
   perspective: 720px;
@@ -961,8 +966,8 @@ input[type="text"]:focus {
 
 /* Gerçekçi 3D zar küpü */
 .die {
-  --die-size: 2.65rem;
-  --die-z: 1.325rem;
+  --die-size: 2.15rem;
+  --die-z: 1.075rem;
   --pip: #1a1a1a;
   --throw-x: -28px;
   --throw-r: -48deg;
@@ -1095,9 +1100,11 @@ input[type="text"]:focus {
   transform: scale(0.92);
 }
 .btn-roll {
-  padding: 0.5rem 1.05rem;
-  font-size: 0.9rem;
-  min-width: 6.5rem;
+  padding: 0.45rem 0.35rem;
+  font-size: 0.72rem;
+  min-width: 0;
+  width: 100%;
+  line-height: 1.15;
   background: linear-gradient(180deg, #7b88ff, #3f4fd6) !important;
   border-color: transparent !important;
   color: #fff !important;
@@ -1113,8 +1120,8 @@ input[type="text"]:focus {
 
 .off-stacks {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.3rem;
+  grid-template-columns: 1fr;
+  gap: 0.25rem;
   flex: 1;
 }
 .off-slot {
@@ -1125,9 +1132,9 @@ input[type="text"]:focus {
   color: var(--ink);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.9rem;
   cursor: pointer;
-  min-height: 2.4rem;
+  min-height: 1.7rem;
 }
 .off-slot.white.legal,
 .off-slot.blue.legal {
@@ -1363,18 +1370,17 @@ input[type="text"]:focus {
   .tavla-board {
     min-height: calc(100svh - 12.25rem);
     padding: 0.35rem;
-    gap: 0.28rem;
   }
   .checker {
-    width: min(100%, 1.75rem);
+    width: min(100%, 1.65rem);
   }
   .board-mid {
-    grid-template-columns: 0.9fr 1.2fr 0.9fr;
-    min-height: 4.8rem;
+    width: 4.1rem;
+    min-width: 4.1rem;
   }
   .die {
-    --die-size: 2.3rem;
-    --die-z: 1.15rem;
+    --die-size: 2rem;
+    --die-z: 1rem;
   }
 }
 
@@ -1420,7 +1426,12 @@ input[type="text"]:focus {
     min-height: 0;
     height: 100%;
   }
-  .board-half {
+  .board-side,
+  .board-quad {
     min-height: 0;
+  }
+  .board-mid {
+    width: 4.2rem;
+    min-width: 4.2rem;
   }
 }
