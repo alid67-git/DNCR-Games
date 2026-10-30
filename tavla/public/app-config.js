@@ -1,9 +1,69 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.4",
-  build: 5,
+  version: "1.0.8",
+  build: 9,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.8",
+      build: 9,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Ortadaki kapak / menteşe şeridi geri geldi (metal menteşeler)",
+          "Yarı tahta yıldız motifleri yeniden eklendi",
+        ],
+        en: [
+          "Center cover / hinge strip restored (metal hinges)",
+          "Half-board star motifs brought back",
+        ],
+      },
+    },
+    {
+      version: "1.0.7",
+      build: 8,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Açık ahşap + soft mavi arayüz paleti",
+          "Açık meşe tahta, kırmızımsı üçgenler, soft kartlar",
+        ],
+        en: [
+          "Light wood + soft blue UI palette",
+          "Pale oak board, reddish points, soft elevated cards",
+        ],
+      },
+    },
+    {
+      version: "1.0.6",
+      build: 7,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Hamlelerde taşlar yay çizerek hedefe uçuyor",
+          "Vurulan taş bara animasyonla gidiyor (oyuncu + bilgisayar)",
+        ],
+        en: [
+          "Checkers arc across the board on every move",
+          "Hit blots fly to the bar (player + computer)",
+        ],
+      },
+    },
+    {
+      version: "1.0.5",
+      build: 6,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Klasik ahşap tavla tahtası (bej / kahve / siyah-beyaz taşlar)",
+          "Gerçekçi 3D zar küpleri ve havadan atılma animasyonu",
+        ],
+        en: [
+          "Classic wooden board (tan / brown / black-white checkers)",
+          "Realistic 3D dice cubes with a throw-in animation",
+        ],
+      },
+    },
     {
       version: "1.0.4",
       build: 5,

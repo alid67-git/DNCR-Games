@@ -305,19 +305,25 @@
         <div id="board" class="tavla-board" role="img" aria-label="Tavla tahtası">
           <div class="board-half top" id="board-top"></div>
           <div class="board-mid">
-            <div class="bar-zone" id="bar-zone" data-from="bar">
-              <span class="zone-label" data-i18n="barLabel">Bar</span>
-              <div class="bar-stack" id="bar-stack"></div>
-            </div>
-            <div class="dice-panel">
-              <div class="dice-row" id="dice-row" aria-live="polite"></div>
-              <button type="button" class="btn btn-primary btn-roll" id="btn-roll" data-i18n="rollDice">Zar at</button>
-            </div>
-            <div class="off-zone" id="off-zone">
-              <span class="zone-label" data-i18n="offLabel">Kapı</span>
-              <div class="off-stacks">
-                <button type="button" class="off-slot white" id="off-white" data-to="off"></button>
-                <button type="button" class="off-slot blue" id="off-blue" data-to="off"></button>
+            <!-- Katlanma izi + iki gümüş menteşe (referans) -->
+            <span class="katlanma-izi" aria-hidden="true"></span>
+            <span class="kapak-hinge hinge-start" aria-hidden="true"></span>
+            <span class="kapak-hinge hinge-end" aria-hidden="true"></span>
+            <div class="board-mid-inner">
+              <div class="bar-zone" id="bar-zone" data-from="bar">
+                <span class="zone-label" data-i18n="barLabel">Bar</span>
+                <div class="bar-stack" id="bar-stack"></div>
+              </div>
+              <div class="dice-panel">
+                <div class="dice-row" id="dice-row" aria-live="polite"></div>
+                <button type="button" class="btn btn-primary btn-roll" id="btn-roll" data-i18n="rollDice">Zar at</button>
+              </div>
+              <div class="off-zone" id="off-zone">
+                <span class="zone-label" data-i18n="offLabel">Kapı</span>
+                <div class="off-stacks">
+                  <button type="button" class="off-slot white" id="off-white" data-to="off"></button>
+                  <button type="button" class="off-slot blue" id="off-blue" data-to="off"></button>
+                </div>
               </div>
             </div>
           </div>
