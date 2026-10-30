@@ -1,9 +1,24 @@
 window.FanoronaConfig = {
   appName: "Fanorona",
-  version: "1.0.6",
-  build: 7,
+  version: "1.0.7",
+  build: 8,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/fanorona/",
   changelog: [
+    {
+      version: "1.0.7",
+      build: 8,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Tahta dikey zıplamıyor; durum yazısı tahtanın üstünde",
+          "Sıradaki oyuncunun isim kutusu güçlü vurgulu (“Sırada”)",
+        ],
+        en: [
+          "Board no longer jumps vertically; status sits above the board",
+          "Active player name chip strongly highlighted (“On turn”)",
+        ],
+      },
+    },
     {
       version: "1.0.6",
       build: 7,
