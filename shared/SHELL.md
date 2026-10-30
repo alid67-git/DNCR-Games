@@ -12,7 +12,7 @@ Ana ekran sırası (değiştirme):
 4. **Yardım**
 5. **DNCR Games** (hub çıkışı)
 
-Sürüm numarası ana menü altında ve ayarların dibinde görünür.
+Sürüm numarası ana ekranda markanın altında (`#home-version`) ve ayarların dibinde görünür.
 
 ## Zorunlu oyun modları (Oyna ekranı)
 
