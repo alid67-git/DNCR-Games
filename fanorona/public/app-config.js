@@ -1,9 +1,24 @@
 window.FanoronaConfig = {
   appName: "Fanorona",
-  version: "1.0.5",
-  build: 6,
+  version: "1.0.6",
+  build: 7,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/fanorona/",
   changelog: [
+    {
+      version: "1.0.6",
+      build: 7,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Sıra geçişi daha yavaş ve okunaklı: banner + kart ~2,5 sn tutuluyor",
+          "Rakip / bilgisayar sırasında kilitli bekle kartı net kalıyor",
+        ],
+        en: [
+          "Turn change slower to read: banner + card held ~2.5s",
+          "Opponent / CPU wait card stays clear while locked",
+        ],
+      },
+    },
     {
       version: "1.0.5",
       build: 6,
