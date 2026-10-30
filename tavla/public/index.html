@@ -278,7 +278,10 @@
       <header class="game-top">
         <button type="button" class="btn-icon" id="btn-game-back" aria-label="Geri">←</button>
         <p class="game-title" data-i18n="appName">Tavla</p>
-        <button type="button" class="btn-icon" id="btn-game-restart" aria-label="Yeniden">↻</button>
+        <div class="game-top-actions">
+          <button type="button" class="btn-icon" id="btn-game-undo" data-i18n-aria="undo" aria-label="Geri al" title="Geri al" disabled>↶</button>
+          <button type="button" class="btn-icon" id="btn-game-restart" aria-label="Yeniden">↻</button>
+        </div>
       </header>
 
       <div class="score-row">
@@ -317,15 +320,18 @@
           <div class="board-side right" id="board-right">
             <div class="board-quad top" id="board-right-top"></div>
             <div class="board-quad bottom" id="board-right-bottom"></div>
-            <!-- Zarlar tahta üzerinde (referans gibi) -->
+            <!-- Zarlar tahta üzerinde — buton zarların üstüne binmez -->
             <div class="dice-on-board">
               <div class="dice-panel">
                 <div class="dice-row" id="dice-row" aria-live="polite"></div>
-                <button type="button" class="btn btn-primary btn-roll" id="btn-roll" data-i18n="rollDice">Zar at</button>
               </div>
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="roll-bar">
+        <button type="button" class="btn btn-primary btn-roll" id="btn-roll" data-i18n="rollDice">Zar at</button>
       </div>
 
       <!-- Bar / Kapı — tahta dışı tepsiler (referans) -->

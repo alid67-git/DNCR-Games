@@ -1,9 +1,28 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.10",
-  build: 11,
+  version: "1.0.11",
+  build: 12,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.11",
+      build: 12,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Geri al (undo) — son hamle / bilgisayar turu",
+          "Zar at butonu zarların üstüne binmiyor; önceki zarlar görünür",
+          "Oynanabilir noktalar mat üçgen vurgusuyla",
+          "Gerçekçi zar sesleri + sakin ambiyans (eski arpej kaldırıldı)",
+        ],
+        en: [
+          "Undo — last move / computer turn",
+          "Roll button no longer covers dice; previous dice stay visible",
+          "Legal points highlighted with matte triangle tint",
+          "Realistic dice samples + soft ambient (silly arpeggio removed)",
+        ],
+      },
+    },
     {
       version: "1.0.10",
       build: 11,

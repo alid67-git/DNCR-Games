@@ -1,5 +1,5 @@
 /**
- * Tavla — Web Audio müzik + zar/hamle SFX (dosya yok, sentez)
+ * Tavla — gerçekçi zar örnekleri + yumuşak ambiyans
  * window.TavlaAudio
  */
 (function (root) {
@@ -9,16 +9,43 @@
   let master = null;
   let musicGain = null;
   let sfxGain = null;
+  let musicEl = null;
   let musicNodes = [];
-  let musicTimer = null;
   let unlocked = false;
+  let loadPromise = null;
 
   const state = {
     music: true,
     sfx: true,
-    musicVol: 0.18,
-    sfxVol: 0.55,
+    musicVol: 0.12,
+    sfxVol: 0.7,
   };
+
+  /** @type {AudioBuffer[]} */
+  let diceBuffers = [];
+  /** @type {AudioBuffer[]} */
+  let woodBuffers = [];
+
+  const DICE_URLS = [
+    "assets/sfx/dice-roll-06.ogg",
+    "assets/sfx/dice-roll-08.ogg",
+    "assets/sfx/dice-roll-11.ogg",
+    "assets/sfx/dice-roll-17.ogg",
+    "assets/sfx/wood-die-1.ogg",
+    "assets/sfx/wood-die-3.ogg",
+    "assets/sfx/wood-die-4.ogg",
+  ];
+  const DICE_FALLBACK = [
+    "assets/sfx/dice-roll-06.mp3",
+    "assets/sfx/dice-roll-08.mp3",
+    "assets/sfx/dice-roll-11.mp3",
+    "assets/sfx/dice-roll-17.mp3",
+    "assets/sfx/wood-die-1.mp3",
+    "assets/sfx/wood-die-3.mp3",
+    "assets/sfx/wood-die-4.mp3",
+  ];
+  const AMBIENT_OGG = "assets/sfx/ambient-soft.ogg";
+  const AMBIENT_MP3 = "assets/sfx/ambient-soft.mp3";
 
   function ensure() {
     if (ctx) return ctx;
@@ -46,7 +73,60 @@
       } catch (_) {}
     }
     unlocked = c.state === "running";
+    preload();
     return unlocked;
+  }
+
+  function decodeFetch(url) {
+    const c = ensure();
+    if (!c) return Promise.resolve(null);
+    return fetch(url)
+      .then((r) => {
+        if (!r.ok) throw new Error("fetch " + url);
+        return r.arrayBuffer();
+      })
+      .then((buf) => c.decodeAudioData(buf.slice(0)))
+      .catch(() => null);
+  }
+
+  function preload() {
+    if (loadPromise) return loadPromise;
+    const c = ensure();
+    if (!c) return Promise.resolve();
+    loadPromise = Promise.all(
+      DICE_URLS.map((url, i) =>
+        decodeFetch(url).then((buf) => {
+          if (buf) return buf;
+          return decodeFetch(DICE_FALLBACK[i]);
+        })
+      )
+    ).then((bufs) => {
+      diceBuffers = bufs.filter(Boolean).slice(0, 4);
+      woodBuffers = bufs.filter(Boolean).slice(4);
+      if (!diceBuffers.length && woodBuffers.length) diceBuffers = woodBuffers.slice();
+    });
+    return loadPromise;
+  }
+
+  function playBuffer(buf, gainMul, when, rate) {
+    const c = ensure();
+    if (!c || !sfxGain || !buf) return;
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    if (rate) src.playbackRate.value = rate;
+    const g = c.createGain();
+    const t0 = when != null ? when : c.currentTime;
+    const vol = Math.max(0.001, (gainMul != null ? gainMul : 1) * 0.95);
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + Math.max(0.08, buf.duration * 0.98));
+    src.connect(g);
+    g.connect(sfxGain);
+    src.start(t0);
+  }
+
+  function pick(arr) {
+    if (!arr || !arr.length) return null;
+    return arr[(Math.random() * arr.length) | 0];
   }
 
   function tone(freq, dur, type, gain, when, dest, slideTo) {
@@ -76,14 +156,14 @@
     const n = Math.max(1, (c.sampleRate * dur) | 0);
     const buf = c.createBuffer(1, n, c.sampleRate);
     const data = buf.getChannelData(0);
-    for (let i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 1.4);
+    for (let i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 1.5);
     const src = c.createBufferSource();
     src.buffer = buf;
     const g = c.createGain();
     const f = c.createBiquadFilter();
     f.type = "bandpass";
-    f.frequency.value = freq || 1200;
-    f.Q.value = q != null ? q : 0.9;
+    f.frequency.value = freq || 900;
+    f.Q.value = q != null ? q : 0.8;
     g.gain.setValueAtTime(gain, t0);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
     src.connect(f);
@@ -93,27 +173,35 @@
     src.stop(t0 + dur + 0.02);
   }
 
-  /** Zar yuvarlanma — çıtır gürültü + tahta tıkırtısı */
+  /** Zar — kayıtlı örnek; yoksa yumuşak tahta tıkırtısı */
   function playDiceRoll() {
     if (!state.sfx) return;
     const c = ensure();
     if (!c || !sfxGain) return;
     unlock();
-    const t = c.currentTime;
-    // Başlangıç fırlatma
-    noiseBurst(0.09, 0.14, t, 1800, 0.7);
-    tone(180, 0.06, "triangle", 0.05, t, sfxGain, 90);
-    // Yuvarlanma tıkırtıları
-    const clacks = [0.08, 0.16, 0.24, 0.34, 0.44, 0.55, 0.66, 0.76];
-    clacks.forEach((off, i) => {
-      const g = 0.09 - i * 0.006;
-      noiseBurst(0.045, Math.max(0.03, g), t + off, 1400 + (i % 3) * 280, 1.1);
-      tone(220 + (i % 4) * 40, 0.035, "square", 0.028, t + off, sfxGain);
+    preload().then(() => {
+      const c2 = ensure();
+      if (!c2 || !sfxGain || !state.sfx) return;
+      const primary = pick(diceBuffers) || pick(woodBuffers);
+      if (primary) {
+        const rate = 0.92 + Math.random() * 0.16;
+        playBuffer(primary, 1.05, c2.currentTime, rate);
+        const wood = pick(woodBuffers);
+        if (wood && wood !== primary) {
+          playBuffer(wood, 0.45, c2.currentTime + 0.05 + Math.random() * 0.08, 0.95 + Math.random() * 0.1);
+        }
+        return;
+      }
+      // Fallback: softer wood clacks (no harsh square wave)
+      const t = c2.currentTime;
+      noiseBurst(0.07, 0.1, t, 1600, 0.6);
+      [0.1, 0.22, 0.36, 0.52, 0.7].forEach((off, i) => {
+        noiseBurst(0.04, 0.08 - i * 0.01, t + off, 1100 + i * 120, 0.9);
+        tone(160 + i * 18, 0.04, "triangle", 0.04, t + off, sfxGain);
+      });
+      noiseBurst(0.08, 0.1, t + 0.85, 700, 0.7);
+      tone(120, 0.1, "sine", 0.06, t + 0.85, sfxGain);
     });
-    // Masaya oturma
-    noiseBurst(0.07, 0.12, t + 0.84, 900, 0.8);
-    tone(140, 0.08, "triangle", 0.07, t + 0.84, sfxGain);
-    tone(280, 0.1, "sine", 0.05, t + 0.88, sfxGain);
   }
 
   function playSfx(name) {
@@ -127,93 +215,111 @@
         playDiceRoll();
         break;
       case "select":
-        tone(520, 0.05, "sine", 0.07, t, sfxGain);
-        tone(780, 0.06, "triangle", 0.04, t + 0.02, sfxGain);
+        tone(420, 0.05, "sine", 0.05, t, sfxGain);
         break;
       case "place":
       case "move":
-        tone(360, 0.12, "triangle", 0.1, t, sfxGain, 480);
-        tone(560, 0.1, "sine", 0.06, t + 0.05, sfxGain);
+        tone(280, 0.09, "sine", 0.07, t, sfxGain, 340);
+        noiseBurst(0.035, 0.04, t, 600, 0.7);
         break;
       case "capture":
-        tone(240, 0.12, "square", 0.08, t, sfxGain);
-        tone(380, 0.16, "triangle", 0.1, t + 0.04, sfxGain);
-        noiseBurst(0.06, 0.05, t + 0.02, 700);
+        tone(200, 0.1, "triangle", 0.07, t, sfxGain);
+        noiseBurst(0.05, 0.06, t + 0.02, 500);
         break;
       case "claim":
       case "bear":
-        tone(480, 0.1, "triangle", 0.1, t, sfxGain);
-        tone(720, 0.14, "sine", 0.08, t + 0.05, sfxGain);
+        tone(360, 0.1, "sine", 0.07, t, sfxGain);
+        tone(480, 0.12, "sine", 0.05, t + 0.06, sfxGain);
         break;
       case "win":
-        [523, 659, 784, 987].forEach((f, i) =>
-          tone(f, 0.28, "triangle", 0.1, t + i * 0.1, sfxGain)
+        [392, 494, 587, 784].forEach((f, i) =>
+          tone(f, 0.26, "sine", 0.07, t + i * 0.1, sfxGain)
         );
         break;
       case "lose":
-        tone(320, 0.28, "triangle", 0.09, t, sfxGain, 160);
-        tone(200, 0.35, "sine", 0.08, t + 0.12, sfxGain);
+        tone(280, 0.25, "sine", 0.06, t, sfxGain, 140);
         break;
       default:
-        tone(500, 0.07, "sine", 0.06, t, sfxGain);
+        tone(400, 0.06, "sine", 0.04, t, sfxGain);
         break;
     }
   }
 
   function stopMusic() {
-    if (musicTimer) {
-      clearInterval(musicTimer);
-      musicTimer = null;
-    }
     for (const n of musicNodes) {
       try {
         n.stop();
       } catch (_) {}
     }
     musicNodes = [];
+    if (musicEl) {
+      try {
+        musicEl.pause();
+        musicEl.currentTime = 0;
+      } catch (_) {}
+    }
   }
 
-  /** Sakin tahta ambiyansı — yeşil/mavi hissi, düşük arpej */
+  function ensureMusicEl() {
+    if (musicEl) return musicEl;
+    const a = new Audio();
+    a.loop = true;
+    a.preload = "auto";
+    const o = document.createElement("source");
+    o.src = AMBIENT_OGG;
+    o.type = "audio/ogg";
+    const m = document.createElement("source");
+    m.src = AMBIENT_MP3;
+    m.type = "audio/mpeg";
+    a.appendChild(o);
+    a.appendChild(m);
+    a.volume = Math.min(1, state.musicVol * 1.4);
+    musicEl = a;
+    return a;
+  }
+
+  /** Sessiz oda ambiyansı — arpej yok */
   function startMusic() {
     const c = ensure();
     if (!c || !musicGain || !state.music) return;
     stopMusic();
-    musicGain.gain.setTargetAtTime(state.musicVol, c.currentTime, 0.35);
+    musicGain.gain.setTargetAtTime(state.musicVol, c.currentTime, 0.4);
+    const el = ensureMusicEl();
+    el.volume = Math.min(1, Math.max(0.04, state.musicVol * 1.35));
+    const play = () => {
+      const p = el.play();
+      if (p && typeof p.catch === "function") p.catch(() => startPadFallback());
+    };
+    if (el.readyState >= 2) play();
+    else {
+      el.addEventListener("canplaythrough", play, { once: true });
+      el.load();
+      // Kısa süre sonra hâlâ çalmazsa pad
+      setTimeout(() => {
+        if (el.paused && state.music) startPadFallback();
+      }, 800);
+    }
+  }
 
-    const pads = [98, 146.83, 196, 246.94];
+  function startPadFallback() {
+    const c = ensure();
+    if (!c || !musicGain || !state.music || musicNodes.length) return;
+    const pads = [82.41, 123.47, 164.81];
     pads.forEach((f, i) => {
       const o = c.createOscillator();
       const g = c.createGain();
-      o.type = i % 2 === 0 ? "sine" : "triangle";
+      const ftr = c.createBiquadFilter();
+      o.type = "sine";
       o.frequency.value = f;
-      g.gain.value = 0.028 + (i === 0 ? 0.015 : 0);
-      o.connect(g);
+      ftr.type = "lowpass";
+      ftr.frequency.value = 420;
+      g.gain.value = 0.018 + (i === 0 ? 0.01 : 0);
+      o.connect(ftr);
+      ftr.connect(g);
       g.connect(musicGain);
       o.start();
       musicNodes.push(o);
     });
-
-    let step = 0;
-    const arp = [196, 246.94, 293.66, 349.23, 293.66, 246.94, 220, 196];
-    musicTimer = setInterval(() => {
-      if (!state.music || !musicGain) return;
-      const c2 = ensure();
-      if (!c2) return;
-      const f = arp[step % arp.length];
-      step += 1;
-      const o = c2.createOscillator();
-      const g = c2.createGain();
-      o.type = "sine";
-      o.frequency.value = f;
-      const t0 = c2.currentTime;
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(0.038, t0 + 0.08);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.35);
-      o.connect(g);
-      g.connect(musicGain);
-      o.start(t0);
-      o.stop(t0 + 1.45);
-    }, 1600);
   }
 
   function setMusic(on) {
@@ -221,10 +327,10 @@
     const c = ensure();
     if (!c || !musicGain) return;
     if (state.music) {
-      musicGain.gain.setTargetAtTime(state.musicVol, c.currentTime, 0.2);
-      if (!musicNodes.length) startMusic();
+      musicGain.gain.setTargetAtTime(state.musicVol, c.currentTime, 0.25);
+      startMusic();
     } else {
-      musicGain.gain.setTargetAtTime(0, c.currentTime, 0.25);
+      musicGain.gain.setTargetAtTime(0, c.currentTime, 0.3);
       stopMusic();
     }
   }
@@ -245,6 +351,7 @@
     const c = ensure();
     if (c && musicGain) musicGain.gain.value = state.music ? state.musicVol : 0;
     if (c && sfxGain) sfxGain.gain.value = state.sfx ? state.sfxVol : 0;
+    if (musicEl) musicEl.volume = Math.min(1, state.musicVol * 1.35);
   }
 
   root.TavlaAudio = {
@@ -256,6 +363,7 @@
     setMusic,
     setSfx,
     applyPrefs,
-    getState: () => ({ ...state, unlocked }),
+    preload,
+    getState: () => ({ ...state, unlocked, diceReady: diceBuffers.length > 0 }),
   };
 })(typeof window !== "undefined" ? window : globalThis);

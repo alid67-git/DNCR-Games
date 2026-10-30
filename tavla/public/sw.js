@@ -1,5 +1,5 @@
 /* Tavla — offline cache (solo + local 2P + P2P shell) */
-const CACHE = "tavla-v1.0.10";
+const CACHE = "tavla-v1.0.11";
 const ASSETS = [
   "./",
   "./index.html",
@@ -32,6 +32,14 @@ const ASSETS = [
   "./assets/favicon.png",
   "./assets/apple-touch-icon.png",
   "./assets/dncr-mark.png",
+  "./assets/sfx/dice-roll-06.ogg",
+  "./assets/sfx/dice-roll-08.ogg",
+  "./assets/sfx/dice-roll-11.ogg",
+  "./assets/sfx/dice-roll-17.ogg",
+  "./assets/sfx/wood-die-1.ogg",
+  "./assets/sfx/wood-die-3.ogg",
+  "./assets/sfx/wood-die-4.ogg",
+  "./assets/sfx/ambient-soft.ogg",
 ];
 
 self.addEventListener("install", (event) => {
