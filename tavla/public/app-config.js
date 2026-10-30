@@ -1,9 +1,24 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.12",
-  build: 13,
+  version: "1.0.13",
+  build: 14,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.13",
+      build: 14,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Yenile yerine geri / ileri (undo · redo)",
+          "Ana menüye çıkarken onay sorusu",
+        ],
+        en: [
+          "Refresh replaced with undo · redo",
+          "Confirm before leaving to the main menu",
+        ],
+      },
+    },
     {
       version: "1.0.12",
       build: 13,

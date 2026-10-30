@@ -54,9 +54,11 @@
   const Audio = window.TavlaAudio || null;
   /** @type {Map<number, HTMLButtonElement>} */
   const pointEls = new Map();
-  /** Undo — son hamle / zar atışı öncesi durumlar */
+  /** Undo / Redo — hamle geçmişi */
   /** @type {string[]} */
   let undoStack = [];
+  /** @type {string[]} */
+  let redoStack = [];
   const UNDO_MAX = 40;
 
   function playMoveSfx(kind) {
@@ -587,6 +589,7 @@
 
   function clearUndo() {
     undoStack = [];
+    redoStack = [];
     updateUndoBtn();
   }
 
@@ -596,42 +599,63 @@
     try {
       undoStack.push(serialize(session.state));
       if (undoStack.length > UNDO_MAX) undoStack.shift();
+      redoStack = [];
     } catch (_) {}
     updateUndoBtn();
   }
 
-  function updateUndoBtn() {
-    const btn = $("btn-game-undo");
-    if (!btn) return;
-    const ok =
+  function historyIdle() {
+    return (
       !!session &&
       session.mode !== "p2p" &&
-      undoStack.length > 0 &&
       !diceBusy &&
       !moveBusy &&
-      !(session.aiThinking) &&
-      !session.state.winner;
-    btn.disabled = !ok;
+      !session.aiThinking &&
+      !session.state.winner
+    );
   }
 
-  function doUndo() {
-    if (!session || session.mode === "p2p") return;
-    if (!undoStack.length || diceBusy || moveBusy || session.aiThinking) return;
-    clearTimeout(aiTimer);
-    session.aiThinking = false;
-    const snap = undoStack.pop();
-    try {
-      session.state = deserialize(snap);
-    } catch (_) {
-      updateUndoBtn();
-      return;
-    }
+  function updateUndoBtn() {
+    const u = $("btn-game-undo");
+    const r = $("btn-game-redo");
+    const idle = historyIdle();
+    if (u) u.disabled = !(idle && undoStack.length > 0);
+    if (r) r.disabled = !(idle && redoStack.length > 0);
+  }
+
+  function restoreSnap(snap) {
+    session.state = deserialize(snap);
     selected = null;
     session.endSfxPlayed = false;
     session.scoreRecorded = false;
+    clearTimeout(aiTimer);
+    session.aiThinking = false;
     renderGame();
     updateUndoBtn();
-    toast(t("undoDone"));
+  }
+
+  function doUndo() {
+    if (!historyIdle() || !undoStack.length) return;
+    try {
+      redoStack.push(serialize(session.state));
+      if (redoStack.length > UNDO_MAX) redoStack.shift();
+      restoreSnap(undoStack.pop());
+      toast(t("undoDone"));
+    } catch (_) {
+      updateUndoBtn();
+    }
+  }
+
+  function doRedo() {
+    if (!historyIdle() || !redoStack.length) return;
+    try {
+      undoStack.push(serialize(session.state));
+      if (undoStack.length > UNDO_MAX) undoStack.shift();
+      restoreSnap(redoStack.pop());
+      toast(t("redoDone"));
+    } catch (_) {
+      updateUndoBtn();
+    }
   }
 
   function currentMoves() {
@@ -1303,12 +1327,36 @@
     }
   }
 
-  function goHome() {
+  function leaveGameToHome() {
     clearTimeout(aiTimer);
     selected = null;
     session = null;
+    clearUndo();
     destroyP2P();
     showScreen("home");
+  }
+
+  function goHome(opts) {
+    const skipConfirm = !!(opts && opts.skipConfirm);
+    const inMatch = !!(session && session.state && !session.state.winner);
+    if (inMatch && !skipConfirm) {
+      if (!window.confirm(t("confirmLeave"))) return;
+    }
+    leaveGameToHome();
+  }
+
+  function doRematch() {
+    if (!session) return;
+    if (session.mode === "solo") startSolo();
+    else if (session.mode === "twop") startTwoP();
+    else if (session.mode === "p2p" && p2p && p2pLobby) {
+      p2pLobby.ready = { white: false, blue: false };
+      p2p.send({ type: "rematch-ask", who: p2pLobby.you });
+      session = null;
+      clearUndo();
+      showScreen("room");
+      renderRoom();
+    }
   }
 
   // —— Events ——
@@ -1462,7 +1510,10 @@
 
   $("btn-game-back").addEventListener("click", () => {
     if (session && session.mode === "p2p" && p2pLobby) {
+      const inMatch = !!(session.state && !session.state.winner);
+      if (inMatch && !window.confirm(t("confirmLeave"))) return;
       session = null;
+      clearUndo();
       showScreen("room");
       renderRoom();
       return;
@@ -1470,27 +1521,16 @@
     goHome();
   });
 
-  $("btn-game-home").addEventListener("click", () => goHome());
+  $("btn-game-home").addEventListener("click", () => goHome({ skipConfirm: true }));
 
   if ($("btn-game-undo")) {
     $("btn-game-undo").addEventListener("click", () => doUndo());
   }
-  $("btn-game-restart").addEventListener("click", () => {
-    if (!session) return;
-    if (session.mode === "solo") startSolo();
-    else if (session.mode === "twop") startTwoP();
-    else if (session.mode === "p2p" && p2p && p2pLobby) {
-      p2pLobby.ready = { white: false, blue: false };
-      p2p.send({ type: "rematch-ask", who: p2pLobby.you });
-      session = null;
-      showScreen("room");
-      renderRoom();
-    }
-  });
+  if ($("btn-game-redo")) {
+    $("btn-game-redo").addEventListener("click", () => doRedo());
+  }
 
-  $("btn-rematch").addEventListener("click", () => {
-    $("btn-game-restart").click();
-  });
+  $("btn-rematch").addEventListener("click", () => doRematch());
 
   $("btn-roll").addEventListener("click", () => doRoll());
   if ($("bar-zone")) $("bar-zone").addEventListener("click", () => onBarClick());
