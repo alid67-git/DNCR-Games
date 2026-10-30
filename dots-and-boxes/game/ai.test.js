@@ -28,7 +28,7 @@ function testAllDifficultiesOnAllBoards() {
   const diffs = Ai.DIFFICULTY_LEVELS;
   for (const def of Boards.BOARD_DEFS) {
     for (const d of diffs) {
-      playFullAiGame(def.id, d, "medium");
+      playFullAiGame(def.id, d, "normal");
     }
   }
 }

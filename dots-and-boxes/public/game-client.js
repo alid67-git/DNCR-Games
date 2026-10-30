@@ -15,7 +15,7 @@
 
   const DIFFS = [
     { id: "easy", i18n: "diffEasy", hint: "diffEasyHint" },
-    { id: "medium", i18n: "diffMedium", hint: "diffMediumHint" },
+    { id: "normal", i18n: "diffNormal", hint: "diffNormalHint" },
     { id: "hard", i18n: "diffHard", hint: "diffHardHint" },
     { id: "veryhard", i18n: "diffVeryHard", hint: "diffVeryHardHint" },
   ];
@@ -23,7 +23,7 @@
   /** Zorluk → önerilen tahta id'leri (önceden tanımlanmış eşleme). */
   const DIFF_BOARDS = {
     easy: ["grid-6x6", "grid-6x8", "shape-star"],
-    medium: ["grid-8x10", "shape-star", "shape-diamond"],
+    normal: ["grid-8x10", "shape-star", "shape-diamond"],
     hard: ["grid-8x10", "shape-diamond", "shape-plus"],
     veryhard: ["grid-10x10", "shape-plus", "shape-diamond"],
   };
@@ -43,10 +43,16 @@
   };
 
   let settings = loadSettings();
+  if (settings.aiDifficulty === "medium") {
+    settings.aiDifficulty = "normal";
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch (_) {}
+  }
   let setup = {
     mode: "solo", // solo | twop
-    difficulty: settings.aiDifficulty || "medium",
-    boardId: recommendedBoard(settings.aiDifficulty || "medium"),
+    difficulty: settings.aiDifficulty || "normal",
+    boardId: recommendedBoard(settings.aiDifficulty || "normal"),
     p1: "",
     p2: "",
   };
@@ -67,7 +73,7 @@
   }
 
   function loadSettings() {
-    const defaults = { lang: "tr", aiDifficulty: "medium", p1: "", p2: "" };
+    const defaults = { lang: "tr", aiDifficulty: "normal", p1: "", p2: "" };
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
       if (!raw) return defaults;
@@ -92,7 +98,7 @@
   }
 
   function recommendedBoard(diff) {
-    const list = DIFF_BOARDS[diff] || DIFF_BOARDS.medium;
+    const list = DIFF_BOARDS[diff] || DIFF_BOARDS.normal;
     return list[0];
   }
 
@@ -163,7 +169,7 @@
     window.ArenaScore.record({
       gameId: "noktalar",
       result,
-      difficulty: session.difficulty || "medium",
+      difficulty: session.difficulty || "normal",
       mode: session.mode === "twop" ? "twop" : session.mode,
       stats: {
         boxes: myScore || 0,
@@ -276,7 +282,7 @@
     document.querySelectorAll('input[name="lang"]').forEach((r) => {
       r.checked = r.value === lang();
     });
-    const diff = settings.aiDifficulty || "medium";
+    const diff = settings.aiDifficulty || "normal";
     document.querySelectorAll('input[name="defDiff"]').forEach((r) => {
       r.checked = r.value === diff;
     });
@@ -681,7 +687,7 @@
 
     session = {
       mode,
-      difficulty: opts.difficulty || "medium",
+      difficulty: opts.difficulty || "normal",
       boardId,
       graph,
       state,
@@ -1079,7 +1085,7 @@
 
   $("btn-mode-solo").addEventListener("click", () => {
     setup.mode = "solo";
-    setup.difficulty = settings.aiDifficulty || "medium";
+    setup.difficulty = settings.aiDifficulty || "normal";
     setup.boardId = recommendedBoard(setup.difficulty);
     renderDiffGrid();
     renderBoardGrids();
@@ -1109,7 +1115,7 @@
     saveSettings({ p1, p2 });
     startGame({
       mode: "twop",
-      difficulty: "medium",
+      difficulty: "normal",
       boardId: setup.boardId,
       p1,
       p2,
@@ -1121,14 +1127,16 @@
       (document.querySelector('input[name="lang"]:checked') || {}).value || "tr";
     const selectedDiff =
       (document.querySelector('input[name="defDiff"]:checked') || {}).value ||
-      "medium";
+      "normal";
     const displayName =
       ($("settings-display-name") && $("settings-display-name").value) || "";
     saveSettings({
       lang: selectedLang,
-      aiDifficulty: ["easy", "medium", "hard", "veryhard"].includes(selectedDiff)
-        ? selectedDiff
-        : "medium",
+      aiDifficulty: ["easy", "normal", "medium", "hard", "veryhard"].includes(selectedDiff)
+        ? selectedDiff === "medium"
+          ? "normal"
+          : selectedDiff
+        : "normal",
     });
     if (window.ArenaScore) window.ArenaScore.setDisplayName(displayName);
     applyI18n();

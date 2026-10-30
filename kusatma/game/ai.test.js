@@ -54,11 +54,11 @@ function quickBattle() {
   s.edgeDrawn["H_0_0"] = true;
   s.edgeDrawn["H_1_0"] = true;
   s.edgeDrawn["V_0_0"] = true;
-  const move = Ai.chooseMove(s, 1, "medium");
+  const move = Ai.chooseMove(s, 1, "normal");
   assert.ok(move);
   assert.strictEqual(move.type, "DRAW_LINE");
   assert.strictEqual(move.edgeId, "V_0_1");
-  console.log("ok medium takes free box");
+  console.log("ok normal takes free box");
 }
 
 console.log("\nAll AI tests passed.");

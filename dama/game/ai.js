@@ -23,6 +23,7 @@
 
   const DIFFICULTY = {
     easy: { depth: 1, variety: 20, blunderChance: 0.42 },
+    normal: { depth: 2, variety: 6, blunderChance: 0.18 },
     hard: { depth: 3, variety: 2.5, blunderChance: 0.06 },
     veryhard: { depth: 4, variety: 0.9, blunderChance: 0 },
   };
@@ -116,13 +117,14 @@
   }
 
   function resolveOpts(difficultyOrOpts) {
-    let difficulty = "hard";
+    let difficulty = "normal";
     let depth;
     let variety;
     let blunderChance;
     if (typeof difficultyOrOpts === "object" && difficultyOrOpts) {
-      difficulty = difficultyOrOpts.difficulty || "hard";
-      const preset = DIFFICULTY[difficulty] || DIFFICULTY.hard;
+      difficulty = difficultyOrOpts.difficulty || "normal";
+      if (difficulty === "medium") difficulty = "normal";
+      const preset = DIFFICULTY[difficulty] || DIFFICULTY.normal;
       depth = difficultyOrOpts.depth != null ? difficultyOrOpts.depth : preset.depth;
       variety = difficultyOrOpts.variety != null ? difficultyOrOpts.variety : preset.variety;
       blunderChance =
@@ -130,8 +132,9 @@
           ? difficultyOrOpts.blunderChance
           : preset.blunderChance;
     } else {
-      difficulty = difficultyOrOpts || "hard";
-      const preset = DIFFICULTY[difficulty] || DIFFICULTY.hard;
+      difficulty = difficultyOrOpts || "normal";
+      if (difficulty === "medium") difficulty = "normal";
+      const preset = DIFFICULTY[difficulty] || DIFFICULTY.normal;
       depth = preset.depth;
       variety = preset.variety;
       blunderChance = preset.blunderChance;

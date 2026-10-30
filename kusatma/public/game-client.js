@@ -43,9 +43,15 @@
   let p2pLobby = null;
 
   let settings = loadSettings();
+  if (settings.aiDifficulty === "medium") {
+    settings.aiDifficulty = "normal";
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch (_) {}
+  }
   let setup = {
     mode: "solo",
-    difficulty: settings.aiDifficulty || "medium",
+    difficulty: settings.aiDifficulty || "normal",
     p1: settings.p1 || "",
     p2: settings.p2 || "",
   };
@@ -162,7 +168,7 @@
   function loadSettings() {
     const defaults = {
       lang: "tr",
-      aiDifficulty: "medium",
+      aiDifficulty: "normal",
       p1: "",
       p2: "",
       music: true,
@@ -270,7 +276,7 @@
     if ($("home-version")) $("home-version").textContent = ver;
     if ($("settings-version")) $("settings-version").textContent = ver;
     if ($("set-lang")) $("set-lang").value = lang();
-    if ($("set-diff")) $("set-diff").value = settings.aiDifficulty || "medium";
+    if ($("set-diff")) $("set-diff").value = settings.aiDifficulty || "normal";
     if ($("set-music")) $("set-music").checked = settings.music !== false;
     if ($("set-sfx")) $("set-sfx").checked = settings.sfx !== false;
     if ($("set-learning")) $("set-learning").checked = isLearningEnabled();
@@ -284,8 +290,9 @@
     if (!grid) return;
     const diffs = [
       { id: "easy", i18n: "diffEasy", hint: "diffEasyHint" },
-      { id: "medium", i18n: "diffMedium", hint: "diffMediumHint" },
+      { id: "normal", i18n: "diffNormal", hint: "diffNormalHint" },
       { id: "hard", i18n: "diffHard", hint: "diffHardHint" },
+      { id: "veryhard", i18n: "diffVeryHard", hint: "diffVeryHardHint" },
     ];
     grid.innerHTML = "";
     for (const d of diffs) {

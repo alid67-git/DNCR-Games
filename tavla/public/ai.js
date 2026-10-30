@@ -45,7 +45,8 @@
   function chooseMove(state, difficulty, rng) {
     const moves = E.legalMoves(state);
     if (!moves.length) return null;
-    const diff = String(difficulty || "hard").toLowerCase();
+    let diff = String(difficulty || "normal").toLowerCase();
+    if (diff === "medium") diff = "normal";
     const r = typeof rng === "function" ? rng : Math.random;
 
     if (diff === "easy") {

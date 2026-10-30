@@ -18,6 +18,7 @@
 
   const DIFFS = [
     { id: "easy", i18n: "diffEasy", hint: "diffEasyHint" },
+    { id: "normal", i18n: "diffNormal", hint: "diffNormalHint" },
     { id: "hard", i18n: "diffHard", hint: "diffHardHint" },
     { id: "veryhard", i18n: "diffVeryHard", hint: "diffVeryHardHint" },
   ];
@@ -38,7 +39,7 @@
   };
 
   let settings = loadSettings();
-  let setupDiff = settings.aiDifficulty || "hard";
+  let setupDiff = settings.aiDifficulty || "normal";
   /** @type {null | object} */
   let session = null;
   /** @type {null | number | 'bar'} */
@@ -78,7 +79,7 @@
   function loadSettings() {
     const defaults = {
       lang: "tr",
-      aiDifficulty: "hard",
+      aiDifficulty: "normal",
       name: "",
       p1: "",
       p2: "",
@@ -171,7 +172,7 @@
     window.ArenaScore.record({
       gameId: "tavla",
       result: session.mode === "twop" ? "win" : result,
-      difficulty: session.difficulty || settings.aiDifficulty || "hard",
+      difficulty: session.difficulty || settings.aiDifficulty || "normal",
       mode: session.mode === "twop" ? "twop" : session.mode,
       stats: { captures: winnerCaps },
     });
@@ -892,7 +893,7 @@
         renderGame();
         return;
       }
-      const result = Ai.playTurn(session.state, session.difficulty || "hard");
+      const result = Ai.playTurn(session.state, session.difficulty || "normal");
       selected = null;
       const pair = (result.roll || (result.state && result.state.lastRoll) || [1, 1]).slice(0, 2);
       playDiceRollAnim(pair, async () => {
@@ -1199,7 +1200,7 @@
     document.querySelectorAll('input[name="lang"]').forEach((r) => {
       r.checked = r.value === lang();
     });
-    const diff = settings.aiDifficulty || "hard";
+    const diff = settings.aiDifficulty || "normal";
     document.querySelectorAll('input[name="defDiff"]').forEach((r) => {
       r.checked = r.value === diff;
     });
@@ -1258,7 +1259,7 @@
   }
 
   $("btn-mode-solo").addEventListener("click", () => {
-    setupDiff = settings.aiDifficulty || "hard";
+    setupDiff = settings.aiDifficulty || "normal";
     renderDiffGrid();
     showScreen("soloSetup");
   });
@@ -1314,16 +1315,16 @@
       (document.querySelector('input[name="lang"]:checked') || {}).value || "tr";
     const selectedDiff =
       (document.querySelector('input[name="defDiff"]:checked') || {}).value ||
-      "hard";
+      "normal";
     const displayName =
       ($("settings-display-name") && $("settings-display-name").value) || "";
     const musicOn = $("set-music") ? !!$("set-music").checked : true;
     const sfxOn = $("set-sfx") ? !!$("set-sfx").checked : true;
     saveSettings({
       lang: selectedLang,
-      aiDifficulty: ["easy", "hard", "veryhard"].includes(selectedDiff)
+      aiDifficulty: ["easy", "normal", "hard", "veryhard"].includes(selectedDiff)
         ? selectedDiff
-        : "hard",
+        : "normal",
       name: displayName.trim() || settings.name,
       music: musicOn,
       sfx: sfxOn,

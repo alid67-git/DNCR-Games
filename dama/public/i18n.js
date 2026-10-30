@@ -21,7 +21,7 @@ window.DamaI18n = (function () {
 
       playTitle: "Oyun modu",
       playSolo: "Bilgisayara karşı",
-      playSoloHint: "Kolay · Zor · Çok Zor — internet gerekmez",
+      playSoloHint: "Kolay · Normal · Zor · Çok Zor — internet gerekmez",
       play2p: "Aynı cihazda iki kişi",
       play2pHint: "Telefon veya tablet elden ele — ağ gerekmez",
       playP2p: "İki telefonda / uzaktan",
@@ -31,6 +31,8 @@ window.DamaI18n = (function () {
       chooseDifficulty: "Zorluk seç",
       diffEasy: "Kolay",
       diffEasyHint: "Sık hata yapar, rastgele oynar",
+      diffNormal: "Normal",
+      diffNormalHint: "Dengeli; ara sıra hata yapar",
       diffHard: "Zor",
       diffHardHint: "Almaları ve damayı kollar",
       diffVeryHard: "Çok Zor",
@@ -93,7 +95,7 @@ window.DamaI18n = (function () {
         "Solo ve aynı cihaz internet istemez. Uzaktan yalnızca eşleşme anında internet gerekir; oyun sunucusu yoktur.",
       helpDifficultyTitle: "Zorluk",
       helpDifficulty:
-        "Kolay: sık hata. Zor: alma ve damayı görür. Çok Zor: daha derin arama ile güçlü oynar.",
+        "Kolay: sık hata. Normal: dengeli (varsayılan). Zor: alma ve damayı görür. Çok Zor: daha derin arama ile güçlü oynar.",
       helpP2pTitle: "Ülkeler arası (sunucusuz)",
       helpP2p1: "Oyna → İki telefonda / uzaktan → Oda kur.",
       helpP2p2: "4 haneli kodu WhatsApp vb. ile gönder.",
@@ -169,7 +171,7 @@ window.DamaI18n = (function () {
 
       playTitle: "Game mode",
       playSolo: "Vs computer",
-      playSoloHint: "Easy · Hard · Very Hard — no internet",
+      playSoloHint: "Easy · Normal · Hard · Very Hard — no internet",
       play2p: "Two players, same device",
       play2pHint: "Pass the phone or tablet — no network",
       playP2p: "Two phones / remote",
@@ -179,6 +181,8 @@ window.DamaI18n = (function () {
       chooseDifficulty: "Choose difficulty",
       diffEasy: "Easy",
       diffEasyHint: "Often blunders, plays randomly",
+      diffNormal: "Normal",
+      diffNormalHint: "Balanced; occasional mistakes",
       diffHard: "Hard",
       diffHardHint: "Watches captures and kings",
       diffVeryHard: "Very Hard",
@@ -241,7 +245,7 @@ window.DamaI18n = (function () {
         "Solo and same-device need no internet. Remote only needs net briefly to pair; there is no game server.",
       helpDifficultyTitle: "Difficulty",
       helpDifficulty:
-        "Easy: frequent mistakes. Hard: sees captures and kings. Very Hard: deeper search.",
+        "Easy: frequent mistakes. Normal: balanced (default). Hard: sees captures and kings. Very Hard: deeper search.",
       helpP2pTitle: "Cross-border (serverless)",
       helpP2p1: "Play → Two phones / remote → Create room.",
       helpP2p2: "Send the 4-character code via WhatsApp etc.",
