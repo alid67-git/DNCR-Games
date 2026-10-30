@@ -915,11 +915,17 @@
 
     const capW = (s.capturedBy && s.capturedBy.white) || 0;
     const capB = (s.capturedBy && s.capturedBy.black) || 0;
-    $("meta-red").textContent = `${capW} ${t("captured")}`;
-    $("meta-black").textContent = `${capB} ${t("captured")}`;
+    const redTurn = !s.winner && s.turn === PLAYERS.white;
+    const blackTurn = !s.winner && s.turn === PLAYERS.black;
+    $("meta-red").textContent = redTurn
+      ? `${t("chipOnTurn")} · ${capW} ${t("captured")}`
+      : `${capW} ${t("captured")}`;
+    $("meta-black").textContent = blackTurn
+      ? `${t("chipOnTurn")} · ${capB} ${t("captured")}`
+      : `${capB} ${t("captured")}`;
 
-    $("chip-red").classList.toggle("active", s.turn === PLAYERS.white && !s.winner);
-    $("chip-black").classList.toggle("active", s.turn === PLAYERS.black && !s.winner);
+    $("chip-red").classList.toggle("active", redTurn);
+    $("chip-black").classList.toggle("active", blackTurn);
 
     let phaseText = "";
     if (s.winner) phaseText = t("gameOver");

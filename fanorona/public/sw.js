@@ -1,5 +1,5 @@
 /* Fanorona — offline cache; online’da ağ öncelikli (eski 1.0.1 cache’e takılma) */
-const CACHE = "fanorona-v1.0.6";
+const CACHE = "fanorona-v1.0.7";
 const ASSETS = [
   "./",
   "./index.html",
