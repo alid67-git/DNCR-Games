@@ -1415,6 +1415,24 @@ input[type="text"]:focus {
   font-size: 1.25rem;
   color: var(--accent);
 }
+.start-eyebrow {
+  font-family: var(--font-body, var(--font-display)) !important;
+  font-size: 0.82rem !important;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted) !important;
+  margin: 0 !important;
+}
+.start-card #start-text {
+  margin: 0.15rem 0 0.55rem;
+  line-height: 1.35;
+}
+.fly-pace {
+  /* shared move flight timing — oyuncu + bilgisayar aynı */
+  --fly-ms: 680;
+  --fly-hit-ms: 560;
+}
 
 .toast {
   position: fixed;
