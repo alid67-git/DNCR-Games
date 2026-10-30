@@ -87,8 +87,9 @@ window.FanoronaI18n = (function () {
       helpRule3: "Yaklaşma: hedefinin ötesindeki bitişik rakip taşları al. Uzaklaşma: terk ettiğin yönün arkasındaki bitişik rakipleri al.",
       helpRule4: "İkisi de mümkünse yöntem seç. Alma sonrası aynı taşla, yön değiştirerek (aynı yöne tekrar veya hemen geri gitmeden) zincire devam etmek zorundasın — sıra sende kalır.",
       helpRule5:
-        "Sıra rakibe ne zaman geçer: (1) Alma olmadan paika yaptığında hemen. (2) Alma / zincirden sonra o taşla yeni bir alma kalmadığında. Zincir bitince tur biter; rakip oynar.",
-      helpRule6: "Rakibin tüm taşlarını al veya rakibin hiç hamlesi kalmazsa kazanırsın. Hamleler parlar; alınan taşlar uçar.",
+        "ÖNEMLİ — Sıra değişimi: Sıra yalnızca şu anlarda rakibe geçer: (1) Alma yokken paika yaptığında hemen. (2) Alma veya zincir bittiğinde (o taşla yeni alma kalmadığında). Zincir sürerken sıra sende kalır; bitince üstte “Sıra …” uyarısı çıkar ve rakip oynar.",
+      helpRule6:
+        "Rakibin tüm taşlarını al veya rakibin hiç hamlesi kalmazsa kazanırsın. Taşlar hedefe kayarak gider; alınan taşlar uçar; hamle sonunda taş parlar.",
       helpModesTitle: "Oyun modları",
       helpModes:
         "Bilgisayara karşı · Aynı cihazda iki kişi · İki telefonda / uzaktan (oda kodu, P2P). İlk ikisi tamamen çevrimdışı.",
@@ -150,6 +151,9 @@ window.FanoronaI18n = (function () {
       notYourTurn: "Sıra sende değil.",
       captureBanner: "Alma!",
       chainBanner: "Zincir!",
+      turnYouBanner: "Sıra sende!",
+      turnCpuBanner: "Sıra bilgisayarda",
+      turnOppBanner: "Sıra rakipte",
       chooseApproach: "Yaklaşarak al",
       chooseWithdraw: "Uzaklaşarak al",
     },
@@ -240,8 +244,9 @@ window.FanoronaI18n = (function () {
       helpRule3: "Approach: capture contiguous enemies beyond your landing point. Withdrawal: capture contiguous enemies behind the point you left.",
       helpRule4: "If both apply, choose a method. After a capture you must continue with the same piece when possible (change direction; no immediate reverse) — it remains your turn.",
       helpRule5:
-        "When the turn passes: (1) right after a paika (no capture). (2) after a capture/chain when that piece has no further capture. Then the opponent plays.",
-      helpRule6: "Win by capturing all enemy pieces or leaving them with no moves. Moves flash; captured pieces fly off.",
+        "IMPORTANT — Turn change: The turn passes only when (1) you make a paika (no capture), or (2) a capture/chain ends (that piece has no further capture). During a chain it stays your turn; when it ends a “Turn …” banner appears and the opponent plays.",
+      helpRule6:
+        "Win by capturing all enemy pieces or leaving them with no moves. Pieces slide to the target; captured pieces fly off; the mover flashes on landing.",
       helpModesTitle: "Game modes",
       helpModes:
         "Vs computer · Two on one device · Two phones / remote (room code, P2P). The first two are fully offline.",
@@ -303,6 +308,9 @@ window.FanoronaI18n = (function () {
       notYourTurn: "Not your turn.",
       captureBanner: "Capture!",
       chainBanner: "Chain!",
+      turnYouBanner: "Your turn!",
+      turnCpuBanner: "Computer’s turn",
+      turnOppBanner: "Opponent’s turn",
       chooseApproach: "Capture by approach",
       chooseWithdraw: "Capture by withdrawal",
     },

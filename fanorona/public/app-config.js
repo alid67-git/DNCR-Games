@@ -1,9 +1,26 @@
 window.FanoronaConfig = {
   appName: "Fanorona",
-  version: "1.0.1",
-  build: 2,
+  version: "1.0.2",
+  build: 3,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/fanorona/",
   changelog: [
+    {
+      version: "1.0.2",
+      build: 3,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Sıra değişince üstte uyarı + skor kutusu parlaması",
+          "Taşlar hedefe kayarak gidiyor; alınan taşlar uçuyor",
+          "Yardımda sıra geçişi vurgulandı; varsayılan zorluk Normal",
+        ],
+        en: [
+          "Turn-change banner + score-chip pulse",
+          "Pieces slide to target; captures fly off",
+          "Help stresses when the turn passes; default difficulty Normal",
+        ],
+      },
+    },
     {
       version: "1.0.1",
       build: 2,

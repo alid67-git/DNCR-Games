@@ -58,6 +58,8 @@
   let p2pLobby = null;
   let hubBackCtl = null;
   let moveFlashTimer = null;
+  /** Hamle/yeme animasyonu sürerken tıklamayı kilitle */
+  let animBusy = false;
   const Sfx = window.DncrMoveSfx || null;
 
   function playMoveSfx(kind) {
@@ -351,17 +353,120 @@
     }
   }
 
-  function showBanner(text) {
+  function showBanner(text, ms, kind) {
     const el = $("mill-banner");
     if (!el) return;
     el.textContent = text;
-    el.classList.remove("hidden");
+    el.classList.remove("hidden", "turn-banner", "capture-banner");
+    if (kind === "turn") el.classList.add("turn-banner");
+    else if (kind === "capture") el.classList.add("capture-banner");
+    // restart CSS animation
+    el.style.animation = "none";
+    void el.offsetWidth;
+    el.style.animation = "";
     clearTimeout(showBanner._t);
-    showBanner._t = setTimeout(() => el.classList.add("hidden"), 900);
+    showBanner._t = setTimeout(() => {
+      el.classList.add("hidden");
+      el.classList.remove("turn-banner", "capture-banner");
+    }, ms == null ? 900 : ms);
+  }
+
+  function announceTurnChange(player) {
+    if (!session || session.state.winner || player == null) return;
+    const chipRed = $("chip-red");
+    const chipBlack = $("chip-black");
+    if (chipRed) chipRed.classList.remove("turn-pulse");
+    if (chipBlack) chipBlack.classList.remove("turn-pulse");
+    const chip = player === PLAYERS.white ? chipRed : chipBlack;
+    if (chip) {
+      void chip.offsetWidth;
+      chip.classList.add("turn-pulse");
+      clearTimeout(announceTurnChange._t);
+      announceTurnChange._t = setTimeout(() => {
+        chip.classList.remove("turn-pulse");
+      }, 1600);
+    }
+    let text;
+    if (session.mode === "solo") {
+      text =
+        player === PLAYERS.white ? t("turnYouBanner") : t("turnCpuBanner");
+    } else if (session.mode === "p2p") {
+      text =
+        player === session.you ? t("turnYouBanner") : t("turnOppBanner");
+    } else {
+      const name = (session.names && session.names[player]) || teamLabel(player);
+      text = `${t("turnOf")}: ${name}`;
+    }
+    showBanner(text, 1500, "turn");
+    const status = $("status-msg");
+    if (status) status.textContent = text;
   }
 
   function waitMs(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function easeOutCubic(u) {
+    return 1 - Math.pow(1 - u, 3);
+  }
+
+  function clearMoveTrail() {
+    const fx = $("board-fx");
+    if (!fx) return;
+    fx.querySelectorAll(".move-trail, .move-landing").forEach((n) => n.remove());
+  }
+
+  function drawMoveTrail(fromId, toId) {
+    const fx = $("board-fx");
+    const a = POSITIONS[fromId];
+    const b = POSITIONS[toId];
+    if (!fx || !a || !b) return;
+    clearMoveTrail();
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", a.x);
+    line.setAttribute("y1", a.y);
+    line.setAttribute("x2", b.x);
+    line.setAttribute("y2", b.y);
+    line.setAttribute("class", "move-trail");
+    fx.appendChild(line);
+    const land = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    land.setAttribute("cx", b.x);
+    land.setAttribute("cy", b.y);
+    land.setAttribute("r", "3.6");
+    land.setAttribute("class", "move-landing");
+    fx.appendChild(land);
+  }
+
+  /**
+   * Taşı SVG kullanıcı biriminde from → to kaydırır (görsel tahta henüz eski konumda).
+   */
+  function animateSlidePiece(fromId, toId) {
+    return new Promise((resolve) => {
+      const el = document.querySelector(`.piece[data-node="${fromId}"]`);
+      const from = POSITIONS[fromId];
+      const to = POSITIONS[toId];
+      if (!el || !from || !to) {
+        resolve();
+        return;
+      }
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      el.classList.add("is-sliding");
+      el.style.transform = "none";
+      const t0 = performance.now();
+      const dur = 340;
+      function frame(now) {
+        const u = Math.min(1, (now - t0) / dur);
+        const e = easeOutCubic(u);
+        el.setAttribute("transform", `translate(${dx * e} ${dy * e})`);
+        if (u < 1) requestAnimationFrame(frame);
+        else {
+          el.classList.remove("is-sliding");
+          resolve();
+        }
+      }
+      requestAnimationFrame(frame);
+    });
   }
 
   function svgPointToWrap(nodeId) {
@@ -498,7 +603,7 @@
   }
 
   function canAct() {
-    if (!session || session.state.winner) return false;
+    if (!session || session.state.winner || animBusy) return false;
     if (pendingChoice) return true;
     if (session.mode === "solo") {
       return session.state.turn === PLAYERS.white && !session.aiThinking;
@@ -642,7 +747,7 @@
   }
 
   async function applyAction(action, opts) {
-    if (!session) return;
+    if (!session || animBusy) return;
     const fromNet = opts && opts.fromNet;
     const actor = session.state.turn;
     if (!fromNet && session.mode === "p2p" && actor !== session.you) {
@@ -651,6 +756,7 @@
     }
 
     const hadChain = !!session.state.chain;
+    const boardBefore = Object.assign({}, session.state.board);
     const r = tryAction(session.state, actor, action);
     if (!r.ok) {
       if (!fromNet) toast(r.error);
@@ -668,28 +774,60 @@
       return;
     }
 
-    const captured = (r.state.lastMove && r.state.lastMove.captured) || [];
+    const lm = r.state.lastMove || {};
+    const from = lm.from;
+    const to = lm.to;
+    const captured = lm.captured || [];
     const capturedOwner = captured.length ? opponent(actor) : null;
     const stillChain = !!r.state.chain;
-    session.state = r.state;
+    const turnPassed =
+      !r.state.winner && !stillChain && r.state.turn !== actor;
+
+    animBusy = true;
     selected = stillChain && r.state.chain ? r.state.chain.piece : null;
     pendingChoice = null;
+    clearHints();
 
     if (captured.length) {
       playMoveSfx("capture");
-      showBanner(hadChain || stillChain ? t("chainBanner") : t("captureBanner"));
-      flashCapturedNodes(captured);
+      showBanner(
+        hadChain || stillChain ? t("chainBanner") : t("captureBanner"),
+        900,
+        "capture"
+      );
     } else {
       playMoveSfx("move");
     }
 
-    renderGame();
-    if (r.state.lastMove && r.state.lastMove.to) {
-      flashMoveNode(r.state.lastMove.to, actor);
+    // Görsel: taşı eski yerinde tut, alınanlar duruyor — kaydır sonra uçur
+    renderPieces(boardBefore);
+    if (from && to) {
+      drawMoveTrail(from, to);
+      await animateSlidePiece(from, to);
     }
 
-    const ejects = captured.map((id) => animateEjectPiece(id, capturedOwner));
-    if (ejects.length) await Promise.all(ejects);
+    if (captured.length) {
+      flashCapturedNodes(captured);
+      // Uçuş öncesi alınanları tahtadan kaldır
+      const midBoard = Object.assign({}, boardBefore);
+      if (from && midBoard[from] === actor) delete midBoard[from];
+      if (to) midBoard[to] = actor;
+      for (const id of captured) delete midBoard[id];
+      renderPieces(midBoard);
+      await Promise.all(captured.map((id) => animateEjectPiece(id, capturedOwner)));
+    }
+
+    session.state = r.state;
+    clearMoveTrail();
+    renderGame();
+    if (to) flashMoveNode(to, actor);
+
+    if (turnPassed) {
+      await waitMs(120);
+      announceTurnChange(r.state.turn);
+    }
+
+    animBusy = false;
 
     if (session.mode === "p2p" && !fromNet && p2p) {
       p2p.send({ type: "action", action, moveCount: r.state.moveCount });
@@ -700,20 +838,12 @@
       !session.state.winner &&
       session.state.turn === PLAYERS.black
     ) {
-      scheduleAi(captured.length ? 280 : 480);
-    } else if (
-      session.mode === "solo" &&
-      !session.state.winner &&
-      session.state.turn === PLAYERS.white &&
-      session.state.chain &&
-      session.state.chain.piece
-    ) {
-      // human continues chain — no AI
+      scheduleAi(captured.length ? 420 : 560);
     }
   }
 
   function onNodeClick(nodeId) {
-    if (!session || session.state.winner) return;
+    if (!session || session.state.winner || animBusy) return;
     if (pendingChoice) {
       toast(t("statusChoose"));
       return;
