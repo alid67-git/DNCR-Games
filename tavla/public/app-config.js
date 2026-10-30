@@ -1,9 +1,22 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.16",
-  build: 17,
+  version: "1.0.17",
+  build: 18,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.17",
+      build: 18,
+      date: "2026-10-31",
+      items: {
+        tr: [
+          "Android: tahta kısaldı — alt yazılar / Bar·Kapı örtülmüyor",
+        ],
+        en: [
+          "Android: shorter board — bottom status / Bar·Off stay visible",
+        ],
+      },
+    },
     {
       version: "1.0.16",
       build: 17,
