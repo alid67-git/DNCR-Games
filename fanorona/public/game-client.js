@@ -1357,6 +1357,8 @@
     selected = null;
     pendingChoice = null;
     session = null;
+    clearHist();
+    hideTurnWait();
     destroyP2P();
     showScreen("home");
   }
