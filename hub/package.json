@@ -1,6 +1,6 @@
 {
   "name": "dncr-games-hub",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "private": true,
   "description": "DNCR Games hub — launcher for Kati, Noktalar, Dokuztaş, Kuşatma, Sayı Bulma, Fanorona, Dama, Tavla",
   "scripts": {
