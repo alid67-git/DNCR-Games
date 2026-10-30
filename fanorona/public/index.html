@@ -306,8 +306,11 @@
       <div class="board-stage">
         <div class="board-wrap board-wrap-wide">
           <div id="mill-banner" class="mill-banner hidden" aria-live="assertive"></div>
-          <div id="turn-wait" class="turn-wait hidden" aria-live="assertive">
-            <p id="turn-wait-text"></p>
+          <div id="turn-wait" class="turn-wait hidden" aria-live="assertive" aria-hidden="true">
+            <div class="turn-wait-card">
+              <p id="turn-wait-title" class="turn-wait-title"></p>
+              <p id="turn-wait-text" class="turn-wait-sub"></p>
+            </div>
           </div>
           <div id="board-fx-html" class="board-fx-html" aria-hidden="true"></div>
           <svg id="board" viewBox="0 0 100 60" role="img" aria-label="Fanorona tahtası" overflow="visible">
