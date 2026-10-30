@@ -62,6 +62,88 @@
   let animBusy = false;
   const Sfx = window.DncrMoveSfx || null;
 
+  const Hist = (window.DncrHistory && window.DncrHistory.create({ max: 40 })) || null;
+
+  function snap() {
+    return JSON.stringify(session.state);
+  }
+
+  function pushHist() {
+    if (!Hist || !session || session.mode === "p2p") return;
+    try {
+      Hist.push(snap());
+    } catch (_) {}
+    updateHistBtns();
+  }
+
+  function clearHist() {
+    if (Hist) Hist.clear();
+    updateHistBtns();
+  }
+
+  function historyIdle() {
+    return (
+      !!session &&
+      session.mode !== "p2p" &&
+      !session.aiThinking &&
+      !(session.state && session.state.winner)
+      && !animBusy
+    );
+  }
+
+  function updateHistBtns() {
+    const u = $("btn-game-undo");
+    const r = $("btn-game-redo");
+    const idle = historyIdle();
+    if (u) u.disabled = !(idle && Hist && Hist.canUndo());
+    if (r) r.disabled = !(idle && Hist && Hist.canRedo());
+  }
+
+  function restoreSnap(raw) {
+    session.state = JSON.parse(raw);
+    selected = null;
+    clearTimeout(aiTimer);
+    if ("aiThinking" in session) session.aiThinking = false;
+    pendingChoice = null;
+    animBusy = false;
+    clearHints();
+    clearMoveTrail();
+    renderGame();
+    updateHistBtns();
+    if (
+      session.mode === "solo" &&
+      !session.state.winner &&
+      session.state.turn === PLAYERS.black
+    ) {
+      scheduleAi(420);
+    }
+  }
+
+  function doUndo() {
+    if (!historyIdle() || !Hist || !Hist.canUndo()) return;
+    const prev = Hist.undo(snap());
+    if (prev == null) return;
+    try {
+      restoreSnap(prev);
+      toast(t("undoDone"));
+    } catch (_) {
+      updateHistBtns();
+    }
+  }
+
+  function doRedo() {
+    if (!historyIdle() || !Hist || !Hist.canRedo()) return;
+    const next = Hist.redo(snap());
+    if (next == null) return;
+    try {
+      restoreSnap(next);
+      toast(t("redoDone"));
+    } catch (_) {
+      updateHistBtns();
+    }
+  }
+
+
   function playMoveSfx(kind) {
     if (!Sfx) return;
     Sfx.unlock();
@@ -700,6 +782,7 @@
           : t("statusMove");
     }
 
+    updateHistBtns();
     const end = $("end-panel");
     if (s.winner) {
       maybeRecordScore();
@@ -774,6 +857,7 @@
       return;
     }
 
+    if (!fromNet) pushHist();
     const lm = r.state.lastMove || {};
     const from = lm.from;
     const to = lm.to;
@@ -918,6 +1002,7 @@
   function startSolo() {
     clearTimeout(aiTimer);
     destroyP2P();
+    clearHist();
     pendingChoice = null;
     const starter = readNextStarter();
     writeNextStarter(starter);
@@ -941,6 +1026,7 @@
   function startTwoP() {
     clearTimeout(aiTimer);
     destroyP2P();
+    clearHist();
     pendingChoice = null;
     const p1 = ($("p1-name").value || "").trim() || t("player1Ph");
     const p2 = ($("p2-name").value || "").trim() || t("player2Ph");
@@ -1323,6 +1409,13 @@
       renderRoom();
     }
   });
+
+  if ($("btn-game-undo")) {
+    $("btn-game-undo").addEventListener("click", () => doUndo());
+  }
+  if ($("btn-game-redo")) {
+    $("btn-game-redo").addEventListener("click", () => doRedo());
+  }
 
   $("btn-rematch").addEventListener("click", () => {
     $("btn-game-restart").click();

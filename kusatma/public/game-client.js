@@ -63,6 +63,80 @@
   let hubBackCtl = null;
   let tutorialCtl = null;
   let fxBusy = false;
+
+  const Hist = (window.DncrHistory && window.DncrHistory.create({ max: 40 })) || null;
+
+  function snap() {
+    return JSON.stringify(session.state);
+  }
+
+  function pushHist() {
+    if (!Hist || !session || session.mode === "p2p" || session.mode === "demo") return;
+    try {
+      Hist.push(snap());
+    } catch (_) {}
+    updateHistBtns();
+  }
+
+  function clearHist() {
+    if (Hist) Hist.clear();
+    updateHistBtns();
+  }
+
+  function historyIdle() {
+    return (
+      !!session &&
+      session.mode !== "p2p" &&
+      session.mode !== "demo" &&
+      !fxBusy &&
+      !(session.state && session.state.phase === PHASE.GAME_OVER)
+    );
+  }
+
+  function updateHistBtns() {
+    const u = $("btn-game-undo");
+    const r = $("btn-game-redo");
+    const idle = historyIdle();
+    if (u) u.disabled = !(idle && Hist && Hist.canUndo());
+    if (r) r.disabled = !(idle && Hist && Hist.canRedo());
+  }
+
+  function restoreSnap(raw) {
+    session.state = JSON.parse(raw);
+    selectedStone = null;
+    clearTimeout(aiTimer);
+    fxBusy = false;
+    const boardEl = $("board");
+    if (boardEl) boardEl.classList.remove("is-fx-busy");
+    renderAll();
+    updateHistBtns();
+    if (session.mode !== "demo" && session.mode !== "p2p") maybeAiTurn();
+  }
+
+  function doUndo() {
+    if (!historyIdle() || !Hist || !Hist.canUndo()) return;
+    const prev = Hist.undo(snap());
+    if (prev == null) return;
+    try {
+      restoreSnap(prev);
+      toast(t("undoDone"));
+    } catch (_) {
+      updateHistBtns();
+    }
+  }
+
+  function doRedo() {
+    if (!historyIdle() || !Hist || !Hist.canRedo()) return;
+    const next = Hist.redo(snap());
+    if (next == null) return;
+    try {
+      restoreSnap(next);
+      toast(t("redoDone"));
+    } catch (_) {
+      updateHistBtns();
+    }
+  }
+
   let demo = null; // { index, busy }
   const Audio = window.SiegeAudio || null;
   const DemoMatch = window.SiegeDemoMatch || null;
@@ -614,6 +688,7 @@
       if (silent) console.warn("demo action fail", action, r.error);
       return Promise.resolve(false);
     }
+    if (!fromNet) pushHist();
     const next = r.state;
     selectedStone = null;
 
@@ -649,6 +724,7 @@
   async function startGame(mode) {
     clearTimeout(aiTimer);
     selectedStone = null;
+    clearHist();
     await ensureAudio();
     if (Audio && settings.music !== false) Audio.startMusic();
     // Öğrenme: solo’da ayar açıksa; 2P/P2P’te kapalı (tam kurallar)
@@ -707,6 +783,7 @@
   }
 
   function renderAll() {
+    updateHistBtns();
     if (!session) return;
     renderHud();
     renderBoard();
@@ -1513,9 +1590,32 @@
     clearTimeout(aiTimer);
     if (session && session.mode === "p2p") destroyP2P();
     session = null;
+    clearHist();
     document.body.classList.remove("is-learning");
     if (Audio) Audio.stopMusic();
     showScreen(screen || "home");
+  }
+
+  if ($("btn-game-undo")) {
+    $("btn-game-undo").addEventListener("click", () => doUndo());
+  }
+  if ($("btn-game-redo")) {
+    $("btn-game-redo").addEventListener("click", () => doRedo());
+  }
+  if ($("btn-game-restart")) {
+    $("btn-game-restart").addEventListener("click", () => {
+      if (!session) return;
+      if (session.mode === "demo") return;
+      if (session.mode === "p2p") {
+        destroyP2P();
+        session = null;
+        document.body.classList.remove("is-learning");
+        clearHist();
+        showScreen("p2p");
+        return;
+      }
+      startGame(session.mode);
+    });
   }
 
   $("btn-game-back").addEventListener("click", () => {

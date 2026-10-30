@@ -1,15 +1,15 @@
 :root {
-  --bg: #1e1e24;
-  --bg-2: #16161c;
-  --grid: #4a4e69;
-  --p1: #00b4d8;
-  --p2: #e63946;
-  --neutral: #9a8c98;
-  --insured: #ffb703;
-  --ink: #e8e6ef;
-  --muted: rgba(232, 230, 239, 0.55);
-  --card: rgba(36, 36, 44, 0.88);
-  --line: rgba(74, 78, 105, 0.55);
+  --bg: #0f1720;
+  --bg-2: #121a24;
+  --grid: #4a5d73;
+  --p1: #4fc3f7;
+  --p2: #66bb6a;
+  --neutral: #8a97a8;
+  --insured: #5ec8a8;
+  --ink: #f2f6fa;
+  --muted: rgba(242, 246, 250, 0.62);
+  --card: rgba(20, 32, 46, 0.9);
+  --line: rgba(150, 185, 210, 0.28);
   --font: "Manrope", system-ui, sans-serif;
   --display: "Sora", system-ui, sans-serif;
   --safe-t: env(safe-area-inset-top, 0px);
@@ -33,10 +33,10 @@ html, body {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(ellipse 70% 40% at 50% -10%, rgba(0, 180, 216, 0.16), transparent 55%),
-    radial-gradient(circle at 90% 80%, rgba(230, 57, 70, 0.12), transparent 40%),
-    radial-gradient(circle at 10% 70%, rgba(255, 183, 3, 0.08), transparent 38%),
-    linear-gradient(165deg, #24242c, var(--bg-2) 60%, #0e0e12);
+    radial-gradient(ellipse 70% 40% at 50% -10%, rgba(79, 195, 247, 0.16), transparent 55%),
+    radial-gradient(circle at 90% 80%, rgba(102, 187, 106, 0.12), transparent 40%),
+    radial-gradient(circle at 10% 70%, rgba(94, 200, 168, 0.1), transparent 38%),
+    linear-gradient(165deg, #162231, var(--bg-2) 60%, #0a1018);
 }
 #app {
   position: relative;
@@ -584,3 +584,18 @@ body.is-learning #phase-pill {
   50% { opacity: 0.7; }
 }
 .hud-card.is-turn .hud-name { animation: pulse-turn 1.4s ease infinite; }
+
+.game-top-actions { display:flex; align-items:center; gap:0.2rem; flex-wrap:wrap; justify-content:flex-end; }
+.btn-icon {
+  appearance: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--ink);
+  font-size: 1.05rem;
+  cursor: pointer;
+  line-height: 1;
+}
+#btn-game-undo:disabled, #btn-game-redo:disabled { opacity:0.35; cursor:default; }

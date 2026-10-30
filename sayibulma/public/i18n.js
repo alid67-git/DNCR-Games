@@ -104,6 +104,10 @@ window.SayibulmaI18n = (function () {
       defaultDifficulty: "Varsayılan bilgisayar zorluğu",
       save: "Kaydet",
       saved: "Ayarlar kaydedildi.",
+      undo: "Geri al",
+      redo: "İleri al",
+      undoDone: "Son hamle geri alındı",
+      redoDone: "Hamle ileri alındı",
 
       helpTitle: "Yardım",
       helpRulesTitle: "Kurallar",
@@ -274,6 +278,10 @@ window.SayibulmaI18n = (function () {
       defaultDifficulty: "Default computer difficulty",
       save: "Save",
       saved: "Settings saved.",
+      undo: "Undo",
+      redo: "Redo",
+      undoDone: "Last move undone",
+      redoDone: "Move redone",
 
       helpTitle: "Help",
       helpRulesTitle: "Rules",

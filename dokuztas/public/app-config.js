@@ -1,9 +1,24 @@
 window.DokuztasConfig = {
   appName: "Dokuztaş",
-  version: "1.0.5",
-  build: 6,
+  version: "1.0.6",
+  build: 7,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/dokuztas/",
   changelog: [
+    {
+      version: "1.0.6",
+      build: 7,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Soğuk palet: mavi / gri / beyaz / yeşil (kahverengi kalktı)",
+          "Oyun çubuğunda geri al · ileri al (undo / redo); yeniden başlat kaldı",
+        ],
+        en: [
+          "Cool palette: blue / gray / white / green (no brown)",
+          "Game bar undo · redo; restart kept",
+        ],
+      },
+    },
     {
       version: "1.0.5",
       build: 6,

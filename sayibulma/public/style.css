@@ -7,7 +7,7 @@
   --lime-deep: #6bc22a;
   --teal: #1a6b78;
   --teal-glow: #2ec4b6;
-  --coral: #ff6b6b;
+  --coral: #4fc3f7;
   --panel: rgba(6, 37, 46, 0.82);
   --radius: 16px;
   --font-display: "Sora", "Segoe UI", sans-serif;
@@ -746,7 +746,7 @@ input[type="text"]:focus {
   justify-content: center;
   font-size: 1.15rem;
   font-weight: 800;
-  color: #ff6b6b;
+  color: #4fc3f7;
   line-height: 1;
   pointer-events: none;
 }
@@ -1364,3 +1364,7 @@ input[type="text"]:focus {
     margin-bottom: 0.15rem;
   }
 }
+
+
+.game-top-actions { display:flex; align-items:center; gap:0.2rem; }
+#btn-game-undo:disabled, #btn-game-redo:disabled { opacity:0.35; cursor:default; }

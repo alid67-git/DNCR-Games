@@ -1684,6 +1684,9 @@
   if ($("btn-start-ok")) {
     $("btn-start-ok").addEventListener("click", () => dismissStartBanner());
   }
+  if ($("btn-game-restart")) {
+    $("btn-game-restart").addEventListener("click", () => doRematch());
+  }
   $("btn-rematch").addEventListener("click", () => doRematch());
 
   $("btn-roll").addEventListener("click", () => doRoll());

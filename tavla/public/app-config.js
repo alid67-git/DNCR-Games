@@ -1,12 +1,12 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.15",
-  build: 16,
+  version: "1.0.16",
+  build: 17,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
     {
-      version: "1.0.15",
-      build: 16,
+      version: "1.0.16",
+      build: 17,
       date: "2026-10-30",
       items: {
         tr: [
@@ -16,6 +16,21 @@ window.TavlaConfig = {
         en: [
           "Slower computer pace; move animations match the player",
           "Start dialog: You start / Computer starts",
+        ],
+      },
+    },
+    {
+      version: "1.0.15",
+      build: 16,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Soğuk palet: mavi / gri / beyaz / yeşil (kahverengi kalktı)",
+          "Oyun çubuğunda geri al · ileri al (undo / redo); yeniden başlat kaldı",
+        ],
+        en: [
+          "Cool palette: blue / gray / white / green (no brown)",
+          "Game bar undo · redo; restart kept",
         ],
       },
     },
