@@ -308,32 +308,37 @@
             <div class="board-quad top" id="board-left-top"></div>
             <div class="board-quad bottom" id="board-left-bottom"></div>
           </div>
-          <div class="board-mid">
-            <!-- Dikey katlanma izi + üst/alt gümüş menteşe -->
-            <span class="katlanma-izi" aria-hidden="true"></span>
-            <span class="kapak-hinge hinge-start" aria-hidden="true"></span>
-            <span class="kapak-hinge hinge-end" aria-hidden="true"></span>
-            <div class="board-mid-inner">
-              <div class="bar-zone" id="bar-zone" data-from="bar">
-                <span class="zone-label" data-i18n="barLabel">Bar</span>
-                <div class="bar-stack" id="bar-stack"></div>
-              </div>
-              <div class="dice-panel">
-                <div class="dice-row" id="dice-row" aria-live="polite"></div>
-                <button type="button" class="btn btn-primary btn-roll" id="btn-roll" data-i18n="rollDice">Zar at</button>
-              </div>
-              <div class="off-zone" id="off-zone">
-                <span class="zone-label" data-i18n="offLabel">Kapı</span>
-                <div class="off-stacks">
-                  <button type="button" class="off-slot white" id="off-white" data-to="off"></button>
-                  <button type="button" class="off-slot blue" id="off-blue" data-to="off"></button>
-                </div>
-              </div>
-            </div>
+          <!-- İnce dikey kapak: sadece katlanma izi + 2 menteşe -->
+          <div class="board-mid" aria-hidden="true">
+            <span class="katlanma-izi"></span>
+            <span class="kapak-hinge hinge-start"></span>
+            <span class="kapak-hinge hinge-end"></span>
           </div>
           <div class="board-side right" id="board-right">
             <div class="board-quad top" id="board-right-top"></div>
             <div class="board-quad bottom" id="board-right-bottom"></div>
+            <!-- Zarlar tahta üzerinde (referans gibi) -->
+            <div class="dice-on-board">
+              <div class="dice-panel">
+                <div class="dice-row" id="dice-row" aria-live="polite"></div>
+                <button type="button" class="btn btn-primary btn-roll" id="btn-roll" data-i18n="rollDice">Zar at</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bar / Kapı — tahta dışı tepsiler (referans) -->
+      <div class="board-trays">
+        <div class="bar-zone" id="bar-zone" data-from="bar">
+          <span class="zone-label" data-i18n="barLabel">Bar</span>
+          <div class="bar-stack" id="bar-stack"></div>
+        </div>
+        <div class="off-zone" id="off-zone">
+          <span class="zone-label" data-i18n="offLabel">Kapı</span>
+          <div class="off-stacks">
+            <button type="button" class="off-slot white" id="off-white" data-to="off"></button>
+            <button type="button" class="off-slot blue" id="off-blue" data-to="off"></button>
           </div>
         </div>
       </div>

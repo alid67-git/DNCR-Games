@@ -1,9 +1,24 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.9",
-  build: 10,
+  version: "1.0.10",
+  build: 11,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.10",
+      build: 11,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "İnce dikey katlanma izi + menteşeler (kalın orta sütun kaldırıldı)",
+          "Zarlar tahta yüzeyinde; Bar / Kapı tahta dışı tepsilerde",
+        ],
+        en: [
+          "Thin vertical fold crease + hinges (fat mid column removed)",
+          "Dice on the board surface; Bar / Off as external trays",
+        ],
+      },
+    },
     {
       version: "1.0.9",
       build: 10,
