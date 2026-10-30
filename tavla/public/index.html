@@ -304,9 +304,12 @@
 
       <div class="board-wrap">
         <div id="board" class="tavla-board" role="img" aria-label="Tavla tahtası">
-          <div class="board-half top" id="board-top"></div>
+          <div class="board-side left" id="board-left">
+            <div class="board-quad top" id="board-left-top"></div>
+            <div class="board-quad bottom" id="board-left-bottom"></div>
+          </div>
           <div class="board-mid">
-            <!-- Katlanma izi + iki gümüş menteşe (referans) -->
+            <!-- Dikey katlanma izi + üst/alt gümüş menteşe -->
             <span class="katlanma-izi" aria-hidden="true"></span>
             <span class="kapak-hinge hinge-start" aria-hidden="true"></span>
             <span class="kapak-hinge hinge-end" aria-hidden="true"></span>
@@ -328,7 +331,10 @@
               </div>
             </div>
           </div>
-          <div class="board-half bottom" id="board-bottom"></div>
+          <div class="board-side right" id="board-right">
+            <div class="board-quad top" id="board-right-top"></div>
+            <div class="board-quad bottom" id="board-right-bottom"></div>
+          </div>
         </div>
       </div>
 

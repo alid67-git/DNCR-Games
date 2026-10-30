@@ -1,9 +1,24 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.8",
-  build: 9,
+  version: "1.0.9",
+  build: 10,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.9",
+      build: 10,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Klasik sol/sağ tahta — katlanma izi dikey",
+          "Menteşeler omurganın üst ve alt ucunda",
+        ],
+        en: [
+          "Classic left/right board — vertical fold crease",
+          "Hinges at the top and bottom of the spine",
+        ],
+      },
+    },
     {
       version: "1.0.8",
       build: 9,
