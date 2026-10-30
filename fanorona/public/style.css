@@ -533,6 +533,16 @@ input[type="text"]:focus {
   gap: 0.4rem;
   margin-bottom: 0.7rem;
 }
+.game-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+#btn-game-undo:disabled,
+#btn-game-redo:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
 .game-title {
   margin: 0;
   text-align: center;
@@ -1067,6 +1077,55 @@ input[type="text"]:focus {
   background: rgba(18, 28, 12, 0.94);
   box-shadow: 0 0 18px rgba(255, 200, 80, 0.35);
   animation: turnBannerPop 1.45s ease both;
+}
+.turn-wait {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(12, 8, 4, 0.55);
+  backdrop-filter: blur(1.5px);
+  animation: turnWaitIn 0.35s ease both;
+}
+.turn-wait.hidden {
+  display: none;
+}
+.turn-wait p {
+  margin: 0;
+  max-width: 86%;
+  padding: 0.85rem 1.15rem;
+  border-radius: 14px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.12rem;
+  letter-spacing: 0.02em;
+  color: #ffe082;
+  background: rgba(20, 14, 8, 0.92);
+  border: 2px solid rgba(255, 214, 102, 0.75);
+  box-shadow: 0 0 28px rgba(255, 190, 70, 0.35);
+  animation: turnWaitPulse 1.6s ease-in-out infinite;
+}
+@keyframes turnWaitIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes turnWaitPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 22px rgba(255, 190, 70, 0.3);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 0 34px rgba(255, 200, 80, 0.5);
+  }
 }
 @keyframes turnBannerPop {
   0% {

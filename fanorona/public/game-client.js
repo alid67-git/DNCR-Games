@@ -60,6 +60,8 @@
   let moveFlashTimer = null;
   /** Hamle/yeme animasyonu sürerken tıklamayı kilitle */
   let animBusy = false;
+  /** @type {Set<string>} Animasyon sırasında SVG'de bastırılan (yeniden çizilmeyen) düğümler */
+  let suppressNodes = new Set();
   const Sfx = window.DncrMoveSfx || null;
 
   const Hist = (window.DncrHistory && window.DncrHistory.create({ max: 40 })) || null;
@@ -86,8 +88,9 @@
       !!session &&
       session.mode !== "p2p" &&
       !session.aiThinking &&
-      !(session.state && session.state.winner)
-      && !animBusy
+      !(session.state && session.state.winner) &&
+      !animBusy &&
+      !pendingChoice
     );
   }
 
@@ -100,14 +103,22 @@
   }
 
   function restoreSnap(raw) {
-    session.state = JSON.parse(raw);
-    selected = null;
     clearTimeout(aiTimer);
+    clearTimeout(moveFlashTimer);
+    moveFlashTimer = null;
+    suppressNodes = new Set();
+    clearMoveTrail();
+    const layer = $("board-fx-html");
+    if (layer) layer.innerHTML = "";
+    const fx = $("board-fx");
+    if (fx) fx.innerHTML = "";
+    session.state = JSON.parse(raw);
     if ("aiThinking" in session) session.aiThinking = false;
+    selected = null;
     pendingChoice = null;
     animBusy = false;
     clearHints();
-    clearMoveTrail();
+    hideTurnWait();
     renderGame();
     updateHistBtns();
     if (
@@ -204,6 +215,13 @@
     document.querySelectorAll("[data-i18n-ph]").forEach((el) => {
       const key = el.getAttribute("data-i18n-ph");
       if (key) el.setAttribute("placeholder", t(key));
+    });
+    document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+      const key = el.getAttribute("data-i18n-aria");
+      if (!key) return;
+      const label = t(key);
+      el.setAttribute("aria-label", label);
+      el.setAttribute("title", label);
     });
     const ver = `v${CFG.version} · build ${CFG.build}`;
     if ($("home-version")) $("home-version").textContent = ver;
@@ -406,6 +424,7 @@
     g.innerHTML = "";
     for (const [id, owner] of Object.entries(board || {})) {
       if (!owner) continue;
+      if (suppressNodes.has(id)) continue;
       const p = POSITIONS[id];
       const piece = makePiece(owner, p.x, p.y, selected === id);
       piece.dataset.node = id;
@@ -415,6 +434,10 @@
       });
       g.appendChild(piece);
     }
+  }
+
+  function cloneBoard(board) {
+    return Object.assign({}, board || {});
   }
 
   function clearHints() {
@@ -453,6 +476,52 @@
     }, ms == null ? 900 : ms);
   }
 
+  function turnWaitMessage(player) {
+    if (!session) return "";
+    if (session.mode === "solo") {
+      return player === PLAYERS.white ? t("turnYouBanner") : t("turnWaitCpu");
+    }
+    if (session.mode === "p2p") {
+      return player === session.you ? t("turnYouBanner") : t("turnWaitOpp");
+    }
+    const name = (session.names && session.names[player]) || teamLabel(player);
+    return `${t("turnOf")}: ${name}`;
+  }
+
+  function showTurnWait(player) {
+    const el = $("turn-wait");
+    const text = $("turn-wait-text");
+    if (!el || !text) return;
+    text.textContent = turnWaitMessage(player);
+    el.classList.remove("hidden");
+    el.classList.add("is-on");
+  }
+
+  function hideTurnWait() {
+    const el = $("turn-wait");
+    if (!el) return;
+    el.classList.add("hidden");
+    el.classList.remove("is-on");
+  }
+
+  function updateTurnWaitUi() {
+    if (!session || session.state.winner || animBusy) {
+      if (!animBusy) hideTurnWait();
+      return;
+    }
+    const s = session.state;
+    const mine = canAct();
+    if (session.mode === "twop") {
+      hideTurnWait();
+      return;
+    }
+    if (!mine && !pendingChoice) {
+      showTurnWait(s.turn);
+    } else {
+      hideTurnWait();
+    }
+  }
+
   function announceTurnChange(player) {
     if (!session || session.state.winner || player == null) return;
     const chipRed = $("chip-red");
@@ -466,22 +535,20 @@
       clearTimeout(announceTurnChange._t);
       announceTurnChange._t = setTimeout(() => {
         chip.classList.remove("turn-pulse");
-      }, 1600);
+      }, 2200);
     }
-    let text;
-    if (session.mode === "solo") {
-      text =
-        player === PLAYERS.white ? t("turnYouBanner") : t("turnCpuBanner");
-    } else if (session.mode === "p2p") {
-      text =
-        player === session.you ? t("turnYouBanner") : t("turnOppBanner");
-    } else {
-      const name = (session.names && session.names[player]) || teamLabel(player);
-      text = `${t("turnOf")}: ${name}`;
-    }
-    showBanner(text, 1500, "turn");
+    const text = turnWaitMessage(player);
+    showBanner(text, 1800, "turn");
     const status = $("status-msg");
     if (status) status.textContent = text;
+    const mine =
+      session.mode === "solo"
+        ? player === PLAYERS.white
+        : session.mode === "p2p"
+          ? player === session.you
+          : true;
+    if (!mine) showTurnWait(player);
+    else hideTurnWait();
   }
 
   function waitMs(ms) {
@@ -606,7 +673,7 @@
           delete sk.dataset.prevFill;
         }
       });
-      if (session) renderPieces(session.state.board);
+      // Tahtayı yeniden çizme — alınan taşların geri gelmesine yol açıyordu
       moveFlashTimer = null;
     }, 1000);
   }
@@ -799,6 +866,8 @@
         $("end-text").textContent = `${session.names[s.winner]} ${t("winOther")}`;
       }
     } else end.classList.add("hidden");
+
+    updateTurnWaitUi();
   }
 
   function updateHints() {
@@ -832,6 +901,7 @@
   async function applyAction(action, opts) {
     if (!session || animBusy) return;
     const fromNet = opts && opts.fromNet;
+    const fromAi = opts && opts.fromAi;
     const actor = session.state.turn;
     if (!fromNet && session.mode === "p2p" && actor !== session.you) {
       toast(t("notYourTurn"));
@@ -839,10 +909,12 @@
     }
 
     const hadChain = !!session.state.chain;
-    const boardBefore = Object.assign({}, session.state.board);
+    const boardBefore = cloneBoard(session.state.board);
+
     const r = tryAction(session.state, actor, action);
     if (!r.ok) {
       if (!fromNet) toast(r.error);
+      updateHistBtns();
       return;
     }
 
@@ -857,20 +929,23 @@
       return;
     }
 
-    if (!fromNet) pushHist();
+    // İnsan hamlesinden önce (AI ayrı push etmez → undo insan+AI birim)
+    if (!fromNet && !fromAi) pushHist();
     const lm = r.state.lastMove || {};
     const from = lm.from;
     const to = lm.to;
-    const captured = lm.captured || [];
+    const captured = (lm.captured || []).slice();
     const capturedOwner = captured.length ? opponent(actor) : null;
     const stillChain = !!r.state.chain;
     const turnPassed =
       !r.state.winner && !stillChain && r.state.turn !== actor;
 
     animBusy = true;
+    updateHistBtns();
     selected = stillChain && r.state.chain ? r.state.chain.piece : null;
     pendingChoice = null;
     clearHints();
+    hideTurnWait();
 
     if (captured.length) {
       playMoveSfx("capture");
@@ -883,8 +958,15 @@
       playMoveSfx("move");
     }
 
-    // Görsel: taşı eski yerinde tut, alınanlar duruyor — kaydır sonra uçur
-    renderPieces(boardBefore);
+    // Mantıksal durum hemen güncel — yanlışlıkla eski tahta çizilmesin
+    session.state = r.state;
+
+    // Görsel ara tahta: oynayan taş hâlâ from'da; alınanlar bastırılır (geri gelmesin)
+    suppressNodes = new Set(captured);
+    const slideBoard = cloneBoard(boardBefore);
+    for (const id of captured) slideBoard[id] = null;
+    renderPieces(slideBoard);
+
     if (from && to) {
       drawMoveTrail(from, to);
       await animateSlidePiece(from, to);
@@ -892,26 +974,30 @@
 
     if (captured.length) {
       flashCapturedNodes(captured);
-      // Uçuş öncesi alınanları tahtadan kaldır
-      const midBoard = Object.assign({}, boardBefore);
-      if (from && midBoard[from] === actor) delete midBoard[from];
-      if (to) midBoard[to] = actor;
-      for (const id of captured) delete midBoard[id];
-      renderPieces(midBoard);
-      await Promise.all(captured.map((id) => animateEjectPiece(id, capturedOwner)));
+      // Kaydırma bitti: oynayan taş hedefte, alınanlar SVG'de yok — sadece uçuş orbları
+      const settled = cloneBoard(r.state.board);
+      for (const id of captured) settled[id] = null;
+      suppressNodes = new Set(captured);
+      renderPieces(settled);
+      await Promise.all(
+        captured.map((id) => animateEjectPiece(id, capturedOwner))
+      );
     }
 
-    session.state = r.state;
+    suppressNodes = new Set();
     clearMoveTrail();
     renderGame();
     if (to) flashMoveNode(to, actor);
 
     if (turnPassed) {
-      await waitMs(120);
+      await waitMs(160);
       announceTurnChange(r.state.turn);
+    } else {
+      updateTurnWaitUi();
     }
 
     animBusy = false;
+    updateHistBtns();
 
     if (session.mode === "p2p" && !fromNet && p2p) {
       p2p.send({ type: "action", action, moveCount: r.state.moveCount });
@@ -994,8 +1080,11 @@
         difficulty: session.difficulty || "normal",
       });
       session.aiThinking = false;
-      if (pick) applyAction(pick);
-      else renderGame();
+      if (pick) applyAction(pick, { fromAi: true });
+      else {
+        renderGame();
+        updateHistBtns();
+      }
     }, delay);
   }
 
@@ -1004,6 +1093,8 @@
     destroyP2P();
     clearHist();
     pendingChoice = null;
+    suppressNodes = new Set();
+    hideTurnWait();
     const starter = readNextStarter();
     writeNextStarter(starter);
     session = {
@@ -1028,6 +1119,8 @@
     destroyP2P();
     clearHist();
     pendingChoice = null;
+    suppressNodes = new Set();
+    hideTurnWait();
     const p1 = ($("p1-name").value || "").trim() || t("player1Ph");
     const p2 = ($("p2-name").value || "").trim() || t("player2Ph");
     saveSettings({ p1, p2 });
@@ -1264,6 +1357,8 @@
     selected = null;
     pendingChoice = null;
     session = null;
+    clearHist();
+    hideTurnWait();
     destroyP2P();
     showScreen("home");
   }
@@ -1396,7 +1491,7 @@
 
   $("btn-game-home").addEventListener("click", () => goHome());
 
-  $("btn-game-restart").addEventListener("click", () => {
+  function rematchCurrent() {
     if (!session) return;
     if (session.mode === "solo") startSolo();
     else if (session.mode === "twop") startTwoP();
@@ -1405,10 +1500,12 @@
       p2p.send({ type: "rematch-ask", who: p2pLobby.you });
       session = null;
       pendingChoice = null;
+      clearHist();
+      hideTurnWait();
       showScreen("room");
       renderRoom();
     }
-  });
+  }
 
   if ($("btn-game-undo")) {
     $("btn-game-undo").addEventListener("click", () => doUndo());
@@ -1417,9 +1514,7 @@
     $("btn-game-redo").addEventListener("click", () => doRedo());
   }
 
-  $("btn-rematch").addEventListener("click", () => {
-    $("btn-game-restart").click();
-  });
+  $("btn-rematch").addEventListener("click", () => rematchCurrent());
 
   if (Sfx && Sfx.bindFirstGesture) Sfx.bindFirstGesture(document);
   if (window.ArenaHubBack) {
