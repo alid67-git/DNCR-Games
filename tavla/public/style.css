@@ -566,6 +566,19 @@ input[type="text"]:focus {
     linear-gradient(180deg, #f0c996 0%, var(--wood-felt) 55%, var(--wood-felt-deep) 100%);
   box-shadow: inset 0 0 0 1px rgba(160, 110, 60, 0.12);
 }
+/* Kapak birleşim kenarı — katlanma dikişi */
+.board-half.top {
+  border-bottom: 2px solid #2a180c;
+  box-shadow:
+    inset 0 0 0 1px rgba(160, 110, 60, 0.12),
+    inset 0 -3px 5px rgba(80, 40, 10, 0.12);
+}
+.board-half.bottom {
+  border-top: 2px solid #2a180c;
+  box-shadow:
+    inset 0 0 0 1px rgba(160, 110, 60, 0.12),
+    inset 0 3px 5px rgba(80, 40, 10, 0.12);
+}
 /* Hafif ahşap damar */
 .board-half::before {
   content: "";
@@ -780,15 +793,62 @@ input[type="text"]:focus {
   box-shadow:
     inset 0 2px 3px rgba(255, 210, 160, 0.12),
     inset 0 -2px 4px rgba(0, 0, 0, 0.35);
-  border-top: 2px solid #3d2412;
-  border-bottom: 2px solid #3d2412;
+  /* Yarıların birleştiği kenar dikişleri */
+  border-top: 3px solid #2a180c;
+  border-bottom: 3px solid #2a180c;
   overflow: visible;
+}
+
+/*
+ * Katlanma izi — omurganın tam ortasında ince oluk;
+ * iki yarı buradan katlanır (referanstaki orta dikiş).
+ */
+.katlanma-izi {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  z-index: 3;
+  pointer-events: none;
+  height: 0.28rem;
+  margin-top: -0.14rem;
+  border-radius: 1px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20, 10, 4, 0.15) 0%,
+      #1a0e08 35%,
+      #0c0704 50%,
+      #2a180c 65%,
+      rgba(255, 210, 160, 0.12) 100%
+    );
+  box-shadow:
+    0 1px 0 rgba(255, 220, 180, 0.18),
+    inset 0 1px 1px rgba(0, 0, 0, 0.65),
+    inset 0 -0.5px 0 rgba(255, 210, 160, 0.1);
+}
+.katlanma-izi::before,
+.katlanma-izi::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+}
+.katlanma-izi::before {
+  top: -1px;
+  background: rgba(255, 220, 180, 0.14);
+}
+.katlanma-izi::after {
+  bottom: -1px;
+  background: rgba(0, 0, 0, 0.35);
 }
 
 /*
  * Menteşeler — iStock referansı:
  * koyu omurga üzerinde yalnız İKİ gümüş dikdörtgen;
- * omurganın iki ucunda, üst–alt yarıyı köprüleyecek kadar uzun.
+ * omurganın iki ucunda, katlanma izinin üstünden köprüler.
  */
 .kapak-hinge {
   position: absolute;
