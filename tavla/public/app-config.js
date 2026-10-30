@@ -1,9 +1,22 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.13",
-  build: 14,
+  version: "1.0.14",
+  build: 15,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.14",
+      build: 15,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Zara dokunarak hamle / kapı alma — seçili taş + zar",
+        ],
+        en: [
+          "Tap a die to move or bear off with the selected checker",
+        ],
+      },
+    },
     {
       version: "1.0.13",
       build: 14,

@@ -886,7 +886,7 @@ input[type="text"]:focus {
   bottom: 0.55rem;
 }
 
-/* Zarlar — sağ yarı üzerinde (buton ayrı; zarların üstüne binmez) */
+/* Zarlar — sağ yarı üzerinde; kullanılabilir zarlara dokunulur */
 .dice-on-board {
   position: absolute;
   left: 50%;
@@ -898,7 +898,27 @@ input[type="text"]:focus {
 .dice-on-board .dice-panel {
   pointer-events: none;
 }
+.dice-row {
+  pointer-events: auto;
+}
 .dice-row .die {
+  pointer-events: none;
+}
+.dice-row .die.playable {
+  pointer-events: auto;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.4));
+}
+.dice-row .die.playable:active {
+  transform: scale(0.94);
+}
+.dice-row .die.playable::after {
+  content: "";
+  position: absolute;
+  inset: -0.28rem;
+  border-radius: 0.55rem;
+  border: 2px solid rgba(91, 108, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(91, 108, 255, 0.16);
   pointer-events: none;
 }
 /* Bar · Zar at · Kapı — tek satır */

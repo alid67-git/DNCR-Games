@@ -149,6 +149,8 @@ window.TavlaI18n = (function () {
       redo: "İleri al",
       undoDone: "Son hamle geri alındı",
       redoDone: "Hamle ileri alındı",
+      dieUnused: "Bu zar şu an kullanılamıyor",
+      dieWrongPiece: "Bu zar seçili taşla oynamıyor — başka taş seç veya Kapı’ya dokun",
     },
     en: {
       appName: "Tavla",
@@ -299,6 +301,8 @@ window.TavlaI18n = (function () {
       redo: "Redo",
       undoDone: "Last move undone",
       redoDone: "Move redone",
+      dieUnused: "That die can’t be used right now",
+      dieWrongPiece: "That die doesn’t move the selected checker — pick another or tap Off",
     },
   };
 
