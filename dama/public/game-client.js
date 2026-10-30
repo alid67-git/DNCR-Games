@@ -304,7 +304,7 @@
       crown.setAttribute("r", 1.7);
       crown.setAttribute(
         "fill",
-        owner === PLAYERS.white ? "rgba(62,207,191,0.55)" : "rgba(94,200,184,0.65)"
+        owner === PLAYERS.white ? "rgba(255,255,255,0.55)" : "rgba(94,200,184,0.65)"
       );
       crown.setAttribute("pointer-events", "none");
       g.appendChild(crown);
@@ -397,7 +397,7 @@
     const skin = el.querySelector(".skin");
     if (skin) {
       skin.dataset.prevFill = skin.getAttribute("fill") || "";
-      skin.setAttribute("fill", owner === PLAYERS.white ? "#d8fff8" : "#5a7a96");
+      skin.setAttribute("fill", owner === PLAYERS.white ? "#ffc2ad" : "#5a7a96");
       skin.setAttribute("stroke", "#3ecfbf");
       skin.setAttribute("stroke-width", "0.9");
     }

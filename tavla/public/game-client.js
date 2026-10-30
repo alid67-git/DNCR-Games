@@ -318,19 +318,182 @@
 
   let diceAnimTimer = null;
   let diceBusy = false;
+  let moveBusy = false;
+
+  function waitMs(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function rectCenter(el) {
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    if (!r.width && !r.height) return null;
+    return {
+      x: r.left + r.width / 2,
+      y: r.top + r.height / 2,
+      size: Math.min(r.width, r.height) || 28,
+    };
+  }
+
+  function pointLanding(n) {
+    const el = pointEls.get(n);
+    if (!el) return null;
+    const checkers = el.querySelectorAll(".checker");
+    if (checkers.length) {
+      const last = checkers[checkers.length - 1];
+      const pos = rectCenter(last);
+      if (!pos) return null;
+      const isTop = !!el.closest(".board-half.top");
+      return { x: pos.x, y: pos.y + (isTop ? 11 : -11), size: pos.size };
+    }
+    const r = el.getBoundingClientRect();
+    const isTop = !!el.closest(".board-half.top");
+    return {
+      x: r.left + r.width / 2,
+      y: isTop ? r.top + Math.min(22, r.height * 0.18) : r.bottom - Math.min(22, r.height * 0.18),
+      size: Math.min(r.width * 0.88, 32),
+    };
+  }
+
+  function barLanding(color) {
+    const halfSel = color === PLAYERS.white ? ".bar-white" : ".bar-blue";
+    const half = document.querySelector(`#bar-stack ${halfSel}`);
+    if (!half) return rectCenter($("bar-zone"));
+    const checkers = half.querySelectorAll(".checker");
+    if (checkers.length) return rectCenter(checkers[checkers.length - 1]);
+    return rectCenter(half) || rectCenter($("bar-zone"));
+  }
+
+  function offLanding(color) {
+    return rectCenter(color === PLAYERS.white ? $("off-white") : $("off-blue"));
+  }
+
+  function slotLanding(slot, color) {
+    if (slot === "bar") return barLanding(color);
+    if (slot === "off") return offLanding(color);
+    if (typeof slot === "number") return pointLanding(slot);
+    return null;
+  }
+
+  function peelChecker(slot, color) {
+    if (slot === "bar") {
+      const halfSel = color === PLAYERS.white ? ".bar-white" : ".bar-blue";
+      const half = document.querySelector(`#bar-stack ${halfSel}`);
+      const checkers = half ? half.querySelectorAll(".checker") : [];
+      const c = checkers[checkers.length - 1];
+      if (c) {
+        const pos = rectCenter(c);
+        c.remove();
+        return pos;
+      }
+      return barLanding(color);
+    }
+    if (typeof slot === "number") {
+      const el = pointEls.get(slot);
+      const checkers = el ? el.querySelectorAll(".checker") : [];
+      const c = checkers[checkers.length - 1];
+      if (c) {
+        const pos = rectCenter(c);
+        c.remove();
+        return pos;
+      }
+      return pointLanding(slot);
+    }
+    return null;
+  }
+
+  function flyChecker(from, to, color, opts) {
+    return new Promise((resolve) => {
+      if (!from || !to) {
+        resolve();
+        return;
+      }
+      const size = Math.max(18, from.size || to.size || 28);
+      const el = document.createElement("span");
+      el.className = `checker-fly ${color}${opts && opts.hit ? " is-hit" : ""}`;
+      el.style.width = `${size}px`;
+      el.style.height = `${size}px`;
+      el.style.left = `${from.x - size / 2}px`;
+      el.style.top = `${from.y - size / 2}px`;
+      document.body.appendChild(el);
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const dist = Math.hypot(dx, dy);
+      const arc = Math.min(64, Math.max(18, dist * 0.24));
+      const dur = (opts && opts.duration) || (opts && opts.hit ? 360 : 440);
+      const finish = () => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+        resolve();
+      };
+      if (typeof el.animate !== "function") {
+        waitMs(dur).then(finish);
+        return;
+      }
+      const anim = el.animate(
+        [
+          { transform: "translate(0px, 0px) scale(1)", offset: 0 },
+          {
+            transform: `translate(${(dx * 0.48).toFixed(1)}px, ${(dy * 0.48 - arc).toFixed(1)}px) scale(1.14)`,
+            offset: 0.48,
+          },
+          {
+            transform: `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(1)`,
+            offset: 1,
+          },
+        ],
+        {
+          duration: dur,
+          easing: "cubic-bezier(0.2, 0.75, 0.22, 1)",
+          fill: "forwards",
+        }
+      );
+      anim.finished.then(finish).catch(finish);
+    });
+  }
+
+  async function animateMoveFlight(move, player) {
+    const fromPos = peelChecker(move.from, player) || slotLanding(move.from, player);
+    const toPos = slotLanding(move.to, player);
+    let hitPos = null;
+    if (move.hit && typeof move.to === "number") {
+      const el = pointEls.get(move.to);
+      const blot = el && el.querySelector(".checker");
+      if (blot) hitPos = rectCenter(blot);
+    }
+    await flyChecker(fromPos, toPos, player);
+    if (move.hit) {
+      const opp = opponent(player);
+      if (hitPos) {
+        const blotEl = pointEls.get(move.to) && pointEls.get(move.to).querySelector(".checker");
+        if (blotEl) blotEl.remove();
+      }
+      const barPos = barLanding(opp);
+      await flyChecker(hitPos || toPos, barPos, opp, { hit: true, duration: 380 });
+    }
+  }
+
+  function makeDieFace(faceValue) {
+    const face = document.createElement("span");
+    face.className = "die-face";
+    face.dataset.face = String(faceValue);
+    face.setAttribute("aria-hidden", "true");
+    for (let i = 0; i < 9; i++) {
+      face.appendChild(document.createElement("span")).className = "pip";
+    }
+    return face;
+  }
 
   function makeDieEl(value, extraClass) {
     const die = document.createElement("span");
     die.className = "die" + (extraClass ? " " + extraClass : "");
     die.dataset.value = String(value);
     die.setAttribute("aria-label", String(value));
-    const pips = document.createElement("span");
-    pips.className = "pips";
-    pips.setAttribute("aria-hidden", "true");
-    for (let i = 0; i < 9; i++) {
-      pips.appendChild(document.createElement("span")).className = "pip";
+    const cube = document.createElement("span");
+    cube.className = "die-cube";
+    for (let face = 1; face <= 6; face++) {
+      cube.appendChild(makeDieFace(face));
     }
-    die.appendChild(pips);
+    die.appendChild(cube);
     return die;
   }
 
@@ -352,7 +515,14 @@
         if (idx >= 0) remaining.splice(idx, 1);
         else die.classList.add("used");
       }
-      if (rolling) die.style.animationDelay = `${i * 0.07}s`;
+      if (rolling) {
+        const side = i % 2 === 0 ? -1 : 1;
+        const tx = side * (22 + Math.random() * 36 + i * 8);
+        const tr = side * (28 + Math.random() * 40);
+        die.style.setProperty("--throw-x", `${tx}px`);
+        die.style.setProperty("--throw-r", `${tr}deg`);
+        die.style.animationDelay = `${i * 0.08}s`;
+      }
       row.appendChild(die);
     });
   }
@@ -380,28 +550,20 @@
     } else {
       playMoveSfx("place");
     }
-    let tick = 0;
-    const flicker = () => {
-      const a = 1 + ((Math.random() * 6) | 0);
-      const b = 1 + ((Math.random() * 6) | 0);
-      paintDice([a, b], { rolling: true });
-      tick += 1;
-      if (tick < 7) {
-        diceAnimTimer = setTimeout(flicker, 90);
-      } else {
-        const isDouble = finalPair[0] === finalPair[1];
-        const slots = isDouble
-          ? [finalPair[0], finalPair[0], finalPair[0], finalPair[0]]
-          : [finalPair[0], finalPair[1]];
-        paintDice(slots, { settle: true });
-        diceAnimTimer = setTimeout(() => {
-          diceBusy = false;
-          if (btn) btn.classList.remove("is-rolling");
-          if (typeof done === "function") done();
-        }, 420);
-      }
-    };
-    flicker();
+    // Tek atış animasyonu: 3D zarlar havadan düşüp dönerek gelir
+    paintDice([finalPair[0], finalPair[1]], { rolling: true });
+    diceAnimTimer = setTimeout(() => {
+      const isDouble = finalPair[0] === finalPair[1];
+      const slots = isDouble
+        ? [finalPair[0], finalPair[0], finalPair[0], finalPair[0]]
+        : [finalPair[0], finalPair[1]];
+      paintDice(slots, { settle: true });
+      diceAnimTimer = setTimeout(() => {
+        diceBusy = false;
+        if (btn) btn.classList.remove("is-rolling");
+        if (typeof done === "function") done();
+      }, 400);
+    }, 1050);
   }
 
   function currentMoves() {
@@ -479,6 +641,7 @@
     let phaseText = "";
     if (s.winner) phaseText = lang() === "en" ? "Game over" : "Oyun bitti";
     else if (session.aiThinking || diceBusy) phaseText = t("statusCpu");
+    else if (moveBusy) phaseText = t("movePhase");
     else if (!mine && session.mode !== "twop") phaseText = t("oppTurn");
     else if (s.phase === "move") phaseText = t("movePhase");
     else phaseText = "";
@@ -486,13 +649,13 @@
 
     const rollBtn = $("btn-roll");
     if (rollBtn) {
-      const canRoll = s.phase === "roll" && mine && !s.winner && !diceBusy;
+      const canRoll = s.phase === "roll" && mine && !s.winner && !diceBusy && !moveBusy;
       rollBtn.disabled = !canRoll;
       rollBtn.classList.toggle("hidden", !(s.phase === "roll" || diceBusy) || !!s.winner);
     }
 
     if (s.winner) $("status-msg").textContent = "";
-    else if (diceBusy) $("status-msg").textContent = "";
+    else if (diceBusy || moveBusy) $("status-msg").textContent = "";
     else if (session.aiThinking) $("status-msg").textContent = t("statusCpu");
     else if (!mine && session.mode !== "twop") $("status-msg").textContent = "";
     else if (s.phase === "roll") $("status-msg").textContent = "";
@@ -533,7 +696,7 @@
   }
 
   function doRoll(opts) {
-    if (!session || session.state.winner || diceBusy) return;
+    if (!session || session.state.winner || diceBusy || moveBusy) return;
     const fromNet = opts && opts.fromNet;
     const skipAnim = !!(opts && opts.skipAnim);
     if (!fromNet && !isMyTurn()) {
@@ -568,26 +731,36 @@
     playDiceRollAnim(pair, finish);
   }
 
-  function doMove(move, opts) {
-    if (!session || session.state.winner) return;
+  async function doMove(move, opts) {
+    if (!session || session.state.winner || moveBusy || diceBusy) return;
     const fromNet = opts && opts.fromNet;
+    const skipAnim = !!(opts && opts.skipAnim);
     if (!fromNet && !isMyTurn()) {
       toast(t("oppTurn"));
       return;
     }
-    const r = applyMove(session.state, move);
-    if (!r.ok) {
-      if (!fromNet) toast(r.error || t("selectTarget"));
-      return;
+    moveBusy = true;
+    try {
+      const r = applyMove(session.state, move);
+      if (!r.ok) {
+        if (!fromNet) toast(r.error || t("selectTarget"));
+        return;
+      }
+      const player = session.state.turn;
+      selected = null;
+      if (!skipAnim) {
+        await animateMoveFlight(move, player);
+      }
+      session.state = r.state;
+      if (move.hit) playMoveSfx("capture");
+      else if (move.to === "off") playMoveSfx("claim");
+      else playMoveSfx("move");
+      renderGame();
+      if (!fromNet) sendSync();
+    } finally {
+      moveBusy = false;
     }
-    session.state = r.state;
-    selected = null;
-    if (move.hit) playMoveSfx("capture");
-    else if (move.to === "off") playMoveSfx("claim");
-    else playMoveSfx("move");
-    renderGame();
-    if (!fromNet) sendSync();
-    maybeScheduleAi();
+    if (!(opts && opts.skipAi)) maybeScheduleAi();
   }
 
   function pickMove(from, to) {
@@ -599,7 +772,7 @@
   }
 
   function onPointClick(n) {
-    if (!session || session.state.winner) return;
+    if (!session || session.state.winner || moveBusy || diceBusy) return;
     if (!isMyTurn()) {
       toast(session.mode === "solo" ? t("statusCpu") : t("oppTurn"));
       return;
@@ -658,7 +831,7 @@
   }
 
   function onBarClick() {
-    if (!session || session.state.winner) return;
+    if (!session || session.state.winner || moveBusy || diceBusy) return;
     if (!isMyTurn() || session.state.phase !== "move") return;
     const moves = currentMoves().filter((m) => m.from === "bar");
     if (!moves.length) return;
@@ -678,7 +851,7 @@
   }
 
   function onOffClick(player) {
-    if (!session || session.state.winner) return;
+    if (!session || session.state.winner || moveBusy || diceBusy) return;
     if (!isMyTurn() || session.state.phase !== "move") return;
     if (session.state.turn !== player) return;
     if (selected == null) {
@@ -721,15 +894,35 @@
         return;
       }
       const result = Ai.playTurn(session.state, session.difficulty || "normal");
-      session.aiThinking = false;
       selected = null;
       const pair = (result.roll || (result.state && result.state.lastRoll) || [1, 1]).slice(0, 2);
-      playDiceRollAnim(pair, () => {
+      playDiceRollAnim(pair, async () => {
         if (!session || session.mode !== "solo") return;
-        session.state = result.state;
-        if (result.skipped) toast(t("noMoves"));
-        else if (result.moves && result.moves.some((m) => m.hit)) playMoveSfx("capture");
-        else playMoveSfx("move");
+        const rolled = applyRoll(session.state, result.roll);
+        if (!rolled.ok) {
+          session.state = result.state;
+          session.aiThinking = false;
+          renderGame();
+          return;
+        }
+        session.state = rolled.state;
+        renderGame();
+        if (result.skipped) {
+          toast(t("noMoves"));
+          session.aiThinking = false;
+          renderGame();
+          return;
+        }
+        for (const m of result.moves || []) {
+          if (!session || session.mode !== "solo") return;
+          await doMove(m, { fromNet: true, skipAi: true });
+          await waitMs(70);
+        }
+        // Güvenli senkron — AI sonucuyla hizala
+        if (session && session.mode === "solo" && result.state) {
+          session.state = result.state;
+        }
+        if (session) session.aiThinking = false;
         renderGame();
       });
     }, delay == null ? 520 : delay);

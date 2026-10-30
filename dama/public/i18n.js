@@ -40,7 +40,7 @@ window.DamaI18n = (function () {
       startGame: "Başla",
 
       twoPSetupTitle: "Aynı cihazda iki kişi",
-      player1Label: "Beyaz oyuncu",
+      player1Label: "Mercan oyuncu",
       player2Label: "Siyah oyuncu",
       player1Ph: "Oyuncu 1",
       player2Ph: "Oyuncu 2",
@@ -113,7 +113,7 @@ window.DamaI18n = (function () {
       updatesCurrent: "Yüklü sürüm",
       updatesSeen: "Gördüm",
 
-      white: "Beyaz",
+      white: "Mercan",
       black: "Siyah",
       red: "Beyaz",
       you: "Sen",
@@ -142,7 +142,7 @@ window.DamaI18n = (function () {
       rematch: "Yeniden oyna",
       toHome: "Ana menü",
       starter: "Bu el başlayan",
-      youStart: "Bu elde sen (beyaz) başlıyorsun.",
+      youStart: "Bu elde sen (mercan) başlıyorsun.",
       cpuStarts: "Bu elde bilgisayar (siyah) başlıyor.",
       notYourTurn: "Sıra sende değil.",
       captureBanner: "Alma!",
@@ -190,7 +190,7 @@ window.DamaI18n = (function () {
       startGame: "Start",
 
       twoPSetupTitle: "Two on one device",
-      player1Label: "White player",
+      player1Label: "Coral player",
       player2Label: "Black player",
       player1Ph: "Player 1",
       player2Ph: "Player 2",
@@ -263,7 +263,7 @@ window.DamaI18n = (function () {
       updatesCurrent: "Installed version",
       updatesSeen: "Got it",
 
-      white: "White",
+      white: "Coral",
       black: "Black",
       red: "White",
       you: "You",
@@ -292,7 +292,7 @@ window.DamaI18n = (function () {
       rematch: "Play again",
       toHome: "Main menu",
       starter: "Starter this game",
-      youStart: "You (white) start this game.",
+      youStart: "You (coral) start this game.",
       cpuStarts: "Computer (black) starts this game.",
       notYourTurn: "Not your turn.",
       captureBanner: "Capture!",

@@ -5,8 +5,8 @@
   --wood-deep: #2a9d8f;
   --ink: #e9eef5;
   --muted: rgba(185, 200, 215, 0.62);
-  --red: #f2f5f8;
-  --red-glow: #ffffff;
+  --red: #ff8f6b;
+  --red-glow: #ffc2ad;
   --black: #1a2330;
   --black-glow: #3d5168;
   --amber: #3ecfbf;
@@ -517,7 +517,7 @@ input[type="text"]:focus {
   flex-shrink: 0;
 }
 .seat-red .seat-piece {
-  background: radial-gradient(circle at 35% 30%, #fff6e4, #e8c998 55%, #b8894a);
+  background: radial-gradient(circle at 35% 30%, #ffd0bf, #ff8f6b 55%, #d45530);
 }
 .seat-black .seat-piece {
   background: radial-gradient(circle at 35% 30%, #6b3f28, #3a2214 55%, #140a06);
@@ -582,8 +582,8 @@ input[type="text"]:focus {
   flex-shrink: 0;
 }
 .dot-red {
-  background: radial-gradient(circle at 35% 30%, #ffffff, #cfd8e3);
-  box-shadow: inset 0 0 0 1px rgba(62, 207, 191, 0.35);
+  background: radial-gradient(circle at 35% 30%, #ffd0bf, #ff8f6b);
+  box-shadow: inset 0 0 0 1px rgba(255, 143, 107, 0.45);
 }
 .dot-black {
   background: radial-gradient(circle at 35% 30%, #3d5168, #121820);
@@ -824,7 +824,7 @@ input[type="text"]:focus {
   will-change: transform, opacity;
 }
 .eject-orb.from-red {
-  background: radial-gradient(circle at 35% 30%, #ffffff, #cfd8e3 55%, #8a9aab);
+  background: radial-gradient(circle at 35% 30%, #ffd0bf, #ff8f6b 55%, #d45530);
 }
 .eject-orb.from-black {
   background: radial-gradient(circle at 35% 30%, #3d5168, #1a2330 50%, #0a0e14);

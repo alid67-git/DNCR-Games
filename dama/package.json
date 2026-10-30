@@ -1,6 +1,6 @@
 {
   "name": "dama",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Dama \u2014 T\u00fcrk damas\u0131; solo AI, local 2P, serverless P2P",
   "main": "server.js",
   "scripts": {
