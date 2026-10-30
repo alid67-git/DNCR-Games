@@ -67,6 +67,87 @@
     Sfx.play(kind || "move");
   }
   let hubBackCtl = null;
+  const Hist = (window.DncrHistory && window.DncrHistory.create({ max: 40 })) || null;
+
+  function snap() {
+    return JSON.stringify(state && state.game);
+  }
+
+  function pushHist() {
+    if (!Hist || !state || !state.local || !state.game) return;
+    try {
+      Hist.push(snap());
+    } catch (_) {}
+    updateHistBtns();
+  }
+
+  function clearHist() {
+    if (Hist) Hist.clear();
+    updateHistBtns();
+  }
+
+  function historyIdle() {
+    return (
+      !!state &&
+      !!state.local &&
+      !animating &&
+      !(state.game && state.game.winner)
+    );
+  }
+
+  function updateHistBtns() {
+    const u = $("btn-game-undo");
+    const r = $("btn-game-redo");
+    const idle = historyIdle();
+    if (u) u.disabled = !(idle && Hist && Hist.canUndo());
+    if (r) r.disabled = !(idle && Hist && Hist.canRedo());
+  }
+
+  function restoreGameSnap(raw) {
+    const game = JSON.parse(raw);
+    clearTimeout(aiTimer);
+    selected = null;
+    animating = false;
+    const hotseat = !!(state && state.hotseat);
+    const names = state && state.names;
+    state = makeLocalState(game, { hotseat, names });
+    lastSeenMoveCount = game.moveCount || 0;
+    renderGame(state);
+    updateHistBtns();
+    if (
+      state &&
+      state.local &&
+      !state.hotseat &&
+      !state.game.winner &&
+      state.game.turn === PLAYERS.gourd
+    ) {
+      scheduleLocalAi(420);
+    }
+  }
+
+  function doUndo() {
+    if (!historyIdle() || !Hist || !Hist.canUndo()) return;
+    const prev = Hist.undo(snap());
+    if (prev == null) return;
+    try {
+      restoreGameSnap(prev);
+      toast(t("undoDone"));
+    } catch (_) {
+      updateHistBtns();
+    }
+  }
+
+  function doRedo() {
+    if (!historyIdle() || !Hist || !Hist.canRedo()) return;
+    const next = Hist.redo(snap());
+    if (next == null) return;
+    try {
+      restoreGameSnap(next);
+      toast(t("redoDone"));
+    } catch (_) {
+      updateHistBtns();
+    }
+  }
 
   function useLegacySocket() {
     return !!(settings.serverUrl && String(settings.serverUrl).trim());
@@ -683,6 +764,7 @@
     localMode = true;
     selected = null;
     lastSeenMoveCount = -1;
+    clearHist();
     endP2p();
     if (socket) {
       try {
@@ -693,6 +775,7 @@
     writeNextStarter(starter);
     const game = createGameState(starter);
     applyState(makeLocalState(game), { skipAnim: true });
+    updateHistBtns();
     toast(starter === PLAYERS.gourd ? t("cpuStarts") : t("youStart"));
     if (game.turn === PLAYERS.gourd) scheduleLocalAi(700);
   }
@@ -702,6 +785,7 @@
     localMode = true;
     selected = null;
     lastSeenMoveCount = -1;
+    clearHist();
     endP2p();
     if (socket) {
       try {
@@ -721,6 +805,7 @@
       }),
       { skipAnim: true }
     );
+    updateHistBtns();
   }
 
   function scheduleLocalAi(delay = 520) {
@@ -749,6 +834,7 @@
       toast(r.error);
       return;
     }
+    pushHist();
     const move = r.state.lastMove;
     await animateMove(prevBoard, move, player);
     lastSeenMoveCount = r.state.moveCount;
@@ -944,6 +1030,8 @@
     else if (!g.winner) $("status-msg").textContent = s.vsAi ? t("statusCpu") : t("statusOpp");
     else $("status-msg").textContent = "";
 
+    updateHistBtns();
+
     const end = $("end-panel");
     if (g.winner) {
       maybeRecordKatiScore(s, g);
@@ -1046,8 +1134,51 @@
     selected = null;
     state = null;
     localMode = false;
+    clearHist();
     endP2p();
     showScreen("home");
+  }
+
+  function leaveGameScreen() {
+    const inMatch = !!(state && state.game && !state.game.winner);
+    if (inMatch) {
+      const msg =
+        lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?";
+      if (!window.confirm(msg)) return;
+    }
+    if (state && state.local) {
+      goHome();
+      showScreen("play");
+      return;
+    }
+    if (state && !state.local) {
+      endP2p();
+      if (socket) {
+        try {
+          socket.emit("room:leave");
+        } catch (_) {}
+      }
+      state = null;
+      clearHist();
+      showScreen("play");
+      return;
+    }
+    goHome();
+  }
+
+  function restartCurrentMode() {
+    if (!state) return;
+    selected = null;
+    if (state.hotseat) {
+      startLocalHotseat();
+      return;
+    }
+    if (state.local || (state.vsAi && localMode)) {
+      startLocalSolo();
+      return;
+    }
+    if (p2pSession) p2pSession.rematch();
+    else if (socket) socket.emit("game:rematch", { code: state.code });
   }
 
   // —— Events ——
@@ -1200,20 +1331,20 @@
     goHome();
   });
 
-  $("btn-rematch").addEventListener("click", () => {
-    if (!state) return;
-    selected = null;
-    if (state.hotseat) {
-      startLocalHotseat();
-      return;
-    }
-    if (state.local || (state.vsAi && localMode)) {
-      startLocalSolo();
-      return;
-    }
-    if (p2pSession) p2pSession.rematch();
-    else if (socket) socket.emit("game:rematch", { code: state.code });
-  });
+  if ($("btn-game-back")) {
+    $("btn-game-back").addEventListener("click", () => leaveGameScreen());
+  }
+  if ($("btn-game-undo")) {
+    $("btn-game-undo").addEventListener("click", () => doUndo());
+  }
+  if ($("btn-game-redo")) {
+    $("btn-game-redo").addEventListener("click", () => doRedo());
+  }
+  if ($("btn-game-restart")) {
+    $("btn-game-restart").addEventListener("click", () => restartCurrentMode());
+  }
+
+  $("btn-rematch").addEventListener("click", () => restartCurrentMode());
 
   $("btn-lobby").addEventListener("click", () => {
     if (state && state.local) {

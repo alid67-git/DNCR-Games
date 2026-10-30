@@ -1,5 +1,5 @@
 /* Fanorona — offline cache (solo + local 2P) */
-const CACHE = "fanorona-v1.0.3";
+const CACHE = "fanorona-v1.0.4";
 const ASSETS = [
   "./",
   "./index.html",
@@ -18,6 +18,9 @@ const ASSETS = [
   "./shared/mode-i18n.js",
   "./shared/hub-back.js",
   "./shared/move-sfx.js",
+  "./shared/history-stack.js",
+  "./shared/palette.css",
+  "./shared/shell-ui.css",
   "./fonts/fonts.css",
   "./fonts/manrope-latin.woff2",
   "./fonts/manrope-latinext.woff2",

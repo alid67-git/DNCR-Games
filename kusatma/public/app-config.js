@@ -1,10 +1,25 @@
 window.SiegeConfig = {
   appName: "Kuşatma",
-  version: "1.5.1",
-  build: 10,
+  version: "1.5.2",
+  build: 11,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kusatma/",
   hubUrl: "https://alid67-git.github.io/DNCR-Games/",
   changelog: [
+    {
+      version: "1.5.2",
+      build: 11,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Soğuk palet: mavi / gri / beyaz / yeşil (kahverengi kalktı)",
+          "Oyun çubuğunda geri al · ileri al (undo / redo); yeniden başlat kaldı",
+        ],
+        en: [
+          "Cool palette: blue / gray / white / green (no brown)",
+          "Game bar undo · redo; restart kept",
+        ],
+      },
+    },
     {
       version: "1.5.1",
       build: 10,

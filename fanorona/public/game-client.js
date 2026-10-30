@@ -62,12 +62,98 @@
   let animBusy = false;
   /** @type {Set<string>} Animasyon sırasında SVG'de bastırılan (yeniden çizilmeyen) düğümler */
   let suppressNodes = new Set();
-  /** @type {string[]} */
-  let undoStack = [];
-  /** @type {string[]} */
-  let redoStack = [];
-  const UNDO_MAX = 40;
   const Sfx = window.DncrMoveSfx || null;
+
+  const Hist = (window.DncrHistory && window.DncrHistory.create({ max: 40 })) || null;
+
+  function snap() {
+    return JSON.stringify(session.state);
+  }
+
+  function pushHist() {
+    if (!Hist || !session || session.mode === "p2p") return;
+    try {
+      Hist.push(snap());
+    } catch (_) {}
+    updateHistBtns();
+  }
+
+  function clearHist() {
+    if (Hist) Hist.clear();
+    updateHistBtns();
+  }
+
+  function historyIdle() {
+    return (
+      !!session &&
+      session.mode !== "p2p" &&
+      !session.aiThinking &&
+      !(session.state && session.state.winner) &&
+      !animBusy &&
+      !pendingChoice
+    );
+  }
+
+  function updateHistBtns() {
+    const u = $("btn-game-undo");
+    const r = $("btn-game-redo");
+    const idle = historyIdle();
+    if (u) u.disabled = !(idle && Hist && Hist.canUndo());
+    if (r) r.disabled = !(idle && Hist && Hist.canRedo());
+  }
+
+  function restoreSnap(raw) {
+    clearTimeout(aiTimer);
+    clearTimeout(moveFlashTimer);
+    moveFlashTimer = null;
+    suppressNodes = new Set();
+    clearMoveTrail();
+    const layer = $("board-fx-html");
+    if (layer) layer.innerHTML = "";
+    const fx = $("board-fx");
+    if (fx) fx.innerHTML = "";
+    session.state = JSON.parse(raw);
+    if ("aiThinking" in session) session.aiThinking = false;
+    selected = null;
+    pendingChoice = null;
+    animBusy = false;
+    clearHints();
+    hideTurnWait();
+    renderGame();
+    updateHistBtns();
+    if (
+      session.mode === "solo" &&
+      !session.state.winner &&
+      session.state.turn === PLAYERS.black
+    ) {
+      scheduleAi(420);
+    }
+  }
+
+  function doUndo() {
+    if (!historyIdle() || !Hist || !Hist.canUndo()) return;
+    const prev = Hist.undo(snap());
+    if (prev == null) return;
+    try {
+      restoreSnap(prev);
+      toast(t("undoDone"));
+    } catch (_) {
+      updateHistBtns();
+    }
+  }
+
+  function doRedo() {
+    if (!historyIdle() || !Hist || !Hist.canRedo()) return;
+    const next = Hist.redo(snap());
+    if (next == null) return;
+    try {
+      restoreSnap(next);
+      toast(t("redoDone"));
+    } catch (_) {
+      updateHistBtns();
+    }
+  }
+
 
   function playMoveSfx(kind) {
     if (!Sfx) return;
@@ -352,101 +438,6 @@
 
   function cloneBoard(board) {
     return Object.assign({}, board || {});
-  }
-
-  function serializeState(state) {
-    return JSON.stringify(state);
-  }
-
-  function deserializeState(snap) {
-    return JSON.parse(snap);
-  }
-
-  function clearUndo() {
-    undoStack = [];
-    redoStack = [];
-    updateUndoBtn();
-  }
-
-  function pushUndo() {
-    if (!session || !session.state) return;
-    if (session.mode === "p2p") return;
-    try {
-      undoStack.push(serializeState(session.state));
-      if (undoStack.length > UNDO_MAX) undoStack.shift();
-      redoStack = [];
-    } catch (_) {}
-    updateUndoBtn();
-  }
-
-  function historyIdle() {
-    return (
-      !!session &&
-      session.mode !== "p2p" &&
-      !animBusy &&
-      !session.aiThinking &&
-      !session.state.winner &&
-      !pendingChoice
-    );
-  }
-
-  function updateUndoBtn() {
-    const u = $("btn-game-undo");
-    const r = $("btn-game-redo");
-    const idle = historyIdle();
-    if (u) u.disabled = !(idle && undoStack.length > 0);
-    if (r) r.disabled = !(idle && redoStack.length > 0);
-  }
-
-  function restoreSnap(snap) {
-    clearTimeout(aiTimer);
-    clearTimeout(moveFlashTimer);
-    moveFlashTimer = null;
-    suppressNodes = new Set();
-    clearMoveTrail();
-    const layer = $("board-fx-html");
-    if (layer) layer.innerHTML = "";
-    const fx = $("board-fx");
-    if (fx) fx.innerHTML = "";
-    session.state = deserializeState(snap);
-    session.aiThinking = false;
-    selected = null;
-    pendingChoice = null;
-    animBusy = false;
-    hideTurnWait();
-    renderGame();
-    updateUndoBtn();
-  }
-
-  function doUndo() {
-    if (!historyIdle() || !undoStack.length) return;
-    try {
-      redoStack.push(serializeState(session.state));
-      if (redoStack.length > UNDO_MAX) redoStack.shift();
-      restoreSnap(undoStack.pop());
-      toast(t("undoDone"));
-    } catch (_) {
-      updateUndoBtn();
-    }
-  }
-
-  function doRedo() {
-    if (!historyIdle() || !redoStack.length) return;
-    try {
-      undoStack.push(serializeState(session.state));
-      if (undoStack.length > UNDO_MAX) undoStack.shift();
-      restoreSnap(redoStack.pop());
-      toast(t("redoDone"));
-      if (
-        session.mode === "solo" &&
-        !session.state.winner &&
-        session.state.turn === PLAYERS.black
-      ) {
-        scheduleAi(420);
-      }
-    } catch (_) {
-      updateUndoBtn();
-    }
   }
 
   function clearHints() {
@@ -858,6 +849,7 @@
           : t("statusMove");
     }
 
+    updateHistBtns();
     const end = $("end-panel");
     if (s.winner) {
       maybeRecordScore();
@@ -876,7 +868,6 @@
     } else end.classList.add("hidden");
 
     updateTurnWaitUi();
-    updateUndoBtn();
   }
 
   function updateHints() {
@@ -919,19 +910,16 @@
 
     const hadChain = !!session.state.chain;
     const boardBefore = cloneBoard(session.state.board);
-    if (!fromNet && !fromAi) pushUndo();
 
     const r = tryAction(session.state, actor, action);
     if (!r.ok) {
-      if (!fromNet && !fromAi && undoStack.length) undoStack.pop();
       if (!fromNet) toast(r.error);
-      updateUndoBtn();
+      updateHistBtns();
       return;
     }
 
     // Yaklaşma / uzaklaşma belirsiz — tahta değişmez, UI seçimi bekler
     if (r.state.phase === "choose" && r.state.pendingChoices && r.state.pendingChoices.length > 1) {
-      if (!fromNet && !fromAi && undoStack.length) undoStack.pop();
       pendingChoice = {
         from: action.from || r.state.pendingChoices[0].from,
         to: action.to || r.state.pendingChoices[0].to,
@@ -941,6 +929,8 @@
       return;
     }
 
+    // İnsan hamlesinden önce (AI ayrı push etmez → undo insan+AI birim)
+    if (!fromNet && !fromAi) pushHist();
     const lm = r.state.lastMove || {};
     const from = lm.from;
     const to = lm.to;
@@ -951,7 +941,7 @@
       !r.state.winner && !stillChain && r.state.turn !== actor;
 
     animBusy = true;
-    updateUndoBtn();
+    updateHistBtns();
     selected = stillChain && r.state.chain ? r.state.chain.piece : null;
     pendingChoice = null;
     clearHints();
@@ -1007,7 +997,7 @@
     }
 
     animBusy = false;
-    updateUndoBtn();
+    updateHistBtns();
 
     if (session.mode === "p2p" && !fromNet && p2p) {
       p2p.send({ type: "action", action, moveCount: r.state.moveCount });
@@ -1093,7 +1083,7 @@
       if (pick) applyAction(pick, { fromAi: true });
       else {
         renderGame();
-        updateUndoBtn();
+        updateHistBtns();
       }
     }, delay);
   }
@@ -1101,7 +1091,7 @@
   function startSolo() {
     clearTimeout(aiTimer);
     destroyP2P();
-    clearUndo();
+    clearHist();
     pendingChoice = null;
     suppressNodes = new Set();
     hideTurnWait();
@@ -1127,7 +1117,7 @@
   function startTwoP() {
     clearTimeout(aiTimer);
     destroyP2P();
-    clearUndo();
+    clearHist();
     pendingChoice = null;
     suppressNodes = new Set();
     hideTurnWait();
@@ -1508,7 +1498,7 @@
       p2p.send({ type: "rematch-ask", who: p2pLobby.you });
       session = null;
       pendingChoice = null;
-      clearUndo();
+      clearHist();
       hideTurnWait();
       showScreen("room");
       renderRoom();
