@@ -1,0 +1,53 @@
+/**
+ * DNCR Games — ortak soğuk palet (mavi / gri / beyaz / yeşil)
+ * Kahverengi / kum / odun tonları kullanılmaz.
+ *
+ * Oyunlar kendi :root'unda bu değişkenleri override edebilir;
+ * shell-ui ve ortak UI bu token'lara dayanır.
+ */
+:root {
+  --dncr-bg-deep: #0f1720;
+  --dncr-bg-mid: #162231;
+  --dncr-ink: #f2f6fa;
+  --dncr-muted: rgba(242, 246, 250, 0.62);
+  --dncr-panel: rgba(20, 32, 46, 0.9);
+  --dncr-line: rgba(150, 185, 210, 0.24);
+  --dncr-white: #f7fafc;
+  --dncr-gray: #8a97a8;
+  --dncr-blue: #4fc3f7;
+  --dncr-blue-deep: #0288d1;
+  --dncr-green: #66bb6a;
+  --dncr-green-deep: #2e7d32;
+  --dncr-accent: #5ec8a8;
+  --dncr-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* Light chrome variant (Tavla-style screens) */
+:root.dncr-light,
+.dncr-light {
+  --dncr-bg-deep: #eef2f6;
+  --dncr-bg-mid: #e4ebf2;
+  --dncr-ink: #1e2a38;
+  --dncr-muted: rgba(30, 42, 56, 0.55);
+  --dncr-panel: #ffffff;
+  --dncr-line: rgba(40, 70, 100, 0.14);
+  --dncr-white: #ffffff;
+  --dncr-gray: #6b7c90;
+  --dncr-blue: #4a7fcb;
+  --dncr-blue-deep: #2f5ea8;
+  --dncr-green: #2e9e75;
+  --dncr-green-deep: #1b7a58;
+  --dncr-accent: #2e9e75;
+  --dncr-shadow: 0 10px 28px rgba(30, 42, 56, 0.1);
+}
+
+.game-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+#btn-game-undo:disabled,
+#btn-game-redo:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

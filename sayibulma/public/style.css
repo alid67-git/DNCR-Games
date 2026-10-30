@@ -1364,3 +1364,7 @@ input[type="text"]:focus {
     margin-bottom: 0.15rem;
   }
 }
+
+
+.game-top-actions { display:flex; align-items:center; gap:0.2rem; }
+#btn-game-undo:disabled, #btn-game-redo:disabled { opacity:0.35; cursor:default; }

@@ -63,6 +63,85 @@
   let hubBackCtl = null;
   const Sfx = window.DncrMoveSfx || null;
 
+  const Hist = (window.DncrHistory && window.DncrHistory.create({ max: 40 })) || null;
+
+  function snap() {
+    return JSON.stringify(session.state);
+  }
+
+  function pushHist() {
+    if (!Hist || !session || session.mode === "p2p") return;
+    try {
+      Hist.push(snap());
+    } catch (_) {}
+    updateHistBtns();
+  }
+
+  function clearHist() {
+    if (Hist) Hist.clear();
+    updateHistBtns();
+  }
+
+  function historyIdle() {
+    return (
+      !!session &&
+      session.mode !== "p2p" &&
+      !session.aiThinking &&
+      !(session.state && session.state.winner)
+    );
+  }
+
+  function updateHistBtns() {
+    const u = $("btn-game-undo");
+    const r = $("btn-game-redo");
+    const idle = historyIdle();
+    if (u) u.disabled = !(idle && Hist && Hist.canUndo());
+    if (r) r.disabled = !(idle && Hist && Hist.canRedo());
+  }
+
+  function restoreSnap(raw) {
+    session.state = JSON.parse(raw);
+    clearTimeout(aiTimer);
+    session.aiThinking = false;
+    updateCpuWaitUi(false);
+    setGuessInputLocked(false);
+    pads.guess.clear();
+    renderGame();
+    updateHistBtns();
+    if (
+      session.mode === "solo" &&
+      !session.state.winner &&
+      session.state.turn === PLAYERS.b
+    ) {
+      scheduleAi(420);
+    }
+  }
+
+  function doUndo() {
+    if (!historyIdle() || !Hist || !Hist.canUndo()) return;
+    const prev = Hist.undo(snap());
+    if (prev == null) return;
+    try {
+      restoreSnap(prev);
+      toast(t("undoDone"));
+    } catch (_) {
+      updateHistBtns();
+    }
+  }
+
+  function doRedo() {
+    if (!historyIdle() || !Hist || !Hist.canRedo()) return;
+    const next = Hist.redo(snap());
+    if (next == null) return;
+    try {
+      restoreSnap(next);
+      toast(t("redoDone"));
+    } catch (_) {
+      updateHistBtns();
+    }
+  }
+
+
   const pads = {
     soloSecret: makeDigitPad("solo-secret-slots", "solo-secret-pad", { mask: true }),
     roomSecret: makeDigitPad("room-secret-slots", "room-secret-pad", { mask: true }),
@@ -514,6 +593,7 @@
     $("status-msg").textContent =
       !s.winner && canAct() && !anyGuess ? t("statusGuess") : "";
 
+    updateHistBtns();
     const end = $("end-panel");
     const showResultBtn = $("btn-show-result");
     const stage = $("guess-stage");
@@ -740,6 +820,7 @@
       else if (r.error === "wrong_turn") toast(t("notYourTurn"));
       return;
     }
+    if (!options.fromNet) pushHist();
     session.state = r.state;
     playSfx(r.score.plus === DIGIT_COUNT ? "mill" : "place");
     showLastFeedback(guess, r.score);
@@ -807,6 +888,7 @@
         }
         const r = applyGuess(session.state, PLAYERS.b, guess);
         if (r.ok) {
+          pushHist();
           session.state = r.state;
           playSfx(r.score.plus === DIGIT_COUNT ? "mill" : "place");
           showLastFeedback(guess, r.score);
@@ -839,6 +921,7 @@
   function startSolo() {
     clearTimeout(aiTimer);
     destroyP2P();
+    clearHist();
     const secretA = pads.soloSecret.value();
     if (!isValidSecret(secretA)) {
       toast(t("secretInvalid"));
@@ -1304,6 +1387,7 @@
   function restartCurrentMode() {
     if (!session) return;
     clearTimeout(aiTimer);
+    clearHist();
     session.aiThinking = false;
     updateCpuWaitUi(false);
     if (session.mode === "solo") {

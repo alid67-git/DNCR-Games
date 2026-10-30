@@ -1,16 +1,16 @@
 :root {
-  --bg-deep: #1c1108;
-  --bg-mid: #2b1a0c;
-  --wood: #c9a05a;
-  --wood-deep: #8a5e2c;
-  --ink: #f3e6c8;
-  --muted: rgba(243, 230, 200, 0.58);
-  --red: #c62828;
-  --red-glow: #ef5350;
-  --black: #1a1a1a;
-  --black-glow: #555;
-  --amber: #e8c878;
-  --panel: rgba(28, 16, 8, 0.78);
+  --bg-deep: #0f1720;
+  --bg-mid: #162231;
+  --wood: #5ec8a8;
+  --wood-deep: #2e9e75;
+  --ink: #f2f6fa;
+  --muted: rgba(242, 246, 250, 0.62);
+  --red: #4fc3f7;
+  --red-glow: #81d4fa;
+  --black: #8a97a8;
+  --black-glow: #b0bec5;
+  --amber: #66bb6a;
+  --panel: rgba(20, 32, 46, 0.9);
   --radius: 16px;
   --font-display: "Sora", "Segoe UI", sans-serif;
   --font-body: "Manrope", system-ui, sans-serif;
@@ -516,7 +516,7 @@ input[type="text"]:focus {
 
 .game-top {
   display: grid;
-  grid-template-columns: 40px 1fr 40px;
+  grid-template-columns: 40px 1fr auto;
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.7rem;
@@ -907,3 +907,7 @@ input[type="text"]:focus {
     font-size: 2.15rem;
   }
 }
+
+
+.game-top-actions { display:flex; align-items:center; gap:0.2rem; }
+#btn-game-undo:disabled, #btn-game-redo:disabled { opacity:0.35; cursor:default; }

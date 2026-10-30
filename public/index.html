@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Kati</title>
-  <meta name="theme-color" content="#2a1c0e" />
+  <meta name="theme-color" content="#0f1720" />
   <meta name="description" content="Kati — Red vs Green. Solo, online across countries." />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="shared/palette.css" />
   <link rel="stylesheet" href="shared/shell-ui.css" />
 </head>
 <body>
@@ -287,11 +288,19 @@
     <!-- GAME -->
     <section id="screen-game" class="screen">
       <header class="game-bar">
-        <p class="brand-mark sm" data-i18n="appName">Kati</p>
-        <p id="turn-label" class="turn-label">—</p>
-        <p id="you-label" class="you-label"></p>
-        <p id="starter-label" class="starter-label"></p>
+        <button type="button" class="btn-icon" id="btn-game-back" aria-label="Geri" title="Geri">←</button>
+        <div class="game-bar-mid">
+          <p class="brand-mark sm" data-i18n="appName">Kati</p>
+          <p id="turn-label" class="turn-label">—</p>
+        </div>
+        <div class="game-top-actions">
+          <button type="button" class="btn-icon" id="btn-game-undo" aria-label="Geri al" title="Geri al" disabled>↶</button>
+          <button type="button" class="btn-icon" id="btn-game-redo" aria-label="İleri al" title="İleri al" disabled>↷</button>
+          <button type="button" class="btn-icon" id="btn-game-restart" aria-label="Yeniden" title="Yeniden">↻</button>
+        </div>
       </header>
+      <p id="you-label" class="you-label"></p>
+      <p id="starter-label" class="starter-label"></p>
 
       <div class="score-trays" aria-live="polite">
         <div class="tray tomato-tray">
@@ -309,17 +318,17 @@
         <svg id="board" viewBox="0 0 100 100" role="img" aria-label="Board">
           <defs>
             <radialGradient id="dirtGrad" cx="50%" cy="40%" r="70%">
-              <stop offset="0%" stop-color="#c4a574" />
-              <stop offset="55%" stop-color="#9a7b4f" />
-              <stop offset="100%" stop-color="#6e5333" />
+              <stop offset="0%" stop-color="#3a5568" />
+              <stop offset="55%" stop-color="#243848" />
+              <stop offset="100%" stop-color="#152330" />
             </radialGradient>
             <filter id="pieceShadow" x="-40%" y="-40%" width="180%" height="180%">
               <feDropShadow dx="0.4" dy="0.8" stdDeviation="0.7" flood-opacity="0.35" />
             </filter>
             <radialGradient id="tomatoFill" cx="35%" cy="30%" r="70%">
-              <stop offset="0%" stop-color="#ff8a80"/>
-              <stop offset="55%" stop-color="#c62828"/>
-              <stop offset="100%" stop-color="#7f0000"/>
+              <stop offset="0%" stop-color="#81d4fa"/>
+              <stop offset="55%" stop-color="#0288d1"/>
+              <stop offset="100%" stop-color="#01579b"/>
             </radialGradient>
             <radialGradient id="gourdFill" cx="35%" cy="30%" r="70%">
               <stop offset="0%" stop-color="#c8e6c9"/>
@@ -328,9 +337,9 @@
             </radialGradient>
           </defs>
           <ellipse cx="50" cy="50" rx="46" ry="46" fill="url(#dirtGrad)" class="board-soil" />
-          <g id="board-lines" fill="none" stroke="#3d2a16" stroke-width="1.1" stroke-linecap="round"></g>
-          <path id="left-arc" d="" fill="none" stroke="#3d2a16" stroke-width="1.1" />
-          <path id="right-arc" d="" fill="none" stroke="#3d2a16" stroke-width="1.1" />
+          <g id="board-lines" fill="none" stroke="#8a97a8" stroke-width="1.1" stroke-linecap="round"></g>
+          <path id="left-arc" d="" fill="none" stroke="#8a97a8" stroke-width="1.1" />
+          <path id="right-arc" d="" fill="none" stroke="#8a97a8" stroke-width="1.1" />
           <g id="board-nodes"></g>
           <g id="board-pieces" filter="url(#pieceShadow)"></g>
           <g id="board-hints"></g>
@@ -376,6 +385,7 @@
   <script src="shared/mode-i18n.js"></script>
   <script src="update-check.js"></script>
   <script src="p2p-online.js"></script>
+  <script src="shared/history-stack.js"></script>
   <script src="game-client.js" defer></script>
 </body>
 </html>

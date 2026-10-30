@@ -15,6 +15,7 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="stylesheet" href="fonts/fonts.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="shared/palette.css" />
   <link rel="stylesheet" href="shared/shell-ui.css" />
 </head>
 <body>
@@ -274,7 +275,11 @@
       <header class="game-top">
         <button type="button" class="btn-icon" id="btn-game-back" aria-label="Geri">←</button>
         <p class="game-title" data-i18n="appName">Fanorona</p>
-        <button type="button" class="btn-icon" id="btn-game-restart" aria-label="Yeniden">↻</button>
+        <div class="game-top-actions">
+          <button type="button" class="btn-icon" id="btn-game-undo" aria-label="Geri al" title="Geri al" disabled>↶</button>
+          <button type="button" class="btn-icon" id="btn-game-redo" aria-label="İleri al" title="İleri al" disabled>↷</button>
+          <button type="button" class="btn-icon" id="btn-game-restart" aria-label="Yeniden">↻</button>
+        </div>
       </header>
 
       <div class="score-row">
@@ -365,6 +370,7 @@
   <script src="shared/score.js"></script>
   <script src="shared/move-sfx.js"></script>
   <script src="p2p.js"></script>
+  <script src="shared/history-stack.js"></script>
   <script src="game-client.js" defer></script>
 </body>
 </html>

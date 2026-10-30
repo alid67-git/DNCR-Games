@@ -531,7 +531,7 @@ input[type="text"]:focus {
 
 .game-top {
   display: grid;
-  grid-template-columns: 40px 1fr 40px;
+  grid-template-columns: 40px 1fr auto;
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.7rem;
@@ -1057,3 +1057,7 @@ input[type="text"]:focus {
   }
   #screen-game .status-msg { grid-column: 1 / -1; grid-row: 4; }
 }
+
+
+.game-top-actions { display:flex; align-items:center; gap:0.2rem; }
+#btn-game-undo:disabled, #btn-game-redo:disabled { opacity:0.35; cursor:default; }

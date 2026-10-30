@@ -1,16 +1,16 @@
 :root {
-  --bg-deep: #0a1f22;
-  --bg-mid: #0f2f32;
-  --teal: #1a4a4e;
-  --ink: #e8f4f2;
-  --muted: rgba(232, 244, 242, 0.55);
-  --player: #e53935;
-  --player-glow: #ff6b6b;
-  --ai: #1e88e5;
-  --ai-glow: #64b5f6;
-  --gold: #f0c35a;
-  --panel: rgba(8, 28, 30, 0.78);
-  --line-idle: rgba(180, 210, 210, 0.22);
+  --bg-deep: #0f1720;
+  --bg-mid: #162231;
+  --teal: #1e3a4a;
+  --ink: #f2f6fa;
+  --muted: rgba(242, 246, 250, 0.62);
+  --player: #4fc3f7;
+  --player-glow: #81d4fa;
+  --ai: #66bb6a;
+  --ai-glow: #a5d6a7;
+  --gold: #5ec8a8;
+  --panel: rgba(20, 32, 46, 0.9);
+  --line-idle: rgba(150, 185, 210, 0.28);
   --radius: 16px;
   --font-display: "Sora", "Segoe UI", sans-serif;
   --font-body: "Manrope", system-ui, sans-serif;
@@ -571,7 +571,7 @@ input[type="text"]::placeholder {
 
 .game-top {
   display: grid;
-  grid-template-columns: 40px 1fr 40px;
+  grid-template-columns: 40px 1fr auto;
   align-items: center;
   gap: 0.35rem;
 }
@@ -919,3 +919,7 @@ html[lang="en"] .chip-score::before {
     flex: 1;
   }
 }
+
+
+.game-top-actions { display:flex; align-items:center; gap:0.2rem; }
+#btn-game-undo:disabled, #btn-game-redo:disabled { opacity:0.35; cursor:default; }
