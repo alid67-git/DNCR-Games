@@ -278,7 +278,10 @@
       <header class="game-top">
         <button type="button" class="btn-icon" id="btn-game-back" aria-label="Geri">←</button>
         <p class="game-title" data-i18n="appName">Tavla</p>
-        <button type="button" class="btn-icon" id="btn-game-restart" aria-label="Yeniden">↻</button>
+        <div class="game-top-actions">
+          <button type="button" class="btn-icon" id="btn-game-undo" data-i18n-aria="undo" aria-label="Geri al" title="Geri al" disabled>↶</button>
+          <button type="button" class="btn-icon" id="btn-game-redo" data-i18n-aria="redo" aria-label="İleri al" title="İleri al" disabled>↷</button>
+        </div>
       </header>
 
       <div class="score-row">
@@ -304,31 +307,44 @@
 
       <div class="board-wrap">
         <div id="board" class="tavla-board" role="img" aria-label="Tavla tahtası">
-          <div class="board-half top" id="board-top"></div>
-          <div class="board-mid">
-            <!-- Katlanma izi + iki gümüş menteşe (referans) -->
-            <span class="katlanma-izi" aria-hidden="true"></span>
-            <span class="kapak-hinge hinge-start" aria-hidden="true"></span>
-            <span class="kapak-hinge hinge-end" aria-hidden="true"></span>
-            <div class="board-mid-inner">
-              <div class="bar-zone" id="bar-zone" data-from="bar">
-                <span class="zone-label" data-i18n="barLabel">Bar</span>
-                <div class="bar-stack" id="bar-stack"></div>
-              </div>
+          <div class="board-side left" id="board-left">
+            <div class="board-quad top" id="board-left-top"></div>
+            <div class="board-quad bottom" id="board-left-bottom"></div>
+          </div>
+          <!-- İnce dikey kapak: sadece katlanma izi + 2 menteşe -->
+          <div class="board-mid" aria-hidden="true">
+            <span class="katlanma-izi"></span>
+            <span class="kapak-hinge hinge-start"></span>
+            <span class="kapak-hinge hinge-end"></span>
+          </div>
+          <div class="board-side right" id="board-right">
+            <div class="board-quad top" id="board-right-top"></div>
+            <div class="board-quad bottom" id="board-right-bottom"></div>
+            <!-- Zarlar tahta üzerinde — buton zarların üstüne binmez -->
+            <div class="dice-on-board">
               <div class="dice-panel">
                 <div class="dice-row" id="dice-row" aria-live="polite"></div>
-                <button type="button" class="btn btn-primary btn-roll" id="btn-roll" data-i18n="rollDice">Zar at</button>
-              </div>
-              <div class="off-zone" id="off-zone">
-                <span class="zone-label" data-i18n="offLabel">Kapı</span>
-                <div class="off-stacks">
-                  <button type="button" class="off-slot white" id="off-white" data-to="off"></button>
-                  <button type="button" class="off-slot blue" id="off-blue" data-to="off"></button>
-                </div>
               </div>
             </div>
           </div>
-          <div class="board-half bottom" id="board-bottom"></div>
+        </div>
+      </div>
+
+      <!-- Bar · Zar at · Kapı — tek satır, buton sıkışmaz -->
+      <div class="board-trays">
+        <div class="bar-zone" id="bar-zone" data-from="bar">
+          <span class="zone-label" data-i18n="barLabel">Bar</span>
+          <div class="bar-stack" id="bar-stack"></div>
+        </div>
+        <div class="roll-bar">
+          <button type="button" class="btn btn-primary btn-roll" id="btn-roll" data-i18n="rollDice">Zar at</button>
+        </div>
+        <div class="off-zone" id="off-zone">
+          <span class="zone-label" data-i18n="offLabel">Kapı</span>
+          <div class="off-stacks">
+            <button type="button" class="off-slot white" id="off-white" data-to="off"></button>
+            <button type="button" class="off-slot blue" id="off-blue" data-to="off"></button>
+          </div>
         </div>
       </div>
 

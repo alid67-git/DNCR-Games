@@ -54,6 +54,12 @@
   const Audio = window.TavlaAudio || null;
   /** @type {Map<number, HTMLButtonElement>} */
   const pointEls = new Map();
+  /** Undo / Redo — hamle geçmişi */
+  /** @type {string[]} */
+  let undoStack = [];
+  /** @type {string[]} */
+  let redoStack = [];
+  const UNDO_MAX = 40;
 
   function playMoveSfx(kind) {
     if (Audio) {
@@ -254,16 +260,21 @@
 
   function buildBoard() {
     if (boardReady) return;
-    const top = $("board-top");
-    const bottom = $("board-bottom");
-    if (!top || !bottom) return;
-    top.innerHTML = "";
-    bottom.innerHTML = "";
+    const leftTop = $("board-left-top");
+    const leftBot = $("board-left-bottom");
+    const rightTop = $("board-right-top");
+    const rightBot = $("board-right-bottom");
+    if (!leftTop || !leftBot || !rightTop || !rightBot) return;
+    leftTop.innerHTML = "";
+    leftBot.innerHTML = "";
+    rightTop.innerHTML = "";
+    rightBot.innerHTML = "";
     pointEls.clear();
-    for (let n = 13; n <= 18; n++) top.appendChild(makePoint(n, "tip-up"));
-    for (let n = 19; n <= 24; n++) top.appendChild(makePoint(n, "tip-up"));
-    for (let n = 12; n >= 7; n--) bottom.appendChild(makePoint(n, "tip-down"));
-    for (let n = 6; n >= 1; n--) bottom.appendChild(makePoint(n, "tip-down"));
+    // Klasik düzen: sol 13–18 / 12–7 · sağ 19–24 / 6–1
+    for (let n = 13; n <= 18; n++) leftTop.appendChild(makePoint(n, "tip-up"));
+    for (let n = 12; n >= 7; n--) leftBot.appendChild(makePoint(n, "tip-down"));
+    for (let n = 19; n <= 24; n++) rightTop.appendChild(makePoint(n, "tip-up"));
+    for (let n = 6; n >= 1; n--) rightBot.appendChild(makePoint(n, "tip-down"));
     boardReady = true;
   }
 
@@ -338,16 +349,15 @@
   function pointLanding(n) {
     const el = pointEls.get(n);
     if (!el) return null;
+    const isTop = !!el.closest(".board-quad.top");
     const checkers = el.querySelectorAll(".checker");
     if (checkers.length) {
       const last = checkers[checkers.length - 1];
       const pos = rectCenter(last);
       if (!pos) return null;
-      const isTop = !!el.closest(".board-half.top");
       return { x: pos.x, y: pos.y + (isTop ? 11 : -11), size: pos.size };
     }
     const r = el.getBoundingClientRect();
-    const isTop = !!el.closest(".board-half.top");
     return {
       x: r.left + r.width / 2,
       y: isTop ? r.top + Math.min(22, r.height * 0.18) : r.bottom - Math.min(22, r.height * 0.18),
@@ -503,6 +513,7 @@
     const rolling = !!(opts && opts.rolling);
     const settle = !!(opts && opts.settle);
     const remaining = (opts && opts.remaining ? opts.remaining.slice() : null);
+    const prev = !!(opts && opts.previous);
     row.innerHTML = "";
     const list = values && values.length ? values : [];
     list.forEach((v, i) => {
@@ -510,7 +521,8 @@
       if (rolling) cls = "rolling";
       else if (settle) cls = "settle";
       const die = makeDieEl(v, cls);
-      if (!rolling && remaining) {
+      if (prev) die.classList.add("prev-roll");
+      if (!rolling && !prev && remaining) {
         const idx = remaining.indexOf(v);
         if (idx >= 0) remaining.splice(idx, 1);
         else die.classList.add("used");
@@ -534,6 +546,11 @@
       paintDice([]);
       return;
     }
+    // Zar atma aşamasında önceki oyuncunun zarları görünür kalsın
+    if (state.phase === "roll") {
+      paintDice([raw[0], raw[1]], { previous: true });
+      return;
+    }
     const isDouble = raw[0] === raw[1];
     const slots = isDouble ? [raw[0], raw[0], raw[0], raw[0]] : [raw[0], raw[1]];
     paintDice(slots, { remaining: (state.dice || []).slice() });
@@ -543,14 +560,18 @@
     clearTimeout(diceAnimTimer);
     diceBusy = true;
     const btn = $("btn-roll");
-    if (btn) btn.classList.add("is-rolling");
+    if (btn) {
+      btn.classList.add("is-rolling", "hidden");
+      btn.disabled = true;
+    }
+    updateUndoBtn();
     if (Audio) {
       Audio.unlock();
       Audio.playDiceRoll();
     } else {
       playMoveSfx("place");
     }
-    // Tek atış animasyonu: 3D zarlar havadan düşüp dönerek gelir
+    // Önceki zarlar kısa süre kalsın, sonra yeni zarlar düşsün
     paintDice([finalPair[0], finalPair[1]], { rolling: true });
     diceAnimTimer = setTimeout(() => {
       const isDouble = finalPair[0] === finalPair[1];
@@ -562,8 +583,79 @@
         diceBusy = false;
         if (btn) btn.classList.remove("is-rolling");
         if (typeof done === "function") done();
-      }, 400);
-    }, 1050);
+      }, 380);
+    }, 1100);
+  }
+
+  function clearUndo() {
+    undoStack = [];
+    redoStack = [];
+    updateUndoBtn();
+  }
+
+  function pushUndo() {
+    if (!session || !session.state) return;
+    if (session.mode === "p2p") return;
+    try {
+      undoStack.push(serialize(session.state));
+      if (undoStack.length > UNDO_MAX) undoStack.shift();
+      redoStack = [];
+    } catch (_) {}
+    updateUndoBtn();
+  }
+
+  function historyIdle() {
+    return (
+      !!session &&
+      session.mode !== "p2p" &&
+      !diceBusy &&
+      !moveBusy &&
+      !session.aiThinking &&
+      !session.state.winner
+    );
+  }
+
+  function updateUndoBtn() {
+    const u = $("btn-game-undo");
+    const r = $("btn-game-redo");
+    const idle = historyIdle();
+    if (u) u.disabled = !(idle && undoStack.length > 0);
+    if (r) r.disabled = !(idle && redoStack.length > 0);
+  }
+
+  function restoreSnap(snap) {
+    session.state = deserialize(snap);
+    selected = null;
+    session.endSfxPlayed = false;
+    session.scoreRecorded = false;
+    clearTimeout(aiTimer);
+    session.aiThinking = false;
+    renderGame();
+    updateUndoBtn();
+  }
+
+  function doUndo() {
+    if (!historyIdle() || !undoStack.length) return;
+    try {
+      redoStack.push(serialize(session.state));
+      if (redoStack.length > UNDO_MAX) redoStack.shift();
+      restoreSnap(undoStack.pop());
+      toast(t("undoDone"));
+    } catch (_) {
+      updateUndoBtn();
+    }
+  }
+
+  function doRedo() {
+    if (!historyIdle() || !redoStack.length) return;
+    try {
+      undoStack.push(serialize(session.state));
+      if (undoStack.length > UNDO_MAX) undoStack.shift();
+      restoreSnap(redoStack.pop());
+      toast(t("redoDone"));
+    } catch (_) {
+      updateUndoBtn();
+    }
   }
 
   function currentMoves() {
@@ -649,10 +741,13 @@
 
     const rollBtn = $("btn-roll");
     if (rollBtn) {
-      const canRoll = s.phase === "roll" && mine && !s.winner && !diceBusy && !moveBusy;
+      const showRoll = s.phase === "roll" && !s.winner && !diceBusy;
+      const canRoll = showRoll && mine && !moveBusy && !session.aiThinking;
       rollBtn.disabled = !canRoll;
-      rollBtn.classList.toggle("hidden", !(s.phase === "roll" || diceBusy) || !!s.winner);
+      rollBtn.classList.toggle("hidden", !showRoll);
+      rollBtn.classList.toggle("is-rolling", !!diceBusy);
     }
+    updateUndoBtn();
 
     if (s.winner) $("status-msg").textContent = "";
     else if (diceBusy || moveBusy) $("status-msg").textContent = "";
@@ -704,9 +799,14 @@
       return;
     }
     if (session.state.phase !== "roll") return;
+    if (!fromNet) pushUndo();
     const r = applyRoll(session.state, opts && opts.roll);
     if (!r.ok) {
-      if (!fromNet) toast(r.error || t("rollPhase"));
+      if (!fromNet) {
+        undoStack.pop();
+        updateUndoBtn();
+        toast(r.error || t("rollPhase"));
+      }
       return;
     }
     const finish = () => {
@@ -726,7 +826,7 @@
     const rollBtn = $("btn-roll");
     if (rollBtn) {
       rollBtn.disabled = true;
-      rollBtn.classList.add("is-rolling");
+      rollBtn.classList.add("is-rolling", "hidden");
     }
     playDiceRollAnim(pair, finish);
   }
@@ -739,11 +839,17 @@
       toast(t("oppTurn"));
       return;
     }
+    if (!fromNet) pushUndo();
     moveBusy = true;
+    updateUndoBtn();
     try {
       const r = applyMove(session.state, move);
       if (!r.ok) {
-        if (!fromNet) toast(r.error || t("selectTarget"));
+        if (!fromNet) {
+          undoStack.pop();
+          updateUndoBtn();
+          toast(r.error || t("selectTarget"));
+        }
         return;
       }
       const player = session.state.turn;
@@ -759,6 +865,7 @@
       if (!fromNet) sendSync();
     } finally {
       moveBusy = false;
+      updateUndoBtn();
     }
     if (!(opts && opts.skipAi)) maybeScheduleAi();
   }
@@ -893,6 +1000,8 @@
         renderGame();
         return;
       }
+      // AI turunun tamamı tek undo adımı
+      pushUndo();
       const result = Ai.playTurn(session.state, session.difficulty || "normal");
       selected = null;
       const pair = (result.roll || (result.state && result.state.lastRoll) || [1, 1]).slice(0, 2);
@@ -932,6 +1041,7 @@
     clearTimeout(aiTimer);
     destroyP2P();
     ensureMusic();
+    clearUndo();
     const starter = readNextStarter();
     writeNextStarter(starter);
     session = {
@@ -956,6 +1066,7 @@
     clearTimeout(aiTimer);
     destroyP2P();
     ensureMusic();
+    clearUndo();
     const p1 = ($("p1-name").value || "").trim() || t("player1Ph");
     const p2 = ($("p2-name").value || "").trim() || t("player2Ph");
     saveSettings({ p1, p2 });
@@ -1216,12 +1327,36 @@
     }
   }
 
-  function goHome() {
+  function leaveGameToHome() {
     clearTimeout(aiTimer);
     selected = null;
     session = null;
+    clearUndo();
     destroyP2P();
     showScreen("home");
+  }
+
+  function goHome(opts) {
+    const skipConfirm = !!(opts && opts.skipConfirm);
+    const inMatch = !!(session && session.state && !session.state.winner);
+    if (inMatch && !skipConfirm) {
+      if (!window.confirm(t("confirmLeave"))) return;
+    }
+    leaveGameToHome();
+  }
+
+  function doRematch() {
+    if (!session) return;
+    if (session.mode === "solo") startSolo();
+    else if (session.mode === "twop") startTwoP();
+    else if (session.mode === "p2p" && p2p && p2pLobby) {
+      p2pLobby.ready = { white: false, blue: false };
+      p2p.send({ type: "rematch-ask", who: p2pLobby.you });
+      session = null;
+      clearUndo();
+      showScreen("room");
+      renderRoom();
+    }
   }
 
   // —— Events ——
@@ -1375,7 +1510,10 @@
 
   $("btn-game-back").addEventListener("click", () => {
     if (session && session.mode === "p2p" && p2pLobby) {
+      const inMatch = !!(session.state && !session.state.winner);
+      if (inMatch && !window.confirm(t("confirmLeave"))) return;
       session = null;
+      clearUndo();
       showScreen("room");
       renderRoom();
       return;
@@ -1383,24 +1521,16 @@
     goHome();
   });
 
-  $("btn-game-home").addEventListener("click", () => goHome());
+  $("btn-game-home").addEventListener("click", () => goHome({ skipConfirm: true }));
 
-  $("btn-game-restart").addEventListener("click", () => {
-    if (!session) return;
-    if (session.mode === "solo") startSolo();
-    else if (session.mode === "twop") startTwoP();
-    else if (session.mode === "p2p" && p2p && p2pLobby) {
-      p2pLobby.ready = { white: false, blue: false };
-      p2p.send({ type: "rematch-ask", who: p2pLobby.you });
-      session = null;
-      showScreen("room");
-      renderRoom();
-    }
-  });
+  if ($("btn-game-undo")) {
+    $("btn-game-undo").addEventListener("click", () => doUndo());
+  }
+  if ($("btn-game-redo")) {
+    $("btn-game-redo").addEventListener("click", () => doRedo());
+  }
 
-  $("btn-rematch").addEventListener("click", () => {
-    $("btn-game-restart").click();
-  });
+  $("btn-rematch").addEventListener("click", () => doRematch());
 
   $("btn-roll").addEventListener("click", () => doRoll());
   if ($("bar-zone")) $("bar-zone").addEventListener("click", () => onBarClick());

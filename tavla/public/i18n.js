@@ -145,6 +145,10 @@ window.TavlaI18n = (function () {
       statusCpu: "Bilgisayar oynuyor…",
       pipLabel: "Pip",
       offCount: "Çıkan",
+      undo: "Geri al",
+      redo: "İleri al",
+      undoDone: "Son hamle geri alındı",
+      redoDone: "Hamle ileri alındı",
     },
     en: {
       appName: "Tavla",
@@ -291,6 +295,10 @@ window.TavlaI18n = (function () {
       statusCpu: "Computer is moving…",
       pipLabel: "Pips",
       offCount: "Borne off",
+      undo: "Undo",
+      redo: "Redo",
+      undoDone: "Last move undone",
+      redoDone: "Move redone",
     },
   };
 

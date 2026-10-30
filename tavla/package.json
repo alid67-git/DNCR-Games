@@ -1,6 +1,6 @@
 {
   "name": "tavla",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Tavla — klasik backgammon; solo AI, local 2P, serverless P2P / Bluetooth",
   "scripts": {
     "test": "node game/engine.test.js && node game/ai.test.js",

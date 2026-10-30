@@ -1,9 +1,86 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.8",
-  build: 9,
+  version: "1.0.13",
+  build: 14,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.13",
+      build: 14,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Yenile yerine geri / ileri (undo · redo)",
+          "Ana menüye çıkarken onay sorusu",
+        ],
+        en: [
+          "Refresh replaced with undo · redo",
+          "Confirm before leaving to the main menu",
+        ],
+      },
+    },
+    {
+      version: "1.0.12",
+      build: 13,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Zar at butonu Bar / Kapı satırında — kesilmiyor, her zaman görünür",
+        ],
+        en: [
+          "Roll button sits in the Bar / Off row — no longer clipped",
+        ],
+      },
+    },
+    {
+      version: "1.0.11",
+      build: 12,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Geri al (undo) — son hamle / bilgisayar turu",
+          "Zar at butonu zarların üstüne binmiyor; önceki zarlar görünür",
+          "Oynanabilir noktalar mat üçgen vurgusuyla",
+          "Gerçekçi zar sesleri + sakin ambiyans (eski arpej kaldırıldı)",
+        ],
+        en: [
+          "Undo — last move / computer turn",
+          "Roll button no longer covers dice; previous dice stay visible",
+          "Legal points highlighted with matte triangle tint",
+          "Realistic dice samples + soft ambient (silly arpeggio removed)",
+        ],
+      },
+    },
+    {
+      version: "1.0.10",
+      build: 11,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "İnce dikey katlanma izi + menteşeler (kalın orta sütun kaldırıldı)",
+          "Zarlar tahta yüzeyinde; Bar / Kapı tahta dışı tepsilerde",
+        ],
+        en: [
+          "Thin vertical fold crease + hinges (fat mid column removed)",
+          "Dice on the board surface; Bar / Off as external trays",
+        ],
+      },
+    },
+    {
+      version: "1.0.9",
+      build: 10,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Klasik sol/sağ tahta — katlanma izi dikey",
+          "Menteşeler omurganın üst ve alt ucunda",
+        ],
+        en: [
+          "Classic left/right board — vertical fold crease",
+          "Hinges at the top and bottom of the spine",
+        ],
+      },
+    },
     {
       version: "1.0.8",
       build: 9,
