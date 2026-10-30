@@ -398,11 +398,15 @@ input[type="text"]:focus {
   box-shadow: var(--shadow);
 }
 
+.home-brand-ver,
 .home-footer-ver,
 .settings-ver {
-  margin: 0.85rem 0 0;
-  font-size: 0.78rem;
-  color: rgba(44, 53, 88, 0.4);
+  margin: 0.55rem 0 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  text-align: center;
 }
 
 .game-top {
