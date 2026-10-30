@@ -1,9 +1,22 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.11",
-  build: 12,
+  version: "1.0.12",
+  build: 13,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.12",
+      build: 13,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Zar at butonu Bar / Kapı satırında — kesilmiyor, her zaman görünür",
+        ],
+        en: [
+          "Roll button sits in the Bar / Off row — no longer clipped",
+        ],
+      },
+    },
     {
       version: "1.0.11",
       build: 12,
