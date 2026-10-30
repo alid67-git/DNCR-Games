@@ -234,8 +234,9 @@
     const ver = `v${CFG.version} · build ${CFG.build}`;
     if ($("home-version")) $("home-version").textContent = ver;
     if ($("settings-version")) $("settings-version").textContent = ver;
-    if ($("updates-current"))
-      $("updates-current").textContent = `${CFG.version} (${CFG.build})`;
+    document.querySelectorAll("#updates-current").forEach((el) => {
+      el.textContent = `${CFG.version} (${CFG.build})`;
+    });
     renderChangelog();
     updateUpdatesDot();
     renderDiffGrid();
