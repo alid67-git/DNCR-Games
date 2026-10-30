@@ -1,9 +1,26 @@
 window.FanoronaConfig = {
   appName: "Fanorona",
-  version: "1.0.4",
-  build: 5,
+  version: "1.0.5",
+  build: 6,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/fanorona/",
   changelog: [
+    {
+      version: "1.0.5",
+      build: 6,
+      date: "2026-10-30",
+      items: {
+        tr: [
+          "Alınan taş kaybolup geri gelmiyor — uçuş orb’u taşın yerinde park ediyor",
+          "Sıra sende değilken büyük “bekle” kartı + tahta kilidi",
+          "Geri / ileri (undo · redo); yeniden başlat yok",
+        ],
+        en: [
+          "Captured piece no longer blinks back — fly-off orb parks in place",
+          "Clear wait card + board lock when it isn’t your turn",
+          "Undo · redo; no restart",
+        ],
+      },
+    },
     {
       version: "1.0.4",
       build: 5,

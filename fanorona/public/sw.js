@@ -1,5 +1,5 @@
-/* Fanorona — offline cache (solo + local 2P) */
-const CACHE = "fanorona-v1.0.4";
+/* Fanorona — offline cache; online’da ağ öncelikli (eski 1.0.1 cache’e takılma) */
+const CACHE = "fanorona-v1.0.5";
 const ASSETS = [
   "./",
   "./index.html",
@@ -35,7 +35,10 @@ const ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -50,21 +53,25 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
+  // Online: önce ağ — eski cache’e takılma; offline: cache
   event.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req)
-        .then((res) => {
+    fetch(req)
+      .then((res) => {
+        if (res && res.ok && new URL(req.url).origin === self.location.origin) {
           const copy = res.clone();
-          if (res.ok && new URL(req.url).origin === self.location.origin) {
-            caches.open(CACHE).then((cache) => cache.put(req, copy));
-          }
-          return res;
-        })
-        .catch(() => caches.match("./index.html"));
-    })
+          caches.open(CACHE).then((cache) => cache.put(req, copy));
+        }
+        return res;
+      })
+      .catch(() =>
+        caches.match(req).then((cached) => cached || caches.match("./index.html"))
+      )
   );
 });

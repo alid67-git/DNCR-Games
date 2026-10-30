@@ -863,7 +863,11 @@ input[type="text"]:focus {
 }
 .piece.is-sliding {
   pointer-events: none;
+  transition: none !important;
   filter: drop-shadow(0 0 3px rgba(255, 236, 180, 0.85));
+}
+.board-stage.is-animating .piece {
+  transition: none !important;
 }
 .move-trail {
   fill: none;
@@ -998,11 +1002,16 @@ input[type="text"]:focus {
 .eject-orb.from-black {
   background: radial-gradient(circle at 35% 30%, #b0bec5, #ff7043 50%, #e64a19);
 }
+.eject-orb.is-parked {
+  transform: scale(1);
+  opacity: 1;
+  transition: none;
+}
 .eject-orb.is-charged {
   background: radial-gradient(circle at 35% 30%, #ffe082, #ff9800 48%, #f4511e) !important;
   border-color: #fff8e1;
   transform: scale(1.28);
-  transition: transform 0.18s ease, background 0.18s ease;
+  transition: transform 0.12s ease, background 0.12s ease;
 }
 .eject-orb.is-flying {
   transition: none;
@@ -1081,32 +1090,65 @@ input[type="text"]:focus {
 .turn-wait {
   position: absolute;
   inset: 0;
-  z-index: 9;
+  z-index: 12;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
-  background: rgba(12, 8, 4, 0.55);
-  backdrop-filter: blur(1.5px);
+  pointer-events: auto;
+  background: rgba(6, 10, 16, 0.72);
+  backdrop-filter: blur(3px);
   animation: turnWaitIn 0.35s ease both;
 }
 .turn-wait.hidden {
   display: none;
+  pointer-events: none;
 }
-.turn-wait p {
+.turn-wait.is-soft {
+  pointer-events: none;
+  background: rgba(6, 10, 16, 0.45);
+}
+.turn-wait-card {
   margin: 0;
-  max-width: 86%;
-  padding: 0.85rem 1.15rem;
-  border-radius: 14px;
+  max-width: 88%;
+  padding: 1.05rem 1.25rem 1.1rem;
+  border-radius: 16px;
   text-align: center;
-  font-weight: 800;
-  font-size: 1.12rem;
-  letter-spacing: 0.02em;
-  color: #ffe082;
-  background: rgba(20, 14, 8, 0.92);
-  border: 2px solid rgba(255, 214, 102, 0.75);
-  box-shadow: 0 0 28px rgba(255, 190, 70, 0.35);
+  background: rgba(12, 22, 34, 0.96);
+  border: 2px solid rgba(102, 187, 106, 0.75);
+  box-shadow:
+    0 0 0 1px rgba(79, 195, 247, 0.2),
+    0 0 36px rgba(102, 187, 106, 0.28);
   animation: turnWaitPulse 1.6s ease-in-out infinite;
+}
+.turn-wait-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.28rem;
+  letter-spacing: 0.01em;
+  color: #e8f5e9;
+}
+.turn-wait-sub {
+  margin: 0.45rem 0 0;
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: #81d4fa;
+}
+.board-wrap.is-turn-wait,
+#screen-game.is-turn-wait .board-wrap {
+  outline: 2px solid rgba(102, 187, 106, 0.45);
+  outline-offset: 2px;
+}
+#screen-game.is-turn-wait .score-chip:not(.active) {
+  opacity: 0.55;
+}
+#screen-game.is-turn-wait .score-chip.active {
+  border-color: rgba(102, 187, 106, 0.85);
+  box-shadow: 0 0 0 2px rgba(102, 187, 106, 0.35);
+}
+#screen-game.is-turn-wait #phase-label {
+  color: #81d4fa;
+  font-weight: 800;
 }
 @keyframes turnWaitIn {
   from {

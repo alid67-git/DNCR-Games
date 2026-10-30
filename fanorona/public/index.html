@@ -28,7 +28,7 @@
           <img class="app-logo" src="assets/logo.svg" width="112" height="112" alt="Fanorona" />
           <p class="brand-mark" data-i18n="appName">Fanorona</p>
           <p class="lede" data-i18n="tagline">Madagaskar stratejisi — yaklaş, uzaklaş, zincirle al</p>
-          <p class="home-brand-ver" id="home-version">v1.0.1 · build 2</p>
+          <p class="home-brand-ver" id="home-version">v1.0.5 · build 6</p>
         </header>
         <nav class="home-menu" aria-label="Main">
           <button type="button" class="btn btn-primary btn-menu" id="btn-home-play">
@@ -214,12 +214,12 @@
       </form>
       <div class="settings-block">
         <h2 data-i18n="updatesTitle">Güncellemeler</h2>
-        <p class="lede"><span data-i18n="updatesCurrent">Yüklü sürüm</span>: <strong id="updates-current">1.0.0</strong></p>
+        <p class="lede"><span data-i18n="updatesCurrent">Yüklü sürüm</span>: <strong id="updates-current">1.0.5 (6)</strong></p>
         <div class="settings-actions">
           <button type="button" id="btn-open-updates" class="btn btn-ghost" data-i18n="updatesInSettings">Sürüm notları</button>
         </div>
       </div>
-      <p class="settings-ver" id="settings-version">v1.0.1 · build 2</p>
+      <p class="settings-ver" id="settings-version">v1.0.5 · build 6</p>
     </section>
 
     <section id="screen-help" class="screen">
@@ -306,8 +306,11 @@
       <div class="board-stage">
         <div class="board-wrap board-wrap-wide">
           <div id="mill-banner" class="mill-banner hidden" aria-live="assertive"></div>
-          <div id="turn-wait" class="turn-wait hidden" aria-live="assertive">
-            <p id="turn-wait-text"></p>
+          <div id="turn-wait" class="turn-wait hidden" aria-live="assertive" aria-hidden="true">
+            <div class="turn-wait-card">
+              <p id="turn-wait-title" class="turn-wait-title"></p>
+              <p id="turn-wait-text" class="turn-wait-sub"></p>
+            </div>
           </div>
           <div id="board-fx-html" class="board-fx-html" aria-hidden="true"></div>
           <svg id="board" viewBox="0 0 100 60" role="img" aria-label="Fanorona tahtası" overflow="visible">
@@ -362,6 +365,19 @@
   <div id="toast" class="toast hidden" role="status"></div>
 
   <script src="app-config.js"></script>
+  <script>
+    (function () {
+      var c = window.FanoronaConfig;
+      if (!c) return;
+      var v = "v" + c.version + " · build " + c.build;
+      var h = document.getElementById("home-version");
+      var s = document.getElementById("settings-version");
+      var u = document.getElementById("updates-current");
+      if (h) h.textContent = v;
+      if (s) s.textContent = v;
+      if (u) u.textContent = c.version + " (" + c.build + ")";
+    })();
+  </script>
   <script src="i18n.js"></script>
   <script src="engine.js"></script>
   <script src="ai.js"></script>
