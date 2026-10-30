@@ -424,7 +424,8 @@ input[type="text"]:focus {
   font-weight: 700;
   color: var(--accent);
 }
-#btn-game-undo:disabled {
+#btn-game-undo:disabled,
+#btn-game-redo:disabled {
   opacity: 0.35;
 }
 

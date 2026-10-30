@@ -146,7 +146,9 @@ window.TavlaI18n = (function () {
       pipLabel: "Pip",
       offCount: "Çıkan",
       undo: "Geri al",
+      redo: "İleri al",
       undoDone: "Son hamle geri alındı",
+      redoDone: "Hamle ileri alındı",
     },
     en: {
       appName: "Tavla",
@@ -294,7 +296,9 @@ window.TavlaI18n = (function () {
       pipLabel: "Pips",
       offCount: "Borne off",
       undo: "Undo",
+      redo: "Redo",
       undoDone: "Last move undone",
+      redoDone: "Move redone",
     },
   };
 
