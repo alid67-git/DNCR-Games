@@ -1,0 +1,50 @@
+name: Tag Hub Release
+
+# main’e hub sürüm bump’ı gelince hub-vX.Y.Z yoksa tag basar → Release Hub APK tetiklenir.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/hub/app-config.js"
+      - "hub/package.json"
+      - "hub/android/app/build.gradle"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tag-hub-release
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create hub-v tag if missing
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          V=$(grep -oP 'version:\s*"\K[^"]+' site/hub/app-config.js | head -1)
+          if [[ ! "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Geçersiz hub sürümü: $V"
+            exit 1
+          fi
+          TAG="hub-v${V}"
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "Tag zaten var: $TAG"
+            exit 0
+          fi
+          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
+            echo "Remote’da tag var: $TAG"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "DNCR Games Hub v${V}"
+          git push origin "$TAG"
+          echo "Pushed $TAG → Release Hub APK tetiklenir"
