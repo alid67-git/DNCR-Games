@@ -26,9 +26,16 @@
       --display: "Sora", system-ui, sans-serif;
     }
     * { box-sizing: border-box; }
+    html {
+      height: 100%;
+    }
     body {
       margin: 0;
-      min-height: 100dvh;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
       font-family: var(--font);
       color: var(--ink);
       background:
@@ -36,16 +43,31 @@
         radial-gradient(circle at 85% 75%, rgba(94, 200, 168, 0.22), transparent 42%),
         radial-gradient(circle at 12% 70%, rgba(79, 195, 247, 0.18), transparent 40%),
         linear-gradient(165deg, #162231, #0f1720 58%, #0a1018);
-      padding: max(1.4rem, env(safe-area-inset-top)) 1.15rem max(2rem, env(safe-area-inset-bottom));
+      padding: max(1.1rem, env(safe-area-inset-top)) 1.15rem max(1rem, env(safe-area-inset-bottom));
     }
     main {
       width: min(560px, 100%);
       margin: 0 auto;
       text-align: center;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
     }
     .brand {
-      margin: 0.4rem 0 1.35rem;
+      flex: 0 0 auto;
+      margin: 0.15rem 0 0.85rem;
       animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .hub-scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      padding-bottom: 0.35rem;
+      scrollbar-width: thin;
     }
     .brand img {
       width: min(112px, 30vw);
@@ -253,73 +275,75 @@
       <img src="assets/icon-512.png" width="112" height="112" alt="DNCR Games" />
       <h1>DNCR Games</h1>
       <p class="lede">Oyununu seç</p>
-      <p class="hub-brand-ver" id="hub-ver">v1.0.13</p>
+      <p class="hub-brand-ver" id="hub-ver">v1.0.15</p>
     </header>
 
-    <nav class="games" aria-label="Oyunlar">
-      <a class="game" href="kati/index.html" data-game="kati">
-        <img class="game-art" src="assets/kati-icon.png" width="52" height="52" alt="" />
-        <span class="game-copy">
-          <strong>Kati</strong>
-          <span>Kırmızı vs yeşil</span>
-        </span>
-      </a>
-      <a class="game" href="noktalar/index.html" data-game="noktalar">
-        <img class="game-art" src="assets/noktalar-icon.png" width="52" height="52" alt="" />
-        <span class="game-copy">
-          <strong>Noktalar</strong>
-          <span>Çizgi çek, kutu kapat</span>
-        </span>
-      </a>
-      <a class="game" href="dokuztas/index.html" data-game="dokuztas">
-        <img class="game-art" src="assets/dokuztas-icon.png" width="52" height="52" alt="" />
-        <span class="game-copy">
-          <strong>Dokuztaş</strong>
-          <span>Değirmen kur</span>
-        </span>
-      </a>
-      <a class="game" href="kusatma/index.html" data-game="kusatma">
-        <img class="game-art" src="assets/kusatma-icon.png" width="52" height="52" alt="" />
-        <span class="game-copy">
-          <strong>Kuşatma</strong>
-          <span>Kuşat, esir al</span>
-        </span>
-      </a>
-      <a class="game" href="sayi/index.html" data-game="sayi">
-        <img class="game-art" src="assets/sayi-icon.svg" width="52" height="52" alt="" />
-        <span class="game-copy">
-          <strong>Sayı Bulma</strong>
-          <span>4 hane · artı / eksi</span>
-        </span>
-      </a>
-      <a class="game" href="fanorona/index.html" data-game="fanorona">
-        <img class="game-art" src="assets/fanorona-icon.png" width="52" height="52" alt="" />
-        <span class="game-copy">
-          <strong>Fanorona</strong>
-          <span>Yaklaş, uzaklaş, zincirle</span>
-        </span>
-      </a>
-      <a class="game" href="dama/index.html" data-game="dama">
-        <img class="game-art" src="assets/dama-icon.png" width="52" height="52" alt="" />
-        <span class="game-copy">
-          <strong>Dama</strong>
-          <span>Türk daması · ortogonal alma</span>
-        </span>
-      </a>
-      <a class="game" href="tavla/index.html" data-game="tavla">
-        <img class="game-art" src="assets/tavla-icon.png" width="52" height="52" alt="" />
-        <span class="game-copy">
-          <strong>Tavla</strong>
-          <span>Zar at, yürüt, kapıya</span>
-        </span>
-      </a>
-    </nav>
+    <div class="hub-scroll">
+      <nav class="games" aria-label="Oyunlar">
+        <a class="game" href="kati/index.html" data-game="kati">
+          <img class="game-art" src="assets/kati-icon.png" width="52" height="52" alt="" />
+          <span class="game-copy">
+            <strong>Kati</strong>
+            <span>Kırmızı vs yeşil</span>
+          </span>
+        </a>
+        <a class="game" href="noktalar/index.html" data-game="noktalar">
+          <img class="game-art" src="assets/noktalar-icon.png" width="52" height="52" alt="" />
+          <span class="game-copy">
+            <strong>Noktalar</strong>
+            <span>Çizgi çek, kutu kapat</span>
+          </span>
+        </a>
+        <a class="game" href="dokuztas/index.html" data-game="dokuztas">
+          <img class="game-art" src="assets/dokuztas-icon.png" width="52" height="52" alt="" />
+          <span class="game-copy">
+            <strong>Dokuztaş</strong>
+            <span>Değirmen kur</span>
+          </span>
+        </a>
+        <a class="game" href="kusatma/index.html" data-game="kusatma">
+          <img class="game-art" src="assets/kusatma-icon.png" width="52" height="52" alt="" />
+          <span class="game-copy">
+            <strong>Kuşatma</strong>
+            <span>Kuşat, esir al</span>
+          </span>
+        </a>
+        <a class="game" href="sayi/index.html" data-game="sayi">
+          <img class="game-art" src="assets/sayi-icon.svg" width="52" height="52" alt="" />
+          <span class="game-copy">
+            <strong>Sayı Bulma</strong>
+            <span>4 hane · artı / eksi</span>
+          </span>
+        </a>
+        <a class="game" href="fanorona/index.html" data-game="fanorona">
+          <img class="game-art" src="assets/fanorona-icon.png" width="52" height="52" alt="" />
+          <span class="game-copy">
+            <strong>Fanorona</strong>
+            <span>Yaklaş, uzaklaş, zincirle</span>
+          </span>
+        </a>
+        <a class="game" href="dama/index.html" data-game="dama">
+          <img class="game-art" src="assets/dama-icon.png" width="52" height="52" alt="" />
+          <span class="game-copy">
+            <strong>Dama</strong>
+            <span>Türk daması · ortogonal alma</span>
+          </span>
+        </a>
+        <a class="game" href="tavla/index.html" data-game="tavla">
+          <img class="game-art" src="assets/tavla-icon.png" width="52" height="52" alt="" />
+          <span class="game-copy">
+            <strong>Tavla</strong>
+            <span>Zar at, yürüt, kapıya</span>
+          </span>
+        </a>
+      </nav>
 
-    <div class="hub-actions">
-      <button type="button" class="btn-update-check" id="btn-hub-check-update">Güncellemeyi kontrol et</button>
+      <div class="hub-actions">
+        <button type="button" class="btn-update-check" id="btn-hub-check-update">Güncellemeyi kontrol et</button>
+      </div>
+
+      <footer>Tek uygulama · iPhone / iPad / Android · Yardım her oyunun içinde</footer>
     </div>
-
-    <footer>Tek uygulama · iPhone / iPad / Android · Yardım her oyunun içinde</footer>
   </main>
 
   <div id="hub-toast" class="hub-toast" hidden role="status"></div>
