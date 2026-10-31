@@ -24,7 +24,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Create hub-v tag if missing
+      - name: Create hub-v tag if missing + dispatch APK release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -35,16 +35,23 @@ jobs:
             exit 1
           fi
           TAG="hub-v${V}"
-          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+          CREATED=0
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null || \
+             git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
             echo "Tag zaten var: $TAG"
-            exit 0
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" -m "DNCR Games Hub v${V}"
+            git push origin "$TAG"
+            CREATED=1
+            echo "Pushed $TAG"
           fi
-          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
-            echo "Remote’da tag var: $TAG"
-            exit 0
+          # GITHUB_TOKEN ile basılan tag diğer workflow’ları tetiklemez —
+          # Release Hub APK’yı açıkça workflow_dispatch ile çalıştır.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG zaten var — dispatch atlandı"
+          else
+            gh workflow run "Release Hub APK" --ref main -f "tag=${TAG}"
+            echo "Dispatched Release Hub APK for $TAG (created=${CREATED})"
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$TAG" -m "DNCR Games Hub v${V}"
-          git push origin "$TAG"
-          echo "Pushed $TAG → Release Hub APK tetiklenir"
