@@ -1,9 +1,24 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.22",
-  build: 23,
+  version: "1.0.23",
+  build: 24,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.23",
+      build: 24,
+      date: "2026-10-31",
+      items: {
+        tr: [
+          "Uğultu kaldırıldı — yumuşak piyano arka plan müziği",
+          "Ayarlarda müzik ve oyun sesleri ayrı aç/kapa",
+        ],
+        en: [
+          "Drone removed — soft piano background music",
+          "Separate music and game-sound toggles in Settings",
+        ],
+      },
+    },
     {
       version: "1.0.22",
       build: 23,
