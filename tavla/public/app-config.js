@@ -1,9 +1,22 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.17",
-  build: 18,
+  version: "1.0.18",
+  build: 19,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.18",
+      build: 19,
+      date: "2026-10-31",
+      items: {
+        tr: [
+          "Sağ üstteki yeniden başlat tuşu kaldırıldı",
+        ],
+        en: [
+          "Removed the top-right restart button",
+        ],
+      },
+    },
     {
       version: "1.0.17",
       build: 18,
