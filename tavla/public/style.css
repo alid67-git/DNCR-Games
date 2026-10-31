@@ -557,7 +557,8 @@ input[type="text"]:focus {
   position: relative;
   flex: 1 1 0;
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
   margin: 0.05rem 0;
   min-height: 0;
   max-height: 100%;
@@ -589,9 +590,11 @@ input[type="text"]:focus {
   padding: 0.4rem;
   border-radius: 16px;
   width: 100%;
-  height: 100%;
+  height: auto;
   min-height: 0;
   max-height: 100%;
+  /* Dikine sonsuz uzamasın — oran + üst sınır */
+  aspect-ratio: 10 / 12.5;
   background:
     linear-gradient(160deg, #efc795 0%, var(--wood-frame) 42%, var(--wood-frame-deep) 100%);
   border: 1px solid rgba(160, 110, 60, 0.35);
@@ -1505,7 +1508,22 @@ input[type="text"]:focus {
   }
 }
 
-/* Android / kısa dikey ekran — tahta kısalsın, alt yazı görünsün */
+/* Portrait / Android — tahta yukarı doğru uzamasın */
+@media (orientation: portrait) {
+  .board-wrap {
+    flex: 0 1 auto;
+    max-height: min(54dvh, 520px);
+    align-items: center;
+  }
+  .tavla-board {
+    width: min(100%, 420px);
+    max-height: min(54dvh, 520px);
+    aspect-ratio: 10 / 12;
+    height: auto;
+    margin-inline: auto;
+  }
+}
+
 @media (max-height: 780px) and (orientation: portrait) {
   #app:has(#screen-game.active) {
     padding-top: max(0.2rem, env(safe-area-inset-top, 0px));
@@ -1539,9 +1557,14 @@ input[type="text"]:focus {
     min-height: 1.1rem;
     line-height: 1.1rem;
   }
+  .board-wrap {
+    max-height: min(48dvh, 460px);
+  }
   .tavla-board {
     padding: 0.28rem;
     border-radius: 14px;
+    max-height: min(48dvh, 460px);
+    aspect-ratio: 10 / 11.5;
   }
   .board-trays {
     margin-top: 0.15rem;
@@ -1559,6 +1582,16 @@ input[type="text"]:focus {
   .die {
     --die-size: 1.75rem;
     --die-z: 0.875rem;
+  }
+}
+
+/* Çok uzun Android telefonlar */
+@media (min-height: 781px) and (orientation: portrait) and (max-width: 480px) {
+  .board-wrap {
+    max-height: min(50dvh, 500px);
+  }
+  .tavla-board {
+    max-height: min(50dvh, 500px);
   }
 }
 

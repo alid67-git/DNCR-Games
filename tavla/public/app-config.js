@@ -1,9 +1,22 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.20",
-  build: 21,
+  version: "1.0.21",
+  build: 22,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.21",
+      build: 22,
+      date: "2026-10-31",
+      items: {
+        tr: [
+          "Android portrait: tahta yüksekliği sınırlandı — yukarı doğru uzamaz",
+        ],
+        en: [
+          "Android portrait: board height capped — no longer stretches upward",
+        ],
+      },
+    },
     {
       version: "1.0.20",
       build: 21,
