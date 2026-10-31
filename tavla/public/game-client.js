@@ -834,7 +834,7 @@
     else if (!mine && session.mode !== "twop") phaseText = t("oppTurn");
     else if (s.phase === "move") phaseText = t("movePhase");
     else phaseText = "";
-    if ($("phase-label")) $("phase-label").textContent = phaseText;
+    if ($("phase-label")) $("phase-label").textContent = phaseText || "\u00a0";
 
     const rollBtn = $("btn-roll");
     if (rollBtn) {
@@ -846,13 +846,15 @@
     }
     updateUndoBtn();
 
-    if (s.winner) $("status-msg").textContent = "";
-    else if (diceBusy || moveBusy) $("status-msg").textContent = "";
-    else if (session.aiThinking) $("status-msg").textContent = t("statusCpu");
-    else if (!mine && session.mode !== "twop") $("status-msg").textContent = "";
-    else if (s.phase === "roll") $("status-msg").textContent = "";
-    else if (selected != null) $("status-msg").textContent = t("selectTarget");
-    else $("status-msg").textContent = t("selectPoint");
+    let statusText = "\u00a0";
+    if (s.winner) statusText = "\u00a0";
+    else if (diceBusy || moveBusy) statusText = "\u00a0";
+    else if (session.aiThinking) statusText = t("statusCpu");
+    else if (!mine && session.mode !== "twop") statusText = "\u00a0";
+    else if (s.phase === "roll") statusText = "\u00a0";
+    else if (selected != null) statusText = t("selectTarget");
+    else statusText = t("selectPoint");
+    $("status-msg").textContent = statusText;
 
     const end = $("end-panel");
     if (s.winner) {

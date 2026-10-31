@@ -513,6 +513,9 @@ input[type="text"]:focus {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--leaf);
+  /* Yazı yokken de yer tut — layout sıçramasın */
+  min-height: 1.25em;
+  line-height: 1.25;
 }
 /* —— Tavla board (büyük ekran) —— */
 #screen-game .game-top {
@@ -530,14 +533,24 @@ input[type="text"]:focus {
   margin: 0.05rem 0 0.15rem;
   font-size: 0.78rem;
   flex: 0 0 auto;
+  flex-shrink: 0;
   color: var(--blue-deep);
+  min-height: 1.15rem;
+  line-height: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 #screen-game .status-msg {
   margin-top: 0.2rem;
   flex: 0 0 auto;
   flex-shrink: 0;
   font-size: 0.82rem;
-  min-height: 1.1rem;
+  min-height: 1.2rem;
+  line-height: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .board-wrap {
@@ -1238,6 +1251,7 @@ input[type="text"]:focus {
   margin: 0.35rem 0 0;
   text-align: center;
   min-height: 1.25rem;
+  line-height: 1.25rem;
   font-size: 0.88rem;
   color: var(--muted);
 }
@@ -1516,11 +1530,14 @@ input[type="text"]:focus {
   #screen-game .phase-label {
     margin: 0 0 0.08rem;
     font-size: 0.72rem;
+    min-height: 1.05rem;
+    line-height: 1.05rem;
   }
   #screen-game .status-msg {
     margin-top: 0.12rem;
     font-size: 0.78rem;
-    min-height: 1rem;
+    min-height: 1.1rem;
+    line-height: 1.1rem;
   }
   .tavla-board {
     padding: 0.28rem;

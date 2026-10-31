@@ -1,9 +1,22 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.19",
-  build: 20,
+  version: "1.0.20",
+  build: 21,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.20",
+      build: 21,
+      date: "2026-10-31",
+      items: {
+        tr: [
+          "Durum yazıları için sabit boşluk — yazı gelince/gidince sıçrama yok",
+        ],
+        en: [
+          "Reserved space for status lines — no jump when text appears/hides",
+        ],
+      },
+    },
     {
       version: "1.0.19",
       build: 20,
