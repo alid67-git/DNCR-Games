@@ -32,6 +32,11 @@
     p2pViaNet: "İnternet (uzaktan)",
     p2pViaBt: "Bluetooth / yakında (~5 m)",
     p2pNeedBt: "İnternet gerekmez — iki telefon yan yana, Bluetooth açık olsun.",
+    nearbyTimeout:
+      "Bluetooth oda bulunamadı. Aynı kod mu? Telefonlar yakın mı, Bluetooth açık mı?",
+    nearbyPerm: "Bluetooth / konum izni gerekli — ayarlardan izin verip tekrar dene.",
+    nearbyFail: "Bluetooth bağlantısı kurulamadı. İzinleri kontrol edip tekrar dene.",
+    peerFail: "Eşleşilemedi. Kodu ve bağlantı türünü (internet / Bluetooth) kontrol et.",
     helpModesTitle: "Oyun modları",
     helpModes:
       "Bilgisayara karşı ve aynı cihazda iki kişi tamamen çevrimdışıdır. Uzaktan mod eş bulmak için kısa internet ister; Android hub APK’da Bluetooth / yakında internetsiz oynanır. Oyun sunucusu yoktur (P2P).",
@@ -85,6 +90,11 @@
     p2pViaNet: "Internet (remote)",
     p2pViaBt: "Bluetooth / nearby (~5 m)",
     p2pNeedBt: "No internet — keep phones nearby with Bluetooth on.",
+    nearbyTimeout:
+      "Bluetooth room not found. Same code? Phones close, Bluetooth on?",
+    nearbyPerm: "Bluetooth / location permission needed — allow and retry.",
+    nearbyFail: "Bluetooth link failed. Check permissions and retry.",
+    peerFail: "Could not match. Check the code and connection type (internet / Bluetooth).",
     helpModesTitle: "Game modes",
     helpModes:
       "Vs computer and same-device two-player work fully offline. Remote mode needs brief internet to find each other; on the Android hub APK, Bluetooth / nearby works with no internet. There is no game server (P2P).",

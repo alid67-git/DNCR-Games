@@ -236,8 +236,20 @@
   }
 
   function mapP2pError(err) {
+    if (window.ArenaP2P && ArenaP2P.mapError) {
+      const mapped = ArenaP2P.mapError(err, (k) => {
+        if (k === "nearbyTimeout") return t("nearbyTimeout") || t("p2pTimeout");
+        if (k === "nearbyPerm") return t("nearbyPerm") || t("p2pFail");
+        if (k === "nearbyFail") return t("nearbyFail") || t("p2pFail");
+        if (k === "needCode") return t("needCode");
+        if (k === "peerFail") return t("p2pFail");
+        return t(k) || t("p2pFail");
+      });
+      if (mapped) return mapped;
+    }
     const msg = (err && err.message) || String(err || "");
     if (msg === "timeout" || msg === "join_fail") return t("p2pTimeout");
+    if (msg === "nearby_permission_denied") return t("nearbyPerm") || t("p2pFail");
     if (msg === "room_full") return t("roomFull");
     if (msg === "need_code") return t("needCode");
     return t("p2pFail");

@@ -1128,8 +1128,8 @@
       pads.roomSecret.clear();
       showScreen("room");
       renderRoom();
-    } catch (_) {
-      toast(t("peerFail"));
+    } catch (err) {
+      toast((window.ArenaP2P && ArenaP2P.mapError) ? ArenaP2P.mapError(err, t) : t("peerFail"));
       destroyP2P();
     }
   }
@@ -1166,8 +1166,8 @@
       pads.roomSecret.clear();
       showScreen("room");
       renderRoom();
-    } catch (_) {
-      toast(t("peerFail"));
+    } catch (err) {
+      toast((window.ArenaP2P && ArenaP2P.mapError) ? ArenaP2P.mapError(err, t) : t("peerFail"));
       destroyP2P();
     }
   }

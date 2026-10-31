@@ -173,7 +173,32 @@
   }
 
   /**
+   * P2P / Nearby hata kodunu kullanıcıya gösterilecek metne çevir.
+   * @param {unknown} err
+   * @param {(key: string) => string} [t]
+   */
+  function mapError(err, t) {
+    const msg = (err && err.message) || String(err || "");
+    const tr = typeof t === "function" ? t : null;
+    if (msg === "timeout" || msg === "join_fail") {
+      return tr ? tr("nearbyTimeout") || tr("peerFail") : msg;
+    }
+    if (msg === "nearby_permission_denied") {
+      return tr ? tr("nearbyPerm") || tr("peerFail") : msg;
+    }
+    if (msg === "nearby_unavailable" || msg === "discover_fail" || msg === "advertise_fail") {
+      return tr ? tr("nearbyFail") || tr("peerFail") : msg;
+    }
+    if (msg === "need_code" || msg === "needCode") {
+      return tr ? tr("needCode") || msg : msg;
+    }
+    if (tr && tr("peerFail")) return tr("peerFail");
+    return msg;
+  }
+
+  /**
    * Android APK’da Bluetooth / yakında seçeneğini gösterir; web’de gizler.
+   * Nearby hazırsa varsayılan olarak Bluetooth seçilir (internet gerekmez).
    * @param {{ hintNet?: HTMLElement|null, hintBt?: HTMLElement|null }} [opts]
    */
   function initTransportUi(opts) {
@@ -182,6 +207,14 @@
     const show = nearbyReadySync();
     box.classList.toggle("hidden", !show);
     box.hidden = !show;
+    if (show) {
+      const nearbyRadio = box.querySelector('input[name="p2p-transport"][value="nearby"]');
+      const peerRadio = box.querySelector('input[name="p2p-transport"][value="peerjs"]');
+      if (nearbyRadio && peerRadio) {
+        nearbyRadio.checked = true;
+        peerRadio.checked = false;
+      }
+    }
     const hintNet = (opts && opts.hintNet) || document.getElementById("p2p-need-net") ||
       document.querySelector('[data-i18n="p2pNeedNet"]');
     const hintBt = (opts && opts.hintBt) || document.getElementById("p2p-need-bt");
@@ -205,5 +238,6 @@
     getTransport,
     initTransportUi,
     nearbyReadySync,
+    mapError,
   };
 })(typeof self !== "undefined" ? self : this);

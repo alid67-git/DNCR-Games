@@ -6,6 +6,8 @@
 (function (root) {
   "use strict";
 
+  const JOIN_TIMEOUT_MS = 45000;
+
   function makeCode(len) {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     let s = "";
@@ -75,6 +77,7 @@
       this._unsubs = [];
       this._connected = false;
       this._joinWait = null;
+      this._joinTimer = null;
     }
 
     on(event, fn) {
@@ -101,28 +104,60 @@
     async join(code) {
       if (!this._plugin) throw new Error("nearby_unavailable");
       this.isHost = false;
-      this.code = String(code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+      this.code = String(code || "")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
       if (!this.code) throw new Error("need_code");
       await this._bindPluginEvents();
-      const wait = new Promise((resolve, reject) => {
-        const t = setTimeout(() => reject(new Error("timeout")), 25000);
+
+      const waitConnected = new Promise((resolve, reject) => {
         this._joinWait = {
-          resolve: () => {
-            clearTimeout(t);
-            resolve();
-          },
-          reject: (err) => {
-            clearTimeout(t);
-            reject(err);
-          },
+          resolve: () => resolve(),
+          reject: (err) => reject(err),
         };
       });
-      await this._plugin.startJoin({
-        serviceId: serviceIdFor(this.prefix),
-        name: this.code,
+
+      const overall = new Promise((_, reject) => {
+        this._joinTimer = setTimeout(() => {
+          reject(new Error("timeout"));
+        }, JOIN_TIMEOUT_MS);
       });
-      await wait;
+
+      try {
+        // startJoin izin diyaloğunda bekleyebilir — overall timeout her durumda kurtarır
+        await Promise.race([
+          (async () => {
+            await this._plugin.startJoin({
+              serviceId: serviceIdFor(this.prefix),
+              name: this.code,
+            });
+            await waitConnected;
+          })(),
+          overall,
+        ]);
+      } catch (err) {
+        this._clearJoinWait();
+        try {
+          if (this._plugin && typeof this._plugin.stop === "function") {
+            await this._plugin.stop();
+          }
+        } catch (_) {}
+        throw err;
+      } finally {
+        if (this._joinTimer) {
+          clearTimeout(this._joinTimer);
+          this._joinTimer = null;
+        }
+      }
       return this.code;
+    }
+
+    _clearJoinWait() {
+      this._joinWait = null;
+      if (this._joinTimer) {
+        clearTimeout(this._joinTimer);
+        this._joinTimer = null;
+      }
     }
 
     async _bindPluginEvents() {
@@ -137,6 +172,10 @@
           // join() await'i önce bitsin; oyun lobisi kurulduktan sonra connected
           const w = this._joinWait;
           this._joinWait = null;
+          if (this._joinTimer) {
+            clearTimeout(this._joinTimer);
+            this._joinTimer = null;
+          }
           w.resolve();
           queueMicrotask(() => this.emit("connected", ev));
         } else {
@@ -159,8 +198,9 @@
       const u4 = await p.addListener("error", (ev) => {
         const msg = (ev && ev.message) || "nearby";
         if (this._joinWait) {
-          this._joinWait.reject(new Error(msg));
-          this._joinWait = null;
+          const w = this._joinWait;
+          this._clearJoinWait();
+          w.reject(new Error(msg));
         }
         this.emit("error", msg);
       });
@@ -192,8 +232,8 @@
         try {
           this._joinWait.reject(new Error("destroyed"));
         } catch (_) {}
-        this._joinWait = null;
       }
+      this._clearJoinWait();
       this._teardownListeners();
       this._connected = false;
       try {

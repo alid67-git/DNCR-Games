@@ -7,7 +7,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.getcapacitor.JSObject;
@@ -15,6 +14,8 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.getcapacitor.annotation.Permission;
+import com.getcapacitor.annotation.PermissionCallback;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.nearby.Nearby;
@@ -39,22 +40,38 @@ import java.util.Locale;
 
 /**
  * Offline 1:1 link via Google Nearby Connections (Bluetooth + Wi‑Fi Direct).
+ *
+ * Permissions go through Capacitor's Activity Result path (@PermissionCallback).
+ * Raw ActivityCompat.requestPermissions is NOT used — Capacitor 8 does not forward
+ * those results to @CapacitorPlugin.handleRequestPermissionsResult.
  */
-@CapacitorPlugin(name = "NearbyLink")
+@CapacitorPlugin(
+        name = "NearbyLink",
+        permissions = {
+            @Permission(
+                    alias = "nearby",
+                    strings = {
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.BLUETOOTH_SCAN,
+                        Manifest.permission.BLUETOOTH_ADVERTISE,
+                        Manifest.permission.BLUETOOTH_CONNECT,
+                        Manifest.permission.NEARBY_WIFI_DEVICES
+                    })
+        })
 public class NearbyLinkPlugin extends Plugin {
     private static final String TAG = "NearbyLink";
-    private static final int REQ_PERMS = 7913;
     private static final Strategy STRATEGY = Strategy.P2P_POINT_TO_POINT;
 
     private ConnectionsClient connections;
     @Nullable private String connectedEndpointId;
+    @Nullable private String connectingEndpointId;
     @Nullable private String expectedName;
     private boolean isHost;
     private boolean stopped = true;
     @Nullable private String pendingMode;
     @Nullable private String pendingServiceId;
     @Nullable private String pendingName;
-    @Nullable private PluginCall pendingCall;
 
     private ConnectionsClient client() {
         if (connections == null) {
@@ -93,38 +110,38 @@ public class NearbyLinkPlugin extends Plugin {
         pendingMode = mode;
         pendingServiceId = serviceId;
         pendingName = name;
-        pendingCall = call;
         call.setKeepAlive(true);
         if (!hasRuntimePermissions()) {
-            ActivityCompat.requestPermissions(
-                    getActivity(), runtimePermissions(), REQ_PERMS);
+            // Capacitor Activity Result launcher — callback: nearbyPermsDone
+            requestPermissionForAlias("nearby", call, "nearbyPermsDone");
             return;
         }
-        continuePending();
+        continuePending(call);
     }
 
-    @Override
-    protected void handleRequestPermissionsResult(
-            int requestCode, String[] permissions, int[] grantResults) {
-        super.handleRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode != REQ_PERMS) return;
+    @PermissionCallback
+    private void nearbyPermsDone(PluginCall call) {
         if (!hasRuntimePermissions()) {
-            if (pendingCall != null) {
-                pendingCall.reject("nearby_permission_denied");
-                pendingCall = null;
-            }
+            pendingMode = null;
+            pendingServiceId = null;
+            pendingName = null;
+            call.reject("nearby_permission_denied");
             return;
         }
-        continuePending();
+        continuePending(call);
     }
 
-    private void continuePending() {
-        PluginCall call = pendingCall;
+    private void continuePending(PluginCall call) {
         String mode = pendingMode;
         String serviceId = pendingServiceId;
         String name = pendingName;
-        pendingCall = null;
-        if (call == null || mode == null || serviceId == null || name == null) return;
+        pendingMode = null;
+        pendingServiceId = null;
+        pendingName = null;
+        if (call == null || mode == null || serviceId == null || name == null) {
+            if (call != null) call.reject("nearby_internal");
+            return;
+        }
         if ("host".equals(mode)) {
             doStartHost(call, serviceId, name);
         } else {
@@ -137,6 +154,7 @@ public class NearbyLinkPlugin extends Plugin {
         stopped = false;
         isHost = true;
         expectedName = name;
+        connectingEndpointId = null;
         AdvertisingOptions opts =
                 new AdvertisingOptions.Builder().setStrategy(STRATEGY).build();
         client()
@@ -160,6 +178,7 @@ public class NearbyLinkPlugin extends Plugin {
         stopped = false;
         isHost = false;
         expectedName = name;
+        connectingEndpointId = null;
         DiscoveryOptions opts = new DiscoveryOptions.Builder().setStrategy(STRATEGY).build();
         client()
                 .startDiscovery(serviceId, discoveryCallback, opts)
@@ -206,6 +225,7 @@ public class NearbyLinkPlugin extends Plugin {
 
     private void resetLink(boolean markStopped) {
         if (markStopped) stopped = true;
+        connectingEndpointId = null;
         try {
             client().stopAdvertising();
         } catch (Exception ignored) {
@@ -227,23 +247,30 @@ public class NearbyLinkPlugin extends Plugin {
                 public void onEndpointFound(
                         @NonNull String endpointId, @NonNull DiscoveredEndpointInfo info) {
                     if (stopped || isHost || connectedEndpointId != null) return;
+                    if (connectingEndpointId != null) return;
                     String found = normalizeName(info.getEndpointName());
+                    Log.i(TAG, "found endpoint name=" + found + " expect=" + expectedName);
                     if (expectedName == null || !expectedName.equals(found)) return;
-                    String localName = expectedName != null ? expectedName : "GUEST";
+                    connectingEndpointId = endpointId;
+                    String localName = expectedName;
                     client()
                             .requestConnection(localName, endpointId, lifecycleCallback)
                             .addOnFailureListener(
                                     e -> {
                                         Log.e(TAG, "requestConnection fail", e);
-                                        notifyError(
-                                                e.getMessage() != null
-                                                        ? e.getMessage()
-                                                        : "request_fail");
+                                        if (endpointId.equals(connectingEndpointId)) {
+                                            connectingEndpointId = null;
+                                        }
+                                        // Keep discovering — do not fail the whole join.
                                     });
                 }
 
                 @Override
-                public void onEndpointLost(@NonNull String endpointId) {}
+                public void onEndpointLost(@NonNull String endpointId) {
+                    if (endpointId.equals(connectingEndpointId)) {
+                        connectingEndpointId = null;
+                    }
+                }
             };
 
     private final ConnectionLifecycleCallback lifecycleCallback =
@@ -268,6 +295,7 @@ public class NearbyLinkPlugin extends Plugin {
                     if (result.getStatus().getStatusCode()
                             == ConnectionsStatusCodes.STATUS_OK) {
                         connectedEndpointId = endpointId;
+                        connectingEndpointId = null;
                         try {
                             client().stopAdvertising();
                         } catch (Exception ignored) {
@@ -281,7 +309,17 @@ public class NearbyLinkPlugin extends Plugin {
                         ev.put("isHost", isHost);
                         notifyListeners("connected", ev);
                     } else {
-                        notifyError("connection_failed");
+                        Log.w(
+                                TAG,
+                                "connection_failed code="
+                                        + result.getStatus().getStatusCode()
+                                        + " for "
+                                        + endpointId);
+                        if (endpointId.equals(connectingEndpointId)) {
+                            connectingEndpointId = null;
+                        }
+                        // Guest: keep discovery alive and retry on next sighting.
+                        // Do not emit fatal error — JS timeout handles giving up.
                     }
                 }
 
