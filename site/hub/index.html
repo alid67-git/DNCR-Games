@@ -170,6 +170,13 @@
       .game strong { font-size: 0.92rem; }
       .game span { font-size: 0.72rem; }
     }
+    .hub-credit {
+      margin: 0.2rem 0 0;
+      font-size: 0.86rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+    }
     .hub-brand-ver {
       margin: 0.55rem 0 0;
       font-size: 0.88rem;
@@ -326,75 +333,76 @@
     <header class="brand">
       <img src="assets/icon-512.png" width="112" height="112" alt="DNCR Games" />
       <h1>DNCR Games</h1>
-      <p class="lede">Oyununu seç</p>
-      <p class="hub-brand-ver" id="hub-ver">v1.0.21</p>
+      <p class="hub-credit" id="hub-credit" data-i18n="creditBy">geliştiren Ali Dinçer</p>
+      <p class="lede" data-i18n="lede">Oyununu seç</p>
+      <p class="hub-brand-ver" id="hub-ver">v1.0.22</p>
     </header>
 
     <div class="hub-scroll">
-      <nav class="games" aria-label="Oyunlar">
+      <nav class="games" aria-label="Oyunlar" data-i18n-aria="gamesNav">
         <a class="game" href="kati/index.html" data-game="kati">
           <img class="game-art" src="assets/kati-icon.png" width="52" height="52" alt="" />
           <span class="game-copy">
             <strong>Kati</strong>
-            <span>Kırmızı vs yeşil</span>
+            <span data-i18n="gameKati">Kırmızı vs yeşil</span>
           </span>
         </a>
         <a class="game" href="noktalar/index.html" data-game="noktalar">
           <img class="game-art" src="assets/noktalar-icon.png" width="52" height="52" alt="" />
           <span class="game-copy">
             <strong>Noktalar</strong>
-            <span>Çizgi çek, kutu kapat</span>
+            <span data-i18n="gameNoktalar">Çizgi çek, kutu kapat</span>
           </span>
         </a>
         <a class="game" href="dokuztas/index.html" data-game="dokuztas">
           <img class="game-art" src="assets/dokuztas-icon.png" width="52" height="52" alt="" />
           <span class="game-copy">
             <strong>Dokuztaş</strong>
-            <span>Değirmen kur</span>
+            <span data-i18n="gameDokuztas">Değirmen kur</span>
           </span>
         </a>
         <a class="game" href="kusatma/index.html" data-game="kusatma">
           <img class="game-art" src="assets/kusatma-icon.png" width="52" height="52" alt="" />
           <span class="game-copy">
             <strong>Kuşatma</strong>
-            <span>Kuşat, esir al</span>
+            <span data-i18n="gameKusatma">Kuşat, esir al</span>
           </span>
         </a>
         <a class="game" href="sayi/index.html" data-game="sayi">
           <img class="game-art" src="assets/sayi-icon.svg" width="52" height="52" alt="" />
           <span class="game-copy">
-            <strong>Sayı Bulma</strong>
-            <span>4 hane · artı / eksi</span>
+            <strong data-i18n="nameSayi">Sayı Bulma</strong>
+            <span data-i18n="gameSayi">4 hane · artı / eksi</span>
           </span>
         </a>
         <a class="game" href="fanorona/index.html" data-game="fanorona">
           <img class="game-art" src="assets/fanorona-icon.png" width="52" height="52" alt="" />
           <span class="game-copy">
             <strong>Fanorona</strong>
-            <span>Yaklaş, uzaklaş, zincirle</span>
+            <span data-i18n="gameFanorona">Yaklaş, uzaklaş, zincirle</span>
           </span>
         </a>
         <a class="game" href="dama/index.html" data-game="dama">
           <img class="game-art" src="assets/dama-icon.png" width="52" height="52" alt="" />
           <span class="game-copy">
             <strong>Dama</strong>
-            <span>Türk daması · ortogonal alma</span>
+            <span data-i18n="gameDama">Türk daması · ortogonal alma</span>
           </span>
         </a>
         <a class="game" href="tavla/index.html" data-game="tavla">
           <img class="game-art" src="assets/tavla-icon.png" width="52" height="52" alt="" />
           <span class="game-copy">
             <strong>Tavla</strong>
-            <span>Zar at, yürüt, kapıya</span>
+            <span data-i18n="gameTavla">Zar at, yürüt, kapıya</span>
           </span>
         </a>
       </nav>
 
       <div class="hub-actions">
-        <button type="button" class="btn-update-check" id="btn-hub-check-update">Güncellemeyi kontrol et</button>
+        <button type="button" class="btn-update-check" id="btn-hub-check-update" data-i18n="checkUpdate">Güncellemeyi kontrol et</button>
       </div>
 
-      <footer>Tek uygulama · iPhone / iPad / Android · Yardım her oyunun içinde</footer>
+      <footer data-i18n="footer">Tek uygulama · iPhone / iPad / Android · Yardım her oyunun içinde</footer>
     </div>
   </main>
 
@@ -411,16 +419,103 @@
 
   <div id="hub-update-modal" class="hub-modal" hidden role="dialog" aria-modal="true" aria-labelledby="hub-update-title">
     <div class="hub-modal-card">
-      <h2 id="hub-update-title">Yeni sürüm hazır</h2>
+      <h2 id="hub-update-title" data-i18n="updateTitle">Yeni sürüm hazır</h2>
       <p id="hub-update-body"></p>
       <div class="hub-modal-actions">
-        <button type="button" class="hub-btn-primary" id="btn-hub-update-now">Şimdi güncelle</button>
-        <button type="button" class="hub-btn-ghost" id="btn-hub-update-later">Daha sonra</button>
+        <button type="button" class="hub-btn-primary" id="btn-hub-update-now" data-i18n="updateNow">Şimdi güncelle</button>
+        <button type="button" class="hub-btn-ghost" id="btn-hub-update-later" data-i18n="updateLater">Daha sonra</button>
       </div>
     </div>
   </div>
 
   <script src="app-config.js"></script>
+  <script>
+    (function () {
+      var HUB_I18N = {
+        tr: {
+          creditBy: "geliştiren Ali Dinçer",
+          lede: "Oyununu seç",
+          gamesNav: "Oyunlar",
+          gameKati: "Kırmızı vs yeşil",
+          gameNoktalar: "Çizgi çek, kutu kapat",
+          gameDokuztas: "Değirmen kur",
+          gameKusatma: "Kuşat, esir al",
+          nameSayi: "Sayı Bulma",
+          gameSayi: "4 hane · artı / eksi",
+          gameFanorona: "Yaklaş, uzaklaş, zincirle",
+          gameDama: "Türk daması · ortogonal alma",
+          gameTavla: "Zar at, yürüt, kapıya",
+          checkUpdate: "Güncellemeyi kontrol et",
+          footer: "Tek uygulama · iPhone / iPad / Android · Yardım her oyunun içinde",
+          updateTitle: "Yeni sürüm hazır",
+          updateNow: "Şimdi güncelle",
+          updateLater: "Daha sonra",
+        },
+        en: {
+          creditBy: "Developed by Ali Dinçer",
+          lede: "Choose a game",
+          gamesNav: "Games",
+          gameKati: "Red vs green",
+          gameNoktalar: "Draw lines, close boxes",
+          gameDokuztas: "Build mills",
+          gameKusatma: "Surround and capture",
+          nameSayi: "Number Hunt",
+          gameSayi: "4 digits · plus / minus",
+          gameFanorona: "Approach, withdraw, chain",
+          gameDama: "Turkish draughts · orthogonal capture",
+          gameTavla: "Roll, move, bear off",
+          checkUpdate: "Check for updates",
+          footer: "One app · iPhone / iPad / Android · Help inside each game",
+          updateTitle: "New version ready",
+          updateNow: "Update now",
+          updateLater: "Later",
+        },
+      };
+
+      function hubLang() {
+        try {
+          var stored = localStorage.getItem("dncr_lang") || localStorage.getItem("arena_lang");
+          if (stored === "en" || stored === "tr") return stored;
+          var keys = [
+            "kati_arena_settings",
+            "dots_boxes_settings",
+            "dokuztas_settings",
+            "kusatma_settings_v1",
+            "sayibulma_settings",
+            "fanorona_settings",
+            "dama_settings",
+            "tavla_settings",
+          ];
+          for (var i = 0; i < keys.length; i++) {
+            var raw = localStorage.getItem(keys[i]);
+            if (!raw) continue;
+            var o = JSON.parse(raw);
+            if (o && (o.lang === "en" || o.lang === "tr")) return o.lang;
+          }
+        } catch (_) {}
+        var nav = (navigator.languages && navigator.languages[0]) || navigator.language || "tr";
+        return /^en\b/i.test(String(nav)) ? "en" : "tr";
+      }
+
+      var lang = hubLang();
+      var pack = HUB_I18N[lang] || HUB_I18N.tr;
+      document.documentElement.lang = lang;
+      document.querySelectorAll("[data-i18n]").forEach(function (el) {
+        var key = el.getAttribute("data-i18n");
+        if (key && pack[key] != null) el.textContent = pack[key];
+      });
+      document.querySelectorAll("[data-i18n-aria]").forEach(function (el) {
+        var key = el.getAttribute("data-i18n-aria");
+        if (key && pack[key] != null) el.setAttribute("aria-label", pack[key]);
+      });
+      window.HubI18n = {
+        lang: lang,
+        t: function (key) {
+          return (HUB_I18N[lang] && HUB_I18N[lang][key]) || (HUB_I18N.tr && HUB_I18N.tr[key]) || key;
+        },
+      };
+    })();
+  </script>
   <script src="hub-update.js"></script>
   <script>
     (function () {
