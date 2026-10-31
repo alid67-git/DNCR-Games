@@ -217,6 +217,47 @@
       font-size: 0.88rem;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
     }
+    .hub-dl-progress {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 65;
+      padding: 0.85rem 1.15rem max(1rem, env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, transparent, rgba(8, 12, 18, 0.92) 28%);
+      pointer-events: none;
+    }
+    .hub-dl-progress[hidden] { display: none !important; }
+    .hub-dl-card {
+      width: min(560px, 100%);
+      margin: 0 auto;
+      padding: 0.75rem 0.9rem 0.85rem;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(20, 32, 46, 0.96);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+      pointer-events: none;
+    }
+    .hub-dl-label {
+      margin: 0 0 0.55rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+    }
+    .hub-dl-bar {
+      height: 0.55rem;
+      border-radius: 999px;
+      background: rgba(242, 246, 250, 0.12);
+      overflow: hidden;
+    }
+    .hub-dl-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #3da88c, var(--accent));
+      transition: width 0.18s ease-out;
+    }
     .hub-modal {
       position: fixed;
       inset: 0;
@@ -286,7 +327,7 @@
       <img src="assets/icon-512.png" width="112" height="112" alt="DNCR Games" />
       <h1>DNCR Games</h1>
       <p class="lede">Oyununu seç</p>
-      <p class="hub-brand-ver" id="hub-ver">v1.0.18</p>
+      <p class="hub-brand-ver" id="hub-ver">v1.0.21</p>
     </header>
 
     <div class="hub-scroll">
@@ -358,6 +399,15 @@
   </main>
 
   <div id="hub-toast" class="hub-toast" hidden role="status"></div>
+
+  <div id="hub-dl-progress" class="hub-dl-progress" hidden role="status" aria-live="polite">
+    <div class="hub-dl-card">
+      <p class="hub-dl-label" id="hub-dl-label">İndiriliyor… 0%</p>
+      <div class="hub-dl-bar" aria-hidden="true">
+        <div class="hub-dl-fill" id="hub-dl-fill"></div>
+      </div>
+    </div>
+  </div>
 
   <div id="hub-update-modal" class="hub-modal" hidden role="dialog" aria-modal="true" aria-labelledby="hub-update-title">
     <div class="hub-modal-card">

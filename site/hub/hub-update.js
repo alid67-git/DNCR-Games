@@ -14,9 +14,38 @@
 
   let pending = null;
   let installing = false;
+  let progressHideTimer = null;
 
   function $(id) {
     return document.getElementById(id);
+  }
+
+  function showDownloadProgress(percent, label) {
+    const wrap = $("hub-dl-progress");
+    const fill = $("hub-dl-fill");
+    const text = $("hub-dl-label");
+    if (!wrap) return;
+    clearTimeout(progressHideTimer);
+    const pct = Math.max(0, Math.min(100, Number(percent) || 0));
+    wrap.hidden = false;
+    if (fill) fill.style.width = pct + "%";
+    if (text) {
+      text.textContent =
+        label ||
+        (pct >= 100 ? "İndirme tamam — kurulum açılıyor…" : "İndiriliyor… %" + pct);
+    }
+  }
+
+  function hideDownloadProgress(delayMs) {
+    clearTimeout(progressHideTimer);
+    const run = () => {
+      const wrap = $("hub-dl-progress");
+      const fill = $("hub-dl-fill");
+      if (wrap) wrap.hidden = true;
+      if (fill) fill.style.width = "0%";
+    };
+    if (delayMs && delayMs > 0) progressHideTimer = setTimeout(run, delayMs);
+    else run();
   }
 
   /** APK güncelleme yalnızca native Android hub’da. iPhone Safari / PWA / masaüstü web: hayır. */
@@ -136,17 +165,30 @@
     try {
       if (typeof plugin.addListener === "function" && !downloadAndInstall._bound) {
         downloadAndInstall._bound = true;
+        plugin.addListener("downloadProgress", (ev) => {
+          const pct =
+            ev && typeof ev.percent === "number"
+              ? ev.percent
+              : ev && ev.total > 0
+                ? Math.round((100 * (ev.bytes || 0)) / ev.total)
+                : 0;
+          showDownloadProgress(pct);
+        });
         plugin.addListener("installReady", () => {
+          showDownloadProgress(100, "Kurulum ekranı açılıyor…");
           toast("Kurulum ekranı açıldı");
           installing = false;
+          hideDownloadProgress(2200);
         });
         plugin.addListener("installError", (ev) => {
+          hideDownloadProgress(0);
           toast("Kurulum açılamadı — tarayıcıdan dene");
           installing = false;
           if (pending && pending.apkUrl) openExternal(pending.apkUrl);
         });
       }
     } catch (_) {}
+    showDownloadProgress(0, "İndiriliyor… %0");
     const result = await plugin.downloadAndInstall({ url });
     return { mode: "native", result };
   }
@@ -262,12 +304,13 @@
     installing = true;
     const btn = $("btn-hub-update-now");
     if (btn) btn.disabled = true;
-    toast("İndiriliyor… bildirimde izle, bitince kur");
     hideModal();
+    showDownloadProgress(0, "İndiriliyor… %0");
     try {
       await downloadAndInstall(url);
     } catch (err) {
       console.warn("Hub update apply failed", err);
+      hideDownloadProgress(0);
       toast("İndirme başarısız — tarayıcı açılıyor");
       try {
         await openExternal(url);
