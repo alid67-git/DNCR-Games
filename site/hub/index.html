@@ -28,11 +28,16 @@
     * { box-sizing: border-box; }
     html {
       height: 100%;
+      overflow: hidden;
     }
     body {
       margin: 0;
-      height: 100dvh;
-      max-height: 100dvh;
+      /* Android WebView: document scroll’u kilitle; yalnızca .hub-scroll kayar */
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: var(--app-height, 100%);
+      max-height: var(--app-height, 100%);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -51,21 +56,27 @@
       text-align: center;
       flex: 1 1 auto;
       min-height: 0;
+      height: 100%;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
     .brand {
       flex: 0 0 auto;
       margin: 0.15rem 0 0.85rem;
+      z-index: 2;
       animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
     .hub-scroll {
       flex: 1 1 auto;
+      /* flex çocuğunda overflow için klasik Android/WebView hilesi */
       min-height: 0;
-      overflow-y: auto;
+      height: 0;
       overflow-x: hidden;
+      overflow-y: scroll;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
+      touch-action: pan-y;
       padding-bottom: 0.35rem;
       scrollbar-width: thin;
     }
@@ -275,7 +286,7 @@
       <img src="assets/icon-512.png" width="112" height="112" alt="DNCR Games" />
       <h1>DNCR Games</h1>
       <p class="lede">Oyununu seç</p>
-      <p class="hub-brand-ver" id="hub-ver">v1.0.16</p>
+      <p class="hub-brand-ver" id="hub-ver">v1.0.18</p>
     </header>
 
     <div class="hub-scroll">
@@ -363,6 +374,24 @@
   <script src="hub-update.js"></script>
   <script>
     (function () {
+      // Android WebView 100dvh güvenilmez — gerçek görünür yüksekliği kilitle
+      function setAppHeight() {
+        var h =
+          (window.visualViewport && window.visualViewport.height) ||
+          window.innerHeight ||
+          document.documentElement.clientHeight;
+        if (!h) return;
+        document.documentElement.style.setProperty("--app-height", Math.round(h) + "px");
+      }
+      setAppHeight();
+      window.addEventListener("resize", setAppHeight);
+      window.addEventListener("orientationchange", function () {
+        setTimeout(setAppHeight, 120);
+      });
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", setAppHeight);
+      }
+
       // Capacitor: klasör URL’leri (kati/) html5mode ile hub’a düşer — her zaman …/index.html
       document.querySelectorAll("a.game[data-game]").forEach(function (a) {
         a.addEventListener("click", function (e) {
