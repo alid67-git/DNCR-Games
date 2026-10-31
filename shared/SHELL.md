@@ -78,6 +78,21 @@ npm run build:pages   # _site hub + oyunlar
 
 Yeni yapısal özellik: **önce `shared/`**, sonra sync, sonra gerekirse oyuna özel kanca.
 
+## Android hub — oyun PR’larında zorunlu
+
+Hub APK oyunları **paket içine** gömer. Web/Pages güncellense bile telefadaki hub eski oyunu gösterir.
+
+**Kural:** Herhangi bir oyun (veya `shared/`) değişince aynı PR’da hub sürümü de yükseltilir:
+
+```bash
+node scripts/bump-hub.mjs
+```
+
+Güncellenen yerler: `site/hub/app-config.js`, `hub/package.json`, `hub/android/app/build.gradle`, README APK linkleri.
+
+CI (`hub-game-bump-check`) oyun değişip hub bump yoksa PR’ı reddeder.  
+`main`’e hub bump gelince `tag-hub-release` yoksa `hub-vX.Y.Z` tag’ini basar → **Release Hub APK** yayınlar.
+
 ## Vurgu & puan (ortak kurgu)
 
 - **Hamle SFX:** `shared/js/move-sfx.js` — `select` / `place` / `move` / `capture` / `mill` / `box`
