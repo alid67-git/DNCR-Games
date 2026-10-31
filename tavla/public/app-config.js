@@ -1,9 +1,22 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.23",
-  build: 24,
+  version: "1.0.24",
+  build: 25,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.24",
+      build: 25,
+      date: "2026-10-31",
+      items: {
+        tr: [
+          "Ayarlarda oyun sesleri için belirgin Açık/Kapalı anahtarı",
+        ],
+        en: [
+          "Clear On/Off switch for game sounds in Settings",
+        ],
+      },
+    },
     {
       version: "1.0.23",
       build: 24,

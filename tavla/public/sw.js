@@ -1,5 +1,5 @@
 /* Tavla — offline cache (solo + local 2P + P2P shell) */
-const CACHE = "tavla-v1.0.23";
+const CACHE = "tavla-v1.0.24";
 const ASSETS = [
   "./",
   "./index.html",
