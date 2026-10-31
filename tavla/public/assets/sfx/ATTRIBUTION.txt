@@ -1,4 +1,4 @@
-Tavla SFX / ambient — licenses
+Tavla SFX / music — licenses
 
 Dice rolls (SFXMint, CC0 1.0 — public domain, no attribution required):
   dice-roll-06 / 08 / 11 / 17
@@ -8,4 +8,5 @@ Wooden dice on wooden table (OpenGameArt / Wuzzy, CC0):
   wood-die-1 … wood-die-4
   https://opengameart.org/content/wooden-dice-on-wodden-table-roll
 
-ambient-soft.* — soft room pad generated for this project (no third-party sample).
+piano-concerto-mini.* — original soft piano miniature composed/synthesized
+  for DNCR Games Tavla (scripts/compose-tavla-piano.mjs). No third-party sample.

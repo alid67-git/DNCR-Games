@@ -1,5 +1,5 @@
 /* Tavla — offline cache (solo + local 2P + P2P shell) */
-const CACHE = "tavla-v1.0.22";
+const CACHE = "tavla-v1.0.23";
 const ASSETS = [
   "./",
   "./index.html",
@@ -40,7 +40,7 @@ const ASSETS = [
   "./assets/sfx/wood-die-1.ogg",
   "./assets/sfx/wood-die-3.ogg",
   "./assets/sfx/wood-die-4.ogg",
-  "./assets/sfx/ambient-soft.ogg",
+  "./assets/sfx/piano-concerto-mini.ogg",
 ];
 
 self.addEventListener("install", (event) => {

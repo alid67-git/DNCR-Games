@@ -1,5 +1,5 @@
 /**
- * Tavla — gerçekçi zar örnekleri + yumuşak ambiyans
+ * Tavla — zar/hamle SFX + arka plan piyano (müzik ve efektler ayrı)
  * window.TavlaAudio
  */
 (function (root) {
@@ -10,14 +10,13 @@
   let musicGain = null;
   let sfxGain = null;
   let musicEl = null;
-  let musicNodes = [];
   let unlocked = false;
   let loadPromise = null;
 
   const state = {
     music: true,
     sfx: true,
-    musicVol: 0.12,
+    musicVol: 0.22,
     sfxVol: 0.7,
   };
 
@@ -44,8 +43,8 @@
     "assets/sfx/wood-die-3.mp3",
     "assets/sfx/wood-die-4.mp3",
   ];
-  const AMBIENT_OGG = "assets/sfx/ambient-soft.ogg";
-  const AMBIENT_MP3 = "assets/sfx/ambient-soft.mp3";
+  const MUSIC_OGG = "assets/sfx/piano-concerto-mini.ogg";
+  const MUSIC_MP3 = "assets/sfx/piano-concerto-mini.mp3";
 
   function ensure() {
     if (ctx) return ctx;
@@ -246,12 +245,6 @@
   }
 
   function stopMusic() {
-    for (const n of musicNodes) {
-      try {
-        n.stop();
-      } catch (_) {}
-    }
-    musicNodes = [];
     if (musicEl) {
       try {
         musicEl.pause();
@@ -266,60 +259,36 @@
     a.loop = true;
     a.preload = "auto";
     const o = document.createElement("source");
-    o.src = AMBIENT_OGG;
+    o.src = MUSIC_OGG;
     o.type = "audio/ogg";
     const m = document.createElement("source");
-    m.src = AMBIENT_MP3;
+    m.src = MUSIC_MP3;
     m.type = "audio/mpeg";
     a.appendChild(o);
     a.appendChild(m);
-    a.volume = Math.min(1, state.musicVol * 1.4);
+    a.volume = Math.min(1, Math.max(0.05, state.musicVol));
     musicEl = a;
     return a;
   }
 
-  /** Sessiz oda ambiyansı — arpej yok */
+  /** Arka plan piyano — SFX’ten bağımsız; yalnızca state.music açıkken */
   function startMusic() {
     const c = ensure();
     if (!c || !musicGain || !state.music) return;
     stopMusic();
-    musicGain.gain.setTargetAtTime(state.musicVol, c.currentTime, 0.4);
+    musicGain.gain.setTargetAtTime(state.musicVol, c.currentTime, 0.35);
     const el = ensureMusicEl();
-    el.volume = Math.min(1, Math.max(0.04, state.musicVol * 1.35));
+    el.volume = Math.min(1, Math.max(0.05, state.musicVol));
     const play = () => {
+      if (!state.music) return;
       const p = el.play();
-      if (p && typeof p.catch === "function") p.catch(() => startPadFallback());
+      if (p && typeof p.catch === "function") p.catch(() => {});
     };
     if (el.readyState >= 2) play();
     else {
       el.addEventListener("canplaythrough", play, { once: true });
       el.load();
-      // Kısa süre sonra hâlâ çalmazsa pad
-      setTimeout(() => {
-        if (el.paused && state.music) startPadFallback();
-      }, 800);
     }
-  }
-
-  function startPadFallback() {
-    const c = ensure();
-    if (!c || !musicGain || !state.music || musicNodes.length) return;
-    const pads = [82.41, 123.47, 164.81];
-    pads.forEach((f, i) => {
-      const o = c.createOscillator();
-      const g = c.createGain();
-      const ftr = c.createBiquadFilter();
-      o.type = "sine";
-      o.frequency.value = f;
-      ftr.type = "lowpass";
-      ftr.frequency.value = 420;
-      g.gain.value = 0.018 + (i === 0 ? 0.01 : 0);
-      o.connect(ftr);
-      ftr.connect(g);
-      g.connect(musicGain);
-      o.start();
-      musicNodes.push(o);
-    });
   }
 
   function setMusic(on) {
@@ -351,7 +320,7 @@
     const c = ensure();
     if (c && musicGain) musicGain.gain.value = state.music ? state.musicVol : 0;
     if (c && sfxGain) sfxGain.gain.value = state.sfx ? state.sfxVol : 0;
-    if (musicEl) musicEl.volume = Math.min(1, state.musicVol * 1.35);
+    if (musicEl) musicEl.volume = Math.min(1, Math.max(0.05, state.musicVol));
   }
 
   root.TavlaAudio = {
