@@ -19,7 +19,7 @@
     en: {
       hubBack: "DNCR Games",
       hubBackTitle: "Back to hub?",
-      hubBackConfirm: "Return to the DNCR Games home page?",
+      hubBackConfirm: "Are you sure you want to return to DNCR Games?",
       hubBackYes: "Yes, go back",
       hubBackNo: "Cancel",
     },

@@ -12,12 +12,88 @@
   const TAG_PREFIX = (CFG.releaseTagPrefix || "hub-v").toLowerCase();
   const APK_RE = CFG.apkNamePattern || /DNCR-Games-hub.*\.apk$/i;
 
+  const COPY = {
+    tr: {
+      dlProgress: "İndiriliyor… %{pct}",
+      dlDone: "İndirme tamam — kurulum açılıyor…",
+      installOpening: "Kurulum ekranı açılıyor…",
+      installOpened: "Kurulum ekranı açıldı",
+      installFail: "Kurulum açılamadı — tarayıcıdan dene",
+      apkAndroidOnly: "APK güncelleme yalnızca Android hub’da",
+      offline: "Çevrimdışı — güncelleme kontrol edilemedi",
+      checking: "Güncelleme kontrol ediliyor…",
+      noVersion: "Sürüm bilgisi alınamadı",
+      upToDate: "Güncelsin (v{ver})",
+      checkFail: "Güncelleme kontrolü başarısız",
+      readyBody: "v{ver} hazır. İndirip kurunca hub güncellenir (eski sürümün üzerine).",
+      iosNoApk: "iPhone’da APK yok — Safari’den sayfayı yenilemen yeterli",
+      noApkLink: "APK linki yok",
+      downloadFail: "İndirme başarısız — tarayıcı açılıyor",
+      apkOpenFail: "APK açılamadı",
+    },
+    en: {
+      dlProgress: "Downloading… {pct}%",
+      dlDone: "Download complete — opening installer…",
+      installOpening: "Opening installer…",
+      installOpened: "Installer opened",
+      installFail: "Couldn't open installer — try in the browser",
+      apkAndroidOnly: "APK updates are only on the Android hub",
+      offline: "Offline — couldn't check for updates",
+      checking: "Checking for updates…",
+      noVersion: "Couldn't read version info",
+      upToDate: "You're up to date (v{ver})",
+      checkFail: "Update check failed",
+      readyBody: "v{ver} is ready. Download and install to update the hub.",
+      iosNoApk: "No APK on iPhone — refresh the page in Safari",
+      noApkLink: "No APK link",
+      downloadFail: "Download failed — opening browser",
+      apkOpenFail: "Couldn't open the APK",
+    },
+  };
+
   let pending = null;
   let installing = false;
   let progressHideTimer = null;
 
   function $(id) {
     return document.getElementById(id);
+  }
+
+  function lang() {
+    try {
+      if (window.HubI18n && window.HubI18n.lang) return window.HubI18n.lang;
+      const stored = localStorage.getItem("dncr_lang") || localStorage.getItem("arena_lang");
+      if (stored === "en" || stored === "tr") return stored;
+      const keys = [
+        "kati_arena_settings",
+        "dots_boxes_settings",
+        "dokuztas_settings",
+        "kusatma_settings_v1",
+        "sayibulma_settings",
+        "fanorona_settings",
+        "dama_settings",
+        "tavla_settings",
+      ];
+      for (let i = 0; i < keys.length; i++) {
+        const raw = localStorage.getItem(keys[i]);
+        if (!raw) continue;
+        const o = JSON.parse(raw);
+        if (o && (o.lang === "en" || o.lang === "tr")) return o.lang;
+      }
+    } catch (_) {}
+    const nav = (navigator.languages && navigator.languages[0]) || navigator.language || "tr";
+    return /^en\b/i.test(String(nav)) ? "en" : "tr";
+  }
+
+  function t(key, vars) {
+    const pack = COPY[lang()] || COPY.tr;
+    let s = (pack && pack[key]) || (COPY.tr && COPY.tr[key]) || key;
+    if (vars) {
+      Object.keys(vars).forEach((k) => {
+        s = s.replace(new RegExp("\\{" + k + "\\}", "g"), String(vars[k]));
+      });
+    }
+    return s;
   }
 
   function showDownloadProgress(percent, label) {
@@ -32,7 +108,7 @@
     if (text) {
       text.textContent =
         label ||
-        (pct >= 100 ? "İndirme tamam — kurulum açılıyor…" : "İndiriliyor… %" + pct);
+        (pct >= 100 ? t("dlDone") : t("dlProgress", { pct: pct }));
     }
   }
 
@@ -175,20 +251,20 @@
           showDownloadProgress(pct);
         });
         plugin.addListener("installReady", () => {
-          showDownloadProgress(100, "Kurulum ekranı açılıyor…");
-          toast("Kurulum ekranı açıldı");
+          showDownloadProgress(100, t("installOpening"));
+          toast(t("installOpened"));
           installing = false;
           hideDownloadProgress(2200);
         });
         plugin.addListener("installError", (ev) => {
           hideDownloadProgress(0);
-          toast("Kurulum açılamadı — tarayıcıdan dene");
+          toast(t("installFail"));
           installing = false;
           if (pending && pending.apkUrl) openExternal(pending.apkUrl);
         });
       }
     } catch (_) {}
-    showDownloadProgress(0, "İndiriliyor… %0");
+    showDownloadProgress(0, t("dlProgress", { pct: 0 }));
     const result = await plugin.downloadAndInstall({ url });
     return { mode: "native", result };
   }
@@ -246,10 +322,7 @@
     const modal = $("hub-update-modal");
     const body = $("hub-update-body");
     if (!modal || !body) return;
-    body.textContent =
-      "v" +
-      (info.version || "?") +
-      " hazır. İndirip kurunca hub güncellenir (eski sürümün üzerine).";
+    body.textContent = t("readyBody", { ver: info.version || "?" });
     modal.hidden = false;
   }
 
@@ -260,31 +333,31 @@
 
   async function check({ force = false, silent = true } = {}) {
     if (!isAndroidHubApk()) {
-      if (!silent) toast("APK güncelleme yalnızca Android hub’da");
+      if (!silent) toast(t("apkAndroidOnly"));
       return { status: "skipped-platform" };
     }
     if (shouldSkip(force)) return { status: "skipped" };
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
-      if (!silent) toast("Çevrimdışı — güncelleme kontrol edilemedi");
+      if (!silent) toast(t("offline"));
       return { status: "error" };
     }
-    if (!silent) toast("Güncelleme kontrol ediliyor…");
+    if (!silent) toast(t("checking"));
     markChecked();
     try {
       const info = await fetchHubLatest();
       if (!info || !info.version) {
-        if (!silent) toast("Sürüm bilgisi alınamadı");
+        if (!silent) toast(t("noVersion"));
         return { status: "error" };
       }
       if (compareVersions(info.version, CFG.version) <= 0) {
-        if (!silent) toast("Güncelsin (v" + CFG.version + ")");
+        if (!silent) toast(t("upToDate", { ver: CFG.version }));
         return { status: "up-to-date", version: info.version };
       }
       showModal(info);
       return { status: "available", ...info };
     } catch (err) {
       console.warn("Hub update check failed", err);
-      if (!silent) toast("Güncelleme kontrolü başarısız");
+      if (!silent) toast(t("checkFail"));
       return { status: "error" };
     }
   }
@@ -292,30 +365,30 @@
   async function applyUpdate() {
     if (!isAndroidHubApk()) {
       hideModal();
-      toast("iPhone’da APK yok — Safari’den sayfayı yenilemen yeterli");
+      toast(t("iosNoApk"));
       return;
     }
     if (!pending || installing) return;
     const url = pending.apkUrl || pending.htmlUrl;
     if (!url) {
-      toast("APK linki yok");
+      toast(t("noApkLink"));
       return;
     }
     installing = true;
     const btn = $("btn-hub-update-now");
     if (btn) btn.disabled = true;
     hideModal();
-    showDownloadProgress(0, "İndiriliyor… %0");
+    showDownloadProgress(0, t("dlProgress", { pct: 0 }));
     try {
       await downloadAndInstall(url);
     } catch (err) {
       console.warn("Hub update apply failed", err);
       hideDownloadProgress(0);
-      toast("İndirme başarısız — tarayıcı açılıyor");
+      toast(t("downloadFail"));
       try {
         await openExternal(url);
       } catch (_) {
-        toast("APK açılamadı");
+        toast(t("apkOpenFail"));
       }
       installing = false;
     } finally {
