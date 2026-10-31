@@ -36,6 +36,10 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # Default "tools platform-tools" still tries the discontinued
+          # monolithic "tools" package (404). Gradle pulls platforms/build-tools.
+          packages: platform-tools
 
       - name: Resolve version
         id: ver
