@@ -375,21 +375,21 @@ input[type="text"]:focus {
   align-items: center;
   justify-content: space-between;
   gap: 0.85rem;
-  margin: 0.45rem 0;
-  padding: 0.7rem 0.85rem;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(44, 53, 88, 0.08);
-  cursor: pointer;
+  margin: 0.55rem 0;
+  padding: 0.85rem 0.95rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(44, 53, 88, 0.1);
 }
 .toggle-copy {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.22rem;
   min-width: 0;
+  flex: 1;
 }
 .toggle-copy strong {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--ink, #1c2438);
 }
@@ -398,12 +398,57 @@ input[type="text"]:focus {
   color: var(--muted);
   line-height: 1.3;
 }
-.toggle-row input[type="checkbox"] {
-  width: 1.35rem;
-  height: 1.35rem;
-  flex-shrink: 0;
-  accent-color: var(--leaf-deep, #3f4fd6);
+.btn-audio-switch {
+  appearance: none;
+  border: none;
   cursor: pointer;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.55rem 0.35rem 0.35rem;
+  border-radius: 999px;
+  background: rgba(44, 53, 88, 0.12);
+  color: var(--ink, #1c2438);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  min-width: 5.6rem;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.btn-audio-switch .switch-track {
+  width: 2.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: rgba(44, 53, 88, 0.28);
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.18s ease;
+}
+.btn-audio-switch .switch-track::after {
+  content: "";
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.18s ease;
+}
+.btn-audio-switch[aria-pressed="true"] {
+  background: rgba(63, 79, 214, 0.16);
+  color: var(--leaf-deep, #3f4fd6);
+}
+.btn-audio-switch[aria-pressed="true"] .switch-track {
+  background: var(--leaf-deep, #3f4fd6);
+}
+.btn-audio-switch[aria-pressed="true"] .switch-track::after {
+  transform: translateX(1rem);
+}
+.btn-audio-switch:active {
+  transform: scale(0.98);
 }
 
 .btn {

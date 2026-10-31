@@ -1,7 +1,7 @@
 window.HubConfig = {
   appName: "DNCR Games",
-  version: "1.0.19",
-  build: 20,
+  version: "1.0.20",
+  build: 21,
   githubOwner: "alid67-git",
   githubRepo: "DNCR-Games",
   /** Release tag öneki — yalnızca hub APK sürümleri */

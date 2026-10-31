@@ -73,13 +73,14 @@
   }
 
   function ensureMusic() {
-    if (!Audio) return;
-    Audio.unlock();
-    Audio.applyPrefs({
-      music: settings.music !== false,
-      sfx: settings.sfx !== false,
-    });
-    if (settings.music !== false) Audio.startMusic();
+    const musicOn = settings.music !== false;
+    const sfxOn = settings.sfx !== false;
+    if (Audio) {
+      Audio.unlock();
+      Audio.applyPrefs({ music: musicOn, sfx: sfxOn });
+      if (musicOn) Audio.startMusic();
+    }
+    applySfxPref(sfxOn);
   }
 
   function loadSettings() {
@@ -129,6 +130,23 @@
     toast._t = setTimeout(() => el.classList.add("hidden"), 2600);
   }
 
+  function syncAudioSwitch(kind, on) {
+    const checked = !!on;
+    const input = $(kind === "music" ? "set-music" : "set-sfx");
+    const btn = $(kind === "music" ? "btn-music-toggle" : "btn-sfx-toggle");
+    if (input) input.checked = checked;
+    if (btn) {
+      btn.setAttribute("aria-pressed", checked ? "true" : "false");
+      const lab = btn.querySelector(".switch-label");
+      if (lab) lab.textContent = checked ? t("audioOn") : t("audioOff");
+    }
+  }
+
+  function applySfxPref(on) {
+    if (Audio) Audio.setSfx(on);
+    if (Sfx && typeof Sfx.setEnabled === "function") Sfx.setEnabled(on);
+  }
+
   function applyI18n() {
     document.documentElement.lang = lang();
     document.title = t("appName");
@@ -147,6 +165,8 @@
       $("updates-current").textContent = `${CFG.version} (${CFG.build})`;
     if ($("updates-current-game"))
       $("updates-current-game").textContent = `${CFG.version} (${CFG.build})`;
+    syncAudioSwitch("music", settings.music !== false);
+    syncAudioSwitch("sfx", settings.sfx !== false);
     renderChangelog();
     updateUpdatesDot();
     renderDiffGrid();
@@ -1466,8 +1486,8 @@
     document.querySelectorAll('input[name="defDiff"]').forEach((r) => {
       r.checked = r.value === diff;
     });
-    if ($("set-music")) $("set-music").checked = settings.music !== false;
-    if ($("set-sfx")) $("set-sfx").checked = settings.sfx !== false;
+    syncAudioSwitch("music", settings.music !== false);
+    syncAudioSwitch("sfx", settings.sfx !== false);
     if ($("p1-name")) $("p1-name").value = settings.p1 || "";
     if ($("p2-name")) $("p2-name").value = settings.p2 || "";
     if ($("p2p-name")) $("p2p-name").value = settings.name || "";
@@ -1621,17 +1641,22 @@
     if (Audio) {
       Audio.unlock();
       Audio.setMusic(musicOn);
-      Audio.setSfx(sfxOn);
+      applySfxPref(sfxOn);
       if (musicOn) Audio.startMusic();
+    } else {
+      applySfxPref(sfxOn);
     }
+    syncAudioSwitch("music", musicOn);
+    syncAudioSwitch("sfx", sfxOn);
     setupDiff = settings.aiDifficulty;
     applyI18n();
     toast(t("saved"));
   });
 
-  if ($("set-music")) {
-    $("set-music").addEventListener("change", async (e) => {
-      const on = !!e.target.checked;
+  if ($("btn-music-toggle")) {
+    $("btn-music-toggle").addEventListener("click", async () => {
+      const on = !($("set-music") && $("set-music").checked);
+      syncAudioSwitch("music", on);
       saveSettings({ music: on });
       if (Audio) {
         await Audio.unlock();
@@ -1640,15 +1665,16 @@
       }
     });
   }
-  if ($("set-sfx")) {
-    $("set-sfx").addEventListener("change", async (e) => {
-      const on = !!e.target.checked;
+  if ($("btn-sfx-toggle")) {
+    $("btn-sfx-toggle").addEventListener("click", async () => {
+      const on = !($("set-sfx") && $("set-sfx").checked);
+      syncAudioSwitch("sfx", on);
       saveSettings({ sfx: on });
-      if (Audio) {
-        await Audio.unlock();
-        Audio.setSfx(on);
-        if (on) Audio.playSfx("select");
-      }
+      if (Audio) await Audio.unlock();
+      else if (Sfx) await Sfx.unlock();
+      applySfxPref(on);
+      if (on && Audio) Audio.playSfx("select");
+      else if (on && Sfx) Sfx.play("select");
     });
   }
 

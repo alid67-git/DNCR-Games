@@ -212,21 +212,29 @@
         </fieldset>
         <fieldset class="lang-field audio-toggles">
           <legend data-i18n="audioTitle">Ses</legend>
-          <p class="audio-hint" data-i18n="audioHint">Müzik ve efektler birbirinden bağımsızdır.</p>
-          <label class="toggle-row">
+          <p class="audio-hint" data-i18n="audioHint">Müzik ve oyun sesleri birbirinden bağımsızdır — istediğini tek başına aç/kapa.</p>
+          <div class="toggle-row" data-audio-toggle="music">
             <span class="toggle-copy">
               <strong data-i18n="musicOn">Arka plan müziği</strong>
               <small data-i18n="musicHint">Piyano — kapalıyken yalnızca oyun sesleri kalır</small>
             </span>
-            <input id="set-music" type="checkbox" checked />
-          </label>
-          <label class="toggle-row">
+            <button type="button" class="btn-audio-switch" id="btn-music-toggle" aria-pressed="true">
+              <span class="switch-track" aria-hidden="true"></span>
+              <span class="switch-label" data-on-i18n="audioOn" data-off-i18n="audioOff">Açık</span>
+            </button>
+            <input id="set-music" type="checkbox" checked hidden />
+          </div>
+          <div class="toggle-row" data-audio-toggle="sfx">
             <span class="toggle-copy">
               <strong data-i18n="sfxOn">Oyun sesleri</strong>
-              <small data-i18n="sfxHint">Zar, hamle, yeme — müzikten ayrı</small>
+              <small data-i18n="sfxHint">Zar, hamle, yeme — müzikten ayrı aç/kapa</small>
             </span>
-            <input id="set-sfx" type="checkbox" checked />
-          </label>
+            <button type="button" class="btn-audio-switch" id="btn-sfx-toggle" aria-pressed="true">
+              <span class="switch-track" aria-hidden="true"></span>
+              <span class="switch-label" data-on-i18n="audioOn" data-off-i18n="audioOff">Açık</span>
+            </button>
+            <input id="set-sfx" type="checkbox" checked hidden />
+          </div>
         </fieldset>
         <button type="button" id="btn-settings-save" class="btn btn-primary" data-i18n="save">Kaydet</button>
       </form>
