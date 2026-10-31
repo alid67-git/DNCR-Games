@@ -1,9 +1,22 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.18",
-  build: 19,
+  version: "1.0.19",
+  build: 20,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.19",
+      build: 20,
+      date: "2026-10-31",
+      items: {
+        tr: [
+          "Hamle sonrası tahta sıçraması giderildi (taş/zar scale animasyonları)",
+        ],
+        en: [
+          "Fixed post-move board jump (checker/dice scale animations)",
+        ],
+      },
+    },
     {
       version: "1.0.18",
       build: 19,

@@ -455,7 +455,7 @@
         [
           { transform: "translate(0px, 0px) scale(1)", offset: 0 },
           {
-            transform: `translate(${(dx * 0.48).toFixed(1)}px, ${(dy * 0.48 - arc).toFixed(1)}px) scale(1.14)`,
+            transform: `translate(${(dx * 0.48).toFixed(1)}px, ${(dy * 0.48 - arc).toFixed(1)}px) scale(1.04)`,
             offset: 0.48,
           },
           {
