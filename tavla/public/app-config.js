@@ -1,9 +1,22 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.21",
-  build: 22,
+  version: "1.0.22",
+  build: 23,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.22",
+      build: 23,
+      date: "2026-10-31",
+      items: {
+        tr: [
+          "Önbellek güncellendi — Android/web eski Tavla sürümünde takılmaz",
+        ],
+        en: [
+          "Cache bust — Android/web no longer stuck on an old Tavla shell",
+        ],
+      },
+    },
     {
       version: "1.0.21",
       build: 22,

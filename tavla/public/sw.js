@@ -1,5 +1,5 @@
 /* Tavla — offline cache (solo + local 2P + P2P shell) */
-const CACHE = "tavla-v1.0.21";
+const CACHE = "tavla-v1.0.22";
 const ASSETS = [
   "./",
   "./index.html",
@@ -21,6 +21,7 @@ const ASSETS = [
   "./shared/score.js",
   "./shared/move-sfx.js",
   "./shared/shell-ui.css",
+  "./shared/palette.css",
   "./fonts/fonts.css",
   "./fonts/manrope-latin.woff2",
   "./fonts/manrope-latinext.woff2",
@@ -44,7 +45,18 @@ const ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches
+      .open(CACHE)
+      .then((cache) =>
+        Promise.all(
+          ASSETS.map((u) =>
+            cache.add(u).catch((err) => {
+              console.warn("[tavla-sw] skip", u, err);
+            })
+          )
+        )
+      )
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -59,9 +71,42 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
+function isShellRequest(req) {
+  const url = new URL(req.url);
+  if (req.mode === "navigate") return true;
+  const p = url.pathname;
+  return (
+    /\.(?:js|css|webmanifest|html)$/i.test(p) ||
+    /\/(app-config|i18n|engine|ai|audio|game-client|p2p|sw)\.js$/i.test(p)
+  );
+}
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
+
+  // HTML/JS/CSS: network-first — Android eski sürümde takılı kalmasın
+  if (isShellRequest(req)) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          if (res.ok) {
+            caches.open(CACHE).then((cache) => cache.put(req, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req).then((c) => c || caches.match("./index.html")))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
