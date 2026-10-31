@@ -1272,8 +1272,8 @@
         guestJoined: false,
       };
       updateP2pRoomUi();
-    } catch (_) {
-      toast(t("peerFail"));
+    } catch (err) {
+      toast((window.ArenaP2P && ArenaP2P.mapError) ? ArenaP2P.mapError(err, t) : t("peerFail"));
       destroyP2P();
     }
   }
@@ -1306,8 +1306,8 @@
         guestJoined: false,
       };
       updateP2pRoomUi();
-    } catch (_) {
-      toast(t("peerFail"));
+    } catch (err) {
+      toast((window.ArenaP2P && ArenaP2P.mapError) ? ArenaP2P.mapError(err, t) : t("peerFail"));
       destroyP2P();
     }
   }

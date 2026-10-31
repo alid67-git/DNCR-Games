@@ -1021,7 +1021,7 @@
       showScreen("room");
       renderRoom();
     } catch (err) {
-      toast(t("peerFail"));
+      toast((window.ArenaP2P && ArenaP2P.mapError) ? ArenaP2P.mapError(err, t) : t("peerFail"));
       destroyP2P();
     }
   }
@@ -1056,7 +1056,7 @@
       showScreen("room");
       renderRoom();
     } catch (err) {
-      toast(t("peerFail"));
+      toast((window.ArenaP2P && ArenaP2P.mapError) ? ArenaP2P.mapError(err, t) : t("peerFail"));
       destroyP2P();
     }
   }

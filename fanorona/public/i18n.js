@@ -70,7 +70,10 @@ window.FanoronaI18n = (function () {
       needCode: "Oda kodunu yaz.",
       codeCopied: "Oda kodu kopyalandı.",
       peerBusy: "Oda dolu veya kod kullanılamıyor. Yeni oda kur.",
-      peerFail: "Eşleşilemedi. Kodu ve interneti kontrol et.",
+      peerFail: "Eşleşilemedi. Kodu ve bağlantı türünü (internet / Bluetooth) kontrol et.",
+      nearbyTimeout: "Bluetooth oda bulunamadı. Aynı kod mu? Telefonlar yakın mı, Bluetooth açık mı?",
+      nearbyPerm: "Bluetooth / konum izni gerekli — ayarlardan izin verip tekrar dene.",
+      nearbyFail: "Bluetooth bağlantısı kurulamadı. İzinleri kontrol edip tekrar dene.",
 
       settingsTitle: "Ayarlar",
       language: "Dil",
@@ -241,7 +244,10 @@ window.FanoronaI18n = (function () {
       needCode: "Enter a room code.",
       codeCopied: "Room code copied.",
       peerBusy: "Room full or code unavailable. Create a new room.",
-      peerFail: "Could not match. Check the code and internet.",
+      peerFail: "Could not match. Check the code and connection type (internet / Bluetooth).",
+      nearbyTimeout: "Bluetooth room not found. Same code? Phones close, Bluetooth on?",
+      nearbyPerm: "Bluetooth / location permission needed — allow and retry.",
+      nearbyFail: "Bluetooth link failed. Check permissions and retry.",
 
       settingsTitle: "Settings",
       language: "Language",
