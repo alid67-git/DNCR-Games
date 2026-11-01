@@ -111,6 +111,10 @@
       </header>
       <h2 class="section-title" data-i18n="chooseDifficulty">Zorluk seç</h2>
       <div class="diff-grid" id="diff-grid" role="radiogroup"></div>
+      <fieldset class="lang-field match-len-field">
+        <legend data-i18n="matchLength">Kaç oyunluk maç?</legend>
+        <div class="match-len-row" id="solo-match-len" role="radiogroup"></div>
+      </fieldset>
       <button type="button" class="btn btn-primary btn-start" id="btn-solo-start" data-i18n="startGame">Başla</button>
     </section>
 
@@ -128,6 +132,10 @@
           <span data-i18n="player2Label">Mavi oyuncu</span>
           <input id="p2-name" type="text" maxlength="16" data-i18n-ph="player2Ph" autocomplete="off" />
         </label>
+        <fieldset class="lang-field match-len-field">
+          <legend data-i18n="matchLength">Kaç oyunluk maç?</legend>
+          <div class="match-len-row" id="twop-match-len" role="radiogroup"></div>
+        </fieldset>
       </form>
       <button type="button" class="btn btn-primary btn-start" id="btn-2p-start" data-i18n="startGame">Başla</button>
     </section>
@@ -150,6 +158,10 @@
         </fieldset>
         <p class="field-hint" data-i18n="p2pNeedNet"></p>
         <p id="p2p-need-bt" class="field-hint hidden" data-i18n="p2pNeedBt"></p>
+        <fieldset class="lang-field match-len-field">
+          <legend data-i18n="matchLength">Kaç oyunluk maç?</legend>
+          <div class="match-len-row" id="p2p-match-len" role="radiogroup"></div>
+        </fieldset>
         <div class="lobby-actions">
           <button type="button" id="btn-p2p-create" class="btn btn-primary" data-i18n="createRoom">Oda kur</button>
           <div class="join-row">
@@ -158,6 +170,11 @@
           </div>
         </div>
       </form>
+      <div class="saved-games" id="p2p-saved-wrap">
+        <h2 class="section-title" data-i18n="savedGamesTitle">Kayıtlı / yarım kalan</h2>
+        <p class="lede tiny" data-i18n="savedGamesHint">Önceki bir oyuna devam et (aynı cihaz).</p>
+        <ul id="p2p-saved-list" class="saved-list"></ul>
+      </div>
     </section>
 
     <section id="screen-room" class="screen">
@@ -182,6 +199,7 @@
           </div>
         </div>
       </div>
+      <p id="room-match-info" class="lede tiny"></p>
       <div class="room-actions">
         <button type="button" id="btn-ready" class="btn btn-primary" disabled data-i18n="ready">Hazırım</button>
         <button type="button" id="btn-copy-code" class="btn btn-ghost" data-i18n="copyCode">Kodu kopyala</button>
@@ -371,7 +389,21 @@
         </div>
       </div>
 
+      <div class="info-bar" id="info-bar" aria-live="polite">
+        <span id="info-pips" class="info-pips"></span>
+        <span id="info-ahead" class="info-ahead"></span>
+        <span id="info-match" class="info-match"></span>
+      </div>
+
       <p id="status-msg" class="status-msg" aria-live="polite"></p>
+
+      <div id="undo-ask-panel" class="end-panel hidden" role="dialog" aria-modal="true">
+        <div class="end-card">
+          <p id="undo-ask-text" data-i18n="undoAskPeer">Rakip geri almayı istiyor. İzin veriyor musun?</p>
+          <button type="button" id="btn-undo-allow" class="btn btn-primary" data-i18n="undoAllow">İzin ver</button>
+          <button type="button" id="btn-undo-deny" class="btn btn-ghost" data-i18n="undoDeny">Reddet</button>
+        </div>
+      </div>
 
       <div id="start-panel" class="end-panel hidden" role="dialog" aria-modal="true" aria-labelledby="start-text">
         <div class="end-card start-card">
@@ -406,6 +438,7 @@
   <script src="shared/move-sfx.js"></script>
   <script src="p2p.js"></script>
   <script src="shared/history-stack.js"></script>
+  <script src="game-store.js"></script>
   <script src="game-client.js" defer></script>
 </body>
 </html>

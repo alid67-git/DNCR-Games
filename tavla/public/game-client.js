@@ -60,6 +60,19 @@
   /** @type {string[]} */
   let redoStack = [];
   const UNDO_MAX = 40;
+  /** @type {null | number} hangi zar önce oynanacak */
+  let selectedDie = null;
+  /** Tahta bakış açısı — P2P’de her oyuncu kendi tarafını altta görür */
+  let boardPerspective = PLAYERS.white;
+  /** @type {WakeLockSentinel | null} */
+  let wakeLockSentinel = null;
+  /** Uzaktan hamle kuyruğu (animasyon sırası) */
+  let netQueue = [];
+  let netPumping = false;
+  /** @type {null | 'undo' | 'redo'} */
+  let pendingHistoryKind = null;
+  const Store = window.TavlaStore || null;
+  const MATCH_OPTS = [1, 3, 5, 7];
 
   function playMoveSfx(kind) {
     if (Audio) {
@@ -92,6 +105,7 @@
       p2: "",
       music: true,
       sfx: true,
+      matchTo: 1,
     };
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
@@ -119,6 +133,174 @@
   function showScreen(name) {
     Object.values(screens).forEach((el) => el && el.classList.remove("active"));
     if (screens[name]) screens[name].classList.add("active");
+    if (name === "game") acquireWakeLock();
+    else releaseWakeLock();
+    if (name === "p2p") renderSavedGamesList();
+  }
+
+  async function acquireWakeLock() {
+    try {
+      if (!navigator.wakeLock || typeof navigator.wakeLock.request !== "function") {
+        return;
+      }
+      wakeLockSentinel = await navigator.wakeLock.request("screen");
+      wakeLockSentinel.addEventListener("release", () => {
+        wakeLockSentinel = null;
+      });
+    } catch (_) {
+      wakeLockSentinel = null;
+    }
+  }
+
+  async function releaseWakeLock() {
+    try {
+      if (wakeLockSentinel) await wakeLockSentinel.release();
+    } catch (_) {}
+    wakeLockSentinel = null;
+  }
+
+  function readMatchLen(containerId) {
+    const root = $(containerId);
+    if (!root) return settings.matchTo || 1;
+    const checked = root.querySelector('input[name="matchLen"]:checked');
+    const n = checked ? Number(checked.value) : 1;
+    return MATCH_OPTS.includes(n) ? n : 1;
+  }
+
+  function renderMatchLenRows() {
+    ["solo-match-len", "twop-match-len", "p2p-match-len"].forEach((id) => {
+      const root = $(id);
+      if (!root) return;
+      const cur = settings.matchTo || 1;
+      root.innerHTML = "";
+      MATCH_OPTS.forEach((n) => {
+        const lab = document.createElement("label");
+        const inp = document.createElement("input");
+        inp.type = "radio";
+        inp.name = "matchLen";
+        inp.value = String(n);
+        inp.checked = n === cur;
+        inp.addEventListener("change", () => {
+          if (inp.checked) saveSettings({ matchTo: n });
+        });
+        const span = document.createElement("span");
+        span.textContent = t(`matchLen${n}`);
+        lab.appendChild(inp);
+        lab.appendChild(span);
+        root.appendChild(lab);
+      });
+    });
+  }
+
+  function persistSession() {
+    if (!Store || !session || !session.state) return;
+    if (session.state.winner) {
+      const ms = session.matchScore || { white: 0, blue: 0 };
+      const matchTo = session.matchTo || 1;
+      if (matchTo <= 1 || ms.white >= matchTo || ms.blue >= matchTo) {
+        if (session.saveId) Store.remove(session.saveId);
+        return;
+      }
+    }
+    if (!session.saveId) session.saveId = Store.newId();
+    Store.upsert({
+      id: session.saveId,
+      status: "active",
+      mode: session.mode,
+      transport: session.transport || null,
+      names: session.names,
+      you: session.you || null,
+      matchTo: session.matchTo || 1,
+      matchScore: session.matchScore || { white: 0, blue: 0 },
+      state: serialize(session.state),
+      difficulty: session.difficulty || null,
+    });
+  }
+
+  function clearPersistedSession() {
+    if (Store && session && session.saveId) Store.remove(session.saveId);
+  }
+
+  function renderSavedGamesList() {
+    const list = $("p2p-saved-list");
+    if (!list || !Store) return;
+    const games = Store.listActive();
+    list.innerHTML = "";
+    if (!games.length) {
+      const li = document.createElement("li");
+      li.textContent = t("savedEmpty");
+      list.appendChild(li);
+      return;
+    }
+    games.forEach((g) => {
+      const li = document.createElement("li");
+      const meta = document.createElement("div");
+      meta.className = "saved-meta";
+      const title = document.createElement("strong");
+      const modeLabel =
+        g.mode === "solo" ? t("vsCpu") : g.mode === "twop" ? t("local2p") : t("remote");
+      title.textContent = `${(g.names && g.names.white) || "—"} · ${(g.names && g.names.blue) || "—"}`;
+      const sub = document.createElement("span");
+      const when = g.updatedAt ? new Date(g.updatedAt).toLocaleString() : "";
+      sub.textContent = `${modeLabel} · ${t("savedAt")} ${when}`;
+      meta.appendChild(title);
+      meta.appendChild(sub);
+      const actions = document.createElement("div");
+      actions.className = "saved-actions";
+      const btnGo = document.createElement("button");
+      btnGo.type = "button";
+      btnGo.className = "btn btn-secondary";
+      btnGo.textContent = t("savedResume");
+      btnGo.addEventListener("click", () => resumeSavedGame(g.id));
+      const btnDel = document.createElement("button");
+      btnDel.type = "button";
+      btnDel.className = "btn btn-ghost";
+      btnDel.textContent = t("savedDelete");
+      btnDel.addEventListener("click", () => {
+        Store.remove(g.id);
+        renderSavedGamesList();
+      });
+      actions.appendChild(btnGo);
+      actions.appendChild(btnDel);
+      li.appendChild(meta);
+      li.appendChild(actions);
+      list.appendChild(li);
+    });
+  }
+
+  async function resumeSavedGame(id) {
+    if (!Store) return;
+    const g = Store.get(id);
+    if (!g || !g.state) return;
+    if (g.mode === "p2p") {
+      toast(t("savedGamesHint"));
+      // Yerel tahta durumunu aç — rakip yeniden bağlanınca sync gerekir
+    }
+    destroyP2P();
+    ensureMusic();
+    clearUndo();
+    session = {
+      mode: g.mode === "p2p" ? "twop" : g.mode, // P2P kaydı tek cihazda 2p gibi açılır
+      status: "playing",
+      you: g.you || PLAYERS.white,
+      names: g.names || { white: t("white"), blue: t("blue") },
+      state: deserialize(g.state),
+      matchTo: g.matchTo || 1,
+      matchScore: g.matchScore || { white: 0, blue: 0 },
+      difficulty: g.difficulty || "normal",
+      saveId: g.id,
+      scoreRecorded: false,
+      endSfxPlayed: false,
+      matchPointCredited: !!g.state.winner,
+      resumed: true,
+    };
+    if (g.mode === "solo") session.mode = "solo";
+    selected = null;
+    selectedDie = null;
+    showScreen("game");
+    hideStartPanel();
+    if ($("end-panel")) $("end-panel").classList.add("hidden");
+    renderGame();
   }
 
   function toast(msg) {
@@ -167,6 +349,7 @@
       $("updates-current-game").textContent = `${CFG.version} (${CFG.build})`;
     syncAudioSwitch("music", settings.music !== false);
     syncAudioSwitch("sfx", settings.sfx !== false);
+    renderMatchLenRows();
     renderChangelog();
     updateUpdatesDot();
     renderDiffGrid();
@@ -278,8 +461,9 @@
     return btn;
   }
 
-  function buildBoard() {
-    if (boardReady) return;
+  function buildBoard(perspective) {
+    const view = perspective === PLAYERS.blue ? PLAYERS.blue : PLAYERS.white;
+    if (boardReady && boardPerspective === view) return;
     const leftTop = $("board-left-top");
     const leftBot = $("board-left-bottom");
     const rightTop = $("board-right-top");
@@ -290,12 +474,33 @@
     rightTop.innerHTML = "";
     rightBot.innerHTML = "";
     pointEls.clear();
-    // Klasik düzen: sol 13–18 / 12–7 · sağ 19–24 / 6–1
-    for (let n = 13; n <= 18; n++) leftTop.appendChild(makePoint(n, "tip-up"));
-    for (let n = 12; n >= 7; n--) leftBot.appendChild(makePoint(n, "tip-down"));
-    for (let n = 19; n <= 24; n++) rightTop.appendChild(makePoint(n, "tip-up"));
-    for (let n = 6; n >= 1; n--) rightBot.appendChild(makePoint(n, "tip-down"));
+    boardPerspective = view;
+    const boardEl = $("board");
+    if (boardEl) {
+      boardEl.classList.toggle("is-flipped-perspective", view === PLAYERS.blue);
+    }
+    if (view === PLAYERS.white) {
+      // Klasik: sol 13–18 / 12–7 · sağ 19–24 / 6–1 (beyaz evi alt-sağ)
+      for (let n = 13; n <= 18; n++) leftTop.appendChild(makePoint(n, "tip-up"));
+      for (let n = 12; n >= 7; n--) leftBot.appendChild(makePoint(n, "tip-down"));
+      for (let n = 19; n <= 24; n++) rightTop.appendChild(makePoint(n, "tip-up"));
+      for (let n = 6; n >= 1; n--) rightBot.appendChild(makePoint(n, "tip-down"));
+    } else {
+      // Mavi bakışı: mavi evi (19–24) alt-sağda
+      for (let n = 12; n >= 7; n--) leftTop.appendChild(makePoint(n, "tip-up"));
+      for (let n = 13; n <= 18; n++) leftBot.appendChild(makePoint(n, "tip-down"));
+      for (let n = 6; n >= 1; n--) rightTop.appendChild(makePoint(n, "tip-up"));
+      for (let n = 19; n <= 24; n++) rightBot.appendChild(makePoint(n, "tip-down"));
+    }
     boardReady = true;
+  }
+
+  function ensureBoardForSession() {
+    const you =
+      session && session.mode === "p2p"
+        ? session.you || PLAYERS.white
+        : PLAYERS.white;
+    buildBoard(you);
   }
 
   function appendCheckers(container, count, color) {
@@ -320,14 +525,20 @@
     stack.innerHTML = "";
     const w = barCount(state, PLAYERS.white);
     const b = barCount(state, PLAYERS.blue);
-    const top = document.createElement("div");
-    top.className = "bar-half bar-white";
-    appendCheckers(top, w, "white");
-    const bot = document.createElement("div");
-    bot.className = "bar-half bar-blue";
-    appendCheckers(bot, b, "blue");
-    stack.appendChild(top);
-    stack.appendChild(bot);
+    const whiteEl = document.createElement("div");
+    whiteEl.className = "bar-half bar-white";
+    appendCheckers(whiteEl, w, "white");
+    const blueEl = document.createElement("div");
+    blueEl.className = "bar-half bar-blue";
+    appendCheckers(blueEl, b, "blue");
+    // Mavi bakışında kendi barı altta (oyuncuya yakın)
+    if (boardPerspective === PLAYERS.blue) {
+      stack.appendChild(whiteEl);
+      stack.appendChild(blueEl);
+    } else {
+      stack.appendChild(whiteEl);
+      stack.appendChild(blueEl);
+    }
     if (zone) {
       zone.classList.toggle("selected", selected === "bar");
       zone.classList.toggle("legal-from", isSelectableFrom("bar"));
@@ -565,6 +776,17 @@
           isUsed = true;
         }
       }
+      if (
+        playable &&
+        !rolling &&
+        !prev &&
+        !isUsed &&
+        selectedDie != null &&
+        Number(selectedDie) === Number(v)
+      ) {
+        die.classList.add("is-selected");
+        die.title = t("dieSelected");
+      }
       if (playable && !rolling && !prev && !isUsed) {
         die.classList.add("playable");
         die.setAttribute("role", "button");
@@ -594,9 +816,13 @@
       paintDice([]);
       return;
     }
-    // Zar atma aşamasında önceki oyuncunun zarları görünür kalsın
+    // Önceki tur zarları — çiftte 4 yüz göster (rakip beklerken)
     if (state.phase === "roll") {
-      paintDice([raw[0], raw[1]], { previous: true });
+      const isDouble = raw[0] === raw[1];
+      const slots = isDouble
+        ? [raw[0], raw[0], raw[0], raw[0]]
+        : [raw[0], raw[1]];
+      paintDice(slots, { previous: true });
       return;
     }
     const isDouble = raw[0] === raw[1];
@@ -612,16 +838,24 @@
     });
   }
 
-  /** Zar üzerine dokununca o zarı kullan (kapı / hamle) */
+  /** Zar üzerine dokununca: önce bu zarı seç / o zarı kullan */
   function onDieClick(dieValue) {
     if (!session || session.state.winner || moveBusy || diceBusy) return;
     if (!isMyTurn() || session.state.phase !== "move") return;
     const die = Number(dieValue);
-    const moves = currentMoves().filter((m) => m.die === die);
-    if (!moves.length) {
+    const allForDie = legalMoves(session.state).filter((m) => m.die === die);
+    if (!allForDie.length) {
       toast(t("dieUnused"));
       return;
     }
+
+    // Aynı zara tekrar dokun = seçimi kaldır (sırayı serbest bırak)
+    if (selectedDie === die && selected == null) {
+      selectedDie = null;
+      renderGame();
+      return;
+    }
+    selectedDie = die;
 
     const prefer = (list) => {
       const off = list.find((m) => m.to === "off");
@@ -634,30 +868,30 @@
     };
 
     if (selected != null) {
-      const fromMoves = moves.filter((m) => m.from === selected);
+      const fromMoves = allForDie.filter((m) => m.from === selected);
       if (fromMoves.length) {
         doMove(prefer(fromMoves));
         return;
       }
-      // Seçili taş bu zarı kullanamıyor — tek kapı alma varsa onu uygula
-      const offsOnly = moves.filter((m) => m.to === "off");
+      const offsOnly = allForDie.filter((m) => m.to === "off");
       if (offsOnly.length === 1) {
         doMove(offsOnly[0]);
         return;
       }
       toast(t("dieWrongPiece"));
+      renderGame();
       return;
     }
 
-    if (moves.length === 1) {
-      doMove(moves[0]);
+    if (allForDie.length === 1) {
+      doMove(allForDie[0]);
       return;
     }
-    const froms = [...new Set(moves.map((m) => m.from))];
+    const froms = [...new Set(allForDie.map((m) => m.from))];
     if (froms.length === 1) {
-      const targets = [...new Set(moves.map((m) => m.to))];
+      const targets = [...new Set(allForDie.map((m) => m.to))];
       if (targets.length === 1) {
-        doMove(moves[0]);
+        doMove(allForDie[0]);
         return;
       }
       selected = froms[0];
@@ -665,12 +899,15 @@
       renderGame();
       return;
     }
-    const offs = moves.filter((m) => m.to === "off");
+    const offs = allForDie.filter((m) => m.to === "off");
     if (offs.length === 1) {
       doMove(offs[0]);
       return;
     }
-    toast(t("selectPoint"));
+    // Birden fazla taş — zar seçili kalsın, taş seçilsin
+    playMoveSfx("select");
+    toast(t("dieSelected"));
+    renderGame();
   }
 
   function playDiceRollAnim(finalPair, done) {
@@ -688,8 +925,11 @@
     } else {
       playMoveSfx("place");
     }
-    // Önceki zarlar kısa süre kalsın, sonra yeni zarlar düşsün
-    paintDice([finalPair[0], finalPair[1]], { rolling: true });
+    const rollingSlots =
+      finalPair[0] === finalPair[1]
+        ? [finalPair[0], finalPair[0], finalPair[0], finalPair[0]]
+        : [finalPair[0], finalPair[1]];
+    paintDice(rollingSlots, { rolling: true });
     diceAnimTimer = setTimeout(() => {
       const isDouble = finalPair[0] === finalPair[1];
       const slots = isDouble
@@ -712,7 +952,6 @@
 
   function pushUndo() {
     if (!session || !session.state) return;
-    if (session.mode === "p2p") return;
     try {
       undoStack.push(serialize(session.state));
       if (undoStack.length > UNDO_MAX) undoStack.shift();
@@ -724,11 +963,12 @@
   function historyIdle() {
     return (
       !!session &&
-      session.mode !== "p2p" &&
       !diceBusy &&
       !moveBusy &&
+      !netPumping &&
       !session.aiThinking &&
-      !session.state.winner
+      !session.state.winner &&
+      !pendingHistoryKind
     );
   }
 
@@ -743,42 +983,89 @@
   function restoreSnap(snap) {
     session.state = deserialize(snap);
     selected = null;
+    selectedDie = null;
     session.endSfxPlayed = false;
     session.scoreRecorded = false;
     clearTimeout(aiTimer);
     session.aiThinking = false;
     renderGame();
     updateUndoBtn();
+    persistSession();
   }
 
-  function doUndo() {
-    if (!historyIdle() || !undoStack.length) return;
+  function applyLocalUndo() {
+    if (!undoStack.length) return false;
     try {
       redoStack.push(serialize(session.state));
       if (redoStack.length > UNDO_MAX) redoStack.shift();
       restoreSnap(undoStack.pop());
       toast(t("undoDone"));
+      return true;
     } catch (_) {
       updateUndoBtn();
+      return false;
     }
   }
 
-  function doRedo() {
-    if (!historyIdle() || !redoStack.length) return;
+  function applyLocalRedo() {
+    if (!redoStack.length) return false;
     try {
       undoStack.push(serialize(session.state));
       if (undoStack.length > UNDO_MAX) undoStack.shift();
       restoreSnap(redoStack.pop());
       toast(t("redoDone"));
+      return true;
     } catch (_) {
       updateUndoBtn();
+      return false;
     }
+  }
+
+  function doUndo() {
+    if (!historyIdle() || !undoStack.length) return;
+    if (session.mode === "p2p" && p2p) {
+      pendingHistoryKind = "undo";
+      updateUndoBtn();
+      toast(t("undoRequested"));
+      p2p.send({ type: "history-ask", kind: "undo", who: session.you });
+      return;
+    }
+    applyLocalUndo();
+  }
+
+  function doRedo() {
+    if (!historyIdle() || !redoStack.length) return;
+    if (session.mode === "p2p" && p2p) {
+      pendingHistoryKind = "redo";
+      updateUndoBtn();
+      toast(t("undoRequested"));
+      p2p.send({ type: "history-ask", kind: "redo", who: session.you });
+      return;
+    }
+    applyLocalRedo();
+  }
+
+  function showUndoAsk(kind) {
+    const panel = $("undo-ask-panel");
+    const text = $("undo-ask-text");
+    if (text) text.textContent = kind === "redo" ? t("redoAskPeer") : t("undoAskPeer");
+    if (panel) panel.classList.remove("hidden");
+    panel && (panel.dataset.kind = kind || "undo");
+  }
+
+  function hideUndoAsk() {
+    const panel = $("undo-ask-panel");
+    if (panel) panel.classList.add("hidden");
   }
 
   function currentMoves() {
     if (!session || session.state.phase !== "move" || session.state.winner) return [];
     if (!isMyTurn()) return [];
-    return legalMoves(session.state);
+    let moves = legalMoves(session.state);
+    if (selectedDie != null) {
+      moves = moves.filter((m) => m.die === selectedDie);
+    }
+    return moves;
   }
 
   function isSelectableFrom(from) {
@@ -796,7 +1083,9 @@
   }
 
   function renderBoard() {
-    if (!session || !boardReady) return;
+    if (!session) return;
+    ensureBoardForSession();
+    if (!boardReady) return;
     const s = session.state;
     for (let n = 1; n <= 24; n++) {
       const el = pointEls.get(n);
@@ -833,8 +1122,15 @@
     const s = session.state;
     renderBoard();
 
-    $("score-white").textContent = String(offCount(s, PLAYERS.white));
-    $("score-blue").textContent = String(offCount(s, PLAYERS.blue));
+    const matchTo = session.matchTo || 1;
+    const ms = session.matchScore || { white: 0, blue: 0 };
+    if (matchTo > 1) {
+      $("score-white").textContent = String(ms.white || 0);
+      $("score-blue").textContent = String(ms.blue || 0);
+    } else {
+      $("score-white").textContent = String(offCount(s, PLAYERS.white));
+      $("score-blue").textContent = String(offCount(s, PLAYERS.blue));
+    }
     $("name-chip-white").textContent = session.names.white;
     $("name-chip-blue").textContent = session.names.blue;
 
@@ -842,6 +1138,43 @@
     const pipB = E.pipCount ? E.pipCount(s, PLAYERS.blue) : 0;
     $("meta-white").textContent = `${t("pipLabel")} ${pipW}`;
     $("meta-blue").textContent = `${t("pipLabel")} ${pipB}`;
+
+    const infoPips = $("info-pips");
+    const infoAhead = $("info-ahead");
+    const infoMatch = $("info-match");
+    if (infoPips) {
+      infoPips.textContent = t("pipLine")
+        .replace("{w}", String(pipW))
+        .replace("{b}", String(pipB));
+    }
+    if (infoAhead) {
+      let ahead = t("aheadTied");
+      if (pipW < pipB) {
+        ahead =
+          session.mode === "p2p"
+            ? session.you === PLAYERS.white
+              ? t("aheadYou")
+              : t("aheadOpp")
+            : t("aheadWhite");
+      } else if (pipB < pipW) {
+        ahead =
+          session.mode === "p2p"
+            ? session.you === PLAYERS.blue
+              ? t("aheadYou")
+              : t("aheadOpp")
+            : t("aheadBlue");
+      }
+      infoAhead.textContent = ahead;
+    }
+    if (infoMatch) {
+      infoMatch.textContent =
+        matchTo > 1
+          ? t("matchScore")
+              .replace("{a}", String(ms.white || 0))
+              .replace("{b}", String(ms.blue || 0))
+              .replace("{n}", String(matchTo))
+          : "";
+    }
 
     $("chip-white").classList.toggle("active", s.turn === PLAYERS.white && !s.winner);
     $("chip-blue").classList.toggle("active", s.turn === PLAYERS.blue && !s.winner);
@@ -878,34 +1211,120 @@
 
     const end = $("end-panel");
     if (s.winner) {
-      maybeRecordScore();
-      if (!session.endSfxPlayed) {
-        session.endSfxPlayed = true;
-        if (session.mode === "solo") {
-          playMoveSfx(s.winner === PLAYERS.white ? "win" : "lose");
-        } else if (session.mode === "p2p") {
-          playMoveSfx(s.winner === session.you ? "win" : "lose");
-        } else {
-          playMoveSfx("win");
-        }
-      }
-      end.classList.remove("hidden");
-      if (session.mode === "solo") {
-        $("end-text").textContent =
-          s.winner === PLAYERS.white ? t("winYou") : t("winOpp");
-      } else if (session.mode === "p2p") {
-        $("end-text").textContent =
-          s.winner === session.you ? t("winYou") : t("winOpp");
-      } else {
-        $("end-text").textContent =
-          s.winner === PLAYERS.white ? t("winWhite") : t("winBlue");
-      }
+      handleGameWinnerUI();
     } else end.classList.add("hidden");
+  }
+
+  function handleGameWinnerUI() {
+    if (!session || !session.state.winner) return;
+    const s = session.state;
+    const end = $("end-panel");
+    maybeRecordScore();
+    maybeCreditMatchPoint();
+    if (!session.endSfxPlayed) {
+      session.endSfxPlayed = true;
+      if (session.mode === "solo") {
+        playMoveSfx(s.winner === PLAYERS.white ? "win" : "lose");
+      } else if (session.mode === "p2p") {
+        playMoveSfx(s.winner === session.you ? "win" : "lose");
+      } else {
+        playMoveSfx("win");
+      }
+    }
+    end.classList.remove("hidden");
+    const ms = session.matchScore || { white: 0, blue: 0 };
+    const matchTo = session.matchTo || 1;
+    const matchOver =
+      matchTo > 1 && (ms.white >= matchTo || ms.blue >= matchTo);
+    const rematchBtn = $("btn-rematch");
+    if (rematchBtn) {
+      rematchBtn.textContent = matchOver
+        ? t("rematch")
+        : matchTo > 1
+          ? t("continueMatch")
+          : t("rematch");
+    }
+    let text;
+    if (matchTo > 1) {
+      const a = String(ms.white || 0);
+      const b = String(ms.blue || 0);
+      if (matchOver) {
+        if (session.mode === "p2p") {
+          text =
+            ms[session.you === PLAYERS.white ? "white" : "blue"] >= matchTo
+              ? t("matchWon").replace("{a}", a).replace("{b}", b)
+              : t("matchLost").replace("{a}", a).replace("{b}", b);
+        } else if (session.mode === "solo") {
+          text =
+            ms.white >= matchTo
+              ? t("matchWon").replace("{a}", a).replace("{b}", b)
+              : t("matchLost").replace("{a}", a).replace("{b}", b);
+        } else {
+          text =
+            (ms.white >= matchTo ? t("winWhite") : t("winBlue")) +
+            ` (${a}–${b})`;
+        }
+      } else if (session.mode === "solo") {
+        text =
+          (s.winner === PLAYERS.white ? t("matchGameWin") : t("matchGameLose"))
+            .replace("{a}", a)
+            .replace("{b}", b);
+      } else if (session.mode === "p2p") {
+        text =
+          (s.winner === session.you ? t("matchGameWin") : t("matchGameLose"))
+            .replace("{a}", a)
+            .replace("{b}", b);
+      } else {
+        text =
+          (s.winner === PLAYERS.white ? t("winWhite") : t("winBlue")) +
+          ` · ${a}–${b}`;
+      }
+    } else if (session.mode === "solo") {
+      text = s.winner === PLAYERS.white ? t("winYou") : t("winOpp");
+    } else if (session.mode === "p2p") {
+      text = s.winner === session.you ? t("winYou") : t("winOpp");
+    } else {
+      text = s.winner === PLAYERS.white ? t("winWhite") : t("winBlue");
+    }
+    $("end-text").textContent = text;
+    if (matchOver || matchTo <= 1) clearPersistedSession();
+    else persistSession();
+  }
+
+  function maybeCreditMatchPoint() {
+    if (!session || !session.state.winner) return;
+    if (session.matchPointCredited) return;
+    session.matchPointCredited = true;
+    if (!session.matchScore) session.matchScore = { white: 0, blue: 0 };
+    if (session.state.winner === PLAYERS.white) session.matchScore.white += 1;
+    else session.matchScore.blue += 1;
   }
 
   function sendSync() {
     if (session && session.mode === "p2p" && p2p) {
       p2p.send({ type: "sync", state: serialize(session.state) });
+    }
+  }
+
+  function enqueueNet(job) {
+    netQueue.push(job);
+    pumpNetQueue();
+  }
+
+  async function pumpNetQueue() {
+    if (netPumping) return;
+    netPumping = true;
+    updateUndoBtn();
+    try {
+      while (netQueue.length) {
+        const job = netQueue.shift();
+        try {
+          await job();
+        } catch (_) {}
+      }
+    } finally {
+      netPumping = false;
+      updateUndoBtn();
     }
   }
 
@@ -928,20 +1347,26 @@
       }
       return;
     }
+    const pair = (r.state.lastRoll || r.state.diceRaw || [1, 1]).slice(0, 2);
+    if (!fromNet && session.mode === "p2p" && p2p) {
+      p2p.send({ type: "roll", roll: pair });
+    }
     const finish = () => {
       session.state = r.state;
       selected = null;
+      selectedDie = null;
       if (r.skipped) toast(t("noMoves"));
       renderGame();
-      if (!fromNet) sendSync();
+      persistSession();
+      if (!fromNet && session.mode !== "p2p") sendSync();
+      if (!fromNet && session.mode === "p2p") sendSync();
       maybeScheduleAi();
     };
-    if (skipAnim || fromNet) {
+    if (skipAnim) {
       playMoveSfx("place");
       finish();
       return;
     }
-    const pair = (r.state.lastRoll || r.state.diceRaw || [1, 1]).slice(0, 2);
     const rollBtn = $("btn-roll");
     if (rollBtn) {
       rollBtn.disabled = true;
@@ -973,14 +1398,21 @@
       }
       const player = session.state.turn;
       selected = null;
+      if (!fromNet && session.mode === "p2p" && p2p) {
+        p2p.send({ type: "move", move });
+      }
       if (!skipAnim) {
         await animateMoveFlight(move, player);
       }
       session.state = r.state;
+      if (!(session.state.dice && session.state.dice.includes(selectedDie))) {
+        selectedDie = null;
+      }
       if (move.hit) playMoveSfx("capture");
       else if (move.to === "off") playMoveSfx("claim");
       else playMoveSfx("move");
       renderGame();
+      persistSession();
       if (!fromNet) sendSync();
     } finally {
       moveBusy = false;
@@ -992,7 +1424,13 @@
   function pickMove(from, to) {
     const moves = currentMoves().filter((m) => m.from === from && m.to === to);
     if (!moves.length) return null;
-    // Prefer higher die when several match same path
+    if (selectedDie != null) {
+      const preferred = moves.filter((m) => m.die === selectedDie);
+      if (preferred.length) {
+        preferred.sort((a, b) => b.die - a.die);
+        return preferred[0];
+      }
+    }
     moves.sort((a, b) => b.die - a.die);
     return moves[0];
   }
@@ -1197,11 +1635,20 @@
     if (typeof r === "function") r();
   }
 
-  async function startSolo() {
+  async function startSolo(opts) {
     clearTimeout(aiTimer);
     destroyP2P();
     ensureMusic();
     clearUndo();
+    const keepMatch = !!(opts && opts.continueMatch && session);
+    const matchTo = keepMatch
+      ? session.matchTo || 1
+      : readMatchLen("solo-match-len");
+    const matchScore = keepMatch
+      ? session.matchScore || { white: 0, blue: 0 }
+      : { white: 0, blue: 0 };
+    const saveId = keepMatch ? session.saveId : null;
+    saveSettings({ matchTo });
     const starter = readNextStarter();
     writeNextStarter(starter);
     session = {
@@ -1212,42 +1659,62 @@
         blue: t("computer"),
       },
       state: createState({ starter }),
+      matchTo,
+      matchScore,
+      saveId,
       aiThinking: false,
       scoreRecorded: false,
       endSfxPlayed: false,
+      matchPointCredited: false,
     };
     selected = null;
+    selectedDie = null;
     showScreen("game");
     hideStartPanel();
     if ($("end-panel")) $("end-panel").classList.add("hidden");
     renderGame();
+    persistSession();
     await showStartBanner(starter, session.names);
     if (!session || session.mode !== "solo") return;
     if (starter === PLAYERS.blue) scheduleAi(PACE.aiFirstMs);
   }
 
-  async function startTwoP() {
+  async function startTwoP(opts) {
     clearTimeout(aiTimer);
     destroyP2P();
     ensureMusic();
     clearUndo();
+    const keepMatch = !!(opts && opts.continueMatch && session);
+    const matchTo = keepMatch
+      ? session.matchTo || 1
+      : readMatchLen("twop-match-len");
+    const matchScore = keepMatch
+      ? session.matchScore || { white: 0, blue: 0 }
+      : { white: 0, blue: 0 };
+    const saveId = keepMatch ? session.saveId : null;
     const p1 = ($("p1-name").value || "").trim() || t("player1Ph");
     const p2 = ($("p2-name").value || "").trim() || t("player2Ph");
-    saveSettings({ p1, p2 });
+    saveSettings({ p1, p2, matchTo });
     const starter = readNextStarter();
     writeNextStarter(starter);
     session = {
       mode: "twop",
       names: { white: p1, blue: p2 },
       state: createState({ starter }),
+      matchTo,
+      matchScore,
+      saveId,
       scoreRecorded: false,
       endSfxPlayed: false,
+      matchPointCredited: false,
     };
     selected = null;
+    selectedDie = null;
     showScreen("game");
     hideStartPanel();
     if ($("end-panel")) $("end-panel").classList.add("hidden");
     renderGame();
+    persistSession();
     await showStartBanner(starter, session.names);
   }
 
@@ -1282,6 +1749,18 @@
       p2pLobby.you === PLAYERS.white
         ? `${t("shareHintHost")} ${p2pLobby.code}`
         : t("shareHintGuest");
+    const info = $("room-match-info");
+    if (info) {
+      const n = p2pLobby.matchTo || 1;
+      const ms = p2pLobby.matchScore || { white: 0, blue: 0 };
+      info.textContent =
+        n > 1
+          ? t("matchScore")
+              .replace("{a}", String(ms.white || 0))
+              .replace("{b}", String(ms.blue || 0))
+              .replace("{n}", String(n))
+          : t("matchLen1");
+    }
   }
 
   function maybeStartP2PGame() {
@@ -1291,33 +1770,59 @@
     const starter = p2pLobby.nextStarter || PLAYERS.white;
     p2pLobby.nextStarter = opponent(starter);
     const state = createState({ starter });
+    const matchTo = p2pLobby.matchTo || readMatchLen("p2p-match-len") || 1;
+    const matchScore = p2pLobby.matchScore || { white: 0, blue: 0 };
+    p2pLobby.matchTo = matchTo;
     p2p.send({
       type: "start",
       starter,
       state: serialize(state),
       names: p2pLobby.names,
       nextStarter: p2pLobby.nextStarter,
+      matchTo,
+      matchScore,
     });
-    beginP2PGame(state, p2pLobby.names);
+    beginP2PGame(state, p2pLobby.names, { matchTo, matchScore });
   }
 
-  async function beginP2PGame(state, names) {
+  async function beginP2PGame(state, names, matchMeta) {
     ensureMusic();
     clearUndo();
+    const matchTo =
+      (matchMeta && matchMeta.matchTo) ||
+      (p2pLobby && p2pLobby.matchTo) ||
+      1;
+    const matchScore =
+      (matchMeta && matchMeta.matchScore) ||
+      (p2pLobby && p2pLobby.matchScore) ||
+      { white: 0, blue: 0 };
+    if (p2pLobby) {
+      p2pLobby.matchTo = matchTo;
+      p2pLobby.matchScore = matchScore;
+    }
     session = {
       mode: "p2p",
       status: "playing",
       you: p2pLobby.you,
       names: names || p2pLobby.names,
       state,
+      matchTo,
+      matchScore: { white: matchScore.white || 0, blue: matchScore.blue || 0 },
+      transport:
+        window.ArenaP2P && window.ArenaP2P.getTransport
+          ? window.ArenaP2P.getTransport()
+          : null,
       scoreRecorded: false,
       endSfxPlayed: false,
+      matchPointCredited: false,
     };
     selected = null;
+    selectedDie = null;
     showScreen("game");
     hideStartPanel();
     if ($("end-panel")) $("end-panel").classList.add("hidden");
     renderGame();
+    persistSession();
     await showStartBanner(state.turn, session.names);
   }
 
@@ -1388,34 +1893,96 @@
       } else if (data.type === "start") {
         p2pLobby.names = data.names || p2pLobby.names;
         p2pLobby.nextStarter = data.nextStarter;
+        if (data.matchTo) p2pLobby.matchTo = data.matchTo;
+        if (data.matchScore) p2pLobby.matchScore = data.matchScore;
         const st = data.state
           ? deserialize(data.state)
           : createState({ starter: data.starter });
-        beginP2PGame(st, p2pLobby.names);
+        beginP2PGame(st, p2pLobby.names, {
+          matchTo: data.matchTo || p2pLobby.matchTo || 1,
+          matchScore: data.matchScore || p2pLobby.matchScore,
+        });
       } else if (data.type === "sync") {
         if (!session || session.mode !== "p2p") return;
+        // Animasyonlu roll/move varken snap’i yutmuyoruz — kuyruk boşsa uygula
+        if (diceBusy || moveBusy || netPumping || netQueue.length) return;
         try {
           session.state = deserialize(data.state);
           selected = null;
+          selectedDie = null;
+          if (data.matchScore) session.matchScore = data.matchScore;
           renderGame();
+          persistSession();
         } catch (_) {}
       } else if (data.type === "roll") {
         if (!session || session.mode !== "p2p") return;
-        doRoll({ fromNet: true, roll: data.roll });
+        enqueueNet(
+          () =>
+            new Promise((resolve) => {
+              doRoll({ fromNet: true, roll: data.roll });
+              const wait = () => {
+                if (!diceBusy) resolve();
+                else setTimeout(wait, 60);
+              };
+              setTimeout(wait, 40);
+            })
+        );
       } else if (data.type === "move") {
+        if (!session || session.mode !== "p2p") return;
+        if (data.move) {
+          enqueueNet(() => doMove(data.move, { fromNet: true }));
+        } else if (data.state) {
+          enqueueNet(async () => {
+            try {
+              session.state = deserialize(data.state);
+              selected = null;
+              selectedDie = null;
+              renderGame();
+            } catch (_) {}
+          });
+        }
+      } else if (data.type === "history-ask") {
+        if (!session || session.mode !== "p2p") return;
+        if (data.who === session.you) return;
+        showUndoAsk(data.kind === "redo" ? "redo" : "undo");
+      } else if (data.type === "history-reply") {
+        if (!session || session.mode !== "p2p") return;
+        const kind = pendingHistoryKind;
+        pendingHistoryKind = null;
+        updateUndoBtn();
+        if (!data.ok) {
+          toast(t("undoDenied"));
+          return;
+        }
+        const ok = kind === "redo" ? applyLocalRedo() : applyLocalUndo();
+        if (ok && p2p) {
+          p2p.send({
+            type: "history-apply",
+            kind: kind || "undo",
+            state: serialize(session.state),
+            matchScore: session.matchScore,
+          });
+        }
+      } else if (data.type === "history-apply") {
         if (!session || session.mode !== "p2p") return;
         if (data.state) {
           try {
             session.state = deserialize(data.state);
+            if (data.matchScore) session.matchScore = data.matchScore;
             selected = null;
+            selectedDie = null;
+            // Yerel geçmişi sıfırla — otorite peer’dan gelen durum
+            clearUndo();
             renderGame();
+            persistSession();
+            toast(data.kind === "redo" ? t("redoDone") : t("undoDone"));
           } catch (_) {}
-        } else if (data.move) {
-          doMove(data.move, { fromNet: true });
         }
       } else if (data.type === "rematch-ask") {
         p2pLobby.ready = { white: false, blue: false };
         p2pLobby.ready[data.who] = true;
+        if (data.matchScore) p2pLobby.matchScore = data.matchScore;
+        if (data.matchTo) p2pLobby.matchTo = data.matchTo;
         session = null;
         showScreen("room");
         renderRoom();
@@ -1432,6 +1999,8 @@
       p2p = createP2PSession();
       bindP2PHandlers(p2p);
       const code = await p2p.host();
+      const matchTo = readMatchLen("p2p-match-len");
+      saveSettings({ matchTo });
       p2pLobby = {
         code,
         you: PLAYERS.white,
@@ -1439,6 +2008,8 @@
         ready: { white: false, blue: false },
         guestJoined: false,
         nextStarter: PLAYERS.white,
+        matchTo,
+        matchScore: { white: 0, blue: 0 },
       };
       showScreen("room");
       renderRoom();
@@ -1469,6 +2040,8 @@
         ready: { white: false, blue: false },
         guestJoined: false,
         nextStarter: PLAYERS.white,
+        matchTo: readMatchLen("p2p-match-len") || 1,
+        matchScore: { white: 0, blue: 0 },
       };
       showScreen("room");
       renderRoom();
@@ -1500,12 +2073,16 @@
 
   function leaveGameToHome() {
     clearTimeout(aiTimer);
+    if (session && session.state && !session.state.winner) persistSession();
     selected = null;
+    selectedDie = null;
     session = null;
     clearUndo();
     startResolve = null;
     hideStartPanel();
+    hideUndoAsk();
     destroyP2P();
+    releaseWakeLock();
     showScreen("home");
   }
 
@@ -1520,11 +2097,33 @@
 
   function doRematch() {
     if (!session) return;
-    if (session.mode === "solo") startSolo();
-    else if (session.mode === "twop") startTwoP();
-    else if (session.mode === "p2p" && p2p && p2pLobby) {
+    const matchTo = session.matchTo || 1;
+    const ms = session.matchScore || { white: 0, blue: 0 };
+    const matchOver = matchTo > 1 && (ms.white >= matchTo || ms.blue >= matchTo);
+    if (session.mode === "solo") {
+      if (!matchOver && matchTo > 1) startSolo({ continueMatch: true });
+      else startSolo();
+      return;
+    }
+    if (session.mode === "twop") {
+      if (!matchOver && matchTo > 1) startTwoP({ continueMatch: true });
+      else startTwoP();
+      return;
+    }
+    if (session.mode === "p2p" && p2p && p2pLobby) {
+      if (matchOver) {
+        p2pLobby.matchScore = { white: 0, blue: 0 };
+      } else {
+        p2pLobby.matchScore = { ...ms };
+      }
+      p2pLobby.matchTo = matchTo;
       p2pLobby.ready = { white: false, blue: false };
-      p2p.send({ type: "rematch-ask", who: p2pLobby.you });
+      p2p.send({
+        type: "rematch-ask",
+        who: p2pLobby.you,
+        matchTo,
+        matchScore: p2pLobby.matchScore,
+      });
       session = null;
       clearUndo();
       showScreen("room");
@@ -1709,6 +2308,21 @@
     $("btn-game-redo").addEventListener("click", () => doRedo());
   }
 
+  if ($("btn-undo-allow")) {
+    $("btn-undo-allow").addEventListener("click", () => {
+      const kind = ($("undo-ask-panel") && $("undo-ask-panel").dataset.kind) || "undo";
+      hideUndoAsk();
+      if (p2p) p2p.send({ type: "history-reply", ok: true, kind });
+    });
+  }
+  if ($("btn-undo-deny")) {
+    $("btn-undo-deny").addEventListener("click", () => {
+      const kind = ($("undo-ask-panel") && $("undo-ask-panel").dataset.kind) || "undo";
+      hideUndoAsk();
+      if (p2p) p2p.send({ type: "history-reply", ok: false, kind });
+    });
+  }
+
   if ($("btn-start-ok")) {
     $("btn-start-ok").addEventListener("click", () => dismissStartBanner());
   }
@@ -1720,6 +2334,12 @@
     $("off-white").addEventListener("click", () => onOffClick(PLAYERS.white));
   if ($("off-blue"))
     $("off-blue").addEventListener("click", () => onOffClick(PLAYERS.blue));
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && session && screens.game && screens.game.classList.contains("active")) {
+      acquireWakeLock();
+    }
+  });
 
   // Boot
   if (Audio) {
@@ -1742,6 +2362,6 @@
   applyI18n();
   if (window.ArenaP2P && ArenaP2P.initTransportUi) ArenaP2P.initTransportUi();
   fillSettingsForm();
-  buildBoard();
+  buildBoard(PLAYERS.white);
   if (window.ArenaSW) window.ArenaSW.register("./sw.js");
 })();

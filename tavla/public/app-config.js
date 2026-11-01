@@ -1,9 +1,28 @@
 window.TavlaConfig = {
   appName: "Tavla",
-  version: "1.0.24",
-  build: 25,
+  version: "1.0.25",
+  build: 26,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/tavla/",
   changelog: [
+    {
+      version: "1.0.25",
+      build: 26,
+      date: "2026-11-01",
+      items: {
+        tr: [
+          "Uzaktan/Bluetooth: kendi bakış açın (taşlar ters yüz)",
+          "Zar sırası seçilebilir; çiftte 4 zar görünür",
+          "Pip / önde bilgisi, maç uzunluğu, kayıt-devam",
+          "Rakip hamle animasyonu; undo rakip onayı; ekran uyanık",
+        ],
+        en: [
+          "Remote/Bluetooth: own board perspective",
+          "Choose die order; doubles show 4 dice",
+          "Pip/ahead bar, match length, save-resume",
+          "Opponent move anims; undo needs peer OK; wake lock",
+        ],
+      },
+    },
     {
       version: "1.0.24",
       build: 25,
