@@ -478,13 +478,21 @@
   const TURN_TWOP_MS = 3000;
   const TURN_CHIP_MS = 4200;
 
-  function showBanner(text, ms, kind) {
+  function showBanner(text, ms, kind, side) {
     const el = $("mill-banner");
     if (!el) return;
     el.textContent = text;
-    el.classList.remove("hidden", "turn-banner", "capture-banner");
+    el.classList.remove(
+      "hidden",
+      "turn-banner",
+      "capture-banner",
+      "side-white",
+      "side-black"
+    );
     if (kind === "turn") el.classList.add("turn-banner");
     else if (kind === "capture") el.classList.add("capture-banner");
+    if (side === PLAYERS.white) el.classList.add("side-white");
+    else if (side === PLAYERS.black) el.classList.add("side-black");
     // restart CSS animation
     el.style.animation = "none";
     void el.offsetWidth;
@@ -492,7 +500,7 @@
     clearTimeout(showBanner._t);
     showBanner._t = setTimeout(() => {
       el.classList.add("hidden");
-      el.classList.remove("turn-banner", "capture-banner");
+      el.classList.remove("turn-banner", "capture-banner", "side-white", "side-black");
     }, ms == null ? 900 : ms);
   }
 
@@ -510,55 +518,68 @@
       if (player === PLAYERS.white) {
         return { title: t("turnYouBanner"), sub: t("turnYourMove") };
       }
-      return { title: t("turnWaitCpu"), sub: t("turnWaitHint") };
+      return { title: t("turnWaitCpu"), sub: "" };
     }
     if (session.mode === "p2p") {
       if (player === session.you) {
         return { title: t("turnYouBanner"), sub: t("turnYourMove") };
       }
-      return { title: t("turnWaitOpp"), sub: t("turnWaitHint") };
+      return { title: t("turnWaitOpp"), sub: "" };
     }
     const name = (session.names && session.names[player]) || teamLabel(player);
     return {
       title: `${t("turnOf")}: ${name}`,
-      sub: t("turnPassLocal"),
+      sub: "",
     };
   }
 
-  function setBoardWaiting(on) {
+  function applyTurnSideTint(player) {
     const screen = $("screen-game");
-    if (screen) screen.classList.toggle("is-turn-wait", !!on);
-    const stage = document.querySelector("#screen-game .board-stage");
-    if (stage) stage.classList.toggle("is-turn-wait", !!on);
-    const wrap = document.querySelector("#screen-game .board-wrap");
-    if (wrap) wrap.classList.toggle("is-turn-wait", !!on);
+    if (!screen) return;
+    screen.classList.remove("turn-side-white", "turn-side-black");
+    if (player === PLAYERS.white) screen.classList.add("turn-side-white");
+    else if (player === PLAYERS.black) screen.classList.add("turn-side-black");
   }
 
-  function showTurnWait(player, opts) {
+  function setBoardWaiting(_on) {
+    // Eski sert kilit kalktı — tahta karartılmıyor / kilitlenmiyor
+    const screen = $("screen-game");
+    if (screen) screen.classList.remove("is-turn-wait");
+    const stage = document.querySelector("#screen-game .board-stage");
+    if (stage) stage.classList.remove("is-turn-wait");
+    const wrap = document.querySelector("#screen-game .board-wrap");
+    if (wrap) wrap.classList.remove("is-turn-wait");
+  }
+
+  /** Yumuşak, taş rengine boyalı sıra şeridi — tahtayı kilitlemez */
+  function showTurnWait(player) {
     const el = $("turn-wait");
     const title = $("turn-wait-title");
     const text = $("turn-wait-text");
     if (!el) return;
-    const soft = !!(opts && opts.soft);
-    const mine = isMyTurn(player) && session.mode !== "twop";
     const copy = turnWaitCopy(player);
     if (title) title.textContent = copy.title;
-    if (text) text.textContent = copy.sub;
-    el.classList.toggle("is-soft", soft);
-    el.classList.toggle("is-yours", !!mine);
-    el.classList.toggle("is-theirs", !mine || session.mode === "twop");
+    if (text) {
+      text.textContent = copy.sub || "";
+      text.classList.toggle("hidden", !copy.sub);
+    }
+    el.classList.remove("side-white", "side-black", "is-yours", "is-theirs", "is-soft");
+    el.classList.add(player === PLAYERS.white ? "side-white" : "side-black");
     el.classList.remove("hidden");
     el.classList.add("is-on");
     el.setAttribute("aria-hidden", "false");
-    setBoardWaiting(!soft);
+    applyTurnSideTint(player);
+    setBoardWaiting(false);
   }
 
   function hideTurnWait() {
     const el = $("turn-wait");
     if (!el) return;
     el.classList.add("hidden");
-    el.classList.remove("is-on", "is-soft", "is-yours", "is-theirs");
+    el.classList.remove("is-on", "is-soft", "is-yours", "is-theirs", "side-white", "side-black");
     el.setAttribute("aria-hidden", "true");
+    const text = $("turn-wait-text");
+    if (text) text.classList.remove("hidden");
     setBoardWaiting(false);
   }
 
@@ -571,9 +592,10 @@
       hideTurnWait();
       return;
     }
-    // Yerel 2P: tahtayı kilitleme — sıra skorda + faz etiketinde
+    // Yerel 2P: şerit yok — skor kutusu rengi yeterli
     if (session.mode === "twop") {
       hideTurnWait();
+      applyTurnSideTint(session.state.turn);
       return;
     }
     if (!canAct()) {
@@ -582,15 +604,16 @@
       const phase = $("phase-label");
       if (phase) phase.textContent = copy.title;
       const status = $("status-msg");
-      if (status) status.textContent = copy.sub;
+      if (status) status.textContent = copy.title;
     } else {
       hideTurnWait();
+      applyTurnSideTint(session.state.turn);
     }
   }
 
   /**
-   * Sıra değişimini duyurur ve okuma süresi kadar bekler.
-   * Rakip sırası: kilitli kart kalır. Senin sıran: soft kart + sonra açılır.
+   * Sıra değişimini duyurur (yumuşak, taş rengine boyalı).
+   * Tahta kilitlenmez; kısa okuma payı AI gecikmesi için kalır.
    */
   async function announceTurnChange(player) {
     if (!session || session.state.winner || player == null) return;
@@ -608,17 +631,18 @@
       }, TURN_CHIP_MS);
     }
     const copy = turnWaitCopy(player);
-    const bannerLine = `${copy.title} — ${copy.sub}`;
-    showBanner(bannerLine, TURN_BANNER_MS, "turn");
+    const bannerLine = copy.sub ? `${copy.title} — ${copy.sub}` : copy.title;
+    showBanner(bannerLine, TURN_BANNER_MS, "turn", player);
+    applyTurnSideTint(player);
     const status = $("status-msg");
     if (status) status.textContent = bannerLine;
     const phase = $("phase-label");
     if (phase) phase.textContent = copy.title;
 
     clearTimeout(announceTurnChange._tw);
+    showTurnWait(player);
 
     if (session.mode === "twop") {
-      showTurnWait(player, { soft: true });
       await waitMs(TURN_TWOP_MS);
       if (session && session.mode === "twop" && !session.state.winner) {
         hideTurnWait();
@@ -627,17 +651,14 @@
     }
 
     if (!isMyTurn(player)) {
-      // Rakip / CPU — kart kalır; AI hemen başlamasın diye okuma süresi
-      showTurnWait(player);
-      await waitMs(TURN_READ_MS);
+      // Rakip / CPU — yumuşak şerit kalsın; kısa okuma sonrası AI devam eder
+      await waitMs(Math.min(TURN_READ_MS, 1400));
       return;
     }
 
-    // Sıra sende — soft kart ile net göster, sonra tahtayı aç
-    showTurnWait(player, { soft: true });
-    await waitMs(TURN_READ_MS);
+    // Sıra sende — kısa flaş, sonra şeridi kaldır (skor kutusu yeterli)
+    await waitMs(Math.min(TURN_READ_MS, 1600));
     if (!session || session.state.winner) return;
-    // animBusy hâlâ true olabilir — canAct kullanma
     if (isMyTurn(session.state.turn)) hideTurnWait();
     else showTurnWait(session.state.turn);
   }

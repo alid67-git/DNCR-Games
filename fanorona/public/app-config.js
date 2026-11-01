@@ -1,9 +1,24 @@
 window.FanoronaConfig = {
   appName: "Fanorona",
-  version: "1.0.8",
-  build: 9,
+  version: "1.0.9",
+  build: 10,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/fanorona/",
   changelog: [
+    {
+      version: "1.0.9",
+      build: 10,
+      date: "2026-11-01",
+      items: {
+        tr: [
+          "Sıra mesajı yumuşak şerit; tahta karartma / kilit yok",
+          "Beyaz / siyah sıra rengi taş rengiyle uyumlu",
+        ],
+        en: [
+          "Softer turn strip; no board dim / lock",
+          "White / black turn colors match the pieces",
+        ],
+      },
+    },
     {
       version: "1.0.8",
       build: 9,
