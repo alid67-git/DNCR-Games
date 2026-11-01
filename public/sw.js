@@ -1,5 +1,5 @@
 /* Kati — offline cache (solo + local 2P) */
-const CACHE = "kati-v1.5.2-ur1";
+const CACHE = "kati-v1.5.4";
 const ASSETS = [
   "./",
   "./index.html",

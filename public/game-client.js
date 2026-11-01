@@ -11,6 +11,7 @@
     POSITIONS,
     BOARD_EDGES: EDGES,
     PLAYERS,
+    DRAW,
     createGameState,
     tryMove,
     getAllLegalMoves,
@@ -355,7 +356,8 @@
     if (!s || !g || !g.winner || s.scoreRecorded || !window.ArenaScore) return;
     s.scoreRecorded = true;
     let result = "loss";
-    if (s.you === g.winner) result = "win";
+    if (g.winner === DRAW || g.winner === "draw") result = "draw";
+    else if (s.you === g.winner) result = "win";
     const cap = g.capturedBy || {};
     const captures =
       s.you === PLAYERS.tomato ? cap.tomato || 0 : cap.gourd || 0;
@@ -1048,7 +1050,8 @@
     if (g.winner) {
       maybeRecordKatiScore(s, g);
       end.classList.remove("hidden");
-      if (s.you === g.winner) $("end-text").textContent = t("winYou");
+      if (g.winner === DRAW || g.winner === "draw") $("end-text").textContent = t("winDraw");
+      else if (s.you === g.winner) $("end-text").textContent = t("winYou");
       else if (s.vsAi) $("end-text").textContent = t("winCpu");
       else $("end-text").textContent = `${teamLabel(g.winner)} ${t("winOther")}`;
     } else end.classList.add("hidden");

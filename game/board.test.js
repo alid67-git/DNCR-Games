@@ -83,10 +83,49 @@ function testCaptureCount() {
   assert.strictEqual(r2.state.capturedBy.tomato, 0);
 }
 
+function testLoneDuelDrawAfterFivePlies() {
+  const { NODES, DRAW, LONE_DUEL_DRAW_PLIES } = require("../public/engine.js");
+  let state = createGameState(PLAYERS.tomato);
+  // 1v1: kırmızı TL, yeşil BR — yakalamasız 5 hamle
+  const board = Object.fromEntries(NODES.map((n) => [n, null]));
+  board.TL = PLAYERS.tomato;
+  board.BR = PLAYERS.gourd;
+  state = {
+    ...state,
+    board,
+    turn: PLAYERS.tomato,
+    chainFrom: null,
+    winner: null,
+    loneDuelPlies: 0,
+  };
+
+  const path = [
+    [PLAYERS.tomato, "TL", "TC"],
+    [PLAYERS.gourd, "BR", "BC"],
+    [PLAYERS.tomato, "TC", "TL"],
+    [PLAYERS.gourd, "BC", "C"],
+    [PLAYERS.tomato, "TL", "TC"],
+  ];
+  assert.strictEqual(LONE_DUEL_DRAW_PLIES, 5);
+  for (let i = 0; i < path.length; i++) {
+    const [who, from, to] = path[i];
+    const r = tryMove(state, who, from, to);
+    assert.ok(r.ok, r.error || `hamle ${i + 1} başarısız`);
+    state = r.state;
+    if (i < path.length - 1) {
+      assert.strictEqual(state.winner, null, `hamle ${i + 1} erken bitmemeli`);
+      assert.strictEqual(state.loneDuelPlies, i + 1);
+    }
+  }
+  assert.strictEqual(state.loneDuelPlies, 5);
+  assert.strictEqual(state.winner, DRAW);
+}
+
 testPieceCounts();
 testInitialForcedCapturePath();
 testRejectWrongTurn();
 testRejectIllegal();
 testAlternateStarter();
 testCaptureCount();
+testLoneDuelDrawAfterFivePlies();
 console.log("board.test.js — tüm testler geçti");
