@@ -1,12 +1,27 @@
 window.KatiConfig = {
   appName: "Kati",
-  version: "1.5.3",
-  build: 21,
+  version: "1.5.4",
+  build: 22,
   /** tomato = red, gourd = green (engine keys) */
   teams: { tomato: "red", gourd: "green" },
   /** Public web URL used in invite links (works from APK too). */
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/kati/",
   changelog: [
+    {
+      version: "1.5.4",
+      build: 22,
+      date: "2026-11-01",
+      items: {
+        tr: [
+          "1v1 (birer taş): yakalama olmadan 5 hamleden sonra berabere",
+          "Sonsuz kovalamaca engellendi",
+        ],
+        en: [
+          "1v1 (one piece each): draw after 5 moves without a capture",
+          "Endless chasing prevented",
+        ],
+      },
+    },
     {
       version: "1.5.3",
       build: 21,

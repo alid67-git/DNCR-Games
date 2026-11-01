@@ -80,6 +80,8 @@ window.KatiI18n = (function () {
       helpRule3: "Yakalama zorunlu; zincir varsa aynı taşla devam et.",
       helpRule4: "Rakibin tüm taşlarını ye veya hareket ettirme.",
       helpRule5: "Zincir yakalamada aynı taşla devam et; zorunlu yakalamayı atlama.",
+      helpRule6:
+        "Her iki tarafta birer taş kalırsa: yakalama olmadan 5 hamleden sonra berabere.",
       helpOnlineTitle: "Ülkeler arası nasıl oynanır?",
       helpOnline1: "Oyna → Çevrimiçi oyna → Oda kur.",
       helpOnline2: "Davet linkini kopyalayıp WhatsApp / e-posta ile gönder.",
@@ -138,6 +140,7 @@ window.KatiI18n = (function () {
       winYou: "Kazandın!",
       winCpu: "Bilgisayar kazandı.",
       winOther: "kazandı.",
+      winDraw: "Berabere — tek taşta 5 hamle doldu.",
       ate: "yedi!",
       cpuStarts: "Bu elde bilgisayar (yeşil) başlıyor.",
       youStart: "Bu elde sen (kırmızı) başlıyorsun.",
@@ -240,6 +243,8 @@ window.KatiI18n = (function () {
       helpRule3: "Captures are mandatory; continue chains with the same piece.",
       helpRule4: "Win by capturing all pieces or blocking all moves.",
       helpRule5: "In a capture chain keep going with the same piece; never skip a forced capture.",
+      helpRule6:
+        "If each side has one piece left: after 5 moves without a capture the game is a draw.",
       helpModesTitle: "Game modes",
       helpModes:
         "Vs computer · Same-device two-player · Remote (room code / P2P). The first two work offline.",
@@ -298,6 +303,7 @@ window.KatiI18n = (function () {
       winYou: "You win!",
       winCpu: "Computer wins.",
       winOther: "wins.",
+      winDraw: "Draw — five moves with one piece each.",
       ate: "captured!",
       cpuStarts: "Computer (green) opens this match.",
       youStart: "You (red) open this match.",

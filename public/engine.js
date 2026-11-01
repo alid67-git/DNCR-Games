@@ -101,6 +101,13 @@
   ];
 
   const PLAYERS = { tomato: "tomato", gourd: "gourd" };
+  /** Beraberlik işareti (winner alanı). */
+  const DRAW = "draw";
+  /**
+   * Her iki tarafta da tek taş kaldığında sonsuz kovalamaca olmasın diye:
+   * 1v1 konumunda bu kadar hamleden sonra oyun berabere biter.
+   */
+  const LONE_DUEL_DRAW_PLIES = 5;
 
   function initialBoard() {
     const board = Object.fromEntries(NODES.map((n) => [n, null]));
@@ -186,6 +193,13 @@
     return null;
   }
 
+  function isLoneDuel(board) {
+    return (
+      countPieces(board, PLAYERS.tomato) === 1 &&
+      countPieces(board, PLAYERS.gourd) === 1
+    );
+  }
+
   function createGameState(starter) {
     const start =
       starter === PLAYERS.gourd || starter === PLAYERS.tomato
@@ -200,6 +214,8 @@
       lastMove: null,
       moveCount: 0,
       capturedBy: { tomato: 0, gourd: 0 },
+      /** 1v1 konumunda art arda tamamlanan hamle sayısı (beraberlik için). */
+      loneDuelPlies: 0,
     };
   }
 
@@ -228,6 +244,15 @@
     } else {
       turn = opponent(player);
     }
+
+    let loneDuelPlies = state.loneDuelPlies || 0;
+    if (isLoneDuel(board)) {
+      // Zincir ortasında sayma; tur geçince / hamle bitince say.
+      if (!chainFrom) loneDuelPlies += 1;
+    } else {
+      loneDuelPlies = 0;
+    }
+
     const next = {
       ...state,
       board,
@@ -236,9 +261,18 @@
       lastMove: move,
       moveCount: state.moveCount + 1,
       capturedBy,
+      loneDuelPlies,
       winner: null,
     };
     next.winner = checkWinner(board, next.turn);
+    if (
+      !next.winner &&
+      !chainFrom &&
+      isLoneDuel(board) &&
+      loneDuelPlies >= LONE_DUEL_DRAW_PLIES
+    ) {
+      next.winner = DRAW;
+    }
     return { ok: true, state: next };
   }
 
@@ -273,6 +307,7 @@
 
   function minimax(state, depth, maximizing, rootPlayer, alpha, beta) {
     if (state.winner) {
+      if (state.winner === DRAW) return { score: 0, path: [] };
       if (state.winner === rootPlayer) return { score: 900 + depth, path: [] };
       return { score: -900 - depth, path: [] };
     }
@@ -492,10 +527,12 @@
       if (!childState) continue;
       let score;
       if (childState.winner) {
-        score =
-          childState.winner === aiPlayer
-            ? 900 + opts.depth
-            : -900 - opts.depth;
+        if (childState.winner === DRAW) score = 0;
+        else
+          score =
+            childState.winner === aiPlayer
+              ? 900 + opts.depth
+              : -900 - opts.depth;
       } else {
         const child = minimax(
           childState,
@@ -523,6 +560,8 @@
     JUMP_LINES,
     BOARD_EDGES,
     PLAYERS,
+    DRAW,
+    LONE_DUEL_DRAW_PLIES,
     DIFFICULTY,
     initialBoard,
     opponent,
@@ -531,6 +570,7 @@
     tryMove,
     createGameState,
     checkWinner,
+    isLoneDuel,
     chooseMove,
     evaluate,
   };
