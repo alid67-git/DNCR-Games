@@ -431,12 +431,16 @@
   function renderPieces(board) {
     const g = $("board-pieces");
     g.innerHTML = "";
+    const chainId =
+      session && session.state && session.state.chain && session.state.chain.piece;
     for (const [id, owner] of Object.entries(board || {})) {
       if (!owner) continue;
       if (suppressNodes.has(id) || goneNodes.has(id)) continue;
       const p = POSITIONS[id];
-      const piece = makePiece(owner, p.x, p.y, selected === id);
+      const isChain = chainId === id;
+      const piece = makePiece(owner, p.x, p.y, selected === id || isChain);
       piece.dataset.node = id;
+      if (isChain) piece.classList.add("chain-focus");
       piece.addEventListener("click", (e) => {
         e.stopPropagation();
         onNodeClick(id);
@@ -849,6 +853,14 @@
     return null;
   }
 
+  /** Sıra gerçekten oyuncuda mı? (animBusy / ipucu için canAct’tan ayrı) */
+  function isHumanSideTurn() {
+    if (!session || !session.state || session.state.winner) return false;
+    if (session.mode === "solo") return session.state.turn === PLAYERS.white;
+    if (session.mode === "p2p") return session.state.turn === session.you;
+    return true;
+  }
+
   function canAct() {
     if (!session || session.state.winner || animBusy) return false;
     if (pendingChoice) return true;
@@ -938,13 +950,16 @@
     }
     $("phase-label").textContent = phaseText;
 
-    const mine = canAct();
+    // Durum metni: canAct/animBusy kullanma — animasyon sırasında
+    // yanlışlıkla “Rakip oynuyor” yazıp sonra takılı kalıyordu.
+    const mySide = isHumanSideTurn();
     if (s.winner) $("status-msg").textContent = "";
     else if (session.aiThinking) $("status-msg").textContent = t("statusCpu");
-    else if (!mine && session.mode !== "twop" && !pendingChoice)
+    else if (!mySide && session.mode !== "twop" && !pendingChoice)
       $("status-msg").textContent = t("statusOpp");
     else if (pendingChoice) $("status-msg").textContent = t("statusChoose");
     else if (s.chain) $("status-msg").textContent = t("statusChain");
+    else if (animBusy) $("status-msg").textContent = t("statusAnimating");
     else {
       const moves = getAllLegalMoves(s, s.turn);
       $("status-msg").textContent =
@@ -975,7 +990,16 @@
   }
 
   function updateHints() {
-    if (!session || !canAct() || pendingChoice) {
+    if (!session || pendingChoice) {
+      clearHints();
+      return;
+    }
+    // Animasyon sırasında ipucu gizle; sıra bizdeyse hemen sonra çizilecek
+    if (animBusy || !isHumanSideTurn()) {
+      clearHints();
+      return;
+    }
+    if (session.aiThinking && session.mode === "solo") {
       clearHints();
       return;
     }
@@ -1105,7 +1129,6 @@
     clearMoveTrail();
     const fxHtml = $("board-fx-html");
     if (fxHtml) fxHtml.innerHTML = "";
-    renderGame();
     if (to) flashMoveNode(to, actor);
     if (stage) stage.classList.remove("is-animating");
 
@@ -1113,12 +1136,14 @@
       // Hamle bitti → kısa nefes → sıra duyurusu (okuma süresi dahil)
       await waitMs(TURN_INTRO_MS);
       await announceTurnChange(r.state.turn);
-    } else {
-      updateTurnWaitUi();
     }
 
     animBusy = false;
-    updateHistBtns();
+    // Animasyon kilidi kalktı — status/ipucu/undo’yu taze çiz (takılı “Rakip” olmasın)
+    renderGame();
+    if (stillChain && isHumanSideTurn()) {
+      toast(t("statusChain"));
+    }
 
     if (session.mode === "p2p" && !fromNet && p2p) {
       p2p.send({ type: "action", action, moveCount: r.state.moveCount });
@@ -1150,8 +1175,25 @@
     const moves = getAllLegalMoves(s, actor);
 
     if (s.chain) {
-      const m = moves.find((x) => x.from === s.chain.piece && x.to === nodeId);
-      if (m) applyAction(m);
+      const chainPiece = s.chain.piece;
+      if (nodeId === chainPiece) {
+        showHints(
+          moves.filter((m) => m.from === chainPiece).map((m) => m.to),
+          true
+        );
+        toast(t("statusChain"));
+        return;
+      }
+      const m = moves.find((x) => x.from === chainPiece && x.to === nodeId);
+      if (m) {
+        applyAction(m);
+        return;
+      }
+      toast(t("statusChainOnly"));
+      showHints(
+        moves.filter((x) => x.from === chainPiece).map((x) => x.to),
+        true
+      );
       return;
     }
 

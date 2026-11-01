@@ -1,9 +1,24 @@
 window.FanoronaConfig = {
   appName: "Fanorona",
-  version: "1.0.7",
-  build: 8,
+  version: "1.0.8",
+  build: 9,
   shareBaseUrl: "https://alid67-git.github.io/DNCR-Games/fanorona/",
   changelog: [
+    {
+      version: "1.0.8",
+      build: 9,
+      date: "2026-11-01",
+      items: {
+        tr: [
+          "Zincir sırasında yanlış “Rakip oynuyor” ve kilitlenme düzeltildi",
+          "Devam edilecek taş parlıyor; hedef noktalar işaretleniyor",
+        ],
+        en: [
+          "Fixed false “Opponent playing” lock during chains",
+          "Chain piece glows; legal targets are marked",
+        ],
+      },
+    },
     {
       version: "1.0.7",
       build: 8,
