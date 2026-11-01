@@ -1255,7 +1255,7 @@
 
   $("btn-game-home").addEventListener("click", () => goHome());
 
-  $("btn-game-restart").addEventListener("click", () => {
+  function rematchOrRestart() {
     if (!session) return;
     if (session.mode === "solo") startSolo();
     else if (session.mode === "twop") startTwoP();
@@ -1266,7 +1266,7 @@
       showScreen("room");
       renderRoom();
     }
-  });
+  }
 
   if ($("btn-game-undo")) {
     $("btn-game-undo").addEventListener("click", () => doUndo());
@@ -1275,9 +1275,7 @@
     $("btn-game-redo").addEventListener("click", () => doRedo());
   }
 
-  $("btn-rematch").addEventListener("click", () => {
-    $("btn-game-restart").click();
-  });
+  $("btn-rematch").addEventListener("click", () => rematchOrRestart());
 
   // Boot
   if (Sfx && Sfx.bindFirstGesture) Sfx.bindFirstGesture(document);
