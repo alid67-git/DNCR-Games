@@ -448,13 +448,14 @@
 
   function statusMsgFor(s, forViewer) {
     if (s.winner) return "";
-    if (session.aiThinking) return t("statusCpu");
     if (forViewer) {
       if (s.phase === "remove") return t("statusRemove");
       if (s.phase === "place") return t("statusPlace");
       return t("statusMove");
     }
+    // Rakip / AI sırası: aşamaya göre mesaj (taş alınıyorsa onu söyle)
     if (s.phase === "remove") return t("statusRemoveOpp");
+    if (session.aiThinking) return t("statusCpu");
     if (s.phase === "place") return t("statusPlaceOpp");
     if (canFly(s, s.turn)) return t("statusFlyOpp");
     return t("statusMoveOpp");
@@ -685,6 +686,8 @@
     const forViewer = messagesForViewer();
     $("phase-label").textContent = phaseLabelFor(s, forViewer);
     $("status-msg").textContent = statusMsgFor(s, forViewer);
+    $("phase-label").classList.toggle("is-actor", forViewer && !s.winner);
+    $("status-msg").classList.toggle("is-actor", forViewer && !s.winner);
 
     updateHistBtns();
     const end = $("end-panel");
@@ -1286,4 +1289,19 @@
   fillSettingsForm();
   initBoardSvg();
   if (window.ArenaSW) window.ArenaSW.register("./sw.js");
+
+  // Yerel test: perspektif mesajlarını gerçek renderGame ile doğrulamak için
+  if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+    window.__dokuztasDebug = {
+      forceOppRemove() {
+        if (!session || session.mode !== "solo") return false;
+        session.aiThinking = false;
+        session.state.turn = PLAYERS.black;
+        session.state.phase = "remove";
+        session.state.winner = null;
+        renderGame();
+        return true;
+      },
+    };
+  }
 })();
