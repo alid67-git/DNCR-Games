@@ -1132,119 +1132,100 @@ input[type="text"]:focus {
 .mill-banner.turn-banner {
   top: 8%;
   max-width: 92%;
-  padding: 0.7rem 1.15rem;
-  font-size: 1.05rem;
+  padding: 0.65rem 1.1rem;
+  font-size: 1.02rem;
   line-height: 1.35;
   letter-spacing: 0.01em;
   text-align: center;
   border-radius: 14px;
-  border-color: rgba(102, 187, 106, 0.85);
-  color: #e8f5e9;
-  background: rgba(12, 22, 34, 0.96);
-  box-shadow: 0 0 22px rgba(102, 187, 106, 0.35);
-  animation: turnBannerPop 3.4s ease both;
+  animation: turnBannerPop 3.2s ease both;
 }
+.mill-banner.turn-banner.side-white {
+  border-color: rgba(232, 201, 152, 0.95);
+  color: #3a2214;
+  background: rgba(255, 246, 228, 0.96);
+  box-shadow: 0 0 18px rgba(212, 165, 116, 0.4);
+}
+.mill-banner.turn-banner.side-black {
+  border-color: rgba(107, 63, 40, 0.95);
+  color: #f3e6c8;
+  background: rgba(26, 16, 8, 0.94);
+  box-shadow: 0 0 18px rgba(26, 16, 8, 0.55);
+}
+/* Yumuşak sıra şeridi — karartma / kilit yok; renk = taş rengi */
 .turn-wait {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: 5%;
+  bottom: auto;
   z-index: 12;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 8%;
-  pointer-events: auto;
-  background: rgba(6, 10, 16, 0.72);
-  backdrop-filter: blur(3px);
-  animation: turnWaitIn 0.35s ease both;
+  padding: 0 0.5rem;
+  pointer-events: none;
+  background: transparent;
+  backdrop-filter: none;
+  animation: turnWaitIn 0.3s ease both;
 }
 .turn-wait.hidden {
   display: none;
   pointer-events: none;
 }
-.turn-wait.is-soft {
-  pointer-events: none;
-  background: rgba(6, 10, 16, 0.42);
-}
-.turn-wait.is-yours .turn-wait-card {
-  border-color: rgba(102, 187, 106, 0.9);
-  box-shadow:
-    0 0 0 1px rgba(102, 187, 106, 0.25),
-    0 0 36px rgba(102, 187, 106, 0.32);
-}
-.turn-wait.is-theirs .turn-wait-card {
-  border-color: rgba(79, 195, 247, 0.85);
-  box-shadow:
-    0 0 0 1px rgba(79, 195, 247, 0.22),
-    0 0 36px rgba(79, 195, 247, 0.28);
-}
-.turn-wait.is-theirs .turn-wait-title {
-  color: #e3f2fd;
-}
-.turn-wait.is-theirs .turn-wait-sub {
-  color: #ffcc80;
-}
 .turn-wait-card {
   margin: 0;
-  max-width: 88%;
-  padding: 1.15rem 1.3rem 1.2rem;
-  border-radius: 16px;
+  max-width: 92%;
+  padding: 0.55rem 1rem 0.6rem;
+  border-radius: 999px;
   text-align: center;
-  background: rgba(12, 22, 34, 0.96);
-  border: 2px solid rgba(102, 187, 106, 0.75);
-  box-shadow:
-    0 0 0 1px rgba(79, 195, 247, 0.2),
-    0 0 36px rgba(102, 187, 106, 0.28);
-  animation: turnWaitPulse 1.8s ease-in-out infinite;
+  border: 1.5px solid transparent;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+.turn-wait.side-white .turn-wait-card {
+  background: rgba(255, 246, 228, 0.95);
+  border-color: rgba(212, 165, 116, 0.9);
+  color: #3a2214;
+}
+.turn-wait.side-black .turn-wait-card {
+  background: rgba(26, 16, 8, 0.92);
+  border-color: rgba(107, 63, 40, 0.95);
+  color: #f3e6c8;
 }
 .turn-wait-title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.28rem;
+  font-size: 1.02rem;
   letter-spacing: 0.01em;
-  color: #e8f5e9;
+  color: inherit;
 }
 .turn-wait-sub {
-  margin: 0.45rem 0 0;
-  font-weight: 700;
-  font-size: 0.98rem;
-  color: #81d4fa;
+  margin: 0.2rem 0 0;
+  font-weight: 650;
+  font-size: 0.82rem;
+  opacity: 0.88;
+  color: inherit;
 }
-.board-wrap.is-turn-wait,
-#screen-game.is-turn-wait .board-wrap {
-  box-shadow: 0 0 0 2px rgba(102, 187, 106, 0.4);
+.turn-wait-sub.hidden {
+  display: none;
 }
-#screen-game.is-turn-wait .score-chip:not(.active) {
-  opacity: 0.48;
+#screen-game.turn-side-white #status-msg,
+#screen-game.turn-side-white #phase-label {
+  color: #e8c998;
 }
-#screen-game.is-turn-wait .score-chip.active {
-  border-color: rgba(129, 212, 250, 0.95);
-  box-shadow:
-    0 0 0 3px rgba(129, 212, 250, 0.45),
-    0 0 22px rgba(79, 195, 247, 0.35);
-}
-#screen-game.is-turn-wait #phase-label,
-#screen-game.is-turn-wait #status-msg {
-  color: #81d4fa;
-  font-weight: 800;
+#screen-game.turn-side-black #status-msg,
+#screen-game.turn-side-black #phase-label {
+  color: #b0a090;
 }
 @keyframes turnWaitIn {
   from {
     opacity: 0;
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
-  }
-}
-@keyframes turnWaitPulse {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 22px rgba(255, 190, 70, 0.3);
-  }
-  50% {
-    transform: scale(1.03);
-    box-shadow: 0 0 34px rgba(255, 200, 80, 0.5);
+    transform: translateY(0);
   }
 }
 @keyframes turnBannerPop {
