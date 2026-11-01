@@ -1509,13 +1509,24 @@
     showScreen("home");
   }
 
+  function askLeaveMatch() {
+    const inMatch = !!(session && session.state && !session.state.winner);
+    if (!inMatch) return Promise.resolve(true);
+    if (window.ArenaLeaveConfirm && ArenaLeaveConfirm.ask) {
+      return ArenaLeaveConfirm.ask({ getLang: lang });
+    }
+    return Promise.resolve(window.confirm(t("confirmLeave")));
+  }
+
   function goHome(opts) {
     const skipConfirm = !!(opts && opts.skipConfirm);
-    const inMatch = !!(session && session.state && !session.state.winner);
-    if (inMatch && !skipConfirm) {
-      if (!window.confirm(t("confirmLeave"))) return;
+    if (skipConfirm) {
+      leaveGameToHome();
+      return;
     }
-    leaveGameToHome();
+    askLeaveMatch().then((ok) => {
+      if (ok) leaveGameToHome();
+    });
   }
 
   function doRematch() {
@@ -1688,16 +1699,17 @@
   });
 
   $("btn-game-back").addEventListener("click", () => {
-    if (session && session.mode === "p2p" && p2pLobby) {
-      const inMatch = !!(session.state && !session.state.winner);
-      if (inMatch && !window.confirm(t("confirmLeave"))) return;
-      session = null;
-      clearUndo();
-      showScreen("room");
-      renderRoom();
-      return;
-    }
-    goHome();
+    askLeaveMatch().then((ok) => {
+      if (!ok) return;
+      if (session && session.mode === "p2p" && p2pLobby) {
+        session = null;
+        clearUndo();
+        showScreen("room");
+        renderRoom();
+        return;
+      }
+      leaveGameToHome();
+    });
   });
 
   $("btn-game-home").addEventListener("click", () => goHome({ skipConfirm: true }));

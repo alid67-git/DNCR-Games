@@ -604,6 +604,11 @@ input[type="text"]:focus {
   min-height: 1.2em;
 }
 
+.phase-label.is-actor {
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
 .board-wrap {
   position: relative;
   margin: 0 auto;
@@ -840,7 +845,12 @@ input[type="text"]:focus {
   min-height: 1.35em;
   margin: 0.75rem 0 0;
   font-size: 0.92rem;
+  font-weight: 500;
   color: var(--wood);
+}
+
+.status-msg.is-actor {
+  font-weight: 700;
 }
 
 .end-panel {

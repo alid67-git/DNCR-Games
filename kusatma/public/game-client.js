@@ -1602,20 +1602,17 @@
   if ($("btn-game-redo")) {
     $("btn-game-redo").addEventListener("click", () => doRedo());
   }
-  if ($("btn-game-restart")) {
-    $("btn-game-restart").addEventListener("click", () => {
-      if (!session) return;
-      if (session.mode === "demo") return;
-      if (session.mode === "p2p") {
-        destroyP2P();
-        session = null;
-        document.body.classList.remove("is-learning");
-        clearHist();
-        showScreen("p2p");
-        return;
-      }
-      startGame(session.mode);
-    });
+  function askLeaveMatch() {
+    if (!session || session.mode === "demo") return Promise.resolve(true);
+    if (session.state && session.state.phase === PHASE.GAME_OVER) {
+      return Promise.resolve(true);
+    }
+    if (window.ArenaLeaveConfirm && ArenaLeaveConfirm.ask) {
+      return ArenaLeaveConfirm.ask({ getLang: lang });
+    }
+    return Promise.resolve(
+      confirm(lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?")
+    );
   }
 
   $("btn-game-back").addEventListener("click", () => {
@@ -1623,10 +1620,9 @@
       exitDemo();
       return;
     }
-    if (session && session.state.phase !== PHASE.GAME_OVER) {
-      if (!confirm(lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?")) return;
-    }
-    leaveMatchTo("home");
+    askLeaveMatch().then((ok) => {
+      if (ok) leaveMatchTo("home");
+    });
   });
 
   $("btn-again").addEventListener("click", () => {

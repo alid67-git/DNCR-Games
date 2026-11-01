@@ -402,13 +402,63 @@
     }
   }
 
-  function showMillBanner() {
+  function showMillBanner(byViewer) {
     const el = $("mill-banner");
     if (!el) return;
-    el.textContent = t("millBanner");
+    el.textContent = byViewer ? t("millBanner") : t("millBannerOpp");
     el.classList.remove("hidden");
     clearTimeout(showMillBanner._t);
     showMillBanner._t = setTimeout(() => el.classList.add("hidden"), 900);
+  }
+
+  /** Mesajlar sen / rakip perspektifine göre; aynı cihazda sıradaki oyuncuya göre. */
+  function messagesForViewer() {
+    if (!session) return true;
+    if (session.mode === "twop") return true;
+    if (session.mode === "solo") {
+      return session.state.turn === PLAYERS.red && !session.aiThinking;
+    }
+    if (session.mode === "p2p") {
+      return session.you === session.state.turn;
+    }
+    return true;
+  }
+
+  function millByViewer(actor) {
+    if (!session) return true;
+    if (session.mode === "twop") return true;
+    if (session.mode === "solo") return actor === PLAYERS.red;
+    if (session.mode === "p2p") return actor === session.you;
+    return true;
+  }
+
+  function phaseLabelFor(s, forViewer) {
+    if (s.winner) return t("gameOver");
+    if (forViewer) {
+      if (s.phase === "remove") return t("phaseRemove");
+      if (s.phase === "place") return t("phasePlace");
+      if (canFly(s, s.turn)) return t("phaseFly");
+      return t("phaseMove");
+    }
+    if (s.phase === "remove") return t("phaseRemoveOpp");
+    if (s.phase === "place") return t("phasePlaceOpp");
+    if (canFly(s, s.turn)) return t("phaseFlyOpp");
+    return t("phaseMoveOpp");
+  }
+
+  function statusMsgFor(s, forViewer) {
+    if (s.winner) return "";
+    if (forViewer) {
+      if (s.phase === "remove") return t("statusRemove");
+      if (s.phase === "place") return t("statusPlace");
+      return t("statusMove");
+    }
+    // Rakip / AI sırası: aşamaya göre mesaj (taş alınıyorsa onu söyle)
+    if (s.phase === "remove") return t("statusRemoveOpp");
+    if (session.aiThinking) return t("statusCpu");
+    if (s.phase === "place") return t("statusPlaceOpp");
+    if (canFly(s, s.turn)) return t("statusFlyOpp");
+    return t("statusMoveOpp");
   }
 
   function waitMs(ms) {
@@ -633,21 +683,11 @@
     $("chip-red").classList.toggle("active", s.turn === PLAYERS.red && !s.winner);
     $("chip-black").classList.toggle("active", s.turn === PLAYERS.black && !s.winner);
 
-    let phaseText = "";
-    if (s.winner) phaseText = t("gameOver");
-    else if (s.phase === "remove") phaseText = t("phaseRemove");
-    else if (s.phase === "place") phaseText = t("phasePlace");
-    else if (canFly(s, s.turn)) phaseText = t("phaseFly");
-    else phaseText = t("phaseMove");
-    $("phase-label").textContent = phaseText;
-
-    const mine = canAct();
-    if (s.winner) $("status-msg").textContent = "";
-    else if (session.aiThinking) $("status-msg").textContent = t("statusCpu");
-    else if (!mine && session.mode !== "twop") $("status-msg").textContent = t("statusOpp");
-    else if (s.phase === "remove") $("status-msg").textContent = t("statusRemove");
-    else if (s.phase === "place") $("status-msg").textContent = t("statusPlace");
-    else $("status-msg").textContent = t("statusMove");
+    const forViewer = messagesForViewer();
+    $("phase-label").textContent = phaseLabelFor(s, forViewer);
+    $("status-msg").textContent = statusMsgFor(s, forViewer);
+    $("phase-label").classList.toggle("is-actor", forViewer && !s.winner);
+    $("status-msg").classList.toggle("is-actor", forViewer && !s.winner);
 
     updateHistBtns();
     const end = $("end-panel");
@@ -717,7 +757,7 @@
       formedMill && action.to
         ? millNodesAt(r.state.board, action.to, actor)
         : [];
-    if (formedMill) showMillBanner();
+    if (formedMill) showMillBanner(millByViewer(actor));
     session.state = r.state;
     selected = null;
 
@@ -1087,6 +1127,20 @@
     showScreen("home");
   }
 
+  function matchInProgress() {
+    return !!(session && session.state && !session.state.winner);
+  }
+
+  function askLeaveMatch() {
+    if (!matchInProgress()) return Promise.resolve(true);
+    if (window.ArenaLeaveConfirm && ArenaLeaveConfirm.ask) {
+      return ArenaLeaveConfirm.ask({ getLang: lang });
+    }
+    return Promise.resolve(
+      window.confirm(lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?")
+    );
+  }
+
   // —— Events ——
   $("btn-home-play").addEventListener("click", () => showScreen("play"));
   if ($("btn-home-scores")) {
@@ -1204,18 +1258,25 @@
   });
 
   $("btn-game-back").addEventListener("click", () => {
-    if (session && session.mode === "p2p" && p2pLobby) {
-      session = null;
-      showScreen("room");
-      renderRoom();
-      return;
-    }
-    goHome();
+    askLeaveMatch().then((ok) => {
+      if (!ok) return;
+      if (session && session.mode === "p2p" && p2pLobby) {
+        session = null;
+        showScreen("room");
+        renderRoom();
+        return;
+      }
+      goHome();
+    });
   });
 
-  $("btn-game-home").addEventListener("click", () => goHome());
+  $("btn-game-home").addEventListener("click", () => {
+    askLeaveMatch().then((ok) => {
+      if (ok) goHome();
+    });
+  });
 
-  $("btn-game-restart").addEventListener("click", () => {
+  function rematchOrRestart() {
     if (!session) return;
     if (session.mode === "solo") startSolo();
     else if (session.mode === "twop") startTwoP();
@@ -1226,7 +1287,7 @@
       showScreen("room");
       renderRoom();
     }
-  });
+  }
 
   if ($("btn-game-undo")) {
     $("btn-game-undo").addEventListener("click", () => doUndo());
@@ -1235,9 +1296,7 @@
     $("btn-game-redo").addEventListener("click", () => doRedo());
   }
 
-  $("btn-rematch").addEventListener("click", () => {
-    $("btn-game-restart").click();
-  });
+  $("btn-rematch").addEventListener("click", () => rematchOrRestart());
 
   // Boot
   if (Sfx && Sfx.bindFirstGesture) Sfx.bindFirstGesture(document);
@@ -1249,4 +1308,19 @@
   fillSettingsForm();
   initBoardSvg();
   if (window.ArenaSW) window.ArenaSW.register("./sw.js");
+
+  // Yerel test: perspektif mesajlarını gerçek renderGame ile doğrulamak için
+  if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+    window.__dokuztasDebug = {
+      forceOppRemove() {
+        if (!session || session.mode !== "solo") return false;
+        session.aiThinking = false;
+        session.state.turn = PLAYERS.black;
+        session.state.phase = "remove";
+        session.state.winner = null;
+        renderGame();
+        return true;
+      },
+    };
+  }
 })();

@@ -1151,31 +1151,38 @@
     showScreen("home");
   }
 
-  function leaveGameScreen() {
+  function askLeaveMatch() {
     const inMatch = !!(state && state.game && !state.game.winner);
-    if (inMatch) {
-      const msg =
-        lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?";
-      if (!window.confirm(msg)) return;
+    if (!inMatch) return Promise.resolve(true);
+    if (window.ArenaLeaveConfirm && ArenaLeaveConfirm.ask) {
+      return ArenaLeaveConfirm.ask({ getLang: lang });
     }
-    if (state && state.local) {
-      goHome();
-      showScreen("play");
-      return;
-    }
-    if (state && !state.local) {
-      endP2p();
-      if (socket) {
-        try {
-          socket.emit("room:leave");
-        } catch (_) {}
+    const msg = lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?";
+    return Promise.resolve(window.confirm(msg));
+  }
+
+  function leaveGameScreen() {
+    askLeaveMatch().then((ok) => {
+      if (!ok) return;
+      if (state && state.local) {
+        goHome();
+        showScreen("play");
+        return;
       }
-      state = null;
-      clearHist();
-      showScreen("play");
-      return;
-    }
-    goHome();
+      if (state && !state.local) {
+        endP2p();
+        if (socket) {
+          try {
+            socket.emit("room:leave");
+          } catch (_) {}
+        }
+        state = null;
+        clearHist();
+        showScreen("play");
+        return;
+      }
+      goHome();
+    });
   }
 
   function restartCurrentMode() {
@@ -1351,9 +1358,6 @@
   }
   if ($("btn-game-redo")) {
     $("btn-game-redo").addEventListener("click", () => doRedo());
-  }
-  if ($("btn-game-restart")) {
-    $("btn-game-restart").addEventListener("click", () => restartCurrentMode());
   }
 
   $("btn-rematch").addEventListener("click", () => restartCurrentMode());

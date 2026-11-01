@@ -46,6 +46,7 @@ Sürüm numarası ana ekranda markanın altında (`#home-version`) ve ayarların
 | `register-sw.js` | Service worker kaydı |
 | `mode-i18n.js` | Ortak mod / menü çeviri anahtarları |
 | `hub-back.js` | DNCR Games hub’a onaylı dönüş |
+| `leave-confirm.js` | Oyun içi ← geri / çıkış onayı (maç sürerken) |
 | `score.js` | Yerel kariyer puanı / skor tablosu |
 | `move-sfx.js` | Ortak hamle vurgusu SFX (Web Audio) |
 | `history-stack.js` | Ortak undo/redo yığını (`DncrHistory`) |

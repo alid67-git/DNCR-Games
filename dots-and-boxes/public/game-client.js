@@ -1125,6 +1125,17 @@
     showScreen("home");
   }
 
+  function askLeaveMatch() {
+    const inMatch = !!(session && session.state && !session.state.winner);
+    if (!inMatch) return Promise.resolve(true);
+    if (window.ArenaLeaveConfirm && ArenaLeaveConfirm.ask) {
+      return ArenaLeaveConfirm.ask({ getLang: lang });
+    }
+    return Promise.resolve(
+      window.confirm(lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?")
+    );
+  }
+
   // —— Events ——
   $("btn-home-play").addEventListener("click", () => showScreen("play"));
   if ($("btn-home-scores")) {
@@ -1229,14 +1240,21 @@
 
   $("btn-rematch").addEventListener("click", rematch);
   $("btn-change-board").addEventListener("click", changeBoard);
-  $("btn-game-home").addEventListener("click", goHome);
+  $("btn-game-home").addEventListener("click", () => {
+    askLeaveMatch().then((ok) => {
+      if (ok) goHome();
+    });
+  });
   $("btn-game-back").addEventListener("click", () => {
-    clearTimeout(aiTimer);
-    if (!session) {
-      goHome();
-      return;
-    }
-    changeBoard();
+    askLeaveMatch().then((ok) => {
+      if (!ok) return;
+      clearTimeout(aiTimer);
+      if (!session) {
+        goHome();
+        return;
+      }
+      changeBoard();
+    });
   });
   if ($("btn-game-undo")) {
     $("btn-game-undo").addEventListener("click", () => doUndo());
@@ -1244,9 +1262,6 @@
   if ($("btn-game-redo")) {
     $("btn-game-redo").addEventListener("click", () => doRedo());
   }
-  $("btn-game-restart").addEventListener("click", () => {
-    if (session) rematch();
-  });
 
   function isIosSafari() {
     const ua = navigator.userAgent || "";
