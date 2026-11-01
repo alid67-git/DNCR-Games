@@ -1346,6 +1346,104 @@ input[type="text"]:focus {
   color: var(--muted);
 }
 
+.info-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.75rem;
+  margin: 0.45rem 0 0;
+  padding: 0.45rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(44, 53, 88, 0.08);
+  font-size: 0.8rem;
+  color: var(--ink, #1c2438);
+  min-height: 1.6rem;
+}
+.info-bar .info-ahead {
+  font-weight: 700;
+  color: var(--leaf-deep, #3f4fd6);
+}
+.info-bar .info-match {
+  color: var(--muted);
+}
+.match-len-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+.match-len-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(44, 53, 88, 0.1);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.match-len-row input {
+  accent-color: var(--leaf-deep, #3f4fd6);
+}
+.saved-games {
+  margin-top: 1.25rem;
+}
+.saved-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.saved-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  background: var(--panel, #fff);
+  border: 1px solid var(--line, rgba(44, 53, 88, 0.1));
+}
+.saved-list .saved-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+.saved-list .saved-meta strong {
+  font-size: 0.92rem;
+}
+.saved-list .saved-meta span {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.saved-list .saved-actions {
+  display: flex;
+  gap: 0.35rem;
+}
+.lede.tiny {
+  font-size: 0.82rem;
+  margin: 0.2rem 0 0;
+}
+.die.is-selected .die-cube {
+  outline: 2px solid var(--leaf-deep, #3f4fd6);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(63, 79, 214, 0.25);
+}
+.tavla-board.is-flipped-perspective .bar-half.bar-white {
+  order: 2;
+}
+.tavla-board.is-flipped-perspective .bar-half.bar-blue {
+  order: 1;
+}
+
 .room-head {
   text-align: center;
   margin-bottom: 1rem;

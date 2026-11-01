@@ -1,5 +1,5 @@
 /* Tavla — offline cache (solo + local 2P + P2P shell) */
-const CACHE = "tavla-v1.0.24";
+const CACHE = "tavla-v1.0.25";
 const ASSETS = [
   "./",
   "./index.html",
@@ -11,6 +11,7 @@ const ASSETS = [
   "./audio.js",
   "./p2p.js",
   "./game-client.js",
+  "./game-store.js",
   "./manifest.webmanifest",
   "./shared/nearby-session.js",
   "./shared/p2p-session.js",
