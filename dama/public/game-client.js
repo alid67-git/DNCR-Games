@@ -1086,6 +1086,31 @@
     showScreen("home");
   }
 
+  function askLeaveMatch() {
+    const inMatch = !!(session && session.state && !session.state.winner);
+    if (!inMatch) return Promise.resolve(true);
+    if (window.ArenaLeaveConfirm && ArenaLeaveConfirm.ask) {
+      return ArenaLeaveConfirm.ask({ getLang: lang });
+    }
+    return Promise.resolve(
+      window.confirm(lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?")
+    );
+  }
+
+  function rematchOrRestart() {
+    if (!session) return;
+    if (session.mode === "solo") startSolo();
+    else if (session.mode === "twop") startTwoP();
+    else if (session.mode === "p2p" && p2p && p2pLobby) {
+      p2pLobby.ready = { white: false, black: false };
+      p2p.send({ type: "rematch-ask", who: p2pLobby.you });
+      session = null;
+      pendingChoice = null;
+      showScreen("room");
+      renderRoom();
+    }
+  }
+
   $("btn-home-play").addEventListener("click", () => showScreen("play"));
   if ($("btn-home-scores")) {
     $("btn-home-scores").addEventListener("click", () => {
@@ -1202,30 +1227,23 @@
   });
 
   $("btn-game-back").addEventListener("click", () => {
-    if (session && session.mode === "p2p" && p2pLobby) {
-      session = null;
-      pendingChoice = null;
-      showScreen("room");
-      renderRoom();
-      return;
-    }
-    goHome();
+    askLeaveMatch().then((ok) => {
+      if (!ok) return;
+      if (session && session.mode === "p2p" && p2pLobby) {
+        session = null;
+        pendingChoice = null;
+        showScreen("room");
+        renderRoom();
+        return;
+      }
+      goHome();
+    });
   });
 
-  $("btn-game-home").addEventListener("click", () => goHome());
-
-  $("btn-game-restart").addEventListener("click", () => {
-    if (!session) return;
-    if (session.mode === "solo") startSolo();
-    else if (session.mode === "twop") startTwoP();
-    else if (session.mode === "p2p" && p2p && p2pLobby) {
-      p2pLobby.ready = { white: false, black: false };
-      p2p.send({ type: "rematch-ask", who: p2pLobby.you });
-      session = null;
-      pendingChoice = null;
-      showScreen("room");
-      renderRoom();
-    }
+  $("btn-game-home").addEventListener("click", () => {
+    askLeaveMatch().then((ok) => {
+      if (ok) goHome();
+    });
   });
 
   if ($("btn-game-undo")) {
@@ -1235,9 +1253,7 @@
     $("btn-game-redo").addEventListener("click", () => doRedo());
   }
 
-  $("btn-rematch").addEventListener("click", () => {
-    $("btn-game-restart").click();
-  });
+  $("btn-rematch").addEventListener("click", () => rematchOrRestart());
 
   if (Sfx && Sfx.bindFirstGesture) Sfx.bindFirstGesture(document);
   if (window.ArenaHubBack) {

@@ -1127,6 +1127,20 @@
     showScreen("home");
   }
 
+  function matchInProgress() {
+    return !!(session && session.state && !session.state.winner);
+  }
+
+  function askLeaveMatch() {
+    if (!matchInProgress()) return Promise.resolve(true);
+    if (window.ArenaLeaveConfirm && ArenaLeaveConfirm.ask) {
+      return ArenaLeaveConfirm.ask({ getLang: lang });
+    }
+    return Promise.resolve(
+      window.confirm(lang() === "en" ? "Leave the match?" : "Maçtan çıkılsın mı?")
+    );
+  }
+
   // —— Events ——
   $("btn-home-play").addEventListener("click", () => showScreen("play"));
   if ($("btn-home-scores")) {
@@ -1244,16 +1258,23 @@
   });
 
   $("btn-game-back").addEventListener("click", () => {
-    if (session && session.mode === "p2p" && p2pLobby) {
-      session = null;
-      showScreen("room");
-      renderRoom();
-      return;
-    }
-    goHome();
+    askLeaveMatch().then((ok) => {
+      if (!ok) return;
+      if (session && session.mode === "p2p" && p2pLobby) {
+        session = null;
+        showScreen("room");
+        renderRoom();
+        return;
+      }
+      goHome();
+    });
   });
 
-  $("btn-game-home").addEventListener("click", () => goHome());
+  $("btn-game-home").addEventListener("click", () => {
+    askLeaveMatch().then((ok) => {
+      if (ok) goHome();
+    });
+  });
 
   function rematchOrRestart() {
     if (!session) return;

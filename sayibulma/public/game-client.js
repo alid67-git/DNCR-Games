@@ -1192,10 +1192,12 @@
     return !!(session && session.state && !session.state.winner);
   }
 
-  function confirmLeaveOrRestart(kind) {
-    if (!gameInProgress()) return true;
-    const key = kind === "restart" ? "confirmRestart" : "confirmLeave";
-    return window.confirm(t(key));
+  function askLeaveMatch() {
+    if (!gameInProgress()) return Promise.resolve(true);
+    if (window.ArenaLeaveConfirm && ArenaLeaveConfirm.ask) {
+      return ArenaLeaveConfirm.ask({ getLang: lang });
+    }
+    return Promise.resolve(window.confirm(t("confirmLeave")));
   }
 
   function goHome() {
@@ -1367,21 +1369,24 @@
   });
 
   $("btn-game-back").addEventListener("click", () => {
-    if (!confirmLeaveOrRestart("leave")) return;
-    clearTimeout(aiTimer);
-    if (session && session.mode === "p2p" && p2pLobby) {
-      session = null;
-      updateCpuWaitUi(false);
-      showScreen("room");
-      renderRoom();
-      return;
-    }
-    goHome();
+    askLeaveMatch().then((ok) => {
+      if (!ok) return;
+      clearTimeout(aiTimer);
+      if (session && session.mode === "p2p" && p2pLobby) {
+        session = null;
+        updateCpuWaitUi(false);
+        showScreen("room");
+        renderRoom();
+        return;
+      }
+      goHome();
+    });
   });
 
   $("btn-game-home").addEventListener("click", () => {
-    if (!confirmLeaveOrRestart("leave")) return;
-    goHome();
+    askLeaveMatch().then((ok) => {
+      if (ok) goHome();
+    });
   });
 
   function restartCurrentMode() {
@@ -1408,12 +1413,6 @@
       renderRoom();
     }
   }
-
-  $("btn-game-restart").addEventListener("click", () => {
-    if (!session) return;
-    if (!confirmLeaveOrRestart("restart")) return;
-    restartCurrentMode();
-  });
 
   if ($("btn-game-undo")) {
     $("btn-game-undo").addEventListener("click", () => doUndo());
